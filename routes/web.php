@@ -17,33 +17,26 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
 
-Route::middleware('auth')->group(function () {
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Students
-    Route::apiResource('students', StudentController::class);
-
-    // Programs
-    Route::apiResource('programs', ProgramController::class);
-
-    // Academic Records (nested under students)
-    Route::apiResource('students.academic-records', AcademicRecordController::class);
-
-    // Documents (nested under students)
-    Route::apiResource('students.documents', DocumentController::class);
-
-    // Admission Applications (nested under students)
+    // Application routes
+    Route::post('/applications/draft', [AdmissionApplicationController::class, 'createDraft']);
     Route::apiResource('students.applications', AdmissionApplicationController::class);
-
-    // Program Choices (nested under applications)
     Route::apiResource('applications.program-choices', ProgramChoiceController::class);
+
+    // Other resources
+    Route::apiResource('students', StudentController::class);
+    Route::apiResource('programs', ProgramController::class);
+    Route::apiResource('students.academic-records', AcademicRecordController::class);
+    Route::apiResource('students.documents', DocumentController::class);
 });
 
 require __DIR__.'/auth.php';

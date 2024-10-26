@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -36,5 +38,13 @@ class Student extends Model
     public function admissionApplications()
     {
         return $this->hasMany(AdmissionApplication::class);
+    }
+
+    public function hasCompleteProfile(): bool
+    {
+        return !empty($this->address) &&
+               !empty($this->phone) &&
+               !empty($this->emergency_contact_name) &&
+               !empty($this->emergency_contact_phone);
     }
 }

@@ -32,4 +32,3 @@ createInertiaApp({
         color: '#4B5563',  // Tailwind's Gray-600, adjust as needed
     },
 });
-

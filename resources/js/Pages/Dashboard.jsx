@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
+import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 
 export default function Dashboard() {
     return (
@@ -12,15 +13,21 @@ export default function Dashboard() {
         >
             <Head title="Dashboard" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <div className="p-6 text-gray-900">
-                            You're logged in!
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <Container fluid>
+                <Row className="justify-content-center">
+                    <Col xs={12} md={10} lg={8}>
+                        <Card className="shadow-sm">
+                            <Card.Body>
+                                <Card.Title as="h4" className="mb-4">Welcome to Your Dashboard</Card.Title>
+                                <Card.Text>
+                                    You're logged in! This is your personalized dashboard where you can manage your account and access various features of the application.
+                                </Card.Text>
+                                <Button variant="primary" href={route('profile.edit')}>Edit Profile</Button>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
+            </Container>
         </AuthenticatedLayout>
     );
 }

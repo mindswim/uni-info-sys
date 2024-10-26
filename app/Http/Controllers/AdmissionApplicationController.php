@@ -1,95 +1,71 @@
+<?php
+
 namespace App\Http\Controllers;
 
-use App\Models\AdmissionApplication;
 use App\Models\Student;
+use App\Models\AdmissionApplication;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\Http\JsonResponse;
 
 class AdmissionApplicationController extends Controller
 {
-    public function index(Student $student): Response
-    {
-        $applications = $student->admissionApplications()
-            ->with('programChoices.program')
-            ->paginate(10);
-
-        // Return an Inertia response to render the applications index page
-        return Inertia::render('AdmissionApplications/Index', [
-            'student' => $student,
-            'applications' => $applications,
-        ]);
-    }
-
-    public function store(Request $request, Student $student)
+    public function store(Request $request, Student $student): JsonResponse
     {
         $validated = $request->validate([
             'academic_year' => 'required|string',
             'semester' => 'required|string',
-            'status' => 'required|string|in:draft,submitted,under_review,accepted,rejected',
+            'status' => 'required|string|in:draft,submitted,under_review,accepted,rejected'
         ]);
 
-        $student->admissionApplications()->create([
+        $application = $student->admissionApplications()->create([
             ...$validated,
-            'application_date' => now(),
+            'application_date' => now()
         ]);
 
-        // Redirect to the applications index page with a success message
-        return redirect()->route('students.admission-applications.index', $student->id)
-                         ->with('success', 'Admission application created successfully.');
+        return response()->json($application, 201);
     }
 
-    public function show(Student $student, AdmissionApplication $application): Response
+    public function index(Student $student)
     {
-        // Ensure the application belongs to the student
+        return response()->json(
+            $student->admissionApplications()
+                ->with('programChoices.program')
+                ->paginate(10)
+        );
+    }
+
+    public function show(Student $student, AdmissionApplication $application): JsonResponse
+    {
         if ($application->student_id !== $student->id) {
-            abort(404, 'Application not found');
+            return response()->json(['message' => 'Not found'], 404);
         }
 
-        $application->load('programChoices.program');
-
-        // Return an Inertia response to render the application show page
-        return Inertia::render('AdmissionApplications/Show', [
-            'student' => $student,
-            'application' => $application,
-        ]);
+        return response()->json($application->load('programChoices.program'));
     }
 
-    public function update(Request $request, Student $student, AdmissionApplication $application)
+    public function update(Request $request, Student $student, AdmissionApplication $application): JsonResponse
     {
-        // Ensure the application belongs to the student
         if ($application->student_id !== $student->id) {
-            abort(404, 'Application not found');
+            return response()->json(['message' => 'Not found'], 404);
         }
 
         $validated = $request->validate([
             'status' => 'required|string|in:draft,submitted,under_review,accepted,rejected',
-            'decision_status' => 'nullable|string',
-            'comments' => 'nullable|string',
+            'comments' => 'nullable|string'
         ]);
-
-        if (in_array($validated['status'], ['accepted', 'rejected'])) {
-            $validated['decision_date'] = now();
-        }
 
         $application->update($validated);
 
-        // Redirect to the application show page with a success message
-        return redirect()->route('students.admission-applications.show', [$student->id, $application->id])
-                         ->with('success', 'Admission application updated successfully.');
+        return response()->json($application->fresh());
     }
 
-    public function destroy(Student $student, AdmissionApplication $application)
+    public function destroy(Student $student, AdmissionApplication $application): JsonResponse
     {
-        // Ensure the application belongs to the student
         if ($application->student_id !== $student->id) {
-            abort(404, 'Application not found');
+            return response()->json(['message' => 'Not found'], 404);
         }
 
         $application->delete();
-
-        // Redirect to the applications index page with a success message
-        return redirect()->route('students.admission-applications.index', $student->id)
-                         ->with('success', 'Admission application deleted successfully.');
+        return response()->json(null, 204);
     }
 }

@@ -1,24 +1,20 @@
+<?php
 namespace App\Http\Controllers;
 
 use App\Models\AdmissionApplication;
 use App\Models\ProgramChoice;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
+use Illuminate\Http\JsonResponse;
 
 class ProgramChoiceController extends Controller
 {
-    public function index(AdmissionApplication $application)
+    public function index(AdmissionApplication $application): JsonResponse
     {
         $programChoices = $application->programChoices()->with('program')->get();
-
-        // Return an Inertia response for rendering the ProgramChoices index page
-        return Inertia::render('ProgramChoices/Index', [
-            'application' => $application,
-            'programChoices' => $programChoices,
-        ]);
+        return response()->json($programChoices);
     }
 
-    public function store(Request $request, AdmissionApplication $application)
+    public function store(Request $request, AdmissionApplication $application): JsonResponse
     {
         $validated = $request->validate([
             'program_id' => 'required|exists:programs,id',
@@ -28,18 +24,22 @@ class ProgramChoiceController extends Controller
 
         // Check if preference order already exists
         if ($application->programChoices()->where('preference_order', $validated['preference_order'])->exists()) {
-            return redirect()->back()->withErrors(['preference_order' => 'Preference order already exists']);
+            return response()->json([
+                'message' => 'Preference order already exists'
+            ], 422);
         }
 
-        $application->programChoices()->create($validated);
-
-        // Redirect to the ProgramChoices index page with a success message
-        return redirect()->route('applications.program-choices.index', $application->id)
-                         ->with('success', 'Program choice added successfully.');
+        $programChoice = $application->programChoices()->create($validated);
+        return response()->json($programChoice, 201);
     }
 
-    public function update(Request $request, AdmissionApplication $application, ProgramChoice $programChoice)
+    public function update(Request $request, AdmissionApplication $application, ProgramChoice $programChoice): JsonResponse
     {
+        // Ensure the program choice belongs to the application
+        if ($programChoice->application_id !== $application->id) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
+
         $validated = $request->validate([
             'preference_order' => 'sometimes|integer|min:1',
             'status' => 'sometimes|string|in:pending,accepted,rejected',
@@ -53,23 +53,24 @@ class ProgramChoiceController extends Controller
                 ->exists();
 
             if ($exists) {
-                return redirect()->back()->withErrors(['preference_order' => 'Preference order already exists']);
+                return response()->json([
+                    'message' => 'Preference order already exists'
+                ], 422);
             }
         }
 
         $programChoice->update($validated);
-
-        // Redirect to the ProgramChoices index page with a success message
-        return redirect()->route('applications.program-choices.index', $application->id)
-                         ->with('success', 'Program choice updated successfully.');
+        return response()->json($programChoice->fresh());
     }
 
-    public function destroy(AdmissionApplication $application, ProgramChoice $programChoice)
+    public function destroy(AdmissionApplication $application, ProgramChoice $programChoice): JsonResponse
     {
-        $programChoice->delete();
+        // Ensure the program choice belongs to the application
+        if ($programChoice->application_id !== $application->id) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
 
-        // Redirect to the ProgramChoices index page with a success message
-        return redirect()->route('applications.program-choices.index', $application->id)
-                         ->with('success', 'Program choice deleted successfully.');
+        $programChoice->delete();
+        return response()->json(null, 204);
     }
 }

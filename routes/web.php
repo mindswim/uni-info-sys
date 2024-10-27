@@ -28,7 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Application routes
-    Route::post('/applications/draft', [AdmissionApplicationController::class, 'createDraft']);
+    Route::post('/applications/draft', [AdmissionApplicationController::class, 'storeDraft'])->name('applications.storeDraft');
     Route::apiResource('students.applications', AdmissionApplicationController::class);
     Route::apiResource('applications.program-choices', ProgramChoiceController::class);
 
@@ -39,4 +39,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::apiResource('students.documents', DocumentController::class);
 });
 
+// Authentication routes
 require __DIR__.'/auth.php';
+
+// Test route
+Route::get('/test', function () {
+    return Inertia::render('TestPage');
+});

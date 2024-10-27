@@ -27,8 +27,13 @@ export default function AuthenticatedLayout({ header, children }) {
                                     {auth.user.name}
                                 </Dropdown.Toggle>
                                 <Dropdown.Menu>
-                                    <Dropdown.Item as={Link} href={route('profile.edit')}>Profile</Dropdown.Item>
-                                    <Dropdown.Item as={Link} href={route('logout')} method="post" as="button">Log Out</Dropdown.Item>
+                                    <Dropdown.Item as={Link} href={route('profile.edit')}>
+                                        Profile
+                                    </Dropdown.Item>
+                                    {/* Adjusted here: Removed duplicate "as" attribute */}
+                                    <Dropdown.Item as="button" href={route('logout')} method="post">
+                                        Log Out
+                                    </Dropdown.Item>
                                 </Dropdown.Menu>
                             </Dropdown>
                         </Nav>
@@ -44,17 +49,9 @@ export default function AuthenticatedLayout({ header, children }) {
                         </Container>
                     </header>
                 )}
-
-                <Container>
-                    {children}
-                </Container>
+                {children}
             </main>
-
-            <footer className="bg-light text-center text-muted py-3 mt-4">
-                <Container>
-                    &copy; 2023 My App. All rights reserved.
-                </Container>
-            </footer>
         </div>
     );
 }
+

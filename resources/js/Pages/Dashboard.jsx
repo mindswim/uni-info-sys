@@ -12,17 +12,70 @@ export default function Dashboard() {
             }
         >
             <Head title="Dashboard" />
+            
+            <Container fluid className="py-4">
+                {/* Stats Row */}
+                <Row className="g-4 mb-4">
+                    <Col xs={12} md={4}>
+                        <Card className="shadow-sm h-100">
+                            <Card.Body>
+                                <Card.Title>Total Students</Card.Title>
+                                <Card.Text className="h2">150</Card.Text>
+                                <Button variant="primary" href={route('students.index')}>View Students</Button>
+                            </Card.Body>
+                        </Card>
+                    </Col>
 
-            <Container fluid>
-                <Row className="justify-content-center">
-                    <Col xs={12} md={10} lg={8}>
+                    <Col xs={12} md={4}>
+                        <Card className="shadow-sm h-100">
+                            <Card.Body>
+                                <Card.Title>Active Programs</Card.Title>
+                                <Card.Text className="h2">12</Card.Text>
+                                <Button variant="success" href={route('programs.index')}>View Programs</Button>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+
+                    <Col xs={12} md={4}>
+                        <Card className="shadow-sm h-100">
+                            <Card.Body>
+                                <Card.Title>Pending Applications</Card.Title>
+                                <Card.Text className="h2">45</Card.Text>
+                                <Button variant="info">Review Applications</Button>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
+
+                {/* Content Row */}
+                <Row className="g-4">
+                    <Col xs={12} md={8}>
                         <Card className="shadow-sm">
                             <Card.Body>
-                                <Card.Title as="h4" className="mb-4">Welcome to Your Dashboard</Card.Title>
+                                <Card.Title>Recent Activity</Card.Title>
                                 <Card.Text>
-                                    You're logged in! This is your personalized dashboard where you can manage your account and access various features of the application.
+                                    <ul className="list-unstyled">
+                                        <li className="mb-2">✅ New student application received</li>
+                                        <li className="mb-2">📚 Program "Computer Science" updated</li>
+                                        <li className="mb-2">👤 New student registered</li>
+                                        <li className="mb-2">📝 Document verification completed</li>
+                                    </ul>
                                 </Card.Text>
-                                <Button variant="primary" href={route('profile.edit')}>Edit Profile</Button>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+
+                    <Col xs={12} md={4}>
+                        <Card className="shadow-sm">
+                            <Card.Body>
+                                <Card.Title>Quick Actions</Card.Title>
+                                <div className="d-grid gap-2">
+                                    <Button variant="outline-primary" href={route('profile.edit')}>
+                                        Edit Profile
+                                    </Button>
+                                    <Button variant="outline-success">Add New Student</Button>
+                                    <Button variant="outline-info">Create Program</Button>
+                                </div>
                             </Card.Body>
                         </Card>
                     </Col>

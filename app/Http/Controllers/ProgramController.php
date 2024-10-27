@@ -1,3 +1,5 @@
+<?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Program;
@@ -10,7 +12,6 @@ class ProgramController extends Controller
     {
         $programs = Program::paginate(10);
 
-        // Return an Inertia response to render the Programs index page
         return Inertia::render('Programs/Index', [
             'programs' => $programs,
         ]);
@@ -30,7 +31,6 @@ class ProgramController extends Controller
 
         $program = Program::create($validated);
 
-        // Redirect to the Programs index page with a success message
         return redirect()->route('programs.index')->with('success', 'Program created successfully.');
     }
 
@@ -38,7 +38,6 @@ class ProgramController extends Controller
     {
         $program->load('programChoices');
 
-        // Return an Inertia response to render the Program show page
         return Inertia::render('Programs/Show', [
             'program' => $program,
         ]);
@@ -58,7 +57,6 @@ class ProgramController extends Controller
 
         $program->update($validated);
 
-        // Redirect to the Program show page with a success message
         return redirect()->route('programs.show', $program->id)->with('success', 'Program updated successfully.');
     }
 
@@ -66,7 +64,6 @@ class ProgramController extends Controller
     {
         $program->delete();
 
-        // Redirect to the Programs index page with a success message
         return redirect()->route('programs.index')->with('success', 'Program deleted successfully.');
     }
 }

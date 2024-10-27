@@ -1,3 +1,5 @@
+<?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Student;
@@ -13,7 +15,6 @@ class DocumentController extends Controller
     {
         $documents = $student->documents;
 
-        // Return an Inertia response to render the documents index page
         return Inertia::render('Documents/Index', [
             'student' => $student,
             'documents' => $documents,
@@ -38,9 +39,8 @@ class DocumentController extends Controller
             'uploaded_at' => now(),
         ]);
 
-        // Redirect to the Documents index page with a success message
         return redirect()->route('students.documents.index', $student->id)
-                         ->with('success', 'Document uploaded successfully.');
+            ->with('success', 'Document uploaded successfully.');
     }
 
     public function show(Student $student, Document $document): Response
@@ -49,7 +49,6 @@ class DocumentController extends Controller
             abort(404, 'Document not found');
         }
 
-        // Return an Inertia response to render the document details page
         return Inertia::render('Documents/Show', [
             'student' => $student,
             'document' => $document,
@@ -75,9 +74,8 @@ class DocumentController extends Controller
 
         $document->update($data);
 
-        // Redirect to the Documents index page with a success message
         return redirect()->route('students.documents.index', $student->id)
-                         ->with('success', 'Document updated successfully.');
+            ->with('success', 'Document updated successfully.');
     }
 
     public function destroy(Student $student, Document $document)
@@ -92,8 +90,7 @@ class DocumentController extends Controller
 
         $document->delete();
 
-        // Redirect to the Documents index page with a success message
         return redirect()->route('students.documents.index', $student->id)
-                         ->with('success', 'Document deleted successfully.');
+            ->with('success', 'Document deleted successfully.');
     }
 }

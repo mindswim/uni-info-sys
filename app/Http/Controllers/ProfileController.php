@@ -1,3 +1,5 @@
+<?php
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
@@ -63,3 +65,4 @@ class ProfileController extends Controller
         return Redirect::to('/')->with('success', 'Account deleted successfully.');
     }
 }
+

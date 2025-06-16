@@ -128,7 +128,7 @@ This section focuses on improving the quality and organization of the existing c
 
 ---
 
-### ✅ Task 2: Isolate Business Logic with Service Classes
+### ✅ Task 2: Isolate Business Logic with Service Classes - COMPLETED ✅
 
 **Goal:** Move complex business logic out of controllers and into dedicated "Service" classes.
 
@@ -208,7 +208,7 @@ This section focuses on improving the quality and organization of the existing c
 
 ---
 
-### ✅ Task 3: Standardize JSON Output with API Resources
+### ✅ Task 3: Standardize JSON Output with API Resources - COMPLETED ✅
 
 **Goal:** Use API Resources to control and standardize the JSON output of your API, preventing accidental data exposure and ensuring a consistent structure.
 
@@ -422,7 +422,7 @@ This section provides a high-level overview of the development phases to build a
 
 This section focuses on creating the core data models that transform the application from an admissions system into a full-fledged university management system. Each task includes models, migrations, relationships, and comprehensive tests.
 
-### Task 6: Implement Academic Calendar & Terms
+### ✅ Task 6: Implement Academic Calendar & Terms - COMPLETED
 
 **Goal:** Create a robust system for managing academic terms and important dates, removing hardcoded strings like `academic_year` and `semester`.
 
@@ -498,7 +498,7 @@ This section focuses on creating the core data models that transform the applica
         // ... existing code ...
         ```
 
-### Task 7: Implement Course Catalog System
+### ✅ Task 7: Implement Course Catalog System - COMPLETED
 
 **Goal:** Create a comprehensive catalog of all courses offered by the university.
 
@@ -559,7 +559,7 @@ This section focuses on creating the core data models that transform the applica
         }
         ```
 
-### Task 8: Implement Staff Management
+### ✅ Task 8: Implement Staff Management - COMPLETED
 
 **Goal:** Create a system to manage faculty and administrative staff information, linking them to users.
 
@@ -616,7 +616,7 @@ This section focuses on creating the core data models that transform the applica
         }
         ```
 
-### Task 9: Implement Physical Infrastructure
+### ✅ Task 9: Implement Physical Infrastructure - COMPLETED
 
 **Goal:** Model the university's physical campus, including buildings and rooms.
 
@@ -672,7 +672,7 @@ This section focuses on creating the core data models that transform the applica
         }
         ```
 
-### Task 10: Implement Class Scheduling & Sections
+### ✅ Task 10: Implement Class Scheduling & Sections - COMPLETED
 
 **Goal:** Create specific instances (sections) of courses for a given term, with assigned instructors and locations.
 
@@ -714,7 +714,7 @@ This section focuses on creating the core data models that transform the applica
         public function room() { return $this->belongsTo(Room::class); }
         ```
 
-### Task 11: Implement Student Enrollment System
+### ✅ Task 11: Implement Student Enrollment System - COMPLETED
 
 **Goal:** Build the system that allows students to enroll in course sections and tracks their academic progress.
 
@@ -784,7 +784,7 @@ For each task, the workflow will be:
 
 ---
 
-### Task 12: Implement Faculty API Endpoints
+### ✅ Task 12: Implement Faculty API Endpoints - COMPLETED
 
 **Goal:** Create API endpoints for managing `Faculty` resources. This will allow clients to list, view, create, update, and delete faculties.
 
@@ -875,7 +875,7 @@ For each task, the workflow will be:
 
 ---
 
-### Task 13: Implement Department API Endpoints
+### ✅ Task 13: Implement Department API Endpoints - COMPLETED
 
 **Goal:** Create API endpoints for managing `Department` resources.
 
@@ -941,7 +941,7 @@ For each task, the workflow will be:
 
 ---
 
-### Task 14: Implement Program API Endpoints
+### ✅ Task 14: Implement Program API Endpoints - COMPLETED
 
 **Goal:** Create API endpoints for managing `Program` resources.
 
@@ -997,7 +997,7 @@ For each task, the workflow will be:
     php artisan make:test Api/V1/ProgramApiTest
     ```
 
-### Task 15: Implement Course API Endpoints
+### ✅ Task 15: Implement Course API Endpoints - COMPLETED
 
 **Goal:** Create API endpoints for managing `Course` resources, including their prerequisites.
 
@@ -1069,7 +1069,7 @@ For each task, the workflow will be:
 
 ---
 
-### Task 16: Implement Staff API Endpoints
+### ✅ Task 16: Implement Staff API Endpoints - COMPLETED
 
 **Goal:** Create API endpoints for managing `Staff` resources. This will involve linking `Staff` records to `User` and `Department` records.
 
@@ -1121,4 +1121,52 @@ For each task, the workflow will be:
     *   Test the creation of a `User` and `Staff` member together.
     *   Test filtering by department.
 
-</rewritten_file> 
+---
+
+## Section 4: Infrastructure & Core Academic APIs
+
+This section focuses on implementing the remaining critical API endpoints for the university management system. Each task follows a strict workflow: **Implement → Test → Checkpoint → Git Commit → Approval → Next Task**.
+
+### 🎯 Task 17: Implement Building and Room APIs (Infrastructure) - CURRENT TASK
+
+**Goal:** Create comprehensive API endpoints for managing university physical infrastructure - buildings and rooms.
+
+**⚠️ CHECKPOINT PROCESS:**
+1.  **Implement**: Write the code for the controller, resource, and routes.
+2.  **Test**: Create a feature test to validate the new endpoints.
+3.  **Checkpoint**: All tests must pass before proceeding. Verify API endpoints work correctly with proper JSON responses, validation, and relationships.
+4.  **Git Commit**: Once tests pass, commit the changes to version control.
+5.  **Approval**: Get approval from a team member.
+6.  **Next Task**: Move on to the next task.
+
+---
+
+### ⏳ Task 18: Implement CourseSection API (Complex Academic Core) - UP NEXT
+
+**Goal:** Create API endpoints for managing course sections - the heart of academic scheduling that connects courses, terms, instructors, and rooms.
+
+**⚠️ CHECKPOINT PROCESS:**
+1.  **Implement**: Write the code for the controller, resource, and routes.
+2.  **Test**: Create a feature test to validate the new endpoints.
+3.  **Checkpoint**: All tests must pass. Verify complex filtering, relationships, and business logic work correctly.
+4.  **Git Commit**: Once tests pass, commit the changes to version control.
+5.  **Approval**: Get approval from a team member.
+6.  **Next Task**: Move on to the next task.
+
+---
+
+### ⏳ Task 19: Implement Enrollment API (Student Registration System) - UP NEXT
+
+**Goal:** Create API endpoints for managing student enrollments in course sections - the core of student registration and academic tracking.
+
+**⚠️ CHECKPOINT PROCESS:**
+1.  **Implement**: Write the code for the controller, resource, and routes.
+2.  **Test**: Create a feature test to validate the new endpoints.
+3.  **Checkpoint**: All tests must pass. Verify enrollment business logic, capacity management, and waitlist functionality work correctly.
+4.  **Git Commit**: Once tests pass, commit the changes to version control.
+5.  **Approval**: Get approval from a team member.
+6.  **Next Task**: Move on to the next task.
+
+---
+
+</rewritten_file>

@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\V1\DepartmentController;
 use App\Http\Controllers\Api\V1\ProgramController;
 use App\Http\Controllers\Api\V1\CourseController;
 use App\Http\Controllers\Api\V1\StaffController;
+use App\Http\Controllers\Api\V1\BuildingController;
+use App\Http\Controllers\Api\V1\RoomController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -24,4 +26,6 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('programs', ProgramController::class);
     Route::apiResource('courses', CourseController::class);
     Route::apiResource('staff', StaffController::class);
+    Route::apiResource('buildings', BuildingController::class);
+    Route::apiResource('rooms', RoomController::class);
 }); 

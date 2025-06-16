@@ -1121,4 +1121,54 @@ For each task, the workflow will be:
     *   Test the creation of a `User` and `Staff` member together.
     *   Test filtering by department.
 
+### Task 17: Implement Term API Endpoints
+
+**Goal:** Create API endpoints for managing academic `Term` resources.
+
+1.  **Create Controller**:
+    ```bash
+    php artisan make:controller Api/V1/TermController --api --model=Term
+    ```
+
+2.  **Create API Resource**:
+    ```bash
+    php artisan make:resource TermResource
+    ```
+
+3.  **Define `TermResource`**:
+    ```php
+    <?php
+    // ...
+    class TermResource extends JsonResource
+    {
+        public function toArray(Request $request): array
+        {
+            return [
+                'id' => $this->id,
+                'name' => $this->name,
+                'academic_year' => $this->academic_year,
+                'semester' => $this->semester,
+                'start_date' => $this->start_date,
+                'end_date' => $this->end_date,
+            ];
+        }
+    }
+    ```
+
+4.  **Implement Controller Methods**: In `app/Http/Controllers/Api/V1/TermController.php`, implement the CRUD methods. Include filtering by `academic_year`.
+
+5.  **Define API Routes**:
+    ```php
+    use App\Http\Controllers\Api\V1\TermController;
+
+    Route::apiResource('v1/terms', TermController::class);
+    ```
+
+6.  **Create Feature Test**:
+    ```bash
+    php artisan make:test Api/V1/TermApiTest
+    ```
+    *   Write tests for all CRUD operations.
+    *   Test filtering by `academic_year`.
+
 </rewritten_file> 

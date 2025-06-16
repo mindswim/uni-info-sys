@@ -19,8 +19,8 @@ class TermResource extends JsonResource
             'name' => $this->name,
             'academic_year' => $this->academic_year,
             'semester' => $this->semester,
-            'start_date' => $this->start_date instanceof \Carbon\Carbon ? $this->start_date->toDateString() : $this->start_date,
-            'end_date' => $this->end_date instanceof \Carbon\Carbon ? $this->end_date->toDateString() : $this->end_date,
+            'start_date' => $this->start_date,
+            'end_date' => $this->end_date,
         ];
     }
 }

@@ -9,7 +9,11 @@ class CourseSection extends Model
 {
     use HasFactory;
     
-    protected $fillable = ['course_id', 'term_id', 'instructor_id', 'room_id', 'section_number', 'capacity', 'schedule_days', 'start_time', 'end_time'];
+    protected $fillable = ['course_id', 'term_id', 'instructor_id', 'room_id', 'capacity', 'schedule_days', 'start_time', 'end_time', 'status'];
+
+    protected $casts = [
+        'schedule_days' => 'array',
+    ];
 
     public function course() { return $this->belongsTo(Course::class); }
     public function term() { return $this->belongsTo(Term::class); }

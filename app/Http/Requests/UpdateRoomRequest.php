@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateRoomRequest extends FormRequest
 {
@@ -22,13 +23,20 @@ class UpdateRoomRequest extends FormRequest
     public function rules(): array
     {
         $roomId = $this->route('room')->id;
-        $buildingId = $this->input('building_id', $this->route('room')->building_id);
 
         return [
-            'building_id' => 'sometimes|exists:buildings,id',
-            'room_number' => 'sometimes|string|max:50|unique:rooms,room_number,' . $roomId . ',id,building_id,' . $buildingId,
-            'capacity' => 'sometimes|integer|min:1|max:1000',
-            'type' => 'sometimes|in:classroom,lab,lecture_hall,office,other',
+            'building_id' => 'sometimes|required|exists:buildings,id',
+            'room_number' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('rooms')->where(function ($query) {
+                    return $query->where('building_id', $this->building_id ?? $this->route('room')->building_id);
+                })->ignore($roomId),
+            ],
+            'capacity' => 'sometimes|required|integer|min:1',
+            'type' => 'sometimes|required|string|in:lecture_hall,laboratory,seminar_room,office',
         ];
     }
 }

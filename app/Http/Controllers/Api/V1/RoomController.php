@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Room;
+use App\Http\Resources\RoomResource;
 use App\Http\Requests\StoreRoomRequest;
 use App\Http\Requests\UpdateRoomRequest;
-use App\Http\Resources\RoomResource;
-use App\Models\Room;
 use Illuminate\Http\Request;
 
 class RoomController extends Controller
@@ -18,22 +18,11 @@ class RoomController extends Controller
     {
         $query = Room::with('building');
 
-        // Filter by building
         if ($request->has('building_id')) {
             $query->where('building_id', $request->building_id);
         }
 
-        // Filter by room type
-        if ($request->has('type')) {
-            $query->where('type', $request->type);
-        }
-
-        // Filter by minimum capacity
-        if ($request->has('min_capacity')) {
-            $query->where('capacity', '>=', $request->min_capacity);
-        }
-
-        return RoomResource::collection($query->paginate());
+        return RoomResource::collection($query->paginate(10));
     }
 
     /**

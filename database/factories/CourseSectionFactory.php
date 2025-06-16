@@ -24,6 +24,11 @@ class CourseSectionFactory extends Factory
         $startTime = $this->faker->randomElement(['09:00:00', '11:00:00', '13:00:00', '15:00:00']);
         $endTime = Carbon::createFromTimeString($startTime)->addHours($this->faker->randomElement([1, 2]))->toTimeString();
 
+        $scheduleDays = $this->faker->randomElement([
+            ['Monday', 'Wednesday', 'Friday'],
+            ['Tuesday', 'Thursday'],
+        ]);
+
         return [
             'course_id' => Course::factory(),
             'term_id' => Term::factory(),
@@ -32,7 +37,7 @@ class CourseSectionFactory extends Factory
             'section_number' => $this->faker->randomElement(['001', '002', 'A', 'B', 'C']),
             'capacity' => $this->faker->numberBetween(20, 150),
             'status' => 'open',
-            'schedule_days' => $this->faker->randomElement(['MWF', 'TTh']),
+            'schedule_days' => $scheduleDays,
             'start_time' => $startTime,
             'end_time' => $endTime,
         ];

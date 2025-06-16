@@ -3,32 +3,19 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Building;
+use App\Http\Resources\BuildingResource;
 use App\Http\Requests\StoreBuildingRequest;
 use App\Http\Requests\UpdateBuildingRequest;
-use App\Http\Resources\BuildingResource;
-use App\Models\Building;
-use Illuminate\Http\Request;
 
 class BuildingController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $query = Building::query();
-
-        // Include rooms count if requested
-        if ($request->boolean('include_rooms_count')) {
-            $query->withCount('rooms');
-        }
-
-        // Load rooms if requested
-        if ($request->boolean('include_rooms')) {
-            $query->with('rooms');
-        }
-
-        return BuildingResource::collection($query->paginate());
+        return BuildingResource::collection(Building::with('rooms')->paginate(10));
     }
 
     /**
@@ -43,11 +30,9 @@ class BuildingController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Building $building, Request $request)
+    public function show(Building $building)
     {
-        if ($request->boolean('include_rooms')) {
-            $building->load('rooms');
-        }
+        $building->load('rooms');
         return new BuildingResource($building);
     }
 

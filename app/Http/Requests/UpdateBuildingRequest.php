@@ -21,9 +21,11 @@ class UpdateBuildingRequest extends FormRequest
      */
     public function rules(): array
     {
+        $buildingId = $this->route('building')->id;
+
         return [
-            'name' => 'sometimes|string|max:255|unique:buildings,name,' . $this->building->id,
-            'address' => 'sometimes|nullable|string|max:500',
+            'name' => 'sometimes|required|string|max:255|unique:buildings,name,' . $buildingId,
+            'address' => 'nullable|string|max:255',
         ];
     }
 }

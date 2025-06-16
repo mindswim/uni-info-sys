@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreRoomRequest extends FormRequest
+class StoreTermRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,17 +23,18 @@ class StoreRoomRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'building_id' => 'required|exists:buildings,id',
-            'room_number' => [
+            'name' => 'required|string|max:255',
+            'academic_year' => [
                 'required',
-                'string',
-                'max:20',
-                Rule::unique('rooms')->where(function ($query) {
-                    return $query->where('building_id', $this->building_id);
+                'integer',
+                'min:2000',
+                Rule::unique('terms')->where(function ($query) {
+                    return $query->where('semester', $this->semester);
                 }),
             ],
-            'capacity' => 'required|integer|min:1',
-            'type' => 'required|string|in:lecture_hall,laboratory,seminar_room,office',
+            'semester' => 'required|string|in:Fall,Spring,Summer',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
         ];
     }
 }

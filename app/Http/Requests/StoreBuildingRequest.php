@@ -22,8 +22,8 @@ class StoreBuildingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255|unique:buildings',
-            'address' => 'nullable|string|max:500',
+            'name' => 'required|string|max:255|unique:buildings,name',
+            'address' => 'nullable|string|max:255',
         ];
     }
 }

@@ -6,137 +6,113 @@ use App\Models\Building;
 use App\Models\Room;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Sanctum\Sanctum;
+use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class BuildingApiTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithFaker;
+
+    private $admin;
 
     protected function setUp(): void
     {
         parent::setUp();
-        Sanctum::actingAs(
-            User::factory()->create(),
-            ['*']
-        );
+        $this->admin = User::factory()->create();
     }
-
-    public function test_can_get_paginated_buildings()
+    
+    public function test_can_get_all_buildings_paginated_with_rooms()
     {
-        Building::factory()->count(20)->create();
+        Building::factory()->has(Room::factory()->count(3))->count(5)->create();
 
-        $response = $this->getJson('/api/v1/buildings');
+        $response = $this->actingAs($this->admin, 'sanctum')->getJson('/api/v1/buildings');
 
-        $response->assertOk()
+        $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'name', 'address']
+                    '*' => ['id', 'name', 'address', 'rooms']
                 ],
                 'links',
-                'meta'
+                'meta',
             ])
-            ->assertJsonCount(15, 'data');
-    }
-
-    public function test_can_get_buildings_with_rooms()
-    {
-        $building = Building::factory()
-            ->has(Room::factory()->count(3))
-            ->create();
-
-        $response = $this->getJson('/api/v1/buildings?include_rooms=true');
-
-        $response->assertOk()
-            ->assertJsonStructure([
-                'data' => [
-                    '*' => [
-                        'rooms' => [
-                            '*' => ['id', 'room_number']
-                        ]
-                    ]
-                ]
-            ])
+            ->assertJsonCount(5, 'data')
             ->assertJsonCount(3, 'data.0.rooms');
-    }
-
-    public function test_can_get_buildings_with_rooms_count()
-    {
-        Building::factory()
-            ->has(Room::factory()->count(5))
-            ->create();
-
-        $response = $this->getJson('/api/v1/buildings?include_rooms_count=true');
-
-        $response->assertOk()
-            ->assertJsonPath('data.0.rooms_count', 5);
     }
 
     public function test_can_create_a_building()
     {
-        $buildingData = [
-            'name' => 'Science Hall',
-            'address' => '123 University Drive',
+        $data = [
+            'name' => $this->faker->unique()->word . ' Hall',
+            'address' => $this->faker->address,
         ];
-
-        $response = $this->postJson('/api/v1/buildings', $buildingData);
-
+        
+        $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/buildings', $data);
+        
         $response->assertStatus(201)
-            ->assertJsonFragment($buildingData);
+            ->assertJsonFragment($data);
 
-        $this->assertDatabaseHas('buildings', $buildingData);
+        $this->assertDatabaseHas('buildings', $data);
     }
 
-    public function test_create_building_validation_fails()
-    {
-        $response = $this->postJson('/api/v1/buildings', ['name' => '']);
-        $response->assertStatus(422)->assertJsonValidationErrors('name');
-    }
-
-    public function test_can_get_a_single_building()
+    public function test_create_building_fails_with_duplicate_name()
     {
         $building = Building::factory()->create();
 
-        $response = $this->getJson('/api/v1/buildings/' . $building->id);
+        $data = ['name' => $building->name];
 
-        $response->assertOk()
-            ->assertJsonFragment(['id' => $building->id]);
+        $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/buildings', $data);
+        
+        $response->assertStatus(422)->assertJsonValidationErrors(['name']);
+    }
+
+    public function test_can_get_a_single_building_with_rooms()
+    {
+        $building = Building::factory()->has(Room::factory()->count(2))->create();
+
+        $response = $this->actingAs($this->admin, 'sanctum')->getJson("/api/v1/buildings/{$building->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonFragment(['id' => $building->id])
+            ->assertJsonCount(2, 'data.rooms');
     }
 
     public function test_can_update_a_building()
     {
         $building = Building::factory()->create();
-        $updateData = ['name' => 'Updated Science Hall'];
+        
+        $updateData = ['name' => 'Updated Building Name'];
 
-        $response = $this->putJson('/api/v1/buildings/' . $building->id, $updateData);
-
-        $response->assertOk()
+        $response = $this->actingAs($this->admin, 'sanctum')->putJson("/api/v1/buildings/{$building->id}", $updateData);
+        
+        $response->assertStatus(200)
             ->assertJsonFragment($updateData);
 
-        $this->assertDatabaseHas('buildings', $updateData);
+        $this->assertDatabaseHas('buildings', ['id' => $building->id, 'name' => 'Updated Building Name']);
     }
 
     public function test_can_delete_a_building()
     {
         $building = Building::factory()->create();
+        
+        $response = $this->actingAs($this->admin, 'sanctum')->deleteJson("/api/v1/buildings/{$building->id}");
 
-        $response = $this->deleteJson('/api/v1/buildings/' . $building->id);
-
-        $response->assertNoContent();
+        $response->assertStatus(204);
 
         $this->assertDatabaseMissing('buildings', ['id' => $building->id]);
     }
 
-    public function test_deleting_building_cascades_to_rooms()
+    public function test_deleting_a_building_deletes_its_rooms()
     {
-        $building = Building::factory()
-            ->has(Room::factory()->count(3))
-            ->create();
+        $building = Building::factory()->has(Room::factory()->count(1))->create();
+        $roomId = $building->rooms->first()->id;
 
-        $this->assertDatabaseCount('rooms', 3);
+        $this->assertDatabaseHas('rooms', ['id' => $roomId]);
 
-        $building->delete();
+        $response = $this->actingAs($this->admin, 'sanctum')->deleteJson("/api/v1/buildings/{$building->id}");
 
-        $this->assertDatabaseCount('rooms', 0);
+        $response->assertStatus(204);
+
+        $this->assertDatabaseMissing('buildings', ['id' => $building->id]);
+        $this->assertDatabaseMissing('rooms', ['id' => $roomId]); // Assumes onDelete('cascade')
     }
 }

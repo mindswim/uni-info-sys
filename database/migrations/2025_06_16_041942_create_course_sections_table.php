@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('section_number'); // e.g., "001", "A"
             $table->unsignedSmallInteger('capacity');
             $table->enum('status', ['open', 'closed', 'cancelled'])->default('open');
-            $table->string('schedule_days')->nullable(); // e.g., "MWF", "TTh"
+            $table->json('schedule_days')->nullable(); // e.g., ["Monday", "Wednesday", "Friday"]
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
             $table->timestamps();

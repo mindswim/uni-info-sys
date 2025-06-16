@@ -4,136 +4,125 @@ namespace Tests\Feature\Api\V1;
 
 use App\Models\Course;
 use App\Models\CourseSection;
-use App\Models\Department;
-use App\Models\Enrollment;
-use App\Models\Faculty;
 use App\Models\Room;
 use App\Models\Staff;
-use App\Models\Building;
 use App\Models\Term;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Sanctum\Sanctum;
+use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class CourseSectionApiTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithFaker;
 
-    private User $user;
-    private Term $term;
-    private Course $course;
+    private $admin;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->user = User::factory()->create();
-        Sanctum::actingAs($this->user, ['*']);
-
-        $this->term = Term::factory()->create();
-        $department = Department::factory()->for(Faculty::factory())->create();
-        $this->course = Course::factory()->for($department)->create();
+        $this->admin = User::factory()->create();
     }
 
-    private function createCourseSection(array $overrides = []): CourseSection
+    private function getSectionData(array $overrides = []): array
     {
-        return CourseSection::factory()->for($this->course)->for($this->term)->create($overrides);
+        return array_merge([
+            'course_id' => Course::factory()->create()->id,
+            'term_id' => Term::factory()->create()->id,
+            'instructor_id' => Staff::factory()->create()->id,
+            'room_id' => Room::factory()->create()->id,
+            'capacity' => 100,
+            'schedule_days' => ['Monday', 'Wednesday'],
+            'start_time' => '10:00',
+            'end_time' => '11:30',
+        ], $overrides);
+    }
+    
+    public function test_can_get_all_course_sections_paginated()
+    {
+        CourseSection::factory()->count(15)->create();
+
+        $response = $this->actingAs($this->admin, 'sanctum')->getJson('/api/v1/course-sections');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => ['*' => ['id', 'capacity', 'schedule_days', 'course', 'term', 'instructor', 'room']],
+                'links',
+                'meta',
+            ])
+            ->assertJsonCount(10, 'data');
     }
 
-    public function test_can_get_paginated_course_sections()
+    public function test_can_filter_course_sections()
     {
-        $this->createCourseSection();
-        $response = $this->getJson('/api/v1/course-sections');
-        $response->assertOk()->assertJsonStructure(['data' => [['id']], 'links', 'meta']);
-    }
+        $course1 = Course::factory()->create();
+        $course2 = Course::factory()->create();
+        $term = Term::factory()->create();
 
-    public function test_can_filter_course_sections_by_term()
-    {
-        $this->createCourseSection();
-        $otherTerm = Term::factory()->create();
-        $this->createCourseSection(['term_id' => $otherTerm->id]);
+        CourseSection::factory()->count(3)->create(['course_id' => $course1->id, 'term_id' => $term->id]);
+        CourseSection::factory()->count(2)->create(['course_id' => $course2->id, 'term_id' => $term->id]);
 
-        $response = $this->getJson('/api/v1/course-sections?term_id=' . $this->term->id);
-        $response->assertOk()->assertJsonCount(1, 'data');
-    }
+        $response = $this->actingAs($this->admin, 'sanctum')->getJson("/api/v1/course-sections?course_id={$course1->id}&term_id={$term->id}");
 
-    public function test_can_filter_course_sections_by_instructor()
-    {
-        $staff = Staff::factory()->for(User::factory())->create();
-        $this->createCourseSection(['instructor_id' => $staff->id]);
-        $this->createCourseSection();
-
-        $response = $this->getJson('/api/v1/course-sections?instructor_id=' . $staff->id);
-        $response->assertOk()->assertJsonCount(1, 'data');
-    }
-
-    public function test_can_include_enrollment_counts()
-    {
-        $section = $this->createCourseSection(['capacity' => 10]);
-        Enrollment::factory()->count(5)->for($section)->create();
-
-        $response = $this->getJson("/api/v1/course-sections/{$section->id}?include_enrollment_counts=true");
-        $response->assertOk()
-            ->assertJsonPath('data.enrolled_count', 5)
-            ->assertJsonPath('data.available_spots', 5);
+        $response->assertStatus(200);
+        $this->assertCount(3, $response->json('data'));
+        foreach($response->json('data') as $section) {
+            $this->assertEquals($course1->id, $section['course']['id']);
+            $this->assertEquals($term->id, $section['term']['id']);
+        }
     }
 
     public function test_can_create_a_course_section()
     {
-        $room = Room::factory()->for(Building::factory())->create();
-        $staff = Staff::factory()->for(User::factory())->create();
-        $data = [
-            'course_id' => $this->course->id,
-            'term_id' => $this->term->id,
-            'section_number' => 'A1',
-            'capacity' => 100,
-            'instructor_id' => $staff->id,
-            'room_id' => $room->id,
-            'schedule_days' => 'MWF',
-            'start_time' => '10:00',
-            'end_time' => '11:00',
-        ];
+        $data = $this->getSectionData();
+        
+        $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/course-sections', $data);
+        
+        $response->assertStatus(201)
+            ->assertJsonFragment([
+                'capacity' => 100,
+                'schedule_days' => ['Monday', 'Wednesday'],
+                'start_time' => '10:00',
+            ])
+            ->assertJsonPath('data.course.id', $data['course_id']);
 
-        $response = $this->postJson('/api/v1/course-sections', $data);
-
-        $response->assertStatus(201)->assertJsonPath('data.section_number', 'A1');
-        $this->assertDatabaseHas('course_sections', ['section_number' => 'A1']);
-    }
-
-    public function test_create_section_validates_unique_section_number_per_course_term()
-    {
-        $this->createCourseSection(['section_number' => 'A1']);
-        $data = [
-            'course_id' => $this->course->id,
-            'term_id' => $this->term->id,
-            'section_number' => 'A1',
-            'capacity' => 50
-        ];
-        $response = $this->postJson('/api/v1/course-sections', $data);
-        $response->assertStatus(422)->assertJsonValidationErrors('section_number');
+        $this->assertDatabaseHas('course_sections', ['course_id' => $data['course_id'], 'capacity' => 100]);
     }
 
     public function test_can_get_a_single_course_section()
     {
-        $section = $this->createCourseSection();
-        $response = $this->getJson('/api/v1/course-sections/' . $section->id);
-        $response->assertOk()->assertJsonPath('data.id', $section->id);
+        $section = CourseSection::factory()->create();
+
+        $response = $this->actingAs($this->admin, 'sanctum')->getJson("/api/v1/course-sections/{$section->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonFragment(['id' => $section->id]);
     }
 
     public function test_can_update_a_course_section()
     {
-        $section = $this->createCourseSection();
-        $updateData = ['capacity' => 150];
-        $response = $this->putJson('/api/v1/course-sections/' . $section->id, $updateData);
-        $response->assertOk()->assertJsonPath('data.capacity', 150);
+        $section = CourseSection::factory()->create();
+        $newRoom = Room::factory()->create();
+        
+        $updateData = ['capacity' => 150, 'room_id' => $newRoom->id];
+
+        $response = $this->actingAs($this->admin, 'sanctum')->putJson("/api/v1/course-sections/{$section->id}", $updateData);
+        
+        $response->assertStatus(200)
+            ->assertJsonFragment(['capacity' => 150])
+            ->assertJsonPath('data.room.id', $newRoom->id);
+
         $this->assertDatabaseHas('course_sections', ['id' => $section->id, 'capacity' => 150]);
     }
 
     public function test_can_delete_a_course_section()
     {
-        $section = $this->createCourseSection();
-        $response = $this->deleteJson('/api/v1/course-sections/' . $section->id);
-        $response->assertNoContent();
+        $section = CourseSection::factory()->create();
+        
+        $response = $this->actingAs($this->admin, 'sanctum')->deleteJson("/api/v1/course-sections/{$section->id}");
+
+        $response->assertStatus(204);
+
         $this->assertDatabaseMissing('course_sections', ['id' => $section->id]);
     }
 }

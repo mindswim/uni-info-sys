@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\CourseSection;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreCourseSectionRequest extends FormRequest
 {
@@ -24,30 +26,13 @@ class StoreCourseSectionRequest extends FormRequest
         return [
             'course_id' => 'required|exists:courses,id',
             'term_id' => 'required|exists:terms,id',
-            'instructor_id' => 'nullable|exists:staff,id',
-            'room_id' => 'nullable|exists:rooms,id',
-            'section_number' => 'required|string|max:10',
-            'capacity' => 'required|integer|min:1|max:500',
-            'schedule_days' => 'nullable|string|max:10',
-            'start_time' => 'nullable|date_format:H:i',
-            'end_time' => 'nullable|date_format:H:i|after:start_time',
+            'instructor_id' => 'required|exists:staff,id',
+            'room_id' => 'required|exists:rooms,id',
+            'capacity' => 'required|integer|min:1',
+            'schedule_days' => 'required|array',
+            'schedule_days.*' => 'required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
         ];
-    }
-
-    public function withValidator($validator)
-    {
-        $validator->after(function ($validator) {
-            // Check for unique section number per course per term
-            if ($this->course_id && $this->term_id && $this->section_number) {
-                $exists = \App\Models\CourseSection::where('course_id', $this->course_id)
-                    ->where('term_id', $this->term_id)
-                    ->where('section_number', $this->section_number)
-                    ->exists();
-
-                if ($exists) {
-                    $validator->errors()->add('section_number', 'This section number already exists for this course in this term.');
-                }
-            }
-        });
     }
 }

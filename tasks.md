@@ -1255,4 +1255,45 @@ For each task, the workflow will be:
     *   Write tests for all CRUD operations.
     *   Thoroughly test all filtering capabilities.
 
+### Task 20: Implement Enrollment API Endpoints
+
+**Goal:** Create API endpoints for managing student `Enrollment` in course sections.
+
+1.  **Create Controller & Resource**:
+    ```bash
+    php artisan make:controller Api/V1/EnrollmentController --api --model=Enrollment
+    php artisan make:resource EnrollmentResource
+    ```
+
+2.  **Define `EnrollmentResource`**:
+    ```php
+    return [
+        'id' => $this->id,
+        'enrollment_date' => $this->enrollment_date,
+        'status' => $this->status,
+        'student' => new StudentResource($this->whenLoaded('student')),
+        'course_section' => new CourseSectionResource($this->whenLoaded('courseSection')),
+    ];
+    ```
+    *(Note: This assumes a `StudentResource` exists. We may need to create one.)*
+
+3.  **Implement Controller Methods**:
+    *   Implement full CRUD functionality.
+    *   The `index` method should support filtering by `student_id` and `course_section_id`.
+    *   The `store` method should prevent a student from enrolling in the same section twice and check if the section is at capacity.
+
+4.  **Define API Routes**:
+    ```php
+    use App\Http\Controllers\Api\V1\EnrollmentController;
+
+    Route::apiResource('v1/enrollments', EnrollmentController::class);
+    ```
+
+5.  **Create Feature Test**:
+    ```bash
+    php artisan make:test Api/V1/EnrollmentApiTest
+    ```
+    *   Write tests for all CRUD operations and filtering.
+    *   Test validation for double enrollment and section capacity.
+
 </rewritten_file> 

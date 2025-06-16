@@ -23,7 +23,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/students/{student}', [StudentController::class, 'showApi'])->name('api.students.show');
 });
 
-Route::prefix('v1')->group(function () {
+// Unprotected route for creating tokens
+Route::post('/v1/tokens/create', [\App\Http\Controllers\Api\V1\AuthController::class, 'login']);
+
+Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::apiResource('faculties', FacultyController::class);
     Route::apiResource('departments', DepartmentController::class);
     Route::apiResource('programs', ProgramController::class);

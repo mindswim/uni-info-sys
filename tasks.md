@@ -939,4 +939,62 @@ For each task, the workflow will be:
     ```
     *   Write tests for all CRUD operations, including the `faculty_id` filter.
 
+---
+
+### Task 14: Implement Program API Endpoints
+
+**Goal:** Create API endpoints for managing `Program` resources.
+
+1.  **Create Controller**: Generate a new API controller for the `Program` model.
+    ```bash
+    php artisan make:controller Api/V1/ProgramController --api --model=Program
+    ```
+
+2.  **Update `ProgramResource`**: Open `app/Http/Resources/ProgramResource.php` and ensure it includes the department.
+    ```php
+    <?php
+    // ...
+    class ProgramResource extends JsonResource
+    {
+        public function toArray(Request $request): array
+        {
+            return [
+                'id' => $this->id,
+                'name' => $this->name,
+                'department' => new DepartmentResource($this->whenLoaded('department')),
+                // ... other fields
+            ];
+        }
+    }
+    ```
+
+3.  **Implement Controller Methods**: In `app/Http/Controllers/Api/V1/ProgramController.php`, implement the CRUD methods. Include filtering by `department_id`.
+    ```php
+    // Example for index() method
+    public function index(Request $request)
+    {
+        $query = Program::with('department');
+
+        if ($request->has('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+
+        return ProgramResource::collection($query->paginate());
+    }
+    
+    // Implement other methods
+    ```
+
+4.  **Define API Routes**: Add the resource route to `routes/api.php`.
+    ```php
+    use App\Http\Controllers\Api\V1\ProgramController;
+
+    Route::apiResource('v1/programs', ProgramController::class);
+    ```
+
+5.  **Create Feature Test**: Create a test file to validate the API endpoints.
+    ```bash
+    php artisan make:test Api/V1/ProgramApiTest
+    ```
+
 </rewritten_file> 

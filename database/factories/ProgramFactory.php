@@ -9,17 +9,13 @@ class ProgramFactory extends Factory
 {
     public function definition(): array
     {
+        $degree = $this->faker->randomElement(['B.Sc.', 'B.A.', 'M.Sc.', 'M.A.', 'Ph.D.']);
+        $subject = $this->faker->jobTitle(); // Using jobTitle for more variety
+        
         return [
-            'name' => $this->faker->unique()->randomElement([
-                'Computer Science',
-                'Business Administration',
-                'Data Science',
-                'Electrical Engineering',
-                'Psychology',
-                'Medicine'
-            ]),
+            'name' => $this->faker->unique()->name(),
             'department_id' => Department::factory(),
-            'degree_level' => $this->faker->randomElement(['Bachelor', 'Master', 'PhD']),
+            'degree_level' => $this->faker->randomElement(['Bachelors', 'Masters', 'Doctorate']),
             'duration' => $this->faker->numberBetween(1, 5),
             'description' => $this->faker->paragraph(),
             'requirements' => $this->faker->paragraph(),

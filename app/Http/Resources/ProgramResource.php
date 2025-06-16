@@ -17,7 +17,7 @@ class ProgramResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'department' => $this->department,
+            'department' => new DepartmentResource($this->whenLoaded('department')),
             'degree_level' => $this->degree_level,
             'duration_years' => $this->duration_years,
             'capacity' => $this->capacity,

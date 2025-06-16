@@ -1171,4 +1171,45 @@ For each task, the workflow will be:
     *   Write tests for all CRUD operations.
     *   Test filtering by `academic_year`.
 
+### Task 18: Implement Infrastructure (Building & Room) API Endpoints
+
+**Goal:** Create API endpoints for managing `Building` and `Room` resources.
+
+1.  **Create Controllers**:
+    ```bash
+    php artisan make:controller Api/V1/BuildingController --api --model=Building
+    php artisan make:controller Api/V1/RoomController --api --model=Room
+    ```
+
+2.  **Create API Resources**:
+    ```bash
+    php artisan make:resource BuildingResource
+    php artisan make:resource RoomResource
+    ```
+
+3.  **Define API Resources**:
+    *   `BuildingResource` should include a collection of its rooms.
+    *   `RoomResource` should include its parent building.
+
+4.  **Implement Controller Methods**:
+    *   Implement CRUD methods for `BuildingController`.
+    *   Implement CRUD methods for `RoomController`, including the ability to filter rooms by `building_id`.
+
+5.  **Define API Routes**:
+    ```php
+    use App\Http\Controllers\Api\V1\BuildingController;
+    use App\Http\Controllers\Api\V1\RoomController;
+
+    Route::apiResource('v1/buildings', BuildingController::class);
+    Route::apiResource('v1/rooms', RoomController::class);
+    ```
+
+6.  **Create Feature Tests**:
+    ```bash
+    php artisan make:test Api/V1/BuildingApiTest
+    php artisan make:test Api/V1/RoomApiTest
+    ```
+    *   Write full CRUD tests for both.
+    *   For the `RoomApiTest`, ensure filtering by building works correctly.
+
 </rewritten_file> 

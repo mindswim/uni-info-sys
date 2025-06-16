@@ -1067,4 +1067,58 @@ For each task, the workflow will be:
     ```
     *   Include tests for filtering and for correctly attaching/detaching prerequisites.
 
+---
+
+### Task 16: Implement Staff API Endpoints
+
+**Goal:** Create API endpoints for managing `Staff` resources. This will involve linking `Staff` records to `User` and `Department` records.
+
+1.  **Create Controller**:
+    ```bash
+    php artisan make:controller Api/V1/StaffController --api --model=Staff
+    ```
+
+2.  **Create API Resource**:
+    ```bash
+    php artisan make:resource StaffResource
+    ```
+
+3.  **Define `StaffResource`**: This resource should include nested `User` and `Department` data.
+    ```php
+    <?php
+    // ...
+    class StaffResource extends JsonResource
+    {
+        public function toArray(Request $request): array
+        {
+            return [
+                'id' => $this->id,
+                'job_title' => $this->job_title,
+                'bio' => $this->bio,
+                'office_location' => $this->office_location,
+                'user' => new UserResource($this->whenLoaded('user')),
+                'department' => new DepartmentResource($this->whenLoaded('department')),
+            ];
+        }
+    }
+    ```
+    *(Note: This assumes a `UserResource` exists. We may need to create or refine it.)*
+
+4.  **Implement Controller Methods**: In `app/Http/Controllers/Api/V1/StaffController.php`, implement the CRUD methods. Include filtering by `department_id`. The `store` method will need to create a `User` first, then create the `Staff` record linked to it.
+
+5.  **Define API Routes**:
+    ```php
+    use App\Http\Controllers\Api\V1\StaffController;
+
+    Route::apiResource('v1/staff', StaffController::class);
+    ```
+
+6.  **Create Feature Test**:
+    ```bash
+    php artisan make:test Api/V1/StaffApiTest
+    ```
+    *   Write tests for all CRUD operations.
+    *   Test the creation of a `User` and `Staff` member together.
+    *   Test filtering by department.
+
 </rewritten_file> 

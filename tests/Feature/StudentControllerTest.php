@@ -52,26 +52,24 @@ class StudentControllerTest extends TestCase
             'emergency_contact_phone' => '098-765-4321'
         ];
 
-        $response = $this->postJson('/students', $studentData);
+        $response = $this->post('/students', $studentData);
 
-        $response->assertStatus(201)
-            ->assertJsonFragment([
-                'first_name' => 'John',
-                'last_name' => 'Doe'
-            ]);
+        $response->assertStatus(302);
+        $response->assertRedirect('/students');
+        $this->assertDatabaseHas('students', ['student_number' => 'ST12345']);
     }
 
     public function test_can_show_student(): void
     {
         $student = Student::factory()->create();
 
-        $response = $this->getJson("/students/{$student->id}");
+        $response = $this->get("/students/{$student->id}");
 
-        $response->assertStatus(200)
-            ->assertJson([
-                'id' => $student->id,
-                'first_name' => $student->first_name
-            ]);
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->component('Students/Show')
+            ->has('student', fn ($prop) => $prop->where('id', $student->id)->etc())
+        );
     }
 
     public function test_can_update_student(): void
@@ -83,22 +81,21 @@ class StudentControllerTest extends TestCase
             'phone' => '999-999-9999'
         ];
 
-        $response = $this->putJson("/students/{$student->id}", $updateData);
+        $response = $this->put("/students/{$student->id}", $updateData);
 
-        $response->assertStatus(200)
-            ->assertJsonFragment([
-                'first_name' => 'Updated Name',
-                'phone' => '999-999-9999'
-            ]);
+        $response->assertStatus(302);
+        $response->assertRedirect("/students/{$student->id}");
+        $this->assertDatabaseHas('students', ['first_name' => 'Updated Name']);
     }
 
     public function test_can_delete_student(): void
     {
         $student = Student::factory()->create();
 
-        $response = $this->deleteJson("/students/{$student->id}");
+        $response = $this->delete("/students/{$student->id}");
 
-        $response->assertStatus(204);
+        $response->assertStatus(302);
+        $response->assertRedirect('/students');
         $this->assertDatabaseMissing('students', ['id' => $student->id]);
     }
 

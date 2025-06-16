@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreStudentRequest;
+use App\Http\Requests\UpdateStudentRequest;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,27 +21,9 @@ class StudentController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreStudentRequest $request)
     {
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'student_number' => 'required|unique:students',
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'date_of_birth' => 'required|date',
-            'gender' => 'required|string',
-            'nationality' => 'required|string',
-            'address' => 'required|string',
-            'city' => 'required|string',
-            'state' => 'required|string',
-            'postal_code' => 'required|string',
-            'country' => 'required|string',
-            'phone' => 'required|string',
-            'emergency_contact_name' => 'required|string',
-            'emergency_contact_phone' => 'required|string',
-        ]);
-
-        $student = Student::create($validated);
+        $student = Student::create($request->validated());
 
         // Redirect to the Students index page with a success message
         return redirect()->route('students.index')->with('success', 'Student created successfully.');
@@ -55,25 +39,9 @@ class StudentController extends Controller
         ]);
     }
 
-    public function update(Request $request, Student $student)
+    public function update(UpdateStudentRequest $request, Student $student)
     {
-        $validated = $request->validate([
-            'first_name' => 'sometimes|string|max:255',
-            'last_name' => 'sometimes|string|max:255',
-            'date_of_birth' => 'sometimes|date',
-            'gender' => 'sometimes|string',
-            'nationality' => 'sometimes|string',
-            'address' => 'sometimes|string',
-            'city' => 'sometimes|string',
-            'state' => 'sometimes|string',
-            'postal_code' => 'sometimes|string',
-            'country' => 'sometimes|string',
-            'phone' => 'sometimes|string',
-            'emergency_contact_name' => 'sometimes|string',
-            'emergency_contact_phone' => 'sometimes|string',
-        ]);
-
-        $student->update($validated);
+        $student->update($request->validated());
 
         // Redirect to the Student show page with a success message
         return redirect()->route('students.show', $student->id)->with('success', 'Student updated successfully.');

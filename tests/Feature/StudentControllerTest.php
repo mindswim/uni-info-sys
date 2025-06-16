@@ -122,4 +122,98 @@ class StudentControllerTest extends TestCase
                 'emergency_contact_phone'
             ]);
     }
+
+    public function test_api_can_show_student_as_json_resource(): void
+    {
+        $student = Student::factory()->create([
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'student_number' => 'ST12345',
+            'nationality' => 'US'
+        ]);
+
+        // Create a Sanctum token for API authentication
+        $token = $this->user->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->getJson("/api/students/{$student->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'student_id_number',
+                    'name',
+                    'date_of_birth',
+                    'nationality',
+                    'profile_complete',
+                    'applications',
+                    'documents',
+                    'academic_records'
+                ]
+            ])
+            ->assertJsonFragment([
+                'student_id_number' => 'ST12345',
+                'name' => 'John Doe',
+                'nationality' => 'US'
+            ]);
+    }
+
+    public function test_api_shows_student_with_nested_relationships(): void
+    {
+        $student = Student::factory()->create([
+            'first_name' => 'Jane',
+            'last_name' => 'Smith',
+            'student_number' => 'ST67890',
+            'nationality' => 'CA'
+        ]);
+
+        // Create related data
+        $application = $student->admissionApplications()->create([
+            'academic_year' => '2024-2025',
+            'semester' => 'Fall',
+            'status' => 'draft',
+            'application_date' => now()
+        ]);
+
+        // Create a Sanctum token for API authentication
+        $token = $this->user->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->getJson("/api/students/{$student->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'student_id_number',
+                    'name',
+                    'date_of_birth',
+                    'nationality',
+                    'profile_complete',
+                    'applications' => [
+                        '*' => [
+                            'id',
+                            'academic_year',
+                            'semester',
+                            'status',
+                            'application_date',
+                            'comments',
+                            'program_choices'
+                        ]
+                    ],
+                    'documents',
+                    'academic_records'
+                ]
+            ])
+            ->assertJsonFragment([
+                'student_id_number' => 'ST67890',
+                'name' => 'Jane Smith',
+                'nationality' => 'CA'
+            ])
+            ->assertJsonPath('data.applications.0.academic_year', '2024-2025')
+            ->assertJsonPath('data.applications.0.status', 'draft');
+    }
 }

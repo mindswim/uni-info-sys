@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
+use App\Http\Resources\StudentResource;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -37,6 +38,19 @@ class StudentController extends Controller
         return Inertia::render('Students/Show', [
             'student' => $student,
         ]);
+    }
+
+    /**
+     * API version of show method that returns JSON resource
+     */
+    public function showApi(Student $student)
+    {
+        // Eager load the relationships you want to include in the response.
+        $student->load(['academicRecords', 'documents', 'admissionApplications.programChoices.program']);
+
+        // Instead of returning an Inertia view or raw JSON, return the resource.
+        // The resource will format the final JSON output.
+        return new StudentResource($student);
     }
 
     public function update(UpdateStudentRequest $request, Student $student)

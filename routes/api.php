@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\StaffController;
 use App\Http\Controllers\Api\V1\BuildingController;
 use App\Http\Controllers\Api\V1\RoomController;
 use App\Http\Controllers\Api\V1\CourseSectionController;
+use App\Http\Controllers\Api\V1\EnrollmentController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -30,4 +31,13 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('buildings', BuildingController::class);
     Route::apiResource('rooms', RoomController::class);
     Route::apiResource('course-sections', CourseSectionController::class);
+    
+    // Enrollment API routes
+    Route::apiResource('enrollments', EnrollmentController::class);
+    
+    // Additional custom routes for business logic
+    Route::post('enrollments/{enrollment}/withdraw', [EnrollmentController::class, 'withdraw']);
+    Route::post('enrollments/{enrollment}/complete', [EnrollmentController::class, 'complete']);
+    Route::get('students/{student}/enrollments', [EnrollmentController::class, 'byStudent']);
+    Route::get('course-sections/{courseSection}/enrollments', [EnrollmentController::class, 'byCourseSection']);
 }); 

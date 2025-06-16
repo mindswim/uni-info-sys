@@ -13,16 +13,18 @@ return new class extends Migration
     {
         Schema::create('course_sections', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('course_id')->nullable()->constrained()->onDelete('set null');
-            $table->foreignId('term_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('course_id')->constrained()->onDelete('cascade');
+            $table->foreignId('term_id')->constrained()->onDelete('cascade');
             $table->foreignId('instructor_id')->nullable()->constrained('staff')->onDelete('set null');
             $table->foreignId('room_id')->nullable()->constrained()->onDelete('set null');
-            $table->unsignedInteger('capacity');
+            $table->string('section_number'); // e.g., "001", "A"
+            $table->unsignedSmallInteger('capacity');
             $table->enum('status', ['open', 'closed', 'cancelled'])->default('open');
             $table->string('schedule_days')->nullable(); // e.g., "MWF", "TTh"
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
             $table->timestamps();
+            $table->unique(['course_id', 'term_id', 'section_number']);
         });
     }
 

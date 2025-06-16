@@ -29,6 +29,7 @@ class CourseSectionFactory extends Factory
             'term_id' => Term::factory(),
             'instructor_id' => Staff::factory(),
             'room_id' => Room::factory(),
+            'section_number' => $this->faker->randomElement(['001', '002', 'A', 'B', 'C']),
             'capacity' => $this->faker->numberBetween(20, 150),
             'status' => 'open',
             'schedule_days' => $this->faker->randomElement(['MWF', 'TTh']),

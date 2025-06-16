@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 /**
  * @group "Faculty Management"
  * @authenticated
+ * @description APIs for managing the university's faculties, the highest level of academic organization.
  *
  * APIs for managing faculties.
  */

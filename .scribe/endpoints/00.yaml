@@ -100,82 +100,6 @@ endpoints:
     custom: []
   -
     httpMethods:
-      - POST
-    uri: api/v1/tokens/create
-    metadata:
-      groupName: Endpoints
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: ''
-      description: ''
-      authenticated: true
-      custom: []
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      email:
-        name: email
-        description: 'Must be a valid email address.'
-        required: true
-        example: gbailey@example.net
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      password:
-        name: password
-        description: ''
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      device_name:
-        name: device_name
-        description: ''
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-    cleanBodyParameters:
-      email: gbailey@example.net
-      password: architecto
-      device_name: architecto
-    fileParameters: []
-    responses:
-      -
-        status: 422
-        content: '{"message":"The provided credentials are not correct.","errors":{"email":["The provided credentials are not correct."]}}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: '*'
-        description: null
-        custom: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {token}'
-    controller: null
-    method: null
-    route: null
-    custom: []
-  -
-    httpMethods:
       - GET
     uri: api/v1/departments
     metadata:
@@ -1757,7 +1681,7 @@ endpoints:
         name: start_date
         description: 'Must be a valid date.'
         required: true
-        example: '2025-06-16T17:58:15'
+        example: '2025-06-16T18:03:48'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -1777,7 +1701,7 @@ endpoints:
       name: b
       academic_year: 1494
       semester: Summer
-      start_date: '2025-06-16T17:58:15'
+      start_date: '2025-06-16T18:03:48'
       end_date: '2051-07-10'
     fileParameters: []
     responses:
@@ -2222,7 +2146,7 @@ endpoints:
         name: type
         description: ''
         required: true
-        example: seminar_room
+        example: office
         type: string
         enumValues:
           - lecture_hall
@@ -2236,7 +2160,7 @@ endpoints:
       building_id: architecto
       room_number: ngzmiyvdljnikhwa
       capacity: 79
-      type: seminar_room
+      type: office
     fileParameters: []
     responses:
       -
@@ -2502,7 +2426,7 @@ endpoints:
         name: start_time
         description: 'Must be a valid date in the format <code>H:i</code>.'
         required: true
-        example: '17:58'
+        example: '18:03'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -2526,7 +2450,7 @@ endpoints:
       capacity: 22
       schedule_days:
         - Saturday
-      start_time: '17:58'
+      start_time: '18:03'
       end_time: '2051-07-10'
     fileParameters: []
     responses:
@@ -2691,7 +2615,7 @@ endpoints:
         description: ''
         required: true
         example:
-          - Sunday
+          - Friday
         type: 'string[]'
         enumValues:
           - Monday
@@ -2708,7 +2632,7 @@ endpoints:
         name: start_time
         description: 'Must be a valid date in the format <code>H:i</code>.'
         required: true
-        example: '17:58'
+        example: '18:03'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -2731,8 +2655,8 @@ endpoints:
       room_id: architecto
       capacity: 22
       schedule_days:
-        - Sunday
-      start_time: '17:58'
+        - Friday
+      start_time: '18:03'
       end_time: '2051-07-10'
     fileParameters: []
     responses:
@@ -3021,7 +2945,7 @@ endpoints:
         name: status
         description: ''
         required: false
-        example: enrolled
+        example: completed
         type: string
         enumValues:
           - enrolled
@@ -3042,7 +2966,7 @@ endpoints:
         nullable: true
         custom: []
     cleanBodyParameters:
-      status: enrolled
+      status: completed
       grade: b
     fileParameters: []
     responses:

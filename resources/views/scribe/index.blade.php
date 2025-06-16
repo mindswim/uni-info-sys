@@ -82,6 +82,16 @@
                     <a href="#authenticating-requests">Authenticating requests</a>
                 </li>
                             </ul>
+                    <ul id="tocify-header-authentication" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="authentication">
+                    <a href="#authentication">Authentication</a>
+                </li>
+                                    <ul id="tocify-subheader-authentication" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="authentication-POSTapi-v1-tokens-create">
+                                <a href="#authentication-POSTapi-v1-tokens-create">Create API Token</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
                     <ul id="tocify-header-faculty-management" class="tocify-header">
                 <li class="tocify-item level-1" data-unique="faculty-management">
                     <a href="#faculty-management">"Faculty Management"</a>
@@ -114,9 +124,6 @@
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="endpoints-GETapi-students--id-">
                                 <a href="#endpoints-GETapi-students--id-">API version of show method that returns JSON resource</a>
-                            </li>
-                                                                                <li class="tocify-item level-2" data-unique="endpoints-POSTapi-v1-tokens-create">
-                                <a href="#endpoints-POSTapi-v1-tokens-create">POST api/v1/tokens/create</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="endpoints-GETapi-v1-departments">
                                 <a href="#endpoints-GETapi-v1-departments">Display a listing of the resource.</a>
@@ -302,7 +309,175 @@ You can switch the language used with the tabs at the top right (or from the nav
 <p>All authenticated endpoints are marked with a <code>requires authentication</code> badge in the documentation below.</p>
 <p>You can retrieve your token by making a POST request to <code>/api/v1/tokens/create</code>.</p>
 
-        <h1 id="faculty-management">"Faculty Management"</h1>
+        <h1 id="authentication">Authentication</h1>
+
+    
+
+                                <h2 id="authentication-POSTapi-v1-tokens-create">Create API Token</h2>
+
+<p>
+</p>
+
+<p>Authenticates a user and returns a plain-text Sanctum API token.</p>
+
+<span id="example-requests-POSTapi-v1-tokens-create">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/tokens/create" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"email\": \"user@example.com\",
+    \"password\": \"password\",
+    \"device_name\": \"my-laptop\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/tokens/create"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "email": "user@example.com",
+    "password": "password",
+    "device_name": "my-laptop"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-tokens-create">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;token&quot;: &quot;1|aBcDeFgHiJkLmNoPqRsTuVwXyZ&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-tokens-create" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-tokens-create"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-tokens-create"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-tokens-create" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-tokens-create">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-tokens-create" data-method="POST"
+      data-path="api/v1/tokens/create"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-tokens-create', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-tokens-create"
+                    onclick="tryItOut('POSTapi-v1-tokens-create');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-tokens-create"
+                    onclick="cancelTryOut('POSTapi-v1-tokens-create');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-tokens-create"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/tokens/create</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-tokens-create"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-tokens-create"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>email</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="email"                data-endpoint="POSTapi-v1-tokens-create"
+               value="user@example.com"
+               data-component="body">
+    <br>
+<p>The user's email address. Example: <code>user@example.com</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>password</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="password"                data-endpoint="POSTapi-v1-tokens-create"
+               value="password"
+               data-component="body">
+    <br>
+<p>The user's password. Example: <code>password</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>device_name</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="device_name"                data-endpoint="POSTapi-v1-tokens-create"
+               value="my-laptop"
+               data-component="body">
+    <br>
+<p>A name for the device or token, for your reference. Example: <code>my-laptop</code></p>
+        </div>
+        </form>
+
+                <h1 id="faculty-management">"Faculty Management"</h1>
 
     
 
@@ -1417,196 +1592,6 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <p>The ID of the student. Example: <code>1</code></p>
             </div>
                     </form>
-
-                    <h2 id="endpoints-POSTapi-v1-tokens-create">POST api/v1/tokens/create</h2>
-
-<p>
-<small class="badge badge-darkred">requires authentication</small>
-</p>
-
-
-
-<span id="example-requests-POSTapi-v1-tokens-create">
-<blockquote>Example request:</blockquote>
-
-
-<div class="bash-example">
-    <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/v1/tokens/create" \
-    --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
-    --header "Content-Type: application/json" \
-    --header "Accept: application/json" \
-    --data "{
-    \"email\": \"gbailey@example.net\",
-    \"password\": \"architecto\",
-    \"device_name\": \"architecto\"
-}"
-</code></pre></div>
-
-
-<div class="javascript-example">
-    <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/tokens/create"
-);
-
-const headers = {
-    "Authorization": "Bearer {YOUR_AUTH_KEY}",
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-};
-
-let body = {
-    "email": "gbailey@example.net",
-    "password": "architecto",
-    "device_name": "architecto"
-};
-
-fetch(url, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(body),
-}).then(response =&gt; response.json());</code></pre></div>
-
-</span>
-
-<span id="example-responses-POSTapi-v1-tokens-create">
-            <blockquote>
-            <p>Example response (422):</p>
-        </blockquote>
-                <details class="annotation">
-            <summary style="cursor: pointer;">
-                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
-            </summary>
-            <pre><code class="language-http">cache-control: no-cache, private
-content-type: application/json
-access-control-allow-origin: *
- </code></pre></details>         <pre>
-
-<code class="language-json" style="max-height: 300px;">{
-    &quot;message&quot;: &quot;The provided credentials are not correct.&quot;,
-    &quot;errors&quot;: {
-        &quot;email&quot;: [
-            &quot;The provided credentials are not correct.&quot;
-        ]
-    }
-}</code>
- </pre>
-    </span>
-<span id="execution-results-POSTapi-v1-tokens-create" hidden>
-    <blockquote>Received response<span
-                id="execution-response-status-POSTapi-v1-tokens-create"></span>:
-    </blockquote>
-    <pre class="json"><code id="execution-response-content-POSTapi-v1-tokens-create"
-      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
-</span>
-<span id="execution-error-POSTapi-v1-tokens-create" hidden>
-    <blockquote>Request failed with error:</blockquote>
-    <pre><code id="execution-error-message-POSTapi-v1-tokens-create">
-
-Tip: Check that you&#039;re properly connected to the network.
-If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
-You can check the Dev Tools console for debugging information.</code></pre>
-</span>
-<form id="form-POSTapi-v1-tokens-create" data-method="POST"
-      data-path="api/v1/tokens/create"
-      data-authed="1"
-      data-hasfiles="0"
-      data-isarraybody="0"
-      autocomplete="off"
-      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-tokens-create', this);">
-    <h3>
-        Request&nbsp;&nbsp;&nbsp;
-                    <button type="button"
-                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
-                    id="btn-tryout-POSTapi-v1-tokens-create"
-                    onclick="tryItOut('POSTapi-v1-tokens-create');">Try it out ⚡
-            </button>
-            <button type="button"
-                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
-                    id="btn-canceltryout-POSTapi-v1-tokens-create"
-                    onclick="cancelTryOut('POSTapi-v1-tokens-create');" hidden>Cancel 🛑
-            </button>&nbsp;&nbsp;
-            <button type="submit"
-                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
-                    id="btn-executetryout-POSTapi-v1-tokens-create"
-                    data-initial-text="Send Request 💥"
-                    data-loading-text="⏱ Sending..."
-                    hidden>Send Request 💥
-            </button>
-            </h3>
-            <p>
-            <small class="badge badge-black">POST</small>
-            <b><code>api/v1/tokens/create</code></b>
-        </p>
-                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Authorization" class="auth-value"               data-endpoint="POSTapi-v1-tokens-create"
-               value="Bearer {YOUR_AUTH_KEY}"
-               data-component="header">
-    <br>
-<p>Example: <code>Bearer {YOUR_AUTH_KEY}</code></p>
-            </div>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Content-Type"                data-endpoint="POSTapi-v1-tokens-create"
-               value="application/json"
-               data-component="header">
-    <br>
-<p>Example: <code>application/json</code></p>
-            </div>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Accept"                data-endpoint="POSTapi-v1-tokens-create"
-               value="application/json"
-               data-component="header">
-    <br>
-<p>Example: <code>application/json</code></p>
-            </div>
-                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
-        <div style=" padding-left: 28px;  clear: unset;">
-            <b style="line-height: 2;"><code>email</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="email"                data-endpoint="POSTapi-v1-tokens-create"
-               value="gbailey@example.net"
-               data-component="body">
-    <br>
-<p>Must be a valid email address. Example: <code>gbailey@example.net</code></p>
-        </div>
-                <div style=" padding-left: 28px;  clear: unset;">
-            <b style="line-height: 2;"><code>password</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="password"                data-endpoint="POSTapi-v1-tokens-create"
-               value="architecto"
-               data-component="body">
-    <br>
-<p>Example: <code>architecto</code></p>
-        </div>
-                <div style=" padding-left: 28px;  clear: unset;">
-            <b style="line-height: 2;"><code>device_name</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="device_name"                data-endpoint="POSTapi-v1-tokens-create"
-               value="architecto"
-               data-component="body">
-    <br>
-<p>Example: <code>architecto</code></p>
-        </div>
-        </form>
 
                     <h2 id="endpoints-GETapi-v1-departments">Display a listing of the resource.</h2>
 
@@ -5334,7 +5319,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"name\": \"b\",
     \"academic_year\": 1494,
     \"semester\": \"Summer\",
-    \"start_date\": \"2025-06-16T17:58:15\",
+    \"start_date\": \"2025-06-16T18:03:48\",
     \"end_date\": \"2051-07-10\"
 }"
 </code></pre></div>
@@ -5355,7 +5340,7 @@ let body = {
     "name": "b",
     "academic_year": 1494,
     "semester": "Summer",
-    "start_date": "2025-06-16T17:58:15",
+    "start_date": "2025-06-16T18:03:48",
     "end_date": "2051-07-10"
 };
 
@@ -5507,10 +5492,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="start_date"                data-endpoint="POSTapi-v1-terms"
-               value="2025-06-16T17:58:15"
+               value="2025-06-16T18:03:48"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2025-06-16T17:58:15</code></p>
+<p>Must be a valid date. Example: <code>2025-06-16T18:03:48</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end_date</code></b>&nbsp;&nbsp;
@@ -6595,7 +6580,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"building_id\": \"architecto\",
     \"room_number\": \"ngzmiyvdljnikhwa\",
     \"capacity\": 79,
-    \"type\": \"seminar_room\"
+    \"type\": \"office\"
 }"
 </code></pre></div>
 
@@ -6615,7 +6600,7 @@ let body = {
     "building_id": "architecto",
     "room_number": "ngzmiyvdljnikhwa",
     "capacity": 79,
-    "type": "seminar_room"
+    "type": "office"
 };
 
 fetch(url, {
@@ -6764,10 +6749,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="type"                data-endpoint="POSTapi-v1-rooms"
-               value="seminar_room"
+               value="office"
                data-component="body">
     <br>
-<p>Example: <code>seminar_room</code></p>
+<p>Example: <code>office</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>lecture_hall</code></li> <li><code>laboratory</code></li> <li><code>seminar_room</code></li> <li><code>office</code></li></ul>
         </div>
@@ -7238,7 +7223,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"schedule_days\": [
         \"Saturday\"
     ],
-    \"start_time\": \"17:58\",
+    \"start_time\": \"18:03\",
     \"end_time\": \"2051-07-10\"
 }"
 </code></pre></div>
@@ -7264,7 +7249,7 @@ let body = {
     "schedule_days": [
         "Saturday"
     ],
-    "start_time": "17:58",
+    "start_time": "18:03",
     "end_time": "2051-07-10"
 };
 
@@ -7451,10 +7436,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="start_time"                data-endpoint="POSTapi-v1-course-sections"
-               value="17:58"
+               value="18:03"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>H:i</code>. Example: <code>17:58</code></p>
+<p>Must be a valid date in the format <code>H:i</code>. Example: <code>18:03</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end_time</code></b>&nbsp;&nbsp;
@@ -7644,9 +7629,9 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"room_id\": \"architecto\",
     \"capacity\": 22,
     \"schedule_days\": [
-        \"Sunday\"
+        \"Friday\"
     ],
-    \"start_time\": \"17:58\",
+    \"start_time\": \"18:03\",
     \"end_time\": \"2051-07-10\"
 }"
 </code></pre></div>
@@ -7670,9 +7655,9 @@ let body = {
     "room_id": "architecto",
     "capacity": 22,
     "schedule_days": [
-        "Sunday"
+        "Friday"
     ],
-    "start_time": "17:58",
+    "start_time": "18:03",
     "end_time": "2051-07-10"
 };
 
@@ -7875,10 +7860,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="start_time"                data-endpoint="PUTapi-v1-course-sections--id-"
-               value="17:58"
+               value="18:03"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>H:i</code>. Example: <code>17:58</code></p>
+<p>Must be a valid date in the format <code>H:i</code>. Example: <code>18:03</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>end_time</code></b>&nbsp;&nbsp;
@@ -8537,7 +8522,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"status\": \"enrolled\",
+    \"status\": \"completed\",
     \"grade\": \"b\"
 }"
 </code></pre></div>
@@ -8555,7 +8540,7 @@ const headers = {
 };
 
 let body = {
-    "status": "enrolled",
+    "status": "completed",
     "grade": "b"
 };
 
@@ -8688,10 +8673,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="text" style="display: none"
                               name="status"                data-endpoint="PUTapi-v1-enrollments--id-"
-               value="enrolled"
+               value="completed"
                data-component="body">
     <br>
-<p>Example: <code>enrolled</code></p>
+<p>Example: <code>completed</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>enrolled</code></li> <li><code>waitlisted</code></li> <li><code>completed</code></li> <li><code>withdrawn</code></li></ul>
         </div>

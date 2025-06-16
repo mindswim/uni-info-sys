@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Student;
 use App\Models\AdmissionApplication;
+use App\Notifications\ApplicationStatusUpdated;
 use Illuminate\Support\Facades\Log;
 
 class AdmissionService
@@ -31,5 +32,30 @@ class AdmissionService
             'application_date' => now(),
             'status' => 'draft' // Explicitly set status
         ]);
+    }
+
+    /**
+     * Update the status of an admission application and notify the student.
+     *
+     * @param AdmissionApplication $application
+     * @param string $newStatus
+     * @return AdmissionApplication
+     */
+    public function updateApplicationStatus(AdmissionApplication $application, string $newStatus): AdmissionApplication
+    {
+        $oldStatus = $application->status;
+        
+        // Update the application status
+        $application->update(['status' => $newStatus]);
+        
+        // Only send notification if status actually changed
+        if ($oldStatus !== $newStatus) {
+            // Dispatch notification to the student's user
+            $application->student->user->notify(new ApplicationStatusUpdated($application));
+            
+            Log::info("Application {$application->id} status updated from {$oldStatus} to {$newStatus}. Notification sent to user {$application->student->user->id}.");
+        }
+        
+        return $application;
     }
 } 

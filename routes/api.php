@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\BuildingController;
 use App\Http\Controllers\Api\V1\RoomController;
 use App\Http\Controllers\Api\V1\CourseSectionController;
 use App\Http\Controllers\Api\V1\EnrollmentController;
+use App\Http\Controllers\Api\V1\NotificationController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -45,4 +46,8 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::post('enrollments/{enrollment}/complete', [EnrollmentController::class, 'complete']);
     Route::get('students/{student}/enrollments', [EnrollmentController::class, 'byStudent']);
     Route::get('course-sections/{courseSection}/enrollments', [EnrollmentController::class, 'byCourseSection']);
+    
+    // Notification routes
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
 }); 

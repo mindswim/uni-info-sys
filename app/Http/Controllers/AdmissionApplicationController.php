@@ -4,23 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use App\Models\AdmissionApplication;
+use App\Services\AdmissionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class AdmissionApplicationController extends Controller
 {
-    public function store(Request $request, Student $student): JsonResponse
+    public function store(Request $request, Student $student, AdmissionService $admissionService): JsonResponse
     {
         $validated = $request->validate([
             'academic_year' => 'required|string',
             'semester' => 'required|string',
-            'status' => 'required|string|in:draft,submitted,under_review,accepted,rejected'
         ]);
 
-        $application = $student->admissionApplications()->create([
-            ...$validated,
-            'application_date' => now()
-        ]);
+        $application = $admissionService->createDraftApplication($student, $validated);
 
         return response()->json($application, 201);
     }

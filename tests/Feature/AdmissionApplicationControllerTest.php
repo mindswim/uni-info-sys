@@ -45,13 +45,44 @@ class AdmissionApplicationControllerTest extends TestCase
         $applicationData = [
             'academic_year' => '2024-2025',
             'semester' => 'Fall',
-            'status' => 'draft'
         ];
 
         $response = $this->postJson("/students/{$this->student->id}/applications", $applicationData);
 
         $response->assertStatus(201)
-            ->assertJsonFragment($applicationData);
+            ->assertJsonFragment([
+                'academic_year' => '2024-2025',
+                'semester' => 'Fall',
+                'status' => 'draft' // The service always creates draft applications
+            ]);
+    }
+
+    public function test_returns_existing_draft_application()
+    {
+        // Create first draft application
+        $firstApplicationData = [
+            'academic_year' => '2024-2025',
+            'semester' => 'Fall',
+        ];
+
+        $firstResponse = $this->postJson("/students/{$this->student->id}/applications", $firstApplicationData);
+        $firstApplication = $firstResponse->json();
+
+        // Try to create another draft application
+        $secondApplicationData = [
+            'academic_year' => '2025-2026',
+            'semester' => 'Spring',
+        ];
+
+        $secondResponse = $this->postJson("/students/{$this->student->id}/applications", $secondApplicationData);
+        $secondApplication = $secondResponse->json();
+
+        // Should return the same application (existing draft)
+        $this->assertEquals($firstApplication['id'], $secondApplication['id']);
+        $this->assertEquals('draft', $secondApplication['status']);
+        
+        // Should only have one application in the database
+        $this->assertEquals(1, AdmissionApplication::where('student_id', $this->student->id)->count());
     }
 
     public function test_can_list_applications()

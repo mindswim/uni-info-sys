@@ -1212,4 +1212,47 @@ For each task, the workflow will be:
     *   Write full CRUD tests for both.
     *   For the `RoomApiTest`, ensure filtering by building works correctly.
 
+### Task 19: Implement Course Section API Endpoints
+
+**Goal:** Create API endpoints for managing `CourseSection` resources, which represent specific offerings of a course in a term.
+
+1.  **Create Controller & Resource**:
+    ```bash
+    php artisan make:controller Api/V1/CourseSectionController --api --model=CourseSection
+    php artisan make:resource CourseSectionResource
+    ```
+
+2.  **Define `CourseSectionResource`**: This resource must be comprehensive, including its many relationships.
+    ```php
+    return [
+        'id' => $this->id,
+        'capacity' => $this->capacity,
+        'schedule_days' => $this->schedule_days,
+        'start_time' => $this->start_time,
+        'end_time' => $this->end_time,
+        'course' => new CourseResource($this->whenLoaded('course')),
+        'term' => new TermResource($this->whenLoaded('term')),
+        'instructor' => new StaffResource($this->whenLoaded('instructor')),
+        'room' => new RoomResource($this->whenLoaded('room')),
+    ];
+    ```
+
+3.  **Implement Controller Methods**:
+    *   Implement full CRUD functionality.
+    *   The `index` method should support filtering by `course_id`, `term_id`, `instructor_id`, and `room_id`.
+
+4.  **Define API Routes**:
+    ```php
+    use App\Http\Controllers\Api\V1\CourseSectionController;
+
+    Route::apiResource('v1/course-sections', CourseSectionController::class);
+    ```
+
+5.  **Create Feature Test**:
+    ```bash
+    php artisan make:test Api/V1/CourseSectionApiTest
+    ```
+    *   Write tests for all CRUD operations.
+    *   Thoroughly test all filtering capabilities.
+
 </rewritten_file> 

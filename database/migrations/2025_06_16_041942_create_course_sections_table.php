@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('room_id')->nullable()->constrained()->onDelete('set null');
             $table->unsignedInteger('capacity');
             $table->enum('status', ['open', 'closed', 'cancelled'])->default('open');
-            $table->string('schedule_days')->nullable(); // e.g., "MWF", "TTh"
+            $table->json('schedule_days')->nullable(); // e.g., ["Monday", "Wednesday", "Friday"]
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
             $table->timestamps();

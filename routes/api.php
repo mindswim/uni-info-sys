@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\StaffController;
 use App\Http\Controllers\Api\V1\TermController;
 use App\Http\Controllers\Api\V1\BuildingController;
 use App\Http\Controllers\Api\V1\RoomController;
+use App\Http\Controllers\Api\V1\CourseSectionController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -30,4 +31,5 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('terms', TermController::class);
     Route::apiResource('buildings', BuildingController::class);
     Route::apiResource('rooms', RoomController::class);
+    Route::apiResource('course-sections', CourseSectionController::class);
 }); 

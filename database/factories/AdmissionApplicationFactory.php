@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Student;
+use App\Models\Term;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AdmissionApplicationFactory extends Factory
@@ -11,8 +12,7 @@ class AdmissionApplicationFactory extends Factory
     {
         return [
             'student_id' => Student::factory(),
-            'academic_year' => '2024-2025',
-            'semester' => $this->faker->randomElement(['Fall', 'Spring', 'Summer']),
+            'term_id' => Term::factory(),
             'status' => $this->faker->randomElement(['draft', 'submitted', 'under_review', 'accepted', 'rejected']),
             'application_date' => now(),
             'decision_date' => null,

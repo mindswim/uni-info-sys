@@ -8,7 +8,7 @@ This document provides a granular, step-by-step task list to refactor the existi
 
 This section focuses on improving the quality and organization of the existing code.
 
-### ✅ Task 1: Refactor Validation with Form Requests
+### ✅ Task 1: Refactor Validation with Form Requests - COMPLETED ✅
 
 **Goal:** Move validation logic from controllers into dedicated `FormRequest` classes to make controllers leaner and validation logic reusable.
 
@@ -276,117 +276,6 @@ This section focuses on improving the quality and organization of the existing c
 
 ---
 
-## Section 2: Expanding the Data Model
-
-This section focuses on creating the new models and database tables required for advanced features.
-
-### ✅ Task 4: Implement Role-Based Access Control (RBAC) - COMPLETED ✅
-
-**Goal:** Create the necessary models and tables to manage user roles and permissions.
-
-**✅ IMPLEMENTATION COMPLETED:**
-- ✅ Created Role and Permission models with migrations
-- ✅ Created pivot tables (role_user, permission_role) with proper foreign key constraints
-- ✅ Defined all model relationships (User->roles, Role->users/permissions, Permission->roles)
-- ✅ Added helper methods to User model (hasRole, hasAnyRole, hasPermission, getAllPermissions)
-- ✅ Created comprehensive test suite (15 tests, 71 assertions)
-- ✅ Created RolePermissionSeeder with realistic roles (admin, student, staff, moderator) and permissions
-- ✅ All tests passing, including cascade delete verification and unique constraint tests
-
-**Key Features Implemented:**
-- Many-to-many relationships between Users, Roles, and Permissions
-- Cascade delete on pivot tables to maintain data integrity
-- Helper methods for easy role/permission checking
-- Factory classes for testing
-- Comprehensive seeder with realistic university roles and permissions
-
-1.  **Create Models and Migrations:** Run these commands:
-    ```bash
-    php artisan make:model Role -m
-    php artisan make:model Permission -m
-    ```
-
-2.  **Define `Role` and `Permission` Migrations:**
-    *   Open the `..._create_roles_table.php` migration. Define the schema:
-        ```php
-        Schema::create('roles', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique(); // e.g., 'admin', 'student'
-            $table->string('description')->nullable();
-            $table->timestamps();
-        });
-        ```
-    *   Open the `..._create_permissions_table.php` migration. Define the schema:
-        ```php
-        Schema::create('permissions', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique(); // e.g., 'manage-applications', 'submit-documents'
-            $table->string('description')->nullable();
-            $table->timestamps();
-        });
-        ```
-
-3.  **Create Pivot Table Migrations:** You need two more tables to link users, roles, and permissions.
-    ```bash
-    php artisan make:migration create_role_user_table
-    php artisan make:migration create_permission_role_table
-    ```
-
-4.  **Define Pivot Table Schemas:**
-    *   Open `..._create_role_user_table.php`:
-        ```php
-        Schema::create('role_user', function (Blueprint $table) {
-            $table->primary(['user_id', 'role_id']);
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('role_id')->constrained()->onDelete('cascade');
-            $table->timestamps();
-        });
-        ```
-    *   Open `..._create_permission_role_table.php`:
-        ```php
-        Schema::create('permission_role', function (Blueprint $table) {
-            $table->primary(['permission_id', 'role_id']);
-            $table->foreignId('permission_id')->constrained()->onDelete('cascade');
-            $table->foreignId('role_id')->constrained()->onDelete('cascade');
-            $table->timestamps();
-        });
-        ```
-
-5.  **Run Migrations:**
-    ```bash
-    php artisan migrate
-    ```
-
-6.  **Define Model Relationships:**
-    *   In `app/Models/User.php`, add the roles relationship:
-        ```php
-        public function roles()
-        {
-            return $this->belongsToMany(Role::class);
-        }
-        ```
-    *   In `app/Models/Role.php`, add the relationships to users and permissions:
-        ```php
-        public function users()
-        {
-            return $this->belongsToMany(User::class);
-        }
-
-        public function permissions()
-        {
-            return $this->belongsToMany(Permission::class);
-        }
-        ```
-    *   In `app/Models/Permission.php`, add the roles relationship:
-        ```php
-        public function roles()
-        {
-            return $this->belongsToMany(Role::class);
-        }
-        ```
-
----
-
 ### ✅ Task 5: Implement Academic Hierarchy - COMPLETED ✅
 
 **Goal:** Restructure the `Program` model to be part of a formal `Faculty` -> `Department` hierarchy.
@@ -492,3 +381,396 @@ This section focuses on creating the new models and database tables required for
         ```
 
 6.  **Update `ProgramController` Validation:** Remember to update the validation in `ProgramController` (or its new `FormRequest`) to use `department_id` instead of `department`. 
+
+---
+
+## Project Roadmap: From Foundation to Production
+
+This section provides a high-level overview of the development phases to build a complete, professional-grade university management system.
+
+### Phase 1: ✅ Foundation (COMPLETED)
+- Data Models & RBAC
+- Academic Hierarchy
+- Best Practices Implementation
+
+### Phase 1.5: 🎯 Complete University Core (CRITICAL - 3-4 weeks)
+- Academic Operations (Courses, Enrollment, Grading)
+- Faculty & Staff Management
+- Physical Infrastructure
+- Financial Management
+- Workflow & Notifications
+
+### Phase 2: 🔧 Backend Excellence (2-3 weeks)
+- API Completion & Documentation
+- File Upload & Document Management
+- Advanced Security & Performance
+- Integration & Testing
+
+### Phase 3: 🎨 Frontend Excellence (3-4 weeks)
+- Student Portal & Admin Dashboard
+- Course Registration & Management
+- Reporting & Analytics Interface
+- Mobile Responsiveness
+
+### Phase 4: 🚀 Production Deployment (1-2 weeks)
+- Infrastructure & DevOps
+- Security & Monitoring
+- Go-Live Preparation
+
+---
+## Section 3: Building the Complete University Core (Phase 1.5)
+
+This section focuses on creating the core data models that transform the application from an admissions system into a full-fledged university management system. Each task includes models, migrations, relationships, and comprehensive tests.
+
+### Task 6: Implement Academic Calendar & Terms
+
+**Goal:** Create a robust system for managing academic terms and important dates, removing hardcoded strings like `academic_year` and `semester`.
+
+1.  **Create `Term` Model and Migration:**
+    ```bash
+    php artisan make:model Term -m
+    ```
+    -   In the `..._create_terms_table.php` migration:
+        ```php
+        Schema::create('terms', function (Blueprint $table) {
+            $table->id();
+            $table->string('name'); // e.g., "Fall 2024"
+            $table->unsignedSmallInteger('academic_year'); // e.g., 2024
+            $table->string('semester'); // e.g., "Fall", "Spring", "Summer"
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->timestamps();
+            $table->unique(['academic_year', 'semester']);
+        });
+        ```
+
+2.  **Update `AdmissionApplication` to use `term_id`:**
+    ```bash
+    php artisan make:migration update_admission_applications_for_terms --table=admission_applications
+    ```
+    -   In the new migration file:
+        ```php
+        public function up(): void
+        {
+            Schema::table('admission_applications', function (Blueprint $table) {
+                $table->foreignId('term_id')->nullable()->after('student_id')->constrained()->onDelete('set null');
+                $table->dropColumn(['academic_year', 'semester']);
+            });
+        }
+        
+        public function down(): void
+        {
+            Schema::table('admission_applications', function (Blueprint $table) {
+                $table->string('academic_year');
+                $table->string('semester');
+                $table->dropConstrainedForeignId('term_id');
+            });
+        }
+        ```
+    
+3.  **Run Migrations:**
+    ```bash
+    php artisan migrate
+    ```
+
+4.  **Update Models:**
+    -   In `app/Models/Term.php`:
+        ```php
+        protected $fillable = ['name', 'academic_year', 'semester', 'start_date', 'end_date'];
+        
+        public function admissionApplications()
+        {
+            return $this->hasMany(AdmissionApplication::class);
+        }
+        ```
+    -   In `app/Models/AdmissionApplication.php`, update the `fillable` array and add the new relationship:
+        ```php
+        // ... existing code ...
+        protected $fillable = [
+            'student_id', 'term_id', 'status', 'application_date', 
+            'decision_date', 'decision_status', 'comments'
+        ];
+        // ... existing code ...
+        public function term()
+        {
+            return $this->belongsTo(Term::class);
+        }
+        // ... existing code ...
+        ```
+
+### Task 7: Implement Course Catalog System
+
+**Goal:** Create a comprehensive catalog of all courses offered by the university.
+
+1.  **Create `Course` Model and Migration:**
+    ```bash
+    php artisan make:model Course -m
+    ```
+    -   In the `..._create_courses_table.php` migration:
+        ```php
+        Schema::create('courses', function (Blueprint $table) {
+            $table->id();
+            $table->string('course_code')->unique(); // e.g., "CS101"
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->unsignedTinyInteger('credits');
+            $table->foreignId('department_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
+        });
+        ```
+
+2.  **Create Prerequisite Pivot Table:**
+    ```bash
+    php artisan make:migration create_course_prerequisites_table
+    ```
+    -   In the new migration file:
+        ```php
+        Schema::create('course_prerequisites', function (Blueprint $table) {
+            $table->primary(['course_id', 'prerequisite_id']);
+            $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
+            $table->foreignId('prerequisite_id')->constrained('courses')->onDelete('cascade');
+            $table->timestamps();
+        });
+        ```
+
+3.  **Run Migrations:**
+    ```bash
+    php artisan migrate
+    ```
+
+4.  **Update Models:**
+    -   In `app/Models/Course.php`:
+        ```php
+        protected $fillable = ['course_code', 'title', 'description', 'credits', 'department_id'];
+
+        public function department()
+        {
+            return $this->belongsTo(Department::class);
+        }
+
+        public function prerequisites()
+        {
+            return $this->belongsToMany(Course::class, 'course_prerequisites', 'course_id', 'prerequisite_id');
+        }
+        
+        public function isPrerequisiteFor()
+        {
+            return $this->belongsToMany(Course::class, 'course_prerequisites', 'prerequisite_id', 'course_id');
+        }
+        ```
+
+### Task 8: Implement Staff Management
+
+**Goal:** Create a system to manage faculty and administrative staff information, linking them to users.
+
+1.  **Create `Staff` Model and Migration:**
+    ```bash
+    php artisan make:model Staff -m
+    ```
+    -   In the `..._create_staff_table.php` migration:
+        ```php
+        Schema::create('staff', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->unique()->constrained()->onDelete('cascade');
+            $table->foreignId('department_id')->nullable()->constrained()->onDelete('set null');
+            $table->string('job_title'); // e.g., "Professor", "Admissions Officer"
+            $table->string('office_location')->nullable();
+            $table->string('phone_number')->nullable();
+            $table->date('hire_date');
+            $table->timestamps();
+        });
+        ```
+
+2.  **Run Migrations:**
+    ```bash
+    php artisan migrate
+    ```
+
+3.  **Update Models:**
+    -   In `app/Models/User.php`, add the `staff` relationship:
+        ```php
+        // ... existing code ...
+        public function getAllPermissions()
+        {
+            // ... existing code ...
+        }
+
+        public function staff()
+        {
+            return $this->hasOne(Staff::class);
+        }
+    }
+        ```
+    -   In `app/Models/Staff.php`:
+        ```php
+        protected $fillable = ['user_id', 'department_id', 'job_title', 'office_location', 'phone_number', 'hire_date'];
+
+        public function user()
+        {
+            return $this->belongsTo(User::class);
+        }
+
+        public function department()
+        {
+            return $this->belongsTo(Department::class);
+        }
+        ```
+
+### Task 9: Implement Physical Infrastructure
+
+**Goal:** Model the university's physical campus, including buildings and rooms.
+
+1.  **Create `Building` and `Room` Models & Migrations:**
+    ```bash
+    php artisan make:model Building -m
+    php artisan make:model Room -m
+    ```
+    -   In `..._create_buildings_table.php`:
+        ```php
+        Schema::create('buildings', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('address')->nullable();
+            $table->timestamps();
+        });
+        ```
+    -   In `..._create_rooms_table.php`:
+        ```php
+        Schema::create('rooms', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('building_id')->constrained()->onDelete('cascade');
+            $table->string('room_number');
+            $table->unsignedSmallInteger('capacity');
+            $table->enum('type', ['classroom', 'lab', 'lecture_hall', 'office', 'other']);
+            $table->timestamps();
+            $table->unique(['building_id', 'room_number']);
+        });
+        ```
+
+2.  **Run Migrations:**
+    ```bash
+    php artisan migrate
+    ```
+
+3.  **Update Models:**
+    -   In `app/Models/Building.php`:
+        ```php
+        protected $fillable = ['name', 'address'];
+
+        public function rooms()
+        {
+            return $this->hasMany(Room::class);
+        }
+        ```
+    -   In `app/Models/Room.php`:
+        ```php
+        protected $fillable = ['building_id', 'room_number', 'capacity', 'type'];
+
+        public function building()
+        {
+            return $this->belongsTo(Building::class);
+        }
+        ```
+
+### Task 10: Implement Class Scheduling & Sections
+
+**Goal:** Create specific instances (sections) of courses for a given term, with assigned instructors and locations.
+
+1.  **Create `CourseSection` Model and Migration:**
+    ```bash
+    php artisan make:model CourseSection -m
+    ```
+    -   In `..._create_course_sections_table.php`:
+        ```php
+        Schema::create('course_sections', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('course_id')->constrained()->onDelete('cascade');
+            $table->foreignId('term_id')->constrained()->onDelete('cascade');
+            $table->foreignId('instructor_id')->nullable()->constrained('staff')->onDelete('set null');
+            $table->foreignId('room_id')->nullable()->constrained()->onDelete('set null');
+            $table->string('section_number'); // e.g., "001", "A"
+            $table->unsignedSmallInteger('capacity');
+            $table->string('schedule_days')->nullable(); // e.g., "MWF", "TTh"
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
+            $table->timestamps();
+            $table->unique(['course_id', 'term_id', 'section_number']);
+        });
+        ```
+
+2.  **Run Migrations:**
+    ```bash
+    php artisan migrate
+    ```
+
+3.  **Update Models:**
+    -   In `app/Models/CourseSection.php`:
+        ```php
+        protected $fillable = ['course_id', 'term_id', 'instructor_id', 'room_id', 'section_number', 'capacity', 'schedule_days', 'start_time', 'end_time'];
+
+        public function course() { return $this->belongsTo(Course::class); }
+        public function term() { return $this->belongsTo(Term::class); }
+        public function instructor() { return $this->belongsTo(Staff::class, 'instructor_id'); }
+        public function room() { return $this->belongsTo(Room::class); }
+        ```
+
+### Task 11: Implement Student Enrollment System
+
+**Goal:** Build the system that allows students to enroll in course sections and tracks their academic progress.
+
+1.  **Create `Enrollment` Model and Migration:**
+    ```bash
+    php artisan make:model Enrollment -m
+    ```
+    -   In `..._create_enrollments_table.php`:
+        ```php
+        Schema::create('enrollments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('student_id')->constrained()->onDelete('cascade');
+            $table->foreignId('course_section_id')->constrained()->onDelete('cascade');
+            $table->enum('status', ['enrolled', 'waitlisted', 'completed', 'withdrawn'])->default('enrolled');
+            $table->string('grade')->nullable(); // e.g., "A", "B+", "P" for Pass/Fail
+            $table->timestamps();
+            $table->unique(['student_id', 'course_section_id']);
+        });
+        ```
+
+2.  **Run Migrations:**
+    ```bash
+    php artisan migrate
+    ```
+
+3.  **Update Models:**
+    -   In `app/Models/Enrollment.php`:
+        ```php
+        protected $fillable = ['student_id', 'course_section_id', 'status', 'grade'];
+
+        public function student() { return $this->belongsTo(Student::class); }
+        public function courseSection() { return $this->belongsTo(CourseSection::class); }
+        ```
+    -   In `app/Models/Student.php`, add the `enrollments` relationship:
+        ```php
+        // ... existing code ...
+        public function hasCompleteProfile(): bool
+        {
+            // ... existing code ...
+        }
+
+        public function enrollments()
+        {
+            return $this->hasMany(Enrollment::class);
+        }
+    }
+        ```
+    -   In `app/Models/CourseSection.php`, add the `enrollments` relationship:
+        ```php
+        // ... existing code ...
+        public function room() { return $this->belongsTo(Room::class); }
+
+        public function enrollments()
+        {
+            return $this->hasMany(Enrollment::class);
+        }
+        ```
+
+</rewritten_file> 

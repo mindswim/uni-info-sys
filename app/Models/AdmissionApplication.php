@@ -8,7 +8,7 @@ class AdmissionApplication extends Model
     use HasFactory;
 
     protected $fillable = [
-        'student_id', 'academic_year', 'semester', 'status',
+        'student_id', 'term_id', 'status',
         'application_date', 'decision_date', 'decision_status', 'comments'
     ];
 
@@ -25,5 +25,10 @@ class AdmissionApplication extends Model
     public function programChoices()
     {
         return $this->hasMany(ProgramChoice::class, 'application_id');
+    }
+
+    public function term()
+    {
+        return $this->belongsTo(Term::class);
     }
 }

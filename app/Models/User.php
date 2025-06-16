@@ -87,4 +87,9 @@ class User extends Authenticatable
             $query->whereIn('id', $this->roles()->pluck('id'));
         })->get();
     }
+
+    public function staff()
+    {
+        return $this->hasOne(Staff::class);
+    }
 }

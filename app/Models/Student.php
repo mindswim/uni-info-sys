@@ -47,4 +47,9 @@ class Student extends Model
                !empty($this->emergency_contact_name) &&
                !empty($this->emergency_contact_phone);
     }
+
+    public function enrollments()
+    {
+        return $this->hasMany(Enrollment::class);
+    }
 }

@@ -16,7 +16,7 @@ This document outlines the detailed tasks for **Phase 2B (Professional API Archi
 
 This phase focuses on hardening the API, improving developer experience, and optimizing performance.
 
-### ➡️ Task 20: Implement API Authentication with Laravel Sanctum
+### ✅ Task 20: Implement API Authentication with Laravel Sanctum - COMPLETED ✅
 
 **Goal:** Secure all `v1` API endpoints, ensuring that only authenticated clients can access them.
 
@@ -92,7 +92,7 @@ This phase focuses on hardening the API, improving developer experience, and opt
 
 ---
 
-### Task 21: Generate API Documentation with Scribe
+### ✅ Task 21: Generate API Documentation with Scribe - COMPLETED ✅
 
 **Goal:** Automatically generate clean, comprehensive, and interactive API documentation from our existing code and annotations.
 
@@ -132,30 +132,77 @@ These endpoints work normally and can be tested via API clients. They are marked
 
 ### Task 22: Centralize API Error Handling
 
-**Goal:** Implement a standardized JSON error response format for all API exceptions.
+**Goal:** Implement a standardized JSON error response format for all API exceptions, ensuring a predictable and consistent experience for API consumers.
 
 **Implementation Steps:**
 
 1.  **Customize Exception Handler:**
     - I will open `app/Exceptions/Handler.php`.
-    - In the `register()` method, I will use a `renderable` to intercept common exceptions for API routes (`$request->is('api/*')`) and format them into a standard JSON response.
-    - I will handle specific exceptions like `NotFoundHttpException`, `AuthenticationException`, `ValidationException`, and `AuthorizationException`.
-    - **Crucially, I will also add a fallback for any generic `Throwable` to ensure *all* API errors return a consistent JSON format, preventing unexpected HTML error responses.** The structure will be:
-      ```json
-      {
-        "message": "Error description",
-        "errors": { /* Optional: field-specific validation errors */ }
-      }
-      ```
+    - In the `register()` method, I will add a `renderable` for all API routes (`$request->is('api/*')`).
+    - This handler will catch specific exceptions (`NotFoundHttpException`, `AuthenticationException`, `ValidationException`, `AuthorizationException`) and format them into a standard JSON response.
+    - **Crucially, I will also add a fallback for any generic `Throwable` to ensure *all* API errors return a consistent JSON format, preventing unexpected HTML error pages.**
+
+2.  **Add Code to `app/Exceptions/Handler.php`:**
+    - I will add the following code inside the `register()` method:
+    ```php
+    use Illuminate\Http\Request;
+    use Illuminate\Auth\AuthenticationException;
+    use Illuminate\Validation\ValidationException;
+    use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+    use Illuminate\Auth\Access\AuthorizationException;
+    use Throwable;
+
+    // ...
+
+    $this->renderable(function (Throwable $e, Request $request) {
+        if ($request->is('api/*')) {
+            $message = 'An unexpected error occurred.';
+            $statusCode = 500;
+            $errors = [];
+
+            if ($e instanceof NotFoundHttpException) {
+                $message = 'The requested resource was not found.';
+                $statusCode = 404;
+            } elseif ($e instanceof AuthenticationException) {
+                $message = 'Unauthenticated.';
+                $statusCode = 401;
+            } elseif ($e instanceof AuthorizationException) {
+                $message = 'This action is unauthorized.';
+                $statusCode = 403;
+            } elseif ($e instanceof ValidationException) {
+                $message = 'The given data was invalid.';
+                $statusCode = 422;
+                $errors = $e->errors();
+            }
+
+            $response = ['message' => $message];
+
+            if (!empty($errors)) {
+                $response['errors'] = $errors;
+            }
+
+            if (config('app.debug')) {
+                $response['exception'] = get_class($e);
+                $response['file'] = $e->getFile();
+                $response['line'] = $e->getLine();
+                $response['trace'] = collect($e->getTrace())->pluck('file', 'line')->all();
+            }
+
+            return response()->json($response, $statusCode);
+        }
+    });
+    ```
 
 **Testing Steps:**
 
-1.  **Update Existing Tests:**
-    - I will modify existing feature tests to assert the new JSON error structure.
-    - For example, in a test that requests a non-existent resource, I will assert the response has the `message` key and a 404 status.
-    - In a test for invalid data, I will assert a 422 status and the presence of the `message` and `errors` keys.
+1.  **Create New Tests and Update Existing Ones:**
+    - I will create a new test file `tests/Feature/Api/V1/ErrorHandlingTest.php` to specifically test these scenarios.
+    - **Test Not Found (404):** I will make a request to a non-existent API endpoint (e.g., `/api/v1/non-existent-route`) and assert that the response has a `404` status and the `{"message": "The requested resource was not found."}` structure.
+    - **Test Unauthorized (401):** I will modify `AuthenticationTest.php` to assert that a request to a protected endpoint without a token returns the new `{"message": "Unauthenticated."}` structure.
+    - **Test Validation (422):** I will modify a test that submits invalid data (e.g., in `FacultyControllerTest`) to assert a `422` status and the presence of both `message` and `errors` keys.
+    - **Test Authorization (403):** I will create a test where a user without the correct permissions tries to perform an action and assert a `403` status with the `{"message": "This action is unauthorized."}` structure. (This may require setting up a basic role/permission).
 
-**🔍 CHECKPOINT:** All API errors must return a consistent and predictable JSON error format. I will await your approval before committing.
+**🔍 CHECKPOINT:** All API errors, including 404s, validation errors, and authentication failures, must return a consistent and predictable JSON error format. I will await your approval before committing.
 
 ---
 
@@ -169,17 +216,76 @@ These endpoints work normally and can be tested via API clients. They are marked
 
 1.  **Create Notification Class & Migration:**
     - I will run `php artisan make:notification ApplicationStatusUpdated`.
-    - Laravel will prompt to create the `notifications` table migration, which I will confirm. I will then run `php artisan migrate`.
+    - When prompted, I will confirm `yes` to create the `notifications` table migration.
+    - I will then run `php artisan migrate`.
 
-2.  **Configure Notification:**
-    - In `ApplicationStatusUpdated.php`, I will set `via` to return `['database']` and define the `toDatabase` array structure.
+2.  **Configure Notification Class:**
+    - I will open `app/Notifications/ApplicationStatusUpdated.php` and define its structure. It will accept an `AdmissionApplication` in its constructor.
+    ```php
+    <?php
+    namespace App\Notifications;
 
-3.  **Dispatch Notifications:**
-    - In the `AdmissionService` (created in Phase 1), I will locate the logic where an application's status is updated and add the line: `$user->notify(new ApplicationStatusUpdated($application));`. This keeps business logic out of the controller.
+    use App\Models\AdmissionApplication;
+    use Illuminate\Bus\Queueable;
+    use Illuminate\Notifications\Notification;
+    use Illuminate\Contracts\Queue\ShouldQueue;
+    use Illuminate\Notifications\Messages\MailMessage;
+
+    class ApplicationStatusUpdated extends Notification
+    {
+        use Queueable;
+
+        protected $application;
+
+        public function __construct(AdmissionApplication $application)
+        {
+            $this->application = $application;
+        }
+
+        public function via($notifiable)
+        {
+            return ['database']; // We only need database notifications for now
+        }
+
+        public function toDatabase($notifiable)
+        {
+            return [
+                'application_id' => $this->application->id,
+                'status' => $this->application->status,
+                'message' => "Your application status has been updated to: {$this->application->status}",
+            ];
+        }
+    }
+    ```
+
+3.  **Dispatch Notifications from Service:**
+    - I will open the `app/Services/AdmissionService.php`.
+    - In the method responsible for updating an application's status (or create one if it doesn't exist), I will add the notification dispatch logic.
+    - The code will look like this: `$application->student->user->notify(new ApplicationStatusUpdated($application));`. This ensures our business logic remains cleanly separated.
 
 4.  **Create Notifications API:**
-    - I will create a `NotificationController` with `index` and `markAsRead` methods.
-    - I will add `GET /api/v1/notifications` and `POST /api/v1/notifications/{id}/read` to `routes/api.php`.
+    - I will create `app/Http/Controllers/Api/V1/NotificationController.php`.
+    - It will have two methods: `index` (to list unread notifications) and `markAsRead` (to mark a specific notification as read).
+    ```php
+    // In NotificationController.php
+    public function index(Request $request)
+    {
+        return $request->user()->unreadNotifications;
+    }
+
+    public function markAsRead(Request $request, $notificationId)
+    {
+        $notification = $request->user()->notifications()->findOrFail($notificationId);
+        $notification->markAsRead();
+        return response()->noContent();
+    }
+    ```
+    - I will add the corresponding routes to `routes/api.php`:
+    ```php
+    // In routes/api.php within the auth:sanctum group
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    ```
 
 **Testing Steps:**
 
@@ -187,8 +293,9 @@ These endpoints work normally and can be tested via API clients. They are marked
     - I will create `tests/Feature/Api/V1/NotificationTest.php`.
 
 2.  **Write Tests:**
-    - Test that a notification is created in the database when an application status changes.
-    - Test that the `/notifications` endpoint returns a user's unread notifications.
-    - Test that the `markAsRead` endpoint correctly updates the `read_at` timestamp.
+    - **Test Notification Creation:** I will write a test that updates an admission application's status and then asserts that a new notification record is created in the `notifications` table for the correct user. `Notification::fake()` will be very useful here.
+    - **Test Listing Notifications:** I will create a test that authenticates as a user, creates a few notifications for them, and then asserts that a `GET` request to `/api/v1/notifications` returns the correct unread notifications.
+    - **Test Marking as Read:** I will create a test that makes a `POST` request to `/api/v1/notifications/{id}/read` and asserts that the `read_at` column for that notification is no longer null in the database.
+    - **Test Authorization:** I will assert that a user cannot view or mark as read notifications belonging to another user.
 
 **🔍 CHECKPOINT:** Users must automatically receive a database notification for application updates and be able to manage them via the API. I will await your approval before committing. 

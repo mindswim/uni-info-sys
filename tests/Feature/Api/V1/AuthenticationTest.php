@@ -14,7 +14,11 @@ class AuthenticationTest extends TestCase
     public function test_api_endpoints_are_protected_by_auth_sanctum()
     {
         $response = $this->getJson('/api/v1/faculties');
-        $response->assertStatus(401); // Unauthorized
+        $response->assertStatus(401) // Unauthorized
+            ->assertJson([
+                'message' => 'Unauthenticated.'
+            ])
+            ->assertJsonStructure(['message']);
     }
 
     public function test_a_user_can_create_an_api_token()
@@ -45,8 +49,15 @@ class AuthenticationTest extends TestCase
             'device_name' => 'test-device',
         ]);
 
-        $response->assertStatus(422); // Validation Exception
-        $response->assertJsonValidationErrors('email');
+        $response->assertStatus(422) // Validation Exception
+            ->assertJson([
+                'message' => 'The given data was invalid.'
+            ])
+            ->assertJsonStructure([
+                'message',
+                'errors'
+            ])
+            ->assertJsonValidationErrors('email');
     }
 
     public function test_a_user_can_authenticate_with_a_valid_token()
@@ -67,6 +78,10 @@ class AuthenticationTest extends TestCase
             'Authorization' => 'Bearer invalid-token',
         ])->getJson('/api/v1/faculties');
 
-        $response->assertStatus(401); // Unauthorized
+        $response->assertStatus(401) // Unauthorized
+            ->assertJson([
+                'message' => 'Unauthenticated.'
+            ])
+            ->assertJsonStructure(['message']);
     }
 }

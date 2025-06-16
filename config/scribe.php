@@ -172,24 +172,7 @@ return [
         // You can override this by listing the groups, subgroups and endpoints here in the order you want them.
         // See https://scribe.knuckles.wtf/blog/laravel-v4#easier-sorting and https://scribe.knuckles.wtf/laravel/reference/config#order for details
         // Note: does not work for `external` docs types
-        'order' => [
-            'Authentication',
-            'Academic Hierarchy',
-            'Faculty Management',
-            'Department Management',
-            'Program Management',
-            'Academic Core',
-            'Term Management',
-            'Course Management',
-            'Physical Infrastructure',
-            'Building Management',
-            'Room Management',
-            'People Management',
-            'Staff Management',
-            'Academic Operations',
-            'Course Section Management',
-            'Enrollment Management',
-        ],
+        'order' => [],
     ],
 
     // Custom logo path. This will be used as the value of the src attribute for the <img> tag,

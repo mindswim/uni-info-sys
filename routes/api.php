@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\FacultyController;
 use App\Http\Controllers\Api\V1\DepartmentController;
 use App\Http\Controllers\Api\V1\ProgramController;
+use App\Http\Controllers\Api\V1\CourseController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -20,4 +21,5 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('faculties', FacultyController::class);
     Route::apiResource('departments', DepartmentController::class);
     Route::apiResource('programs', ProgramController::class);
+    Route::apiResource('courses', CourseController::class);
 }); 

@@ -997,4 +997,74 @@ For each task, the workflow will be:
     php artisan make:test Api/V1/ProgramApiTest
     ```
 
+### Task 15: Implement Course API Endpoints
+
+**Goal:** Create API endpoints for managing `Course` resources, including their prerequisites.
+
+1.  **Create Controller**:
+    ```bash
+    php artisan make:controller Api/V1/CourseController --api --model=Course
+    ```
+
+2.  **Create API Resource**:
+    ```bash
+    php artisan make:resource CourseResource
+    ```
+
+3.  **Define `CourseResource`**: This resource should handle nested relationships for the department and prerequisites.
+    ```php
+    <?php
+    // ...
+    class CourseResource extends JsonResource
+    {
+        public function toArray(Request $request): array
+        {
+            return [
+                'id' => $this->id,
+                'title' => $this->title,
+                'course_code' => $this->course_code,
+                'credits' => $this->credits,
+                'description' => $this->description,
+                'department' => new DepartmentResource($this->whenLoaded('department')),
+                'prerequisites' => CourseResource::collection($this->whenLoaded('prerequisites')),
+            ];
+        }
+    }
+    ```
+
+4.  **Implement Controller Methods**: In `app/Http/Controllers/Api/V1/CourseController.php`, implement the CRUD methods. Include filtering by `department_id`.
+    ```php
+    // Example for index() method
+    public function index(Request $request)
+    {
+        $query = Course::with(['department', 'prerequisites']);
+
+        if ($request->has('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+
+        return CourseResource::collection($query->paginate());
+    }
+    
+    // In store() and update(), you'll need logic to sync prerequisites.
+    // Example for store():
+    // $course = Course::create($validatedData);
+    // if (isset($validatedData['prerequisites'])) {
+    //     $course->prerequisites()->sync($validatedData['prerequisites']);
+    // }
+    ```
+
+5.  **Define API Routes**:
+    ```php
+    use App\Http\Controllers\Api\V1\CourseController;
+
+    Route::apiResource('v1/courses', CourseController::class);
+    ```
+
+6.  **Create Feature Test**:
+    ```bash
+    php artisan make:test Api/V1/CourseApiTest
+    ```
+    *   Include tests for filtering and for correctly attaching/detaching prerequisites.
+
 </rewritten_file> 

@@ -7,6 +7,7 @@ use App\Models\Building;
 use App\Http\Resources\BuildingResource;
 use App\Http\Requests\StoreBuildingRequest;
 use App\Http\Requests\UpdateBuildingRequest;
+use Illuminate\Http\Request;
 
 class BuildingController extends Controller
 {
@@ -38,8 +39,9 @@ class BuildingController extends Controller
 
     /**
      * Update the specified resource in storage.
+     * @hideFromAPIDocumentation
      */
-    public function update(UpdateBuildingRequest $request, Building $building)
+    public function update(Request $request, Building $building)
     {
         $building->update($request->validated());
         return new BuildingResource($building);

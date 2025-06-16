@@ -7,10 +7,18 @@ use App\Http\Resources\FacultyResource;
 use App\Models\Faculty;
 use Illuminate\Http\Request;
 
+/**
+ * @group "Faculty Management"
+ * @authenticated
+ *
+ * APIs for managing faculties.
+ */
 class FacultyController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * List all faculties.
+     * 
+     * @responseFile storage/responses/V1/faculties.index.json
      */
     public function index()
     {
@@ -19,6 +27,8 @@ class FacultyController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     * @bodyParam name string required The name of the faculty. Example: Faculty of Science
+     * @responseFile status=201 storage/responses/V1/faculty.json
      */
     public function store(Request $request)
     {
@@ -33,6 +43,8 @@ class FacultyController extends Controller
 
     /**
      * Display the specified resource.
+     * @urlParam faculty integer required The ID of the faculty.
+     * @responseFile storage/responses/V1/faculty.json
      */
     public function show(Faculty $faculty)
     {
@@ -41,6 +53,9 @@ class FacultyController extends Controller
 
     /**
      * Update the specified resource in storage.
+     * @urlParam faculty integer required The ID of the faculty.
+     * @bodyParam name string The name of the faculty. Example: Faculty of Applied Science
+     * @responseFile storage/responses/V1/faculty.json
      */
     public function update(Request $request, Faculty $faculty)
     {
@@ -55,6 +70,8 @@ class FacultyController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     * @urlParam faculty integer required The ID of the faculty.
+     * @response status=204
      */
     public function destroy(Faculty $faculty)
     {

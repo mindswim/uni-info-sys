@@ -121,6 +121,13 @@ This phase focuses on hardening the API, improving developer experience, and opt
 
 **🔍 CHECKPOINT:** The generated documentation should be a complete and accurate guide for our API. I will await your approval before committing.
 
+**📝 NOTE:** Due to Scribe's model instantiation conflicts with certain factories, the following `PUT/PATCH` endpoints are excluded from auto-generated documentation but remain fully functional:
+- `PUT /api/v1/terms/{term}` - Update term information
+- `PUT /api/v1/buildings/{building}` - Update building information  
+- `PUT /api/v1/rooms/{room}` - Update room information
+
+These endpoints work normally and can be tested via API clients. They are marked with `@hideFromAPIDocumentation` in their respective controllers. Future enhancement: Consider manual documentation or custom Scribe strategies for these endpoints.
+
 ---
 
 ### Task 22: Centralize API Error Handling

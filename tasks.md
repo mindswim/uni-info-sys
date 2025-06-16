@@ -773,4 +773,104 @@ This section focuses on creating the core data models that transform the applica
         }
         ```
 
+## Phase 2: API Layer Implementation
+
+With a robust and tested data model in place, this phase focuses on building a secure, efficient, and well-structured API to interact with the core university data. We will follow best practices, including using controllers for orchestration, form requests for validation, and API resources for transforming output.
+
+For each task, the workflow will be:
+1.  **Implement**: Write the code for the controller, resource, and routes.
+2.  **Test**: Create a feature test to validate the new endpoints.
+3.  **Commit & Push**: Once tests pass, commit the changes to version control.
+
+---
+
+### Task 12: Implement Faculty API Endpoints
+
+**Goal:** Create API endpoints for managing `Faculty` resources. This will allow clients to list, view, create, update, and delete faculties.
+
+1.  **Create Controller**: Generate a new API controller for the `Faculty` model.
+    ```bash
+    php artisan make:controller Api/V1/FacultyController --api --model=Faculty
+    ```
+
+2.  **Create API Resource**: Generate a resource to control the JSON output for the `Faculty` model.
+    ```bash
+    php artisan make:resource FacultyResource
+    ```
+
+3.  **Define `FacultyResource`**: Open `app/Http/Resources/FacultyResource.php` and define its structure.
+    ```php
+    <?php
+
+    namespace App\Http\Resources;
+
+    use Illuminate\Http\Request;
+    use Illuminate\Http\Resources\Json\JsonResource;
+
+    class FacultyResource extends JsonResource
+    {
+        public function toArray(Request $request): array
+        {
+            return [
+                'id' => $this->id,
+                'name' => $this->name,
+                // Include departments only when the relationship is loaded
+                'departments' => DepartmentResource::collection($this->whenLoaded('departments')),
+            ];
+        }
+    }
+    ```
+
+4.  **Implement Controller Methods**: In `app/Http/Controllers/Api/V1/FacultyController.php`, implement the CRUD methods. Use route model binding and the new `FacultyResource`.
+    ```php
+    // index() - List all faculties
+    public function index()
+    {
+        return FacultyResource::collection(Faculty::with('departments')->paginate());
+    }
+
+    // show() - Show a single faculty
+    public function show(Faculty $faculty)
+    {
+        return new FacultyResource($faculty->load('departments'));
+    }
+    
+    // store() - Create a new faculty (add validation with a FormRequest later)
+    public function store(Request $request)
+    {
+        $validated = $request->validate(['name' => 'required|string|unique:faculties|max:255']);
+        $faculty = Faculty::create($validated);
+        return response()->json(new FacultyResource($faculty), 201);
+    }
+    
+    // update() - Update a faculty
+    public function update(Request $request, Faculty $faculty)
+    {
+        $validated = $request->validate(['name' => 'sometimes|string|unique:faculties,name,'.$faculty->id.'|max:255']);
+        $faculty->update($validated);
+        return new FacultyResource($faculty);
+    }
+
+    // destroy() - Delete a faculty
+    public function destroy(Faculty $faculty)
+    {
+        $faculty->delete();
+        return response()->noContent();
+    }
+    ```
+
+5.  **Define API Routes**: Add the resource route to `routes/api.php`.
+    ```php
+    use App\Http\Controllers\Api\V1\FacultyController;
+
+    Route::apiResource('v1/faculties', FacultyController::class);
+    ```
+
+6.  **Create Feature Test**: Create a test file to validate the API endpoints.
+    ```bash
+    php artisan make:test Api/V1/FacultyApiTest
+    ```
+    *   Write tests for `GET /api/v1/faculties`, `GET /api/v1/faculties/{id}`, `POST /api/v1/faculties`, `PUT/PATCH /api/v1/faculties/{id}`, and `DELETE /api/v1/faculties/{id}`.
+    *   Ensure tests cover success cases, validation errors, and not found errors.
+
 </rewritten_file> 

@@ -8,9 +8,14 @@ class Program extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'department', 'degree_level', 'duration',
+        'name', 'department_id', 'degree_level', 'duration',
         'description', 'requirements', 'capacity'
     ];
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
 
     public function programChoices()
     {

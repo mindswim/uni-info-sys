@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Department;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProgramFactory extends Factory
@@ -17,13 +18,7 @@ class ProgramFactory extends Factory
                 'Psychology',
                 'Medicine'
             ]),
-            'department' => $this->faker->randomElement([
-                'Engineering',
-                'Business',
-                'Science',
-                'Arts',
-                'Medicine'
-            ]),
+            'department_id' => Department::factory(),
             'degree_level' => $this->faker->randomElement(['Bachelor', 'Master', 'PhD']),
             'duration' => $this->faker->numberBetween(1, 5),
             'description' => $this->faker->paragraph(),

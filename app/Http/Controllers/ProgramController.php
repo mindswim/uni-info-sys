@@ -10,7 +10,7 @@ class ProgramController extends Controller
 {
     public function index()
     {
-        $programs = Program::paginate(10);
+        $programs = Program::with('department.faculty')->paginate(10);
 
         return Inertia::render('Programs/Index', [
             'programs' => $programs,
@@ -21,7 +21,7 @@ class ProgramController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'department' => 'required|string|max:255',
+            'department_id' => 'required|exists:departments,id',
             'degree_level' => 'required|string',
             'duration' => 'required|integer',
             'description' => 'required|string',
@@ -36,7 +36,7 @@ class ProgramController extends Controller
 
     public function show(Program $program)
     {
-        $program->load('programChoices');
+        $program->load(['programChoices', 'department.faculty']);
 
         return Inertia::render('Programs/Show', [
             'program' => $program,
@@ -47,7 +47,7 @@ class ProgramController extends Controller
     {
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
-            'department' => 'sometimes|string|max:255',
+            'department_id' => 'sometimes|exists:departments,id',
             'degree_level' => 'sometimes|string',
             'duration' => 'sometimes|integer',
             'description' => 'sometimes|string',

@@ -873,4 +873,70 @@ For each task, the workflow will be:
     *   Write tests for `GET /api/v1/faculties`, `GET /api/v1/faculties/{id}`, `POST /api/v1/faculties`, `PUT/PATCH /api/v1/faculties/{id}`, and `DELETE /api/v1/faculties/{id}`.
     *   Ensure tests cover success cases, validation errors, and not found errors.
 
+---
+
+### Task 13: Implement Department API Endpoints
+
+**Goal:** Create API endpoints for managing `Department` resources.
+
+1.  **Create Controller**: Generate a new API controller for the `Department` model.
+    ```bash
+    php artisan make:controller Api/V1/DepartmentController --api --model=Department
+    ```
+
+2.  **Update `DepartmentResource`**: Open `app/Http/Resources/DepartmentResource.php` and add the related faculty and programs.
+    ```php
+    <?php
+
+    namespace App\Http\Resources;
+
+    use Illuminate\Http\Request;
+    use Illuminate\Http\Resources\Json\JsonResource;
+
+    class DepartmentResource extends JsonResource
+    {
+        public function toArray(Request $request): array
+        {
+            return [
+                'id' => $this->id,
+                'name' => $this->name,
+                'faculty' => new FacultyResource($this->whenLoaded('faculty')),
+                'programs' => ProgramResource::collection($this->whenLoaded('programs')),
+            ];
+        }
+    }
+    ```
+    *(Note: This requires creating a `ProgramResource` as well)*
+
+3.  **Implement Controller Methods**: In `app/Http/Controllers/Api/V1/DepartmentController.php`, implement the CRUD methods.
+    ```php
+    // Example for index() method
+    public function index(Request $request)
+    {
+        $query = Department::with('faculty', 'programs');
+
+        // Allow filtering by faculty
+        if ($request->has('faculty_id')) {
+            $query->where('faculty_id', $request->faculty_id);
+        }
+
+        return DepartmentResource::collection($query->paginate());
+    }
+    
+    // Implement store(), show(), update(), destroy() similarly, including validation.
+    ```
+
+4.  **Define API Routes**: Add the resource route to `routes/api.php`.
+    ```php
+    use App\Http\Controllers\Api\V1\DepartmentController;
+
+    Route::apiResource('v1/departments', DepartmentController::class);
+    ```
+
+5.  **Create Feature Test**: Create a test file to validate the API endpoints.
+    ```bash
+    php artisan make:test Api/V1/DepartmentApiTest
+    ```
+    *   Write tests for all CRUD operations, including the `faculty_id` filter.
+
 </rewritten_file> 

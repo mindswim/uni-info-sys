@@ -11,6 +11,7 @@ use App\Models\Enrollment;
 use App\Models\Student;
 use App\Services\EnrollmentService;
 use App\Filters\EnrollmentFilter;
+use App\Jobs\ProcessWaitlistPromotion;
 use App\Exceptions\CourseSectionUnavailableException;
 use App\Exceptions\DuplicateEnrollmentException;
 use App\Exceptions\EnrollmentCapacityExceededException;
@@ -140,7 +141,7 @@ class EnrollmentController extends Controller
 
         // Handle capacity opening if enrollment was withdrawn
         if (in_array($enrollment->status, ['withdrawn', 'completed']) && $oldStatus === 'enrolled') {
-            $this->enrollmentService->promoteFromWaitlist($enrollment->courseSection);
+            ProcessWaitlistPromotion::dispatch($enrollment->courseSection);
         }
 
         // Reload relationships
@@ -178,7 +179,7 @@ class EnrollmentController extends Controller
 
         // If student was enrolled, try to promote someone from waitlist
         if ($wasEnrolled) {
-            $this->enrollmentService->promoteFromWaitlist($courseSection);
+            ProcessWaitlistPromotion::dispatch($courseSection);
         }
 
         return response()->json([
@@ -207,7 +208,7 @@ class EnrollmentController extends Controller
 
         // If student was enrolled, try to promote someone from waitlist
         if ($wasEnrolled) {
-            $this->enrollmentService->promoteFromWaitlist($courseSection);
+            ProcessWaitlistPromotion::dispatch($courseSection);
         }
 
         return response()->json([
@@ -239,7 +240,7 @@ class EnrollmentController extends Controller
         ]);
 
         // Try to promote someone from waitlist
-        $this->enrollmentService->promoteFromWaitlist($enrollment->courseSection);
+        ProcessWaitlistPromotion::dispatch($enrollment->courseSection);
 
         return response()->json([
             'message' => 'Enrollment marked as completed with grade.',

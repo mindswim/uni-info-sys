@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\SendApplicationStatusNotification;
 use App\Models\Student;
 use App\Models\AdmissionApplication;
 use App\Notifications\ApplicationStatusUpdated;
@@ -50,10 +51,10 @@ class AdmissionService
         
         // Only send notification if status actually changed
         if ($oldStatus !== $newStatus) {
-            // Dispatch notification to the student's user
-            $application->student->user->notify(new ApplicationStatusUpdated($application));
+            // Dispatch notification job asynchronously
+            SendApplicationStatusNotification::dispatch($application);
             
-            Log::info("Application {$application->id} status updated from {$oldStatus} to {$newStatus}. Notification sent to user {$application->student->user->id}.");
+            Log::info("Application {$application->id} status updated from {$oldStatus} to {$newStatus}. Notification job dispatched.");
         }
         
         return $application;

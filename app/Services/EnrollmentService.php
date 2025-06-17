@@ -6,6 +6,7 @@ use App\Exceptions\CourseSectionUnavailableException;
 use App\Exceptions\DuplicateEnrollmentException;
 use App\Exceptions\EnrollmentCapacityExceededException;
 use App\Exceptions\StudentNotActiveException;
+use App\Jobs\SendEnrollmentConfirmation;
 use App\Models\CourseSection;
 use App\Models\Enrollment;
 use App\Models\Student;
@@ -56,6 +57,10 @@ class EnrollmentService
                 'status' => $status,
             ]);
 
+            // Dispatch notification job for enrollment confirmation
+            $confirmationType = $status === 'waitlisted' ? 'waitlisted' : 'enrolled';
+            SendEnrollmentConfirmation::dispatch($enrollment, $confirmationType);
+
             return $enrollment;
         });
     }
@@ -96,8 +101,8 @@ class EnrollmentService
                     'course_section_id' => $courseSection->id,
                 ]);
 
-                // Here you could send a notification to the student
-                // NotificationService::notifyWaitlistPromotion($nextWaitlisted);
+                // Send notification to the student about waitlist promotion
+                SendEnrollmentConfirmation::dispatch($nextWaitlisted, 'promoted');
 
                 return $nextWaitlisted;
             }

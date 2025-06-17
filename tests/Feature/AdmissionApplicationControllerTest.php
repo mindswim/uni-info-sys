@@ -201,9 +201,14 @@ class AdmissionApplicationControllerTest extends TestCase
         // Verify the application was created in the database
         $this->assertDatabaseHas('admission_applications', [
             'student_id' => $this->student->id,
+            'status' => 'draft'
+        ]);
+
+        // Verify the term was created with correct academic_year and semester
+        $this->assertDatabaseHas('terms', [
             'academic_year' => '2024-2025',
             'semester' => 'Fall',
-            'status' => 'draft'
+            'name' => 'Fall 2024-2025'
         ]);
     }
 

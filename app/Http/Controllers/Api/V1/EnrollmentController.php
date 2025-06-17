@@ -10,6 +10,7 @@ use App\Models\CourseSection;
 use App\Models\Enrollment;
 use App\Models\Student;
 use App\Services\EnrollmentService;
+use App\Filters\EnrollmentFilter;
 use App\Exceptions\CourseSectionUnavailableException;
 use App\Exceptions\DuplicateEnrollmentException;
 use App\Exceptions\EnrollmentCapacityExceededException;
@@ -19,8 +20,10 @@ use Illuminate\Http\JsonResponse;
 
 class EnrollmentController extends Controller
 {
-    public function __construct(private EnrollmentService $enrollmentService)
-    {
+    public function __construct(
+        private EnrollmentService $enrollmentService,
+        private EnrollmentFilter $enrollmentFilter
+    ) {
     }
     /**
      * Display a listing of enrollments with filtering
@@ -37,43 +40,8 @@ class EnrollmentController extends Controller
             'courseSection.room.building'
         ]);
 
-        // Apply filters
-        if ($request->filled('student_id')) {
-            $query->where('student_id', $request->student_id);
-        }
-
-        if ($request->filled('course_section_id')) {
-            $query->where('course_section_id', $request->course_section_id);
-        }
-
-        if ($request->filled('status')) {
-            $statuses = is_array($request->status) ? $request->status : [$request->status];
-            $query->whereIn('status', $statuses);
-        }
-
-        if ($request->filled('term_id')) {
-            $query->whereHas('courseSection', function ($q) use ($request) {
-                $q->where('term_id', $request->term_id);
-            });
-        }
-
-        if ($request->filled('course_id')) {
-            $query->whereHas('courseSection', function ($q) use ($request) {
-                $q->where('course_id', $request->course_id);
-            });
-        }
-
-        if ($request->filled('department_id')) {
-            $query->whereHas('courseSection.course', function ($q) use ($request) {
-                $q->where('department_id', $request->department_id);
-            });
-        }
-
-        if ($request->filled('instructor_id')) {
-            $query->whereHas('courseSection', function ($q) use ($request) {
-                $q->where('instructor_id', $request->instructor_id);
-            });
-        }
+        // Apply filters using the filter class
+        $query = $this->enrollmentFilter->apply($query, $request->all());
 
         // Add enrollment counts to course sections
         $query->with(['courseSection' => function ($q) {

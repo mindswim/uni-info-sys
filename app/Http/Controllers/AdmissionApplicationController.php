@@ -8,6 +8,7 @@ use App\Services\AdmissionService;
 use App\Http\Resources\AdmissionApplicationResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Models\Term;
 
 class AdmissionApplicationController extends Controller
 {
@@ -36,16 +37,31 @@ class AdmissionApplicationController extends Controller
         // Validate required fields for draft application
         $validated = $request->validate([
             'academic_year' => 'required|string',
-            'semester' => 'required|string',
+            'semester' => 'required|string|in:Fall,Spring,Summer',
         ]);
 
-        // Create draft application using the service
-        $application = $admissionService->createDraftApplication($student, $validated);
+        // Find or create the term based on academic_year and semester
+        $term = Term::firstOrCreate([
+            'academic_year' => $validated['academic_year'],
+            'semester' => $validated['semester'],
+        ], [
+            // Default values for new terms
+            'name' => $validated['semester'] . ' ' . $validated['academic_year'],
+            'start_date' => now()->addDays(30)->toDateString(),
+            'end_date' => now()->addDays(120)->toDateString(),
+        ]);
 
-        // Return the created application wrapped in a resource
-        return (new AdmissionApplicationResource($application))
-            ->response()
-            ->setStatusCode(201);
+        // Create draft application with term_id instead of academic_year/semester
+        $application = $admissionService->createDraftApplication($student, [
+            'term_id' => $term->id,
+        ]);
+
+        // Load the term relationship for response
+        $application->load('term');
+
+        return response()->json([
+            'data' => new AdmissionApplicationResource($application)
+        ], 201);
     }
 
     public function index(Student $student)

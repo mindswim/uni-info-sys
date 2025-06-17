@@ -16,8 +16,8 @@ class AdmissionApplicationResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'academic_year' => $this->academic_year,
-            'semester' => $this->semester,
+            'academic_year' => $this->term?->academic_year,
+            'semester' => $this->term?->semester,
             'status' => $this->status,
             'application_date' => $this->application_date->format('Y-m-d H:i:s'),
             'comments' => $this->comments,

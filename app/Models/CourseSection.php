@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class CourseSection extends Model
+class CourseSection extends Model implements Auditable
 {
     use HasFactory;
+    use \OwenIt\Auditing\Auditable;
     
     protected $fillable = ['course_id', 'term_id', 'instructor_id', 'room_id', 'capacity', 'schedule_days', 'start_time', 'end_time', 'status'];
 

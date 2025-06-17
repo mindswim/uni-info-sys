@@ -22,6 +22,8 @@ class FacultyController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Faculty::class);
+
         return FacultyResource::collection(Faculty::with('departments')->paginate(10));
     }
 
@@ -32,6 +34,8 @@ class FacultyController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Faculty::class);
+
         $validated = $request->validate([
             'name' => 'required|string|unique:faculties|max:255'
         ]);
@@ -48,6 +52,8 @@ class FacultyController extends Controller
      */
     public function show(Faculty $faculty)
     {
+        $this->authorize('view', $faculty);
+
         return new FacultyResource($faculty->load('departments'));
     }
 
@@ -59,6 +65,8 @@ class FacultyController extends Controller
      */
     public function update(Request $request, Faculty $faculty)
     {
+        $this->authorize('update', $faculty);
+
         $validated = $request->validate([
             'name' => 'sometimes|string|unique:faculties,name,'.$faculty->id.'|max:255'
         ]);
@@ -75,6 +83,8 @@ class FacultyController extends Controller
      */
     public function destroy(Faculty $faculty)
     {
+        $this->authorize('delete', $faculty);
+
         $faculty->delete();
 
         return response()->noContent();

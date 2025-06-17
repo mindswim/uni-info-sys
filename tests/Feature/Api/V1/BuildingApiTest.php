@@ -5,6 +5,7 @@ namespace Tests\Feature\Api\V1;
 use App\Models\Building;
 use App\Models\Room;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -18,7 +19,11 @@ class BuildingApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        
+        // Create admin user with admin role
         $this->admin = User::factory()->create();
+        $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
+        $this->admin->roles()->attach($adminRole);
     }
     
     public function test_can_get_all_buildings_paginated_with_rooms()

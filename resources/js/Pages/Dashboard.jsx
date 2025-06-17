@@ -1,165 +1,149 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export default function Dashboard() {
-    // Mock data - replace with real data from your backend
-    const [notifications] = useState(2);
-    const studentInfo = {
-        name: "Sarah Johnson",
-        id: "STU2024001",
-        status: "Applicant",
-        applicationStage: "In Progress",
-        term: "Fall 2024",
-        deadlineDate: "Nov 15, 2024"
+// A reusable card component for the dashboard grid
+const DashboardCard = ({ title, children, className = '' }) => (
+    <section className={`bg-white rounded-md p-6 shadow ${className}`}>
+        <h2 className="text-xl font-semibold mb-4">{title}</h2>
+        {children}
+    </section>
+);
+
+// A component for displaying a single status item
+const StatusItem = ({ text, status }) => {
+    const statusClasses = {
+        complete: 'text-green-600',
+        pending: 'text-blue-600',
+        'action-needed': 'text-red-600',
+        'not-started': 'text-gray-600',
     };
+    return (
+        <li className={`py-2 border-b border-gray-200 ${statusClasses[status] || 'text-gray-600'}`}>
+            {text}
+        </li>
+    );
+};
 
-    const applicationProgress = [
-        { status: "complete", text: "Personal Information: Complete" },
-        { status: "pending", text: "Academic History: In Progress" },
-        { status: "action-needed", text: "Documents: Action Needed" },
-        { status: "not-started", text: "Program Selection: Not Started" }
-    ];
+export default function Dashboard({ auth }) {
+    // State to hold dynamic data fetched from the backend
+    const [studentInfo, setStudentInfo] = useState(null);
+    const [applicationProgress, setApplicationProgress] = useState([]);
+    const [recentActivity, setRecentActivity] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const recentActivity = [
-        { time: "Today 10:30 AM", text: "Document uploaded: Transcript" },
-        { time: "Yesterday 2:20 PM", text: "Profile information updated" },
-        { time: "Oct 24, 9:15 AM", text: "Started application process" }
-    ];
+    useEffect(() => {
+        // This effect runs when the component mounts to fetch dashboard data.
+        // In a real application, you would make an API call to your backend here.
+        // For now, we will simulate this by using the authenticated user data
+        // and some example dynamic data.
 
-    const messages = [
-        {
-            sender: "Admissions Office",
-            date: "Oct 26",
-            message: "Document verification required: Please submit official transcripts",
-            unread: true
-        },
-        {
-            sender: "Financial Aid",
-            date: "Oct 24",
-            message: "Scholarship information update available",
-            unread: false
-        }
-    ];
+        const fetchDashboardData = async () => {
+            try {
+                setLoading(true);
+                // In a real scenario, you'd fetch this data from an API endpoint
+                // e.g., const response = await axios.get('/api/v1/dashboard-data');
+                // const data = response.data;
+                
+                // For demonstration, we'll use the user from Inertia's `auth` prop
+                // and create some sample data.
+                const user = auth.user;
+                
+                // You would typically fetch student-specific info from your backend
+                // based on the logged-in user's ID.
+                setStudentInfo({
+                    name: user.name,
+                    id: user.id, // Or a student-specific ID
+                    status: 'Applicant', // This would come from your backend
+                    applicationStage: 'In Progress',
+                    term: 'Fall 2024',
+                    deadlineDate: 'Dec 1, 2024',
+                });
+                
+                // This data would also come from your backend
+                setApplicationProgress([
+                    { status: 'complete', text: 'Personal Information: Complete' },
+                    { status: 'pending', text: 'Academic History: In Progress' },
+                    { status: 'action-needed', text: 'Documents: Action Needed' },
+                ]);
+
+                setRecentActivity([
+                    { time: "Today 11:00 AM", text: "Logged in successfully." },
+                    { time: "Yesterday 4:00 PM", text: "Viewed program requirements." },
+                ]);
+                
+                setError(null);
+            } catch (err) {
+                console.error("Failed to fetch dashboard data:", err);
+                setError("Could not load dashboard information. Please try again later.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, [auth.user]); // Re-run effect if the user changes
 
     return (
-        <AuthenticatedLayout>
+        <AuthenticatedLayout
+            user={auth.user}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>}
+        >
             <Head title="Dashboard" />
 
-            {/* User Controls */}
-            <div className="bg-gray-200 px-4 py-2 flex justify-end items-center gap-4">
-                <span>{studentInfo.name} - ID: {studentInfo.id}</span>
-                <a href="#notifications" className="bg-red-500 text-white px-2 py-1 rounded-full text-sm">
-                    {notifications}
-                </a>
-                <button className="bg-blue-800 text-white px-3 py-1 rounded">Help</button>
-            </div>
-
-            {/* Status Banner */}
-            <div className="bg-white p-6 m-4 rounded-md shadow">
-                <div className="user-status">
-                    <h2 className="text-xl font-semibold">Current Status: {studentInfo.status}</h2>
-                    <p>Application Stage: {studentInfo.applicationStage}</p>
-                    <p>Term: {studentInfo.term}</p>
-                </div>
-                <div className="bg-amber-50 text-amber-800 border-l-4 border-amber-500 p-4 rounded-md mt-4">
-                    Action Required: Complete Application by {studentInfo.deadlineDate}
-                </div>
-            </div>
-
-            {/* Main Dashboard Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 p-4 max-w-7xl mx-auto">
-                {/* Quick Actions Section */}
-                <section className="bg-white rounded-md p-6 shadow">
-                    <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-                    <div className="flex flex-col md:flex-row gap-4 mb-6">
-                        <a href="#continue-app" className="bg-blue-800 text-white px-6 py-3 rounded-md text-center font-medium">
-                            Continue Application
-                        </a>
-                        <a href="#documents" className="bg-gray-200 text-gray-700 px-6 py-3 rounded-md text-center font-medium">
-                            Upload Documents
-                        </a>
-                        <a href="#requirements" className="bg-gray-200 text-gray-700 px-6 py-3 rounded-md text-center font-medium">
-                            View Requirements
-                        </a>
-                    </div>
-
-                    <h3 className="font-semibold mb-3">Application Progress</h3>
-                    <ul className="space-y-2">
-                        {applicationProgress.map((item, index) => (
-                            <li key={index} className={`py-2 border-b border-gray-200 ${
-                                item.status === 'complete' ? 'text-green-600' :
-                                item.status === 'pending' ? 'text-blue-600' :
-                                item.status === 'action-needed' ? 'text-red-600' :
-                                'text-gray-600'
-                            }`}>
-                                {item.text}
-                            </li>
-                        ))}
-                    </ul>
-                </section>
-
-                {/* Recent Activity Section */}
-                <section className="bg-white rounded-md p-6 shadow">
-                    <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-                    <ul className="space-y-4">
-                        {recentActivity.map((activity, index) => (
-                            <li key={index} className="border-b border-gray-200 pb-2">
-                                <time className="text-sm text-gray-600">{activity.time}</time>
-                                <p>{activity.text}</p>
-                            </li>
-                        ))}
-                    </ul>
-                    <a href="#all-activity" className="block text-right text-blue-800 text-sm mt-4">
-                        View All Activity →
-                    </a>
-                </section>
-
-                {/* Messages Section */}
-                <section className="bg-white rounded-md p-6 shadow">
-                    <h2 className="text-xl font-semibold mb-4">Messages</h2>
-                    <ul className="space-y-4">
-                        {messages.map((message, index) => (
-                            <li key={index} className={`${message.unread ? 'bg-blue-50 p-2 rounded' : ''} border-b border-gray-200 pb-2`}>
-                                <div className="flex justify-between text-sm text-gray-600">
-                                    <span>{message.sender}</span>
-                                    <time>{message.date}</time>
+            <div className="py-12">
+                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    {loading && <p>Loading dashboard...</p>}
+                    {error && <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">{error}</div>}
+                    
+                    {!loading && !error && studentInfo && (
+                        <>
+                            {/* Status Banner */}
+                            <div className="bg-white p-6 mb-8 rounded-md shadow">
+                                <h2 className="text-2xl font-semibold">Welcome, {studentInfo.name}!</h2>
+                                <p className="text-gray-600">Current Status: {studentInfo.status} | Application Stage: {studentInfo.applicationStage}</p>
+                                <div className="mt-4 bg-yellow-100 text-yellow-800 border-l-4 border-yellow-500 p-4 rounded-md">
+                                    Action Required: Complete Application by {studentInfo.deadlineDate}
                                 </div>
-                                <p>{message.message}</p>
-                            </li>
-                        ))}
-                    </ul>
-                    <a href="#inbox" className="block text-right text-blue-800 text-sm mt-4">
-                        View All Messages →
-                    </a>
-                </section>
+                            </div>
 
-                {/* Quick Links Section */}
-                <section className="bg-white rounded-md p-6 shadow">
-                    <h2 className="text-xl font-semibold mb-4">Quick Links</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <h3 className="text-blue-800 border-b-2 border-gray-200 pb-2 mb-3">
-                                Application
-                            </h3>
-                            <ul className="space-y-2">
-                                <li><a href="#app-status" className="text-gray-700 hover:text-blue-800">Application Status</a></li>
-                                <li><a href="#missing-items" className="text-gray-700 hover:text-blue-800">Missing Items</a></li>
-                                <li><a href="#requirements" className="text-gray-700 hover:text-blue-800">Requirements</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h3 className="text-blue-800 border-b-2 border-gray-200 pb-2 mb-3">
-                                Resources
-                            </h3>
-                            <ul className="space-y-2">
-                                <li><a href="#guide" className="text-gray-700 hover:text-blue-800">Application Guide</a></li>
-                                <li><a href="#faq" className="text-gray-700 hover:text-blue-800">FAQ</a></li>
-                                <li><a href="#contact" className="text-gray-700 hover:text-blue-800">Contact Support</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
+                            {/* Main Dashboard Grid */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <DashboardCard title="Quick Actions">
+                                    <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                                        <a href="#continue" className="bg-blue-600 text-white px-6 py-3 rounded-md text-center font-medium hover:bg-blue-700">
+                                            Continue Application
+                                        </a>
+                                        <a href="#upload" className="bg-gray-200 text-gray-800 px-6 py-3 rounded-md text-center font-medium hover:bg-gray-300">
+                                            Upload Documents
+                                        </a>
+                                    </div>
+                                    <h3 className="font-semibold mb-3 text-gray-700">Application Progress</h3>
+                                    <ul className="space-y-2">
+                                        {applicationProgress.map((item, index) => (
+                                            <StatusItem key={index} {...item} />
+                                        ))}
+                                    </ul>
+                                </DashboardCard>
+                                
+                                <DashboardCard title="Recent Activity">
+                                    <ul className="space-y-4">
+                                        {recentActivity.map((activity, index) => (
+                                            <li key={index} className="border-b border-gray-200 pb-2">
+                                                <time className="text-sm text-gray-500">{activity.time}</time>
+                                                <p className="text-gray-800">{activity.text}</p>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <a href="#all-activity" className="block text-right text-blue-600 hover:underline text-sm mt-4">
+                                        View All Activity →
+                                    </a>
+                                </DashboardCard>
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
         </AuthenticatedLayout>
     );

@@ -19,6 +19,8 @@ class EnrollmentController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $this->authorize('viewAny', Enrollment::class);
+
         $query = Enrollment::with([
             'student.user',
             'courseSection.course.department',
@@ -90,6 +92,8 @@ class EnrollmentController extends Controller
      */
     public function store(StoreEnrollmentRequest $request): JsonResponse
     {
+        $this->authorize('create', Enrollment::class);
+
         // Get all validated data including fields added via merge()
         $data = $request->only(['student_id', 'course_section_id', 'status']);
         
@@ -131,6 +135,8 @@ class EnrollmentController extends Controller
      */
     public function show(Enrollment $enrollment): JsonResponse
     {
+        $this->authorize('view', $enrollment);
+
         $enrollment->load([
             'student.user',
             'courseSection.course.department',
@@ -154,6 +160,8 @@ class EnrollmentController extends Controller
      */
     public function update(UpdateEnrollmentRequest $request, Enrollment $enrollment): JsonResponse
     {
+        $this->authorize('update', $enrollment);
+
         $validated = $request->validated();
         
         $oldStatus = $enrollment->status;
@@ -194,6 +202,8 @@ class EnrollmentController extends Controller
      */
     public function destroy(Enrollment $enrollment): JsonResponse
     {
+        $this->authorize('delete', $enrollment);
+
         $wasEnrolled = $enrollment->status === 'enrolled';
         $courseSection = $enrollment->courseSection;
         
@@ -215,6 +225,8 @@ class EnrollmentController extends Controller
      */
     public function withdraw(Enrollment $enrollment): JsonResponse
     {
+        $this->authorize('update', $enrollment);
+
         if (in_array($enrollment->status, ['withdrawn', 'completed'])) {
             return response()->json([
                 'message' => 'Cannot withdraw from this enrollment.',
@@ -242,6 +254,8 @@ class EnrollmentController extends Controller
      */
     public function complete(Enrollment $enrollment, Request $request): JsonResponse
     {
+        $this->authorize('update', $enrollment);
+
         if ($enrollment->status !== 'enrolled') {
             return response()->json([
                 'message' => 'Cannot complete this enrollment.',
@@ -271,6 +285,8 @@ class EnrollmentController extends Controller
      */
     public function byStudent(Student $student, Request $request): JsonResponse
     {
+        $this->authorize('view', $student);
+
         $query = $student->enrollments()->with([
             'student.user',
             'courseSection.course.department',
@@ -317,6 +333,8 @@ class EnrollmentController extends Controller
      */
     public function byCourseSection(CourseSection $courseSection, Request $request): JsonResponse
     {
+        $this->authorize('view', $courseSection);
+
         $query = $courseSection->enrollments()->with([
             'student.user',
         ]);

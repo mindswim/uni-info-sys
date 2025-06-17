@@ -2,30 +2,30 @@
 
 namespace App\Policies;
 
-use App\Models\AcademicRecord;
+use App\Models\Enrollment;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class AcademicRecordPolicy
+class EnrollmentPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        // Admins can view all, students can view their own
+        // Admin/staff can view all enrollments, students can view their own
         return $user->hasRole('admin') || $user->hasRole('staff') || $user->hasRole('student');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, AcademicRecord $academicRecord): bool
+    public function view(User $user, Enrollment $enrollment): bool
     {
-        // Admin/staff can view any record, student can view their own
+        // Admin/staff can view any enrollment, student can view their own
         return $user->hasRole('admin') || 
                $user->hasRole('staff') || 
-               ($user->hasRole('student') && $user->id === $academicRecord->student->user_id);
+               ($user->hasRole('student') && $user->id === $enrollment->student->user_id);
     }
 
     /**
@@ -33,34 +33,36 @@ class AcademicRecordPolicy
      */
     public function create(User $user): bool
     {
-        // Admin, staff, and students can create academic records
+        // Admin, staff, and students can create enrollments
         return $user->hasRole('admin') || $user->hasRole('staff') || $user->hasRole('student');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, AcademicRecord $academicRecord): bool
+    public function update(User $user, Enrollment $enrollment): bool
     {
-        // Admin/staff can update any, student can update their own
+        // Admin/staff can update any enrollment, student can update their own
         return $user->hasRole('admin') || 
                $user->hasRole('staff') || 
-               ($user->hasRole('student') && $user->id === $academicRecord->student->user_id);
+               ($user->hasRole('student') && $user->id === $enrollment->student->user_id);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, AcademicRecord $academicRecord): bool
+    public function delete(User $user, Enrollment $enrollment): bool
     {
-        // Only admin/staff can delete records
-        return $user->hasRole('admin') || $user->hasRole('staff');
+        // Admin/staff can delete any, student can withdraw from their own enrollment
+        return $user->hasRole('admin') || 
+               $user->hasRole('staff') || 
+               ($user->hasRole('student') && $user->id === $enrollment->student->user_id);
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, AcademicRecord $academicRecord): bool
+    public function restore(User $user, Enrollment $enrollment): bool
     {
         // Only admin can restore
         return $user->hasRole('admin');
@@ -69,7 +71,7 @@ class AcademicRecordPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, AcademicRecord $academicRecord): bool
+    public function forceDelete(User $user, Enrollment $enrollment): bool
     {
         // Only admin can force delete
         return $user->hasRole('admin');

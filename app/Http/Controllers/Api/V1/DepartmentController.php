@@ -14,6 +14,8 @@ class DepartmentController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Department::class);
+
         $query = Department::with(['faculty', 'programs']);
 
         if ($request->has('faculty_id')) {
@@ -28,6 +30,8 @@ class DepartmentController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Department::class);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'faculty_id' => 'required|exists:faculties,id'
@@ -35,7 +39,7 @@ class DepartmentController extends Controller
 
         $department = Department::create($validated);
 
-        return new DepartmentResource($department);
+        return new DepartmentResource($department->load('faculty'));
     }
 
     /**
@@ -43,6 +47,8 @@ class DepartmentController extends Controller
      */
     public function show(Department $department)
     {
+        $this->authorize('view', $department);
+
         return new DepartmentResource($department->load(['faculty', 'programs']));
     }
 
@@ -51,6 +57,8 @@ class DepartmentController extends Controller
      */
     public function update(Request $request, Department $department)
     {
+        $this->authorize('update', $department);
+
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'faculty_id' => 'sometimes|exists:faculties,id'
@@ -58,7 +66,7 @@ class DepartmentController extends Controller
 
         $department->update($validated);
 
-        return new DepartmentResource($department);
+        return new DepartmentResource($department->load('faculty'));
     }
 
     /**
@@ -66,6 +74,8 @@ class DepartmentController extends Controller
      */
     public function destroy(Department $department)
     {
+        $this->authorize('delete', $department);
+
         $department->delete();
 
         return response()->noContent();

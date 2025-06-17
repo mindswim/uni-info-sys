@@ -19,10 +19,16 @@ class StaffController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Staff::class);
+
         $query = Staff::with(['user', 'department']);
 
         if ($request->has('department_id')) {
             $query->where('department_id', $request->department_id);
+        }
+
+        if ($request->has('position')) {
+            $query->where('position', $request->position);
         }
 
         return StaffResource::collection($query->paginate(10));
@@ -33,6 +39,8 @@ class StaffController extends Controller
      */
     public function store(StoreStaffRequest $request)
     {
+        $this->authorize('create', Staff::class);
+
         $validated = $request->validated();
 
         $staff = DB::transaction(function () use ($validated) {
@@ -61,6 +69,8 @@ class StaffController extends Controller
      */
     public function show(Staff $staff)
     {
+        $this->authorize('view', $staff);
+
         $staff->load(['user', 'department']);
         return new StaffResource($staff);
     }
@@ -70,6 +80,8 @@ class StaffController extends Controller
      */
     public function update(UpdateStaffRequest $request, Staff $staff)
     {
+        $this->authorize('update', $staff);
+
         $validated = $request->validated();
 
         DB::transaction(function () use ($validated, $staff) {
@@ -89,6 +101,8 @@ class StaffController extends Controller
      */
     public function destroy(Staff $staff)
     {
+        $this->authorize('delete', $staff);
+
         DB::transaction(function () use ($staff) {
             // Workaround for failing cascade delete in test environment
             $user = $staff->user;

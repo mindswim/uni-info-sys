@@ -16,6 +16,8 @@ class CourseController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Course::class);
+
         $query = Course::with(['department', 'prerequisites']);
 
         if ($request->has('department_id')) {
@@ -30,6 +32,8 @@ class CourseController extends Controller
      */
     public function store(StoreCourseRequest $request)
     {
+        $this->authorize('create', Course::class);
+
         $validated = $request->validated();
         
         $course = Course::create($validated);
@@ -48,6 +52,8 @@ class CourseController extends Controller
      */
     public function show(Course $course)
     {
+        $this->authorize('view', $course);
+
         $course->load(['department', 'prerequisites']);
         return new CourseResource($course);
     }
@@ -57,6 +63,8 @@ class CourseController extends Controller
      */
     public function update(UpdateCourseRequest $request, Course $course)
     {
+        $this->authorize('update', $course);
+
         $validated = $request->validated();
         
         $course->update($validated);
@@ -75,6 +83,8 @@ class CourseController extends Controller
      */
     public function destroy(Course $course)
     {
+        $this->authorize('delete', $course);
+
         $course->delete();
         return response()->noContent();
     }

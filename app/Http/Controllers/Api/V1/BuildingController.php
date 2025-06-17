@@ -16,6 +16,8 @@ class BuildingController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Building::class);
+
         return BuildingResource::collection(Building::with('rooms')->paginate(10));
     }
 
@@ -24,6 +26,8 @@ class BuildingController extends Controller
      */
     public function store(StoreBuildingRequest $request)
     {
+        $this->authorize('create', Building::class);
+
         $building = Building::create($request->validated());
         return new BuildingResource($building);
     }
@@ -33,6 +37,8 @@ class BuildingController extends Controller
      */
     public function show(Building $building)
     {
+        $this->authorize('view', $building);
+
         $building->load('rooms');
         return new BuildingResource($building);
     }
@@ -41,8 +47,10 @@ class BuildingController extends Controller
      * Update the specified resource in storage.
      * @hideFromAPIDocumentation
      */
-    public function update(Request $request, Building $building)
+    public function update(UpdateBuildingRequest $request, Building $building)
     {
+        $this->authorize('update', $building);
+
         $building->update($request->validated());
         return new BuildingResource($building);
     }
@@ -52,6 +60,8 @@ class BuildingController extends Controller
      */
     public function destroy(Building $building)
     {
+        $this->authorize('delete', $building);
+
         $building->delete();
         return response()->noContent();
     }

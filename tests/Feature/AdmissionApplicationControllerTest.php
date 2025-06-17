@@ -170,4 +170,59 @@ class AdmissionApplicationControllerTest extends TestCase
         $response->assertStatus(204);
         $this->assertDatabaseMissing('admission_applications', ['id' => $application->id]);
     }
+
+    public function test_can_create_a_draft_application()
+    {
+        // Ensure no existing draft applications
+        $this->student->admissionApplications()->delete();
+
+        $applicationData = [
+            'academic_year' => '2024-2025',
+            'semester' => 'Fall',
+        ];
+
+        $response = $this->postJson('/applications/draft', $applicationData);
+
+        $response->assertStatus(201)
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'academic_year',
+                    'semester',
+                    'status',
+                    'application_date',
+                    'comments'
+                ]
+            ])
+            ->assertJsonPath('data.status', 'draft')
+            ->assertJsonPath('data.academic_year', '2024-2025')
+            ->assertJsonPath('data.semester', 'Fall');
+
+        // Verify the application was created in the database
+        $this->assertDatabaseHas('admission_applications', [
+            'student_id' => $this->student->id,
+            'academic_year' => '2024-2025',
+            'semester' => 'Fall',
+            'status' => 'draft'
+        ]);
+    }
+
+    public function test_storeDraft_requires_student_record()
+    {
+        // Create a user without a student record
+        $userWithoutStudent = User::factory()->create();
+        
+        $applicationData = [
+            'academic_year' => '2024-2025',
+            'semester' => 'Fall',
+        ];
+
+        $response = $this->actingAs($userWithoutStudent)
+            ->postJson('/applications/draft', $applicationData);
+
+        $response->assertStatus(404)
+            ->assertJson([
+                'message' => 'Student record not found'
+            ]);
+    }
 }

@@ -15,14 +15,6 @@ use App\Http\Controllers\Api\V1\CourseSectionController;
 use App\Http\Controllers\Api\V1\EnrollmentController;
 use App\Http\Controllers\Api\V1\NotificationController;
 
-// Test endpoint for rate limiting
-Route::get('/test-rate-limit', function () {
-    return response()->json([
-        'message' => 'Rate limit test endpoint',
-        'timestamp' => now()
-    ]);
-})->middleware('throttle:api');
-
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware(['auth:sanctum', 'throttle:api']);

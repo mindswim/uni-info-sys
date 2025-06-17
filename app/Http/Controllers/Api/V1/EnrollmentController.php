@@ -9,11 +9,19 @@ use App\Http\Resources\EnrollmentResource;
 use App\Models\CourseSection;
 use App\Models\Enrollment;
 use App\Models\Student;
+use App\Services\EnrollmentService;
+use App\Exceptions\CourseSectionUnavailableException;
+use App\Exceptions\DuplicateEnrollmentException;
+use App\Exceptions\EnrollmentCapacityExceededException;
+use App\Exceptions\StudentNotActiveException;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class EnrollmentController extends Controller
 {
+    public function __construct(private EnrollmentService $enrollmentService)
+    {
+    }
     /**
      * Display a listing of enrollments with filtering
      */
@@ -94,40 +102,56 @@ class EnrollmentController extends Controller
     {
         $this->authorize('create', Enrollment::class);
 
-        // Get all validated data including fields added via merge()
-        $data = $request->only(['student_id', 'course_section_id', 'status']);
-        
-        // Debug: Log what we're about to create
-        \Log::info('Creating enrollment with data:', $data);
+        try {
+            $enrollment = $this->enrollmentService->enrollStudent($request->validated());
 
-        // Create the enrollment
-        $enrollment = Enrollment::create($data);
-        
-        // Debug: Log what was actually created
-        \Log::info('Created enrollment:', $enrollment->toArray());
+            // Load relationships for response
+            $enrollment->load([
+                'student.user',
+                'courseSection.course.department',
+                'courseSection.term',
+                'courseSection.instructor.user',
+                'courseSection.room.building'
+            ]);
 
-        // Load relationships for response
-        $enrollment->load([
-            'student.user',
-            'courseSection.course.department',
-            'courseSection.term',
-            'courseSection.instructor.user',
-            'courseSection.room.building'
-        ]);
+            // Add enrollment count to course section
+            $enrollment->courseSection->loadCount(['enrollments' => function ($q) {
+                $q->where('status', 'enrolled');
+            }]);
 
-        // Add enrollment count to course section
-        $enrollment->courseSection->loadCount(['enrollments' => function ($q) {
-            $q->where('status', 'enrolled');
-        }]);
+            $message = $enrollment->status === 'waitlisted' 
+                ? 'Student has been added to the waitlist for this course section.'
+                : 'Student has been successfully enrolled in the course section.';
 
-        $message = $enrollment->status === 'waitlisted' 
-            ? 'Student has been added to the waitlist for this course section.'
-            : 'Student has been successfully enrolled in the course section.';
+            return response()->json([
+                'message' => $message,
+                'data' => new EnrollmentResource($enrollment),
+            ], 201);
 
-        return response()->json([
-            'message' => $message,
-            'data' => new EnrollmentResource($enrollment),
-        ], 201);
+        } catch (StudentNotActiveException $e) {
+            return response()->json([
+                'message' => 'Enrollment failed.',
+                'error' => $e->getMessage(),
+            ], 422);
+
+        } catch (CourseSectionUnavailableException $e) {
+            return response()->json([
+                'message' => 'Enrollment failed.',
+                'error' => $e->getMessage(),
+            ], 422);
+
+        } catch (DuplicateEnrollmentException $e) {
+            return response()->json([
+                'message' => 'Enrollment failed.',
+                'error' => $e->getMessage(),
+            ], 422);
+
+        } catch (EnrollmentCapacityExceededException $e) {
+            return response()->json([
+                'message' => 'Enrollment failed.',
+                'error' => $e->getMessage(),
+            ], 422);
+        }
     }
 
     /**
@@ -174,7 +198,7 @@ class EnrollmentController extends Controller
 
         // Handle capacity opening if enrollment was withdrawn
         if (in_array($enrollment->status, ['withdrawn', 'completed']) && $oldStatus === 'enrolled') {
-            $this->promoteFromWaitlist($enrollment->courseSection);
+            $this->enrollmentService->promoteFromWaitlist($enrollment->courseSection);
         }
 
         // Reload relationships
@@ -212,7 +236,7 @@ class EnrollmentController extends Controller
 
         // If student was enrolled, try to promote someone from waitlist
         if ($wasEnrolled) {
-            $this->promoteFromWaitlist($courseSection);
+            $this->enrollmentService->promoteFromWaitlist($courseSection);
         }
 
         return response()->json([
@@ -241,7 +265,7 @@ class EnrollmentController extends Controller
 
         // If student was enrolled, try to promote someone from waitlist
         if ($wasEnrolled) {
-            $this->promoteFromWaitlist($courseSection);
+            $this->enrollmentService->promoteFromWaitlist($courseSection);
         }
 
         return response()->json([
@@ -273,7 +297,7 @@ class EnrollmentController extends Controller
         ]);
 
         // Try to promote someone from waitlist
-        $this->promoteFromWaitlist($enrollment->courseSection);
+        $this->enrollmentService->promoteFromWaitlist($enrollment->courseSection);
 
         return response()->json([
             'message' => 'Enrollment marked as completed with grade.',
@@ -367,29 +391,5 @@ class EnrollmentController extends Controller
         // For now, it's a placeholder for future enhancement
     }
 
-    /**
-     * Promote the next student from waitlist to enrolled
-     */
-    private function promoteFromWaitlist(CourseSection $courseSection): void
-    {
-        // Check if there's capacity
-        $enrolledCount = $courseSection->enrollments()->where('status', 'enrolled')->count();
-        
-        if ($enrolledCount >= $courseSection->capacity) {
-            return; // No capacity available
-        }
 
-        // Find the next waitlisted student (FIFO - first in, first out)
-        $nextWaitlisted = $courseSection->enrollments()
-            ->where('status', 'waitlisted')
-            ->orderBy('created_at')
-            ->first();
-
-        if ($nextWaitlisted) {
-            $nextWaitlisted->update(['status' => 'enrolled']);
-            
-            // Here you could send a notification to the student
-            // NotificationService::notifyWaitlistPromotion($nextWaitlisted);
-        }
-    }
 }

@@ -8,17 +8,54 @@ use App\Models\Faculty;
 use Illuminate\Http\Request;
 
 /**
- * @group "Faculty Management"
- * @authenticated
- *
- * APIs for managing faculties.
+ * @OA\Tag(name="Faculties", description="Faculty management endpoints")
  */
 class FacultyController extends Controller
 {
     /**
-     * List all faculties.
-     * 
-     * @responseFile storage/responses/V1/faculties.index.json
+     * @OA\Get(
+     *     path="/api/v1/faculties",
+     *     summary="List all faculties",
+     *     description="Retrieve a paginated list of all faculties with their departments",
+     *     operationId="getFaculties",
+     *     tags={"Faculties"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number for pagination",
+     *         required=false,
+     *         @OA\Schema(type="integer", minimum=1, default=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successfully retrieved faculties",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Faculty of Science"),
+     *                     @OA\Property(property="created_at", type="string", format="date-time"),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time"),
+     *                     @OA\Property(
+     *                         property="departments",
+     *                         type="array",
+     *                         @OA\Items(
+     *                             @OA\Property(property="id", type="integer"),
+     *                             @OA\Property(property="name", type="string")
+     *                         )
+     *                     )
+     *                 )
+     *             ),
+     *             @OA\Property(property="links", type="object"),
+     *             @OA\Property(property="meta", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden")
+     * )
      */
     public function index()
     {
@@ -28,9 +65,37 @@ class FacultyController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     * @bodyParam name string required The name of the faculty. Example: Faculty of Science
-     * @responseFile status=201 storage/responses/V1/faculty.json
+     * @OA\Post(
+     *     path="/api/v1/faculties",
+     *     summary="Create a new faculty",
+     *     description="Store a newly created faculty",
+     *     operationId="createFaculty",
+     *     tags={"Faculties"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Faculty data",
+     *         @OA\JsonContent(
+     *             required={"name"},
+     *             @OA\Property(property="name", type="string", example="Faculty of Science", maxLength=255)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Faculty created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Faculty of Science"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function store(Request $request)
     {
@@ -46,9 +111,44 @@ class FacultyController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     * @urlParam faculty integer required The ID of the faculty.
-     * @responseFile storage/responses/V1/faculty.json
+     * @OA\Get(
+     *     path="/api/v1/faculties/{id}",
+     *     summary="Get a specific faculty",
+     *     description="Display the specified faculty with its departments",
+     *     operationId="getFaculty",
+     *     tags={"Faculties"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Faculty ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successfully retrieved faculty",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Faculty of Science"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time"),
+     *                 @OA\Property(
+     *                     property="departments",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         @OA\Property(property="id", type="integer"),
+     *                         @OA\Property(property="name", type="string")
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Faculty not found")
+     * )
      */
     public function show(Faculty $faculty)
     {
@@ -58,10 +158,44 @@ class FacultyController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     * @urlParam faculty integer required The ID of the faculty.
-     * @bodyParam name string The name of the faculty. Example: Faculty of Applied Science
-     * @responseFile storage/responses/V1/faculty.json
+     * @OA\Put(
+     *     path="/api/v1/faculties/{id}",
+     *     summary="Update a faculty",
+     *     description="Update the specified faculty",
+     *     operationId="updateFaculty",
+     *     tags={"Faculties"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Faculty ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Faculty data to update",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", example="Faculty of Applied Science", maxLength=255)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Faculty updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Faculty of Applied Science"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Faculty not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function update(Request $request, Faculty $faculty)
     {
@@ -77,9 +211,25 @@ class FacultyController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     * @urlParam faculty integer required The ID of the faculty.
-     * @response status=204
+     * @OA\Delete(
+     *     path="/api/v1/faculties/{id}",
+     *     summary="Delete a faculty",
+     *     description="Remove the specified faculty from storage",
+     *     operationId="deleteFaculty",
+     *     tags={"Faculties"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Faculty ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=204, description="Faculty deleted successfully"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Faculty not found")
+     * )
      */
     public function destroy(Faculty $faculty)
     {

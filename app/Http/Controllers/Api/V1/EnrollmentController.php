@@ -102,56 +102,30 @@ class EnrollmentController extends Controller
     {
         $this->authorize('create', Enrollment::class);
 
-        try {
-            $enrollment = $this->enrollmentService->enrollStudent($request->validated());
+        $enrollment = $this->enrollmentService->enrollStudent($request->validated());
 
-            // Load relationships for response
-            $enrollment->load([
-                'student.user',
-                'courseSection.course.department',
-                'courseSection.term',
-                'courseSection.instructor.user',
-                'courseSection.room.building'
-            ]);
+        // Load relationships for response
+        $enrollment->load([
+            'student.user',
+            'courseSection.course.department',
+            'courseSection.term',
+            'courseSection.instructor.user',
+            'courseSection.room.building'
+        ]);
 
-            // Add enrollment count to course section
-            $enrollment->courseSection->loadCount(['enrollments' => function ($q) {
-                $q->where('status', 'enrolled');
-            }]);
+        // Add enrollment count to course section
+        $enrollment->courseSection->loadCount(['enrollments' => function ($q) {
+            $q->where('status', 'enrolled');
+        }]);
 
-            $message = $enrollment->status === 'waitlisted' 
-                ? 'Student has been added to the waitlist for this course section.'
-                : 'Student has been successfully enrolled in the course section.';
+        $message = $enrollment->status === 'waitlisted' 
+            ? 'Student has been added to the waitlist for this course section.'
+            : 'Student has been successfully enrolled in the course section.';
 
-            return response()->json([
-                'message' => $message,
-                'data' => new EnrollmentResource($enrollment),
-            ], 201);
-
-        } catch (StudentNotActiveException $e) {
-            return response()->json([
-                'message' => 'Enrollment failed.',
-                'error' => $e->getMessage(),
-            ], 422);
-
-        } catch (CourseSectionUnavailableException $e) {
-            return response()->json([
-                'message' => 'Enrollment failed.',
-                'error' => $e->getMessage(),
-            ], 422);
-
-        } catch (DuplicateEnrollmentException $e) {
-            return response()->json([
-                'message' => 'Enrollment failed.',
-                'error' => $e->getMessage(),
-            ], 422);
-
-        } catch (EnrollmentCapacityExceededException $e) {
-            return response()->json([
-                'message' => 'Enrollment failed.',
-                'error' => $e->getMessage(),
-            ], 422);
-        }
+        return response()->json([
+            'message' => $message,
+            'data' => new EnrollmentResource($enrollment),
+        ], 201);
     }
 
     /**

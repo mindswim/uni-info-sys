@@ -123,9 +123,13 @@ class EnrollmentResource extends JsonResource
             ? \Carbon\Carbon::createFromFormat('H:i:s', $courseSection->end_time)
             : $courseSection->end_time;
         
+        $daysString = is_array($courseSection->schedule_days) 
+            ? implode(', ', $courseSection->schedule_days)
+            : $courseSection->schedule_days;
+            
         return sprintf(
             '%s %s-%s',
-            $courseSection->schedule_days,
+            $daysString,
             $startTime->format('g:i A'),
             $endTime->format('g:i A')
         );

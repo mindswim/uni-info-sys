@@ -8,6 +8,7 @@ use App\Http\Resources\CourseResource;
 use App\Http\Requests\StoreCourseRequest;
 use App\Http\Requests\UpdateCourseRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * @OA\Tag(name="Courses", description="Course management endpoints")
@@ -81,13 +82,23 @@ class CourseController extends Controller
     {
         $this->authorize('viewAny', Course::class);
 
-        $query = Course::with(['department', 'prerequisites']);
-
+        // Create cache key based on filters
+        $cacheKey = 'courses.all';
         if ($request->has('department_id')) {
-            $query->where('department_id', $request->department_id);
+            $cacheKey = 'courses.department.' . $request->department_id;
         }
 
-        return CourseResource::collection($query->paginate(10));
+        $courses = Cache::remember($cacheKey, 3600, function () use ($request) {
+            $query = Course::with(['department', 'prerequisites']);
+
+            if ($request->has('department_id')) {
+                $query->where('department_id', $request->department_id);
+            }
+
+            return $query->paginate(10);
+        });
+
+        return CourseResource::collection($courses);
     }
 
     /**
@@ -156,6 +167,10 @@ class CourseController extends Controller
         }
         
         $course->load(['department', 'prerequisites']);
+
+        // Clear courses cache (all and department-specific)
+        Cache::forget('courses.all');
+        Cache::forget('courses.department.' . $validated['department_id']);
 
         return new CourseResource($course);
     }
@@ -285,6 +300,7 @@ class CourseController extends Controller
 
         $validated = $request->validated();
         
+        $oldDepartmentId = $course->department_id;
         $course->update($validated);
 
         if (isset($validated['prerequisites'])) {
@@ -292,6 +308,13 @@ class CourseController extends Controller
         }
         
         $course->load(['department', 'prerequisites']);
+
+        // Clear courses cache (all and affected department-specific caches)
+        Cache::forget('courses.all');
+        Cache::forget('courses.department.' . $oldDepartmentId);
+        if (isset($validated['department_id']) && $validated['department_id'] !== $oldDepartmentId) {
+            Cache::forget('courses.department.' . $validated['department_id']);
+        }
 
         return new CourseResource($course);
     }
@@ -321,7 +344,13 @@ class CourseController extends Controller
     {
         $this->authorize('delete', $course);
 
+        $departmentId = $course->department_id;
         $course->delete();
+
+        // Clear courses cache (all and department-specific)
+        Cache::forget('courses.all');
+        Cache::forget('courses.department.' . $departmentId);
+
         return response()->noContent();
     }
 }

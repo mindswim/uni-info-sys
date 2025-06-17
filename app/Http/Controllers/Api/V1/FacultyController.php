@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\FacultyResource;
 use App\Models\Faculty;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * @OA\Tag(name="Faculties", description="Faculty management endpoints")
@@ -61,7 +62,11 @@ class FacultyController extends Controller
     {
         $this->authorize('viewAny', Faculty::class);
 
-        return FacultyResource::collection(Faculty::with('departments')->paginate(10));
+        $faculties = Cache::remember('faculties.all', 3600, function () {
+            return Faculty::with('departments')->paginate(10);
+        });
+
+        return FacultyResource::collection($faculties);
     }
 
     /**
@@ -106,6 +111,9 @@ class FacultyController extends Controller
         ]);
         
         $faculty = Faculty::create($validated);
+        
+        // Clear faculties cache
+        Cache::forget('faculties.all');
         
         return new FacultyResource($faculty);
     }
@@ -207,6 +215,9 @@ class FacultyController extends Controller
         
         $faculty->update($validated);
 
+        // Clear faculties cache
+        Cache::forget('faculties.all');
+
         return new FacultyResource($faculty);
     }
 
@@ -236,6 +247,9 @@ class FacultyController extends Controller
         $this->authorize('delete', $faculty);
 
         $faculty->delete();
+
+        // Clear faculties cache
+        Cache::forget('faculties.all');
 
         return response()->noContent();
     }

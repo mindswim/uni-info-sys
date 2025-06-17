@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Department;
 use Illuminate\Http\Request;
 use App\Http\Resources\DepartmentResource;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * @OA\Tag(name="Departments", description="Department management endpoints")
@@ -75,13 +76,23 @@ class DepartmentController extends Controller
     {
         $this->authorize('viewAny', Department::class);
 
-        $query = Department::with(['faculty', 'programs']);
-
+        // Create cache key based on filters
+        $cacheKey = 'departments.all';
         if ($request->has('faculty_id')) {
-            $query->where('faculty_id', $request->faculty_id);
+            $cacheKey = 'departments.faculty.' . $request->faculty_id;
         }
 
-        return DepartmentResource::collection($query->paginate(10));
+        $departments = Cache::remember($cacheKey, 3600, function () use ($request) {
+            $query = Department::with(['faculty', 'programs']);
+
+            if ($request->has('faculty_id')) {
+                $query->where('faculty_id', $request->faculty_id);
+            }
+
+            return $query->paginate(10);
+        });
+
+        return DepartmentResource::collection($departments);
     }
 
     /**
@@ -135,6 +146,10 @@ class DepartmentController extends Controller
         ]);
 
         $department = Department::create($validated);
+
+        // Clear departments cache (all and faculty-specific)
+        Cache::forget('departments.all');
+        Cache::forget('departments.faculty.' . $validated['faculty_id']);
 
         return new DepartmentResource($department->load('faculty'));
     }
@@ -250,7 +265,15 @@ class DepartmentController extends Controller
             'faculty_id' => 'sometimes|exists:faculties,id'
         ]);
 
+        $oldFacultyId = $department->faculty_id;
         $department->update($validated);
+
+        // Clear departments cache (all and affected faculty-specific caches)
+        Cache::forget('departments.all');
+        Cache::forget('departments.faculty.' . $oldFacultyId);
+        if (isset($validated['faculty_id']) && $validated['faculty_id'] !== $oldFacultyId) {
+            Cache::forget('departments.faculty.' . $validated['faculty_id']);
+        }
 
         return new DepartmentResource($department->load('faculty'));
     }
@@ -280,7 +303,12 @@ class DepartmentController extends Controller
     {
         $this->authorize('delete', $department);
 
+        $facultyId = $department->faculty_id;
         $department->delete();
+
+        // Clear departments cache (all and faculty-specific)
+        Cache::forget('departments.all');
+        Cache::forget('departments.faculty.' . $facultyId);
 
         return response()->noContent();
     }

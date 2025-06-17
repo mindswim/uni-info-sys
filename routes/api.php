@@ -15,19 +15,28 @@ use App\Http\Controllers\Api\V1\CourseSectionController;
 use App\Http\Controllers\Api\V1\EnrollmentController;
 use App\Http\Controllers\Api\V1\NotificationController;
 
+// Test endpoint for rate limiting
+Route::get('/test-rate-limit', function () {
+    return response()->json([
+        'message' => 'Rate limit test endpoint',
+        'timestamp' => now()
+    ]);
+})->middleware('throttle:api');
+
 Route::get('/user', function (Request $request) {
     return $request->user();
-})->middleware('auth:sanctum');
+})->middleware(['auth:sanctum', 'throttle:api']);
 
 // API routes for students that return JSON resources
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/students/{student}', [StudentController::class, 'showApi'])->name('api.students.show');
 });
 
-// Unprotected route for creating tokens
-Route::post('/v1/tokens/create', [\App\Http\Controllers\Api\V1\AuthController::class, 'login']);
+// Unprotected route for creating tokens (still rate limited)
+Route::post('/v1/tokens/create', [\App\Http\Controllers\Api\V1\AuthController::class, 'login'])
+    ->middleware('throttle:api');
 
-Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
+Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::apiResource('faculties', FacultyController::class);
     Route::apiResource('departments', DepartmentController::class);
     Route::apiResource('programs', ProgramController::class);

@@ -17,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        // Use Laravel 11's built-in API throttling
+        $middleware->throttleApi();
+
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
@@ -39,6 +42,9 @@ return Application::configure(basePath: dirname(__DIR__))
                     $message = 'The given data was invalid.';
                     $statusCode = 422;
                     $errors = $e->errors();
+                } elseif ($e instanceof Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException) {
+                    $message = 'Too many requests. Please try again later.';
+                    $statusCode = 429;
                 }
 
                 $response = ['message' => $message];

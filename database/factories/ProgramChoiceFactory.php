@@ -13,7 +13,7 @@ class ProgramChoiceFactory extends Factory
         return [
             'application_id' => AdmissionApplication::factory(),
             'program_id' => Program::factory(),
-            'preference_order' => $this->faker->unique()->numberBetween(1, 5),
+            'preference_order' => $this->faker->numberBetween(1, 5), // Remove unique() - multiple applications can have same preference order
             'status' => $this->faker->randomElement(['pending', 'accepted', 'rejected'])
         ];
     }

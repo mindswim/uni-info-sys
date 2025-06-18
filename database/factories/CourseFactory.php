@@ -18,12 +18,30 @@ class CourseFactory extends Factory
      */
     public function definition(): array
     {
+        $courseTitles = [
+            'Introduction to Computer Science', 'Data Structures and Algorithms', 'Database Systems',
+            'Software Engineering', 'Web Development', 'Machine Learning', 'Artificial Intelligence',
+            'Calculus I', 'Calculus II', 'Linear Algebra', 'Statistics', 'Discrete Mathematics',
+            'General Chemistry', 'Organic Chemistry', 'Physics I', 'Physics II', 'Biology',
+            'English Composition', 'Literature and Writing', 'Public Speaking', 'Critical Thinking',
+            'Microeconomics', 'Macroeconomics', 'Business Management', 'Marketing Principles',
+            'Psychology 101', 'Sociology', 'Political Science', 'History of Civilization',
+            'Art History', 'Music Theory', 'Philosophy', 'Ethics and Moral Reasoning'
+        ];
+
+        $title = $this->faker->randomElement($courseTitles);
+        $level = $this->faker->randomElement(['100', '200', '300', '400', '500']);
+        $prefix = $this->faker->randomElement(['CS', 'MATH', 'CHEM', 'PHYS', 'ENG', 'BUS', 'PSYC', 'HIST', 'ART', 'SOC', 'PHIL', 'MUS', 'STAT', 'ECON']);
+        
+        // Generate unique course codes with more combinations
+        $courseCode = strtoupper($this->faker->unique()->bothify($prefix . '###'));
+
         return [
             'department_id' => Department::factory()->for(Faculty::factory()),
-            'course_code' => strtoupper($this->faker->unique()->bothify('???####')),
-            'title' => $this->faker->bs() . ' ' . $this->faker->word(),
-            'description' => $this->faker->paragraph,
-            'credits' => $this->faker->randomElement([1, 2, 3, 4]),
+            'course_code' => $courseCode,
+            'title' => $title,
+            'description' => $this->faker->realText(200) . ' This course provides students with fundamental knowledge and practical skills in the subject area.',
+            'credits' => $this->faker->randomElement([1, 2, 3, 4, 6]),
         ];
     }
 }

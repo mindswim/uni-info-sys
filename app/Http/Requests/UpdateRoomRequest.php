@@ -4,7 +4,18 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    title: "Update Room Request",
+    description: "Request body for updating a room. All fields are optional.",
+    properties: [
+        new OA\Property(property: "building_id", type: "integer", description: "The ID of the building this room belongs to.", example: 1),
+        new OA\Property(property: "room_number", type: "string", maxLength: 20, example: "201B"),
+        new OA\Property(property: "capacity", type: "integer", minimum: 1, example: 55),
+        new OA\Property(property: "type", type: "string", enum: ["lecture_hall", "laboratory", "seminar_room", "office"], example: "laboratory"),
+    ]
+)]
 class UpdateRoomRequest extends FormRequest
 {
     /**

@@ -11,12 +11,33 @@ use App\Http\Requests\UpdateStaffRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(
+    name: "Staff",
+    description: "Endpoints for managing staff members."
+)]
 class StaffController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    #[OA\Get(
+        path: "/api/v1/staff",
+        summary: "List all staff members",
+        tags: ["Staff"],
+        parameters: [
+            new OA\Parameter(name: "page", in: "query", required: false, schema: new OA\Schema(type: "integer", default: 1)),
+            new OA\Parameter(name: "department_id", in: "query", required: false, description: "Filter by department ID", schema: new OA\Schema(type: "integer")),
+            new OA\Parameter(name: "position", in: "query", required: false, description: "Filter by job title", schema: new OA\Schema(type: "string")),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "A paginated list of staff members.",
+                content: new OA\JsonContent(type: "array", items: new OA\Items(ref: "#/components/schemas/StaffResource"))
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+        ]
+    )]
     public function index(Request $request)
     {
         $this->authorize('viewAny', Staff::class);
@@ -34,9 +55,25 @@ class StaffController extends Controller
         return StaffResource::collection($query->paginate(10));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    #[OA\Post(
+        path: "/api/v1/staff",
+        summary: "Create a new staff member",
+        tags: ["Staff"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: "#/components/schemas/StoreStaffRequest")
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: "Staff member created successfully.",
+                content: new OA\JsonContent(ref: "#/components/schemas/StaffResource")
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+            new OA\Response(response: 422, description: "Validation error"),
+        ]
+    )]
     public function store(StoreStaffRequest $request)
     {
         $this->authorize('create', Staff::class);
@@ -64,9 +101,24 @@ class StaffController extends Controller
         return new StaffResource($staff);
     }
 
-    /**
-     * Display the specified resource.
-     */
+    #[OA\Get(
+        path: "/api/v1/staff/{staff}",
+        summary: "Get a single staff member",
+        tags: ["Staff"],
+        parameters: [
+            new OA\Parameter(name: "staff", in: "path", required: true, description: "ID of the staff member", schema: new OA\Schema(type: "integer")),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "The requested staff member.",
+                content: new OA\JsonContent(ref: "#/components/schemas/StaffResource")
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+            new OA\Response(response: 404, description: "Not Found"),
+        ]
+    )]
     public function show(Staff $staff)
     {
         $this->authorize('view', $staff);
@@ -75,9 +127,29 @@ class StaffController extends Controller
         return new StaffResource($staff);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    #[OA\Put(
+        path: "/api/v1/staff/{staff}",
+        summary: "Update a staff member",
+        tags: ["Staff"],
+        parameters: [
+            new OA\Parameter(name: "staff", in: "path", required: true, description: "ID of the staff member", schema: new OA\Schema(type: "integer")),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: "#/components/schemas/UpdateStaffRequest")
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Staff member updated successfully.",
+                content: new OA\JsonContent(ref: "#/components/schemas/StaffResource")
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+            new OA\Response(response: 404, description: "Not Found"),
+            new OA\Response(response: 422, description: "Validation error"),
+        ]
+    )]
     public function update(UpdateStaffRequest $request, Staff $staff)
     {
         $this->authorize('update', $staff);
@@ -96,9 +168,20 @@ class StaffController extends Controller
         return new StaffResource($staff);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    #[OA\Delete(
+        path: "/api/v1/staff/{staff}",
+        summary: "Delete a staff member",
+        tags: ["Staff"],
+        parameters: [
+            new OA\Parameter(name: "staff", in: "path", required: true, description: "ID of the staff member", schema: new OA\Schema(type: "integer")),
+        ],
+        responses: [
+            new OA\Response(response: 204, description: "Staff member deleted successfully."),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+            new OA\Response(response: 404, description: "Not Found"),
+        ]
+    )]
     public function destroy(Staff $staff)
     {
         $this->authorize('delete', $staff);

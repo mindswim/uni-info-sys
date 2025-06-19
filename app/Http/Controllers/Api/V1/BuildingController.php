@@ -8,12 +8,31 @@ use App\Http\Resources\BuildingResource;
 use App\Http\Requests\StoreBuildingRequest;
 use App\Http\Requests\UpdateBuildingRequest;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(
+    name: "Buildings",
+    description: "Endpoints for managing university buildings."
+)]
 class BuildingController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    #[OA\Get(
+        path: "/api/v1/buildings",
+        summary: "List all buildings",
+        tags: ["Buildings"],
+        parameters: [
+            new OA\Parameter(name: "page", in: "query", required: false, schema: new OA\Schema(type: "integer", default: 1)),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "A paginated list of buildings.",
+                content: new OA\JsonContent(type: "array", items: new OA\Items(ref: "#/components/schemas/BuildingResource"))
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+        ]
+    )]
     public function index()
     {
         $this->authorize('viewAny', Building::class);
@@ -21,9 +40,25 @@ class BuildingController extends Controller
         return BuildingResource::collection(Building::with('rooms')->paginate(10));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    #[OA\Post(
+        path: "/api/v1/buildings",
+        summary: "Create a new building",
+        tags: ["Buildings"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: "#/components/schemas/StoreBuildingRequest")
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: "Building created successfully.",
+                content: new OA\JsonContent(ref: "#/components/schemas/BuildingResource")
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+            new OA\Response(response: 422, description: "Validation error"),
+        ]
+    )]
     public function store(StoreBuildingRequest $request)
     {
         $this->authorize('create', Building::class);
@@ -32,9 +67,24 @@ class BuildingController extends Controller
         return new BuildingResource($building);
     }
 
-    /**
-     * Display the specified resource.
-     */
+    #[OA\Get(
+        path: "/api/v1/buildings/{building}",
+        summary: "Get a single building",
+        tags: ["Buildings"],
+        parameters: [
+            new OA\Parameter(name: "building", in: "path", required: true, description: "ID of the building", schema: new OA\Schema(type: "integer")),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "The requested building.",
+                content: new OA\JsonContent(ref: "#/components/schemas/BuildingResource")
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+            new OA\Response(response: 404, description: "Not Found"),
+        ]
+    )]
     public function show(Building $building)
     {
         $this->authorize('view', $building);
@@ -45,8 +95,30 @@ class BuildingController extends Controller
 
     /**
      * Update the specified resource in storage.
-     * @hideFromAPIDocumentation
      */
+    #[OA\Put(
+        path: "/api/v1/buildings/{building}",
+        summary: "Update a building",
+        tags: ["Buildings"],
+        parameters: [
+            new OA\Parameter(name: "building", in: "path", required: true, description: "ID of the building", schema: new OA\Schema(type: "integer")),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: "#/components/schemas/UpdateBuildingRequest")
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Building updated successfully.",
+                content: new OA\JsonContent(ref: "#/components/schemas/BuildingResource")
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+            new OA\Response(response: 404, description: "Not Found"),
+            new OA\Response(response: 422, description: "Validation error"),
+        ]
+    )]
     public function update(UpdateBuildingRequest $request, Building $building)
     {
         $this->authorize('update', $building);
@@ -55,9 +127,20 @@ class BuildingController extends Controller
         return new BuildingResource($building);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    #[OA\Delete(
+        path: "/api/v1/buildings/{building}",
+        summary: "Delete a building",
+        tags: ["Buildings"],
+        parameters: [
+            new OA\Parameter(name: "building", in: "path", required: true, description: "ID of the building", schema: new OA\Schema(type: "integer")),
+        ],
+        responses: [
+            new OA\Response(response: 204, description: "Building deleted successfully."),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+            new OA\Response(response: 404, description: "Not Found"),
+        ]
+    )]
     public function destroy(Building $building)
     {
         $this->authorize('delete', $building);

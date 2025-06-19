@@ -3,7 +3,16 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    title: "Update Building Request",
+    description: "Request body for updating a building. All fields are optional.",
+    properties: [
+        new OA\Property(property: "name", type: "string", maxLength: 255, example: "Science & Engineering Wing"),
+        new OA\Property(property: "address", type: "string", maxLength: 255, example: "456 College Road"),
+    ]
+)]
 class UpdateBuildingRequest extends FormRequest
 {
     /**

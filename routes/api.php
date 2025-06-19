@@ -103,6 +103,10 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     // Nested ProgramChoice routes - both nested and shallow for RESTful best practices
     Route::apiResource('admission-applications.program-choices', \App\Http\Controllers\Api\V1\ProgramChoiceController::class)->scoped()->shallow();
     
+    // Read-only Role and Permission resources for administrative purposes
+    Route::apiResource('roles', \App\Http\Controllers\Api\V1\RoleController::class)->only(['index', 'show']);
+    Route::apiResource('permissions', \App\Http\Controllers\Api\V1\PermissionController::class)->only(['index', 'show']);
+    
     // Enrollment API routes
     Route::apiResource('enrollments', EnrollmentController::class);
     

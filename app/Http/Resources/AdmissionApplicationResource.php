@@ -67,13 +67,15 @@ use OpenApi\Attributes as OA;
         ),
         new OA\Property(
             property: "student",
-            ref: "#/components/schemas/StudentResource",
-            description: "Student information (when loaded)"
+            type: "object",
+            description: "Student information (when loaded)",
+            nullable: true
         ),
         new OA\Property(
             property: "term",
-            ref: "#/components/schemas/TermResource",
-            description: "Term information (when loaded)"
+            type: "object",
+            description: "Term information (when loaded)",
+            nullable: true
         ),
         new OA\Property(
             property: "program_choices",

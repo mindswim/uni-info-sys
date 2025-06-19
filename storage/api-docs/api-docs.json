@@ -15,6 +15,475 @@
         }
     ],
     "paths": {
+        "/api/v1/admission-applications": {
+            "get": {
+                "tags": [
+                    "Admission Applications"
+                ],
+                "summary": "Get a list of admission applications",
+                "description": "Retrieve a paginated list of admission applications. Admin and staff can see all applications, students can only see their own.",
+                "operationId": "a57b7d8420e8d2a2a8e7a2370ea73f31",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15,
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by application status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "draft",
+                                "submitted",
+                                "under_review",
+                                "accepted",
+                                "rejected"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "student_id",
+                        "in": "query",
+                        "description": "Filter by student ID (admin/staff only)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "term_id",
+                        "in": "query",
+                        "description": "Filter by term ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of admission applications retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/AdmissionApplicationResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "per_page": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admission Applications"
+                ],
+                "summary": "Create a new admission application",
+                "description": "Create a new admission application. Students can only create applications for themselves unless they have admin/staff permissions.",
+                "operationId": "caa77277270ecf8327a1fd874436b56d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "student_id",
+                                    "term_id"
+                                ],
+                                "properties": {
+                                    "student_id": {
+                                        "description": "ID of the student applying",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "term_id": {
+                                        "description": "ID of the term for which the student is applying",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "status": {
+                                        "description": "Initial status of the application",
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "submitted"
+                                        ],
+                                        "example": "draft"
+                                    },
+                                    "comments": {
+                                        "description": "Additional comments or notes",
+                                        "type": "string",
+                                        "example": "Looking forward to joining the program",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Admission application created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Admission application created successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/AdmissionApplicationResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - validation failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admission-applications/{id}": {
+            "get": {
+                "tags": [
+                    "Admission Applications"
+                ],
+                "summary": "Get a specific admission application",
+                "description": "Retrieve details of a specific admission application. Students can only view their own applications.",
+                "operationId": "5f899f01a66fe05f14e481ed9d00205b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the admission application",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Admission application retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/AdmissionApplicationResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "404": {
+                        "description": "Admission application not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Admission application not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admission Applications"
+                ],
+                "summary": "Update an admission application",
+                "description": "Update an admission application. Students can only update their own draft applications. Admin/staff can update any application.",
+                "operationId": "52be95c3d898403cea1ee03f2ff660a1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the admission application",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "term_id": {
+                                        "description": "ID of the term",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "status": {
+                                        "description": "Application status",
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "submitted",
+                                            "under_review",
+                                            "accepted",
+                                            "rejected"
+                                        ],
+                                        "example": "submitted"
+                                    },
+                                    "comments": {
+                                        "description": "Comments or notes",
+                                        "type": "string",
+                                        "example": "Updated application details",
+                                        "nullable": true
+                                    },
+                                    "decision_date": {
+                                        "description": "Decision date (admin/staff only)",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-12-31",
+                                        "nullable": true
+                                    },
+                                    "decision_status": {
+                                        "description": "Decision status (admin/staff only)",
+                                        "type": "string",
+                                        "example": "Accepted with conditions",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Admission application updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Admission application updated successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/AdmissionApplicationResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - validation failed"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "404": {
+                        "description": "Admission application not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admission Applications"
+                ],
+                "summary": "Delete an admission application",
+                "description": "Delete an admission application. Students can only delete their own draft applications. Admin can delete any application.",
+                "operationId": "724b2a9e4c648c01d919cac7e70dcbfe",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the admission application",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Admission application deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Admission application deleted successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "404": {
+                        "description": "Admission application not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/courses": {
             "get": {
                 "tags": [
@@ -1417,9 +1886,841 @@
                     }
                 ]
             }
+        },
+        "/api/v1/permissions": {
+            "get": {
+                "tags": [
+                    "Permissions"
+                ],
+                "summary": "Get list of all permissions",
+                "description": "Retrieve a paginated list of all system permissions. Only accessible by admin and staff users.",
+                "operationId": "c8e60e1cdfb99866cdca9b2d3737f847",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15,
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "include_roles",
+                        "in": "query",
+                        "description": "Include roles associated with each permission",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of permissions retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PermissionResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "description": "Pagination links",
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "description": "Pagination metadata",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/permissions/{permission}": {
+            "get": {
+                "tags": [
+                    "Permissions"
+                ],
+                "summary": "Get a specific permission",
+                "description": "Retrieve details of a specific permission by ID. Only accessible by admin and staff users.",
+                "operationId": "c3ed8a0b841feb45fefc391168a94b98",
+                "parameters": [
+                    {
+                        "name": "permission",
+                        "in": "path",
+                        "description": "ID of the permission",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "include_roles",
+                        "in": "query",
+                        "description": "Include roles associated with this permission",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Permission retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/PermissionResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "404": {
+                        "description": "Permission not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admission-applications/{admission_application}/program-choices": {
+            "get": {
+                "tags": [
+                    "Program Choices"
+                ],
+                "summary": "Get program choices for an admission application",
+                "description": "Retrieve all program choices for a specific admission application. Students can only see choices for their own applications.",
+                "operationId": "57b2e6431d58f41a05c865a1c5892bac",
+                "parameters": [
+                    {
+                        "name": "admission_application",
+                        "in": "path",
+                        "description": "ID of the admission application",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of program choices retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ProgramChoiceResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "404": {
+                        "description": "Admission application not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Program Choices"
+                ],
+                "summary": "Create a new program choice",
+                "description": "Add a new program choice to an admission application. Students can only add choices to their own applications.",
+                "operationId": "ea50a0c539cda938f4c66846b0418e4e",
+                "parameters": [
+                    {
+                        "name": "admission_application",
+                        "in": "path",
+                        "description": "ID of the admission application",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "program_id",
+                                    "preference_order"
+                                ],
+                                "properties": {
+                                    "program_id": {
+                                        "description": "ID of the program to choose",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "preference_order": {
+                                        "description": "Preference order (1 = most preferred)",
+                                        "type": "integer",
+                                        "maximum": 10,
+                                        "minimum": 1,
+                                        "example": 1
+                                    },
+                                    "status": {
+                                        "description": "Initial status (defaults to pending)",
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "accepted",
+                                            "rejected"
+                                        ],
+                                        "example": "pending"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Program choice created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Program choice created successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/ProgramChoiceResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - validation failed"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "404": {
+                        "description": "Admission application not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/program-choices/{program_choice}": {
+            "get": {
+                "tags": [
+                    "Program Choices"
+                ],
+                "summary": "Get a specific program choice",
+                "description": "Retrieve details of a specific program choice. Students can only view choices for their own applications.",
+                "operationId": "0be6e4dc618d74e1d72a44c5dac46537",
+                "parameters": [
+                    {
+                        "name": "program_choice",
+                        "in": "path",
+                        "description": "ID of the program choice",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Program choice retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ProgramChoiceResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "404": {
+                        "description": "Program choice not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Program Choices"
+                ],
+                "summary": "Update a program choice",
+                "description": "Update a program choice. Students can only update choices for their own draft applications. Admin/staff can update any choice.",
+                "operationId": "73037402c5aa9ea0fdcb49847af32e35",
+                "parameters": [
+                    {
+                        "name": "program_choice",
+                        "in": "path",
+                        "description": "ID of the program choice",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "preference_order": {
+                                        "description": "Preference order (1 = most preferred)",
+                                        "type": "integer",
+                                        "maximum": 10,
+                                        "minimum": 1,
+                                        "example": 2
+                                    },
+                                    "status": {
+                                        "description": "Status (admin/staff only)",
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "accepted",
+                                            "rejected"
+                                        ],
+                                        "example": "accepted"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Program choice updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Program choice updated successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/ProgramChoiceResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - validation failed"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "404": {
+                        "description": "Program choice not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Program Choices"
+                ],
+                "summary": "Delete a program choice",
+                "description": "Delete a program choice. Students can only delete choices from their own draft applications. Admin can delete any choice.",
+                "operationId": "0f318d9fc0b306f80ab249ac26a6fc90",
+                "parameters": [
+                    {
+                        "name": "program_choice",
+                        "in": "path",
+                        "description": "ID of the program choice",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Program choice deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Program choice deleted successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "404": {
+                        "description": "Program choice not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/roles": {
+            "get": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Get list of all roles",
+                "description": "Retrieve a paginated list of all system roles. Only accessible by admin and staff users.",
+                "operationId": "c1294bb85dfc016a8f9c0d3f0907293f",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15,
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "include_permissions",
+                        "in": "query",
+                        "description": "Include permissions associated with each role",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of roles retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/RoleResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "description": "Pagination links",
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "description": "Pagination metadata",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/roles/{role}": {
+            "get": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Get a specific role",
+                "description": "Retrieve details of a specific role by ID. Only accessible by admin and staff users.",
+                "operationId": "15615945226214c177b27790822dc8d0",
+                "parameters": [
+                    {
+                        "name": "role",
+                        "in": "path",
+                        "description": "ID of the role",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "include_permissions",
+                        "in": "query",
+                        "description": "Include permissions associated with this role",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Role retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/RoleResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "404": {
+                        "description": "Role not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
         }
     },
     "components": {
+        "schemas": {
+            "AdmissionApplicationResource": {
+                "title": "Admission Application Resource",
+                "description": "Admission application resource representation",
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier of the admission application",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "student_id": {
+                        "description": "ID of the student who submitted the application",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "term_id": {
+                        "description": "ID of the term for which the application is submitted",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "status": {
+                        "description": "Current status of the application",
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "submitted",
+                            "under_review",
+                            "accepted",
+                            "rejected"
+                        ],
+                        "example": "submitted"
+                    },
+                    "application_date": {
+                        "description": "Date and time when the application was created",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15 10:30:00"
+                    },
+                    "decision_date": {
+                        "description": "Date and time when the decision was made",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-02-15 14:20:00",
+                        "nullable": true
+                    },
+                    "decision_status": {
+                        "description": "Additional information about the decision",
+                        "type": "string",
+                        "example": "Accepted with conditions",
+                        "nullable": true
+                    },
+                    "comments": {
+                        "description": "Additional comments or notes about the application",
+                        "type": "string",
+                        "example": "Looking forward to joining the program",
+                        "nullable": true
+                    },
+                    "student": {
+                        "description": "Student information (when loaded)",
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "term": {
+                        "description": "Term information (when loaded)",
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "program_choices": {
+                        "description": "List of program choices for this application (when loaded)",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProgramChoiceResource"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "PermissionResource": {
+                "title": "Permission Resource",
+                "description": "Permission resource representation",
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier of the permission",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "description": "Name of the permission",
+                        "type": "string",
+                        "example": "view-students"
+                    },
+                    "description": {
+                        "description": "Description of the permission",
+                        "type": "string",
+                        "example": "Can view student information",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "description": "When the permission was created",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T08:30:00Z"
+                    },
+                    "updated_at": {
+                        "description": "When the permission was last updated",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T08:30:00Z"
+                    },
+                    "roles": {
+                        "description": "Roles that have this permission",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RoleResource"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ProgramChoiceResource": {
+                "title": "Program Choice Resource",
+                "description": "Program choice resource representation",
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier of the program choice",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "application_id": {
+                        "description": "ID of the admission application this choice belongs to",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "program_id": {
+                        "description": "ID of the program being chosen",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "preference_order": {
+                        "description": "The preference order of this program choice (1 = most preferred)",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "status": {
+                        "description": "Current status of this program choice",
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "accepted",
+                            "rejected"
+                        ],
+                        "example": "pending"
+                    },
+                    "program": {
+                        "description": "Program information (when loaded)",
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "admission_application": {
+                        "$ref": "#/components/schemas/AdmissionApplicationResource"
+                    }
+                },
+                "type": "object"
+            },
+            "RoleResource": {
+                "title": "Role Resource",
+                "description": "Role resource representation",
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier of the role",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "description": "Name of the role",
+                        "type": "string",
+                        "example": "admin"
+                    },
+                    "description": {
+                        "description": "Description of the role",
+                        "type": "string",
+                        "example": "Administrator with full system access",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "description": "When the role was created",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T08:30:00Z"
+                    },
+                    "updated_at": {
+                        "description": "When the role was last updated",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T08:30:00Z"
+                    },
+                    "permissions": {
+                        "description": "Permissions associated with this role",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PermissionResource"
+                        }
+                    }
+                },
+                "type": "object"
+            }
+        },
         "securitySchemes": {
             "bearerAuth": {
                 "type": "http",
@@ -1429,6 +2730,10 @@
         }
     },
     "tags": [
+        {
+            "name": "Admission Applications",
+            "description": "API endpoints for managing admission applications"
+        },
         {
             "name": "Courses",
             "description": "Course management endpoints"
@@ -1440,6 +2745,18 @@
         {
             "name": "Faculties",
             "description": "Faculty management endpoints"
+        },
+        {
+            "name": "Permissions",
+            "description": "API endpoints for viewing system permissions (read-only access for administrators)"
+        },
+        {
+            "name": "Program Choices",
+            "description": "API endpoints for managing program choices within admission applications"
+        },
+        {
+            "name": "Roles",
+            "description": "API endpoints for viewing system roles (read-only access for administrators)"
         }
     ]
 }

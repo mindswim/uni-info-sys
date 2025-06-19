@@ -44,8 +44,9 @@ use OpenApi\Attributes as OA;
         ),
         new OA\Property(
             property: "program",
-            ref: "#/components/schemas/ProgramResource",
-            description: "Program information (when loaded)"
+            type: "object",
+            description: "Program information (when loaded)",
+            nullable: true
         ),
         new OA\Property(
             property: "admission_application",

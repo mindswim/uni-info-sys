@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\AcademicRecord;
 use App\Models\User;
+use App\Models\Student;
 use Illuminate\Auth\Access\Response;
 
 class AcademicRecordPolicy
@@ -11,10 +12,11 @@ class AcademicRecordPolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(User $user, Student $student): bool
     {
-        // Admins can view all, students can view their own
-        return $user->hasRole('admin') || $user->hasRole('staff') || $user->hasRole('student');
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        // Admin/staff can view anyone's records. A student can only view their own.
+        return in_array('admin', $userRoles) || in_array('staff', $userRoles) || $user->id === $student->user_id;
     }
 
     /**
@@ -22,19 +24,19 @@ class AcademicRecordPolicy
      */
     public function view(User $user, AcademicRecord $academicRecord): bool
     {
-        // Admin/staff can view any record, student can view their own
-        return $user->hasRole('admin') || 
-               $user->hasRole('staff') || 
-               ($user->hasRole('student') && $user->id === $academicRecord->student->user_id);
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        // Admin/staff can view any record, student can view their own.
+        return in_array('admin', $userRoles) || in_array('staff', $userRoles) || $user->id === $academicRecord->student->user_id;
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user, Student $student): bool
     {
-        // Admin, staff, and students can create academic records
-        return $user->hasRole('admin') || $user->hasRole('staff') || $user->hasRole('student');
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        // Only admin can create for now.
+        return in_array('admin', $userRoles);
     }
 
     /**
@@ -42,10 +44,9 @@ class AcademicRecordPolicy
      */
     public function update(User $user, AcademicRecord $academicRecord): bool
     {
-        // Admin/staff can update any, student can update their own
-        return $user->hasRole('admin') || 
-               $user->hasRole('staff') || 
-               ($user->hasRole('student') && $user->id === $academicRecord->student->user_id);
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        // Only admin can update for now.
+        return in_array('admin', $userRoles);
     }
 
     /**
@@ -53,8 +54,9 @@ class AcademicRecordPolicy
      */
     public function delete(User $user, AcademicRecord $academicRecord): bool
     {
-        // Only admin/staff can delete records
-        return $user->hasRole('admin') || $user->hasRole('staff');
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        // Only admin can delete for now.
+        return in_array('admin', $userRoles);
     }
 
     /**
@@ -62,8 +64,8 @@ class AcademicRecordPolicy
      */
     public function restore(User $user, AcademicRecord $academicRecord): bool
     {
-        // Only admin can restore
-        return $user->hasRole('admin');
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        return in_array('admin', $userRoles);
     }
 
     /**
@@ -71,7 +73,7 @@ class AcademicRecordPolicy
      */
     public function forceDelete(User $user, AcademicRecord $academicRecord): bool
     {
-        // Only admin can force delete
-        return $user->hasRole('admin');
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        return in_array('admin', $userRoles);
     }
 }

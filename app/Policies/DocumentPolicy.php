@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Document;
 use App\Models\User;
+use App\Models\Student;
 use Illuminate\Auth\Access\Response;
 
 class DocumentPolicy
@@ -11,10 +12,11 @@ class DocumentPolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(User $user, Student $student): bool
     {
-        // Admin/staff can view all documents, students can view their own
-        return $user->hasRole('admin') || $user->hasRole('staff') || $user->hasRole('student');
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        // Admin/staff can view anyone's documents. A student can only view their own.
+        return in_array('admin', $userRoles) || in_array('staff', $userRoles) || $user->id === $student->user_id;
     }
 
     /**
@@ -22,19 +24,19 @@ class DocumentPolicy
      */
     public function view(User $user, Document $document): bool
     {
-        // Admin/staff can view any document, student can view their own
-        return $user->hasRole('admin') || 
-               $user->hasRole('staff') || 
-               ($user->hasRole('student') && $user->id === $document->student->user_id);
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        // Admin/staff can view any document, student can view their own.
+        return in_array('admin', $userRoles) || in_array('staff', $userRoles) || $user->id === $document->user_id;
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user, Student $student): bool
     {
-        // Admin, staff, and students can create documents
-        return $user->hasRole('admin') || $user->hasRole('staff') || $user->hasRole('student');
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        // A student can add a document to their own profile. Admin/staff can add to any.
+        return in_array('admin', $userRoles) || in_array('staff', $userRoles) || $user->id === $student->user_id;
     }
 
     /**
@@ -42,15 +44,9 @@ class DocumentPolicy
      */
     public function update(User $user, Document $document): bool
     {
-        // Admin/staff can update any document, student can update their own unverified documents
-        if ($user->hasRole('admin') || $user->hasRole('staff')) {
-            return true;
-        }
-        
-        // Student can only update their own unverified documents
-        return $user->hasRole('student') && 
-               $user->id === $document->student->user_id && 
-               !$document->verified;
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        // Only admin/staff can update for now (e.g., to verify)
+        return in_array('admin', $userRoles) || in_array('staff', $userRoles);
     }
 
     /**
@@ -58,15 +54,9 @@ class DocumentPolicy
      */
     public function delete(User $user, Document $document): bool
     {
-        // Admin can delete any, student can delete their own unverified documents
-        if ($user->hasRole('admin')) {
-            return true;
-        }
-        
-        // Student can only delete their own unverified documents
-        return $user->hasRole('student') && 
-               $user->id === $document->student->user_id && 
-               !$document->verified;
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        // A student can delete their own document, or an admin/staff can.
+        return in_array('admin', $userRoles) || in_array('staff', $userRoles) || $user->id === $document->user_id;
     }
 
     /**
@@ -74,8 +64,8 @@ class DocumentPolicy
      */
     public function restore(User $user, Document $document): bool
     {
-        // Only admin can restore
-        return $user->hasRole('admin');
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        return in_array('admin', $userRoles);
     }
 
     /**
@@ -83,8 +73,8 @@ class DocumentPolicy
      */
     public function forceDelete(User $user, Document $document): bool
     {
-        // Only admin can force delete
-        return $user->hasRole('admin');
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        return in_array('admin', $userRoles);
     }
 
     /**

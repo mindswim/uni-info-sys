@@ -4,17 +4,18 @@ namespace App\Policies;
 
 use App\Models\Program;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ProgramPolicy
 {
+    use HandlesAuthorization;
+
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        // Everyone can view programs (they're public data)
-        return true;
+        return $user->hasPermission('view-any-program');
     }
 
     /**
@@ -22,8 +23,7 @@ class ProgramPolicy
      */
     public function view(User $user, Program $program): bool
     {
-        // Everyone can view individual programs
-        return true;
+        return $user->hasPermission('view-program');
     }
 
     /**
@@ -31,8 +31,7 @@ class ProgramPolicy
      */
     public function create(User $user): bool
     {
-        // Admin and staff can create programs
-        return $user->hasRole('admin') || ($user->hasRole('staff') && $user->hasPermission('manage-programs'));
+        return $user->hasPermission('create-program');
     }
 
     /**
@@ -40,8 +39,7 @@ class ProgramPolicy
      */
     public function update(User $user, Program $program): bool
     {
-        // Admin and staff can update programs
-        return $user->hasRole('admin') || ($user->hasRole('staff') && $user->hasPermission('manage-programs'));
+        return $user->hasPermission('update-program');
     }
 
     /**
@@ -49,8 +47,7 @@ class ProgramPolicy
      */
     public function delete(User $user, Program $program): bool
     {
-        // Only admin can delete programs
-        return $user->hasRole('admin');
+        return $user->hasPermission('delete-program');
     }
 
     /**
@@ -58,8 +55,7 @@ class ProgramPolicy
      */
     public function restore(User $user, Program $program): bool
     {
-        // Only admin can restore
-        return $user->hasRole('admin');
+        return $user->hasPermission('restore-program');
     }
 
     /**
@@ -67,7 +63,6 @@ class ProgramPolicy
      */
     public function forceDelete(User $user, Program $program): bool
     {
-        // Only admin can force delete
-        return $user->hasRole('admin');
+        return $user->hasPermission('force-delete-program');
     }
 }

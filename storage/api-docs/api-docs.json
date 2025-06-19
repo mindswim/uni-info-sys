@@ -15,6 +15,187 @@
         }
     ],
     "paths": {
+        "/api/v1/students/{student}/academic-records": {
+            "get": {
+                "tags": [
+                    "Academic Records"
+                ],
+                "summary": "Get a student's academic records",
+                "description": "Retrieve a list of academic records for a specific student.",
+                "operationId": "1695a313a81a112508503850fe256d7d",
+                "parameters": [
+                    {
+                        "name": "student",
+                        "in": "path",
+                        "description": "The ID of the student.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AcademicRecordResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Academic Records"
+                ],
+                "summary": "Create a new academic record",
+                "description": "Create a new academic record for a student. Not implemented.",
+                "operationId": "9277acecd95bca24b717ed4c13c0d027",
+                "parameters": [
+                    {
+                        "name": "student",
+                        "in": "path",
+                        "description": "The ID of the student.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "501": {
+                        "description": "Not Implemented"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/academic-records/{academic_record}": {
+            "get": {
+                "tags": [
+                    "Academic Records"
+                ],
+                "summary": "Get a specific academic record",
+                "description": "Retrieve the details of a specific academic record.",
+                "operationId": "bb908a1f0ec469e66d4380f7370966fe",
+                "parameters": [
+                    {
+                        "name": "academic_record",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AcademicRecordResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Academic Records"
+                ],
+                "summary": "Update an academic record",
+                "description": "Update an academic record. Not implemented.",
+                "operationId": "acbef71c9974f13cfa64cf79cbd33b42",
+                "parameters": [
+                    {
+                        "name": "academic_record",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "501": {
+                        "description": "Not Implemented"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Academic Records"
+                ],
+                "summary": "Delete an academic record",
+                "description": "Delete an academic record. Not implemented.",
+                "operationId": "28039e25049d3ab874642d02c00e8b24",
+                "parameters": [
+                    {
+                        "name": "academic_record",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "501": {
+                        "description": "Not Implemented"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/admission-applications": {
             "get": {
                 "tags": [
@@ -1506,6 +1687,177 @@
                 ]
             }
         },
+        "/api/v1/students/{student}/documents": {
+            "get": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Get a student's documents",
+                "description": "Retrieve a list of documents for a specific student. The student's user ID is used for authorization.",
+                "operationId": "689f90033485a4b58e0765034fd23af3",
+                "parameters": [
+                    {
+                        "name": "student",
+                        "in": "path",
+                        "description": "The ID of the student.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DocumentResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Upload a document",
+                "description": "Upload a new document for a student. File upload handling is not implemented in this version.",
+                "operationId": "650bef47ce745d45feada24058c152f1",
+                "parameters": [
+                    {
+                        "name": "student",
+                        "in": "path",
+                        "description": "The ID of the student.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "501": {
+                        "description": "Not Implemented"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/documents/{document}": {
+            "get": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Get a specific document",
+                "description": "Retrieve the details of a specific document.",
+                "operationId": "c5241de6309b57267ad914888f95ca9a",
+                "parameters": [
+                    {
+                        "name": "document",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DocumentResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Update a document",
+                "description": "Update a document's details. Not implemented.",
+                "operationId": "b6ae17d9b33f9c98f394f31ced88bbd2",
+                "responses": {
+                    "501": {
+                        "description": "Not Implemented"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Delete a document",
+                "description": "Delete a document. Not implemented.",
+                "operationId": "867bc0947afcbba0319db67b27716bea",
+                "parameters": [
+                    {
+                        "name": "document",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "501": {
+                        "description": "Not Implemented"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/faculties": {
             "get": {
                 "tags": [
@@ -2366,6 +2718,199 @@
                 ]
             }
         },
+        "/api/v1/programs": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "List all programs",
+                "operationId": "ace59f99f8c99a5c9772d11ec731e776",
+                "responses": {
+                    "200": {
+                        "description": "A paginated list of programs.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ProgramResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Create a new program",
+                "operationId": "d8148ce722f066f9aa354d3a3f6532e4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreProgramRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Program created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProgramResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/v1/programs/{program}": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Get a single program",
+                "operationId": "9fca44a408a27c67671b2c6077341013",
+                "parameters": [
+                    {
+                        "name": "program",
+                        "in": "path",
+                        "description": "ID of the program",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested program.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProgramResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Update a program",
+                "operationId": "bc62be0df71d28791abcc71d9e9b072b",
+                "parameters": [
+                    {
+                        "name": "program",
+                        "in": "path",
+                        "description": "ID of the program",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateProgramRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Program updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProgramResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Delete a program",
+                "operationId": "3049d62751e4e1c83897b97786407f35",
+                "parameters": [
+                    {
+                        "name": "program",
+                        "in": "path",
+                        "description": "ID of the program",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Program deleted successfully."
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            }
+        },
         "/api/v1/roles": {
             "get": {
                 "tags": [
@@ -2511,10 +3056,374 @@
                     }
                 ]
             }
+        },
+        "/api/v1/students": {
+            "get": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Get a list of students",
+                "description": "Retrieve a paginated list of students. Staff and admins can see all students. Students can only see their own record.",
+                "operationId": "4b649fd3816820e7d6ece134d72a7f52",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "include_user",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/StudentResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Create a new student",
+                "description": "Create a new student record. This is a complex administrative action and is not implemented in this version.",
+                "operationId": "20b07e0eabfb966bf0029eef43b01b6e",
+                "responses": {
+                    "501": {
+                        "description": "Not Implemented"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/students/{student}": {
+            "get": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Get a specific student",
+                "description": "Retrieve the details of a specific student.",
+                "operationId": "31bd20c3c3e27baf02b8c5386bd629fe",
+                "parameters": [
+                    {
+                        "name": "student",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "include_user",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudentResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Update a student",
+                "description": "Update a student's record. This is a complex administrative action and is not implemented in this version.",
+                "operationId": "2ddcce83cea189c24a97e11fb2d86050",
+                "parameters": [
+                    {
+                        "name": "student",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "501": {
+                        "description": "Not Implemented"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Delete a student",
+                "description": "Delete a student's record. This is a complex administrative action and is not implemented in this version.",
+                "operationId": "3c247e6248fe468b02cf4534ab92e24d",
+                "parameters": [
+                    {
+                        "name": "student",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "501": {
+                        "description": "Not Implemented"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
         }
     },
     "components": {
         "schemas": {
+            "StoreProgramRequest": {
+                "title": "Store Program Request",
+                "description": "Request body for creating a new program.",
+                "required": [
+                    "name",
+                    "code",
+                    "faculty_id",
+                    "department_id",
+                    "duration_years",
+                    "level",
+                    "status"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Bachelor of Science in Computer Science"
+                    },
+                    "code": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "example": "BSc-CS"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "A comprehensive program covering the fundamentals of computer science."
+                    },
+                    "faculty_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "department_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "duration_years": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "example": 4
+                    },
+                    "level": {
+                        "type": "string",
+                        "enum": [
+                            "undergraduate",
+                            "graduate",
+                            "diploma",
+                            "certificate"
+                        ],
+                        "example": "undergraduate"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "active",
+                            "inactive",
+                            "suspended"
+                        ],
+                        "example": "active"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateProgramRequest": {
+                "title": "Update Program Request",
+                "description": "Request body for updating an existing program. All fields are optional.",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Bachelor of Science in Computer Science"
+                    },
+                    "code": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "example": "BSc-CS"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "A comprehensive program covering the fundamentals of computer science."
+                    },
+                    "faculty_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "department_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "duration_years": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "example": 4
+                    },
+                    "level": {
+                        "type": "string",
+                        "enum": [
+                            "undergraduate",
+                            "graduate",
+                            "diploma",
+                            "certificate"
+                        ],
+                        "example": "undergraduate"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "active",
+                            "inactive",
+                            "suspended"
+                        ],
+                        "example": "active"
+                    }
+                },
+                "type": "object"
+            },
+            "AcademicRecordResource": {
+                "title": "Academic Record Resource",
+                "description": "Represents an academic record for a student, such as their GPA for a specific program in a given term.",
+                "properties": {
+                    "id": {
+                        "description": "The unique identifier for the academic record.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "student_id": {
+                        "description": "The ID of the student this record belongs to.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "program_id": {
+                        "description": "The ID of the program this record is associated with.",
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "term_id": {
+                        "description": "The ID of the term this record is for.",
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "gpa": {
+                        "description": "The Grade Point Average for this record.",
+                        "type": "number",
+                        "format": "float",
+                        "example": 3.85
+                    },
+                    "status": {
+                        "description": "The academic standing or status.",
+                        "type": "string",
+                        "example": "Good Standing"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
             "AdmissionApplicationResource": {
                 "title": "Admission Application Resource",
                 "description": "Admission application resource representation",
@@ -2587,6 +3496,48 @@
                         "items": {
                             "$ref": "#/components/schemas/ProgramChoiceResource"
                         }
+                    }
+                },
+                "type": "object"
+            },
+            "DocumentResource": {
+                "title": "Document Resource",
+                "description": "Represents a document uploaded by a user, such as a transcript or a resume.",
+                "properties": {
+                    "id": {
+                        "description": "The unique identifier for the document.",
+                        "type": "integer"
+                    },
+                    "user_id": {
+                        "description": "The ID of the user who owns this document.",
+                        "type": "integer"
+                    },
+                    "document_type": {
+                        "description": "The type of the document.",
+                        "type": "string",
+                        "example": "transcript"
+                    },
+                    "file_path": {
+                        "description": "The storage path of the document file.",
+                        "type": "string"
+                    },
+                    "file_name": {
+                        "description": "The original name of the document file.",
+                        "type": "string"
+                    },
+                    "verified_at": {
+                        "description": "When the document was verified by an administrator.",
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
                     }
                 },
                 "type": "object"
@@ -2678,6 +3629,73 @@
                 },
                 "type": "object"
             },
+            "ProgramResource": {
+                "title": "Program Resource",
+                "description": "A program of study offered by the university.",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Bachelor of Science in Computer Science"
+                    },
+                    "code": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "example": "BSc-CS"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "A comprehensive program covering the fundamentals of computer science."
+                    },
+                    "duration_years": {
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "level": {
+                        "type": "string",
+                        "enum": [
+                            "undergraduate",
+                            "graduate",
+                            "diploma",
+                            "certificate"
+                        ],
+                        "example": "undergraduate"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "active",
+                            "inactive",
+                            "suspended"
+                        ],
+                        "example": "active"
+                    },
+                    "faculty_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "department_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "type": "object"
+            },
             "RoleResource": {
                 "title": "Role Resource",
                 "description": "Role resource representation",
@@ -2719,6 +3737,49 @@
                     }
                 },
                 "type": "object"
+            },
+            "StudentResource": {
+                "title": "Student Resource",
+                "description": "Represents a student in the system.",
+                "properties": {
+                    "id": {
+                        "description": "The unique identifier for the student.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "student_number": {
+                        "description": "The unique student identification number.",
+                        "type": "string",
+                        "example": "2024-00001"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/UserResource"
+                    }
+                },
+                "type": "object"
+            },
+            "UserResource": {
+                "title": "User Resource",
+                "description": "Represents a user in the system.",
+                "properties": {
+                    "id": {
+                        "description": "The unique identifier for the user.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "description": "The name of the user.",
+                        "type": "string",
+                        "example": "John Doe"
+                    },
+                    "email": {
+                        "description": "The email address of the user.",
+                        "type": "string",
+                        "format": "email",
+                        "example": "john.doe@example.com"
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -2731,6 +3792,10 @@
     },
     "tags": [
         {
+            "name": "Academic Records",
+            "description": "API endpoints for managing academic records for a student"
+        },
+        {
             "name": "Admission Applications",
             "description": "API endpoints for managing admission applications"
         },
@@ -2741,6 +3806,10 @@
         {
             "name": "Departments",
             "description": "Department management endpoints"
+        },
+        {
+            "name": "Documents",
+            "description": "API endpoints for managing student documents"
         },
         {
             "name": "Faculties",
@@ -2755,8 +3824,16 @@
             "description": "API endpoints for managing program choices within admission applications"
         },
         {
+            "name": "Programs",
+            "description": "Endpoints for managing academic programs."
+        },
+        {
             "name": "Roles",
             "description": "API endpoints for viewing system roles (read-only access for administrators)"
+        },
+        {
+            "name": "Students",
+            "description": "API endpoints for managing student records"
         }
     ]
 }

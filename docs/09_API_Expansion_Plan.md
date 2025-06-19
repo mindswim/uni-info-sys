@@ -144,105 +144,55 @@ This phase focuses on creating API controllers, routes, and tests for core model
 
 ---
 
-## Phase 2: Documenting Existing Resources
+## Phase 2: Code Standardization and Documentation
 
-This phase focuses on adding OpenAPI annotations and comprehensive feature tests to all existing API controllers that are currently undocumented. The goal is to make the generated `api-docs.json` file a complete and accurate representation of the entire API surface.
+This phase consolidates the original documentation plan into a single, structured task. The core principle is to **standardize before documenting**, ensuring that the API we expose is secure, consistent, and follows project-wide best practices *before* we write its official documentation.
 
-### Task 14: Document Student-centric Resources
+### Task 14: Standardize and Document All Remaining API Resources
 
-**Goal**: Add comprehensive OpenAPI documentation and ensure full test coverage for the `Student`, `AcademicRecord`, and `Document` API endpoints.
+**Goal**: First, perform a code review and refactoring pass on all remaining API controllers to ensure they meet project standards for authorization and validation. Second, add comprehensive OpenAPI annotations to produce a complete and accurate `api-docs.json` file. This task supersedes the original tasks 14 through 18.
 
-**Implementation Steps**:
-1.  **Review Controllers and Resources**: Systematically go through `Api/V1/StudentController.php`, `Api/V1/AcademicRecordController.php`, `Api/V1/DocumentController.php` and their corresponding Resource classes (`StudentResource.php`, etc.).
-2.  **Add Resource Schemas**: Add `#[OA\Schema]` annotations to `StudentResource`, `AcademicRecordResource`, and `DocumentResource` to define their structure for the OpenAPI specification.
-3.  **Add Controller Annotations**: For each method (`index`, `show`, `store`, `update`, `destroy`), add detailed OpenAPI annotations (`@OA\Get`, `@OA\Post`, etc.). Document all query parameters for filtering, path parameters, request body schemas, and all possible success and error responses.
-4.  **Update Related Resources**: After adding the schema to `StudentResource`, update `AdmissionApplicationResource` to use `ref: "#/components/schemas/StudentResource"` instead of the temporary `type: "object"` definition.
-5.  **Create/Enhance Tests**: If they don't exist, create feature tests: `Api/V1/StudentApiTest.php`, `Api/V1/AcademicRecordApiTest.php`, and `Api/V1/DocumentApiTest.php`. Ensure tests cover all documented parameters and responses.
-
-**Testing & Verification**:
-1.  **Run Tests**: Execute all related tests and ensure they pass.
-2.  **Generate and Verify Docs**: Run `php artisan l5-swagger:generate`. Navigate to the documentation UI and confirm that the "Student", "Academic Record", and "Document" sections are now complete and that the `AdmissionApplication` schema correctly references the `Student` schema.
-
-**Checkpoint & Human Approval (Mandatory Stop)**:
-1.  **AI Statement of Completion**: Task 14 is complete.
-2.  **AI Request for Approval to Commit**: **Awaiting your approval to proceed with `git add .`, `git commit`, and `git push`.**
-3.  **AI Request to Proceed**: **Ready to proceed to Task 15. Please confirm.**
+**Resources to Process**:
+*   **Academic Structure**: `Program`, `Term`, `Course`
+*   **Student-centric**: `Student`, `User`, `AcademicRecord`, `Document`
+*   **Course & Enrollment**: `CourseSection`, `Enrollment`
+*   **Administrative**: `Faculty`, `Department`, `Staff`
+*   **Physical Resources**: `Building`, `Room`
 
 ---
 
-### Task 15: Document Academic Structure Resources
+#### **Phase 2A: Code Standardization**
 
-**Goal**: Add documentation and tests for `Program` and `Term` API endpoints.
+For each resource listed above, perform the following standardization checks on its corresponding API controller. The `ProgramController` will be the first to be standardized.
 
-**Implementation Steps**:
-1.  **Add Resource Schemas**: Add `#[OA\Schema]` annotations to `ProgramResource.php` and `TermResource.php`.
-2.  **Annotate Controllers**: Add full OpenAPI annotations to `Api/V1/ProgramController.php` and `Api/V1/TermController.php`.
-3.  **Update Related Resources**:
-    *   In `ProgramChoiceResource.php`, update the `program` property to use `ref: "#/components/schemas/ProgramResource"`.
-    *   In `AdmissionApplicationResource.php`, update the `term` property to use `ref: "#/components/schemas/TermResource"`.
-4.  **Create/Enhance Tests**: Create or improve `Api/V1/ProgramApiTest.php` and `Api/V1/TermApiTest.php`.
+1.  **Authorization Review**:
+    *   **Confirm Policy Exists**: Ensure a `Policy` class exists for the model.
+    *   **Apply Authorization**: Verify that every controller method calls `$this->authorize()` with the correct action (e.g., `viewAny`, `view`, `create`, `update`, `delete`). If authorization is missing, add it.
 
-**Testing & Verification**:
-1.  **Run Tests & Verify Docs**: Run tests, regenerate documentation, and verify the "Program" and "Term" sections in the Swagger UI. Confirm that the `AdmissionApplication` and `ProgramChoice` schemas now correctly reference their related schemas.
+2.  **Validation Review**:
+    *   **Use Form Requests**: Confirm that `store` and `update` methods use dedicated `Store...Request` and `Update...Request` classes for validation.
+    *   **Refactor Inline Validation**: If a controller uses inline validation (e.g., `Validator::make(...)`), refactor it to use a Form Request class.
 
-**Checkpoint & Human Approval (Mandatory Stop)**:
-1.  **AI Statement of Completion**: Task 15 is complete.
-2.  **AI Request for Approval to Commit**: **Awaiting your approval to proceed with `git add .`, `git commit`, and `git push`.**
-3.  **AI Request to Proceed**: **Ready to proceed to Task 16. Please confirm.**
+3.  **Create Missing Controllers**: If an API controller for a resource does not exist in the `Api/V1` namespace, create it. Implement read-only `index` and `show` methods with proper authorization. Write operations can be stubbed to return a `501 Not Implemented` status.
 
 ---
 
-### Task 16: Document Course & Enrollment Resources
+#### **Phase 2B: API Documentation**
 
-**Goal**: Add documentation and tests for `CourseSection` and `Enrollment` API endpoints.
+Once a controller has been standardized, proceed with documenting it and its related resource.
 
-**Implementation Steps**:
-1.  **Add Resource Schemas**: Add `#[OA\Schema]` annotations to `CourseSectionResource.php` and `EnrollmentResource.php`.
-2.  **Annotate Controllers**: Add full OpenAPI annotations to `Api/V1/CourseSectionController.php` and `Api/V1/EnrollmentController.php`. These are complex controllers, so pay special attention to documenting the extensive filtering capabilities.
-3.  **Create/Enhance Tests**: Create or improve `Api/V1/CourseSectionApiTest.php` and review the existing `Api/V1/EnrollmentApiTest.php` to ensure it covers all documented functionality.
+1.  **Systematically Annotate Resource Schemas**: Go through each of the corresponding `...Resource.php` files for the models listed above.
+    *   Add a complete `#[OA\Schema(...)]` block to each resource file, defining all of its properties.
 
-**Testing & Verification**:
-1.  **Run Tests & Verify Docs**: Run tests, regenerate documentation, and verify the "Course Section" and "Enrollment" sections in the Swagger UI.
+2.  **Link Resource Schemas**: As the schemas are defined, update any related resources to use the correct `ref` pointer instead of a generic object type. This will fix the reference errors encountered previously.
 
-**Checkpoint & Human Approval (Mandatory Stop)**:
-1.  **AI Statement of Completion**: Task 16 is complete.
-2.  **AI Request for Approval to Commit**: **Awaiting your approval to proceed with `git add .`, `git commit`, and `git push`.**
-3.  **AI Request to Proceed**: **Ready to proceed to Task 17. Please confirm.**
+3.  **Annotate Controller Endpoints**: For each corresponding `...Controller.php`, add or update the OpenAPI annotations (`@OA\Get`, `@OA\Post`, etc.) for all available methods.
 
----
-
-### Task 17: Document Administrative Resources
-
-**Goal**: Add documentation and tests for the `Staff` API endpoint.
-
-**Implementation Steps**:
-1.  **Add Resource Schema**: Add an `#[OA\Schema]` annotation to `StaffResource.php`.
-2.  **Annotate Controller**: Add full OpenAPI annotations to `Api/V1/StaffController.php`.
-3.  **Create/Enhance Tests**: Create or improve `Api/V1/StaffApiTest.php`.
-
-**Testing & Verification**:
-1.  **Run Tests & Verify Docs**: Run tests, regenerate documentation, and verify the "Staff" section in the Swagger UI.
+**Verification**:
+1.  **Generate Documentation**: After standardizing and annotating all resources, run `php artisan l5-swagger:generate`. The command must complete without any reference errors.
+2.  **Visual Inspection**: Navigate to the Swagger UI and manually inspect the documentation. Confirm that all endpoints are present, parameters are correct, and schemas are properly defined and linked.
 
 **Checkpoint & Human Approval (Mandatory Stop)**:
-1.  **AI Statement of Completion**: Task 17 is complete.
-2.  **AI Request for Approval to Commit**: **Awaiting your approval to proceed with `git add .`, `git commit`, and `git push`.**
-3.  **AI Request to Proceed**: **Ready to proceed to Task 18. Please confirm.**
-
----
-
-### Task 18: Document Physical Resources
-
-**Goal**: Add documentation and tests for `Building` and `Room` API endpoints.
-
-**Implementation Steps**:
-1.  **Add Resource Schemas**: Add `#[OA\Schema]` annotations to `BuildingResource.php` and `RoomResource.php`.
-2.  **Annotate Controllers**: Add full OpenAPI annotations to `Api/V1/BuildingController.php` and `Api/V1/RoomController.php`.
-3.  **Create/Enhance Tests**: Create or improve `Api/V1/BuildingApiTest.php` and `Api/V1/RoomApiTest.php`.
-
-**Testing & Verification**:
-1.  **Run Tests & Verify Docs**: Run tests, regenerate documentation, and verify the "Building" and "Room" sections in the Swagger UI.
-
-**Checkpoint & Human Approval (Mandatory Stop)**:
-1.  **AI Statement of Completion**: Task 18 is complete.
-2.  **AI Request for Approval to Commit**: **Awaiting your approval to proceed with `git add .`, `git commit`, and `git push`.**
-3.  **AI Request to Proceed**: **This was the final task. The API Expansion and Documentation Plan is now complete.** 
+1.  **AI Statement of Completion**: Task 14 is complete. All relevant API endpoints are now standardized and documented.
+2.  **AI Request for Approval to Commit**: **Awaiting your approval to proceed with `git add .` and `git commit`.**
+3.  **AI Request to Proceed**: **The API Expansion and Documentation Plan is now complete. Please confirm.** 

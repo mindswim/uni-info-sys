@@ -17,6 +17,34 @@ use App\Http\Controllers\Api\V1\CourseSectionController;
 use App\Http\Controllers\Api\V1\EnrollmentController;
 use App\Http\Controllers\Api\V1\NotificationController;
 
+/**
+ * @OA\Get(
+ *     path="/api/v1/health",
+ *     summary="Check application health",
+ *     description="Provides the health status of the application and its connected services (database, cache).",
+ *     tags={"System"},
+ *     @OA\Response(
+ *         response=200,
+ *         description="System is healthy",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="string", example="healthy"),
+ *             @OA\Property(property="timestamp", type="string", format="date-time"),
+ *             @OA\Property(property="services", type="object"),
+ *             @OA\Property(property="application", type="object")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=503,
+ *         description="System is unhealthy",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="string", example="unhealthy"),
+ *             @OA\Property(property="timestamp", type="string", format="date-time"),
+ *             @OA\Property(property="services", type="object"),
+ *             @OA\Property(property="application", type="object")
+ *         )
+ *     )
+ * )
+ */
 // Health Check Endpoint - Unauthenticated for monitoring
 Route::get('/health', function () {
     $status = 'healthy';

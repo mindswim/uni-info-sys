@@ -665,6 +665,83 @@
                 ]
             }
         },
+        "/api/v1/tokens/create": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login and obtain API token",
+                "description": "Authenticate with email and password to receive an API token for subsequent requests.",
+                "operationId": "20f9ed47a7a17709741d60d449c3bcf4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password",
+                                    "device_name"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@university.edu"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "device_name": {
+                                        "type": "string",
+                                        "example": "Mobile App"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful, token returned.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|abc123def456..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid credentials or validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/buildings": {
             "get": {
                 "tags": [
@@ -2826,6 +2903,92 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/api/v1/notifications": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Get user notifications",
+                "description": "Retrieve all unread notifications for the authenticated user.",
+                "operationId": "cac3bdde44f0be0512f7d05c0a6064e4",
+                "responses": {
+                    "200": {
+                        "description": "List of unread notifications.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string",
+                                                        "example": "abc-123-def"
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "example": "App\\Notifications\\ApplicationStatusUpdated"
+                                                    },
+                                                    "data": {
+                                                        "type": "object",
+                                                        "example": {
+                                                            "message": "Your application status has been updated"
+                                                        }
+                                                    },
+                                                    "read_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                }
+            }
+        },
+        "/api/v1/notifications/{id}/read": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Mark notification as read",
+                "description": "Mark a specific notification as read for the authenticated user.",
+                "operationId": "fc1834c084071515133aef066568ee30",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Notification ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Notification marked as read successfully."
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Notification not found"
+                    }
+                }
             }
         },
         "/api/v1/permissions": {
@@ -6024,6 +6187,10 @@
             "description": "API endpoints for managing admission applications"
         },
         {
+            "name": "Authentication",
+            "description": "Authentication endpoints for obtaining API tokens."
+        },
+        {
             "name": "Buildings",
             "description": "Endpoints for managing university buildings."
         },
@@ -6050,6 +6217,10 @@
         {
             "name": "Faculties",
             "description": "Faculty management endpoints"
+        },
+        {
+            "name": "Notifications",
+            "description": "Endpoints for managing user notifications."
         },
         {
             "name": "Permissions",

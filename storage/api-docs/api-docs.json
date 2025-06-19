@@ -671,8 +671,7 @@
                     "Courses"
                 ],
                 "summary": "List all courses",
-                "description": "Retrieve a paginated list of all courses with their departments and prerequisites",
-                "operationId": "getCourses",
+                "operationId": "3522f88b734e2061541a8dbd0b6be53c",
                 "parameters": [
                     {
                         "name": "page",
@@ -697,253 +696,77 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully retrieved courses",
+                        "description": "A paginated list of courses.",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "code": {
-                                                        "type": "string",
-                                                        "example": "CS101"
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "Introduction to Computer Science"
-                                                    },
-                                                    "description": {
-                                                        "type": "string",
-                                                        "example": "Basic concepts of computer science"
-                                                    },
-                                                    "credits": {
-                                                        "type": "integer",
-                                                        "example": 3
-                                                    },
-                                                    "department_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "created_at": {
-                                                        "type": "string",
-                                                        "format": "date-time"
-                                                    },
-                                                    "updated_at": {
-                                                        "type": "string",
-                                                        "format": "date-time"
-                                                    },
-                                                    "department": {
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "integer"
-                                                            },
-                                                            "name": {
-                                                                "type": "string"
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    },
-                                                    "prerequisites": {
-                                                        "type": "array",
-                                                        "items": {
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "integer"
-                                                                },
-                                                                "code": {
-                                                                    "type": "string"
-                                                                },
-                                                                "name": {
-                                                                    "type": "string"
-                                                                }
-                                                            },
-                                                            "type": "object"
-                                                        }
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "links": {
-                                            "type": "object"
-                                        },
-                                        "meta": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CourseResource"
+                                    }
                                 }
                             }
                         }
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     },
                     "403": {
-                        "description": "Forbidden"
+                        "description": "Unauthorized"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             },
             "post": {
                 "tags": [
                     "Courses"
                 ],
                 "summary": "Create a new course",
-                "description": "Store a newly created course with optional prerequisites",
-                "operationId": "createCourse",
+                "operationId": "92ce73d19fae55890bc7e00c723b7557",
                 "requestBody": {
-                    "description": "Course data",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "code",
-                                    "name",
-                                    "credits",
-                                    "department_id"
-                                ],
-                                "properties": {
-                                    "code": {
-                                        "type": "string",
-                                        "maxLength": 10,
-                                        "example": "CS101"
-                                    },
-                                    "name": {
-                                        "type": "string",
-                                        "maxLength": 255,
-                                        "example": "Introduction to Computer Science"
-                                    },
-                                    "description": {
-                                        "type": "string",
-                                        "example": "Basic concepts of computer science"
-                                    },
-                                    "credits": {
-                                        "type": "integer",
-                                        "maximum": 6,
-                                        "minimum": 1,
-                                        "example": 3
-                                    },
-                                    "department_id": {
-                                        "description": "ID of the department this course belongs to",
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "prerequisites": {
-                                        "description": "Array of prerequisite course IDs",
-                                        "type": "array",
-                                        "items": {
-                                            "type": "integer"
-                                        }
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/StoreCourseRequest"
                             }
                         }
                     }
                 },
                 "responses": {
                     "201": {
-                        "description": "Course created successfully",
+                        "description": "Course created successfully.",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "code": {
-                                                    "type": "string",
-                                                    "example": "CS101"
-                                                },
-                                                "name": {
-                                                    "type": "string",
-                                                    "example": "Introduction to Computer Science"
-                                                },
-                                                "description": {
-                                                    "type": "string",
-                                                    "example": "Basic concepts of computer science"
-                                                },
-                                                "credits": {
-                                                    "type": "integer",
-                                                    "example": 3
-                                                },
-                                                "department_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time"
-                                                },
-                                                "department": {
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "integer"
-                                                        },
-                                                        "name": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/CourseResource"
                                 }
                             }
                         }
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     },
                     "403": {
-                        "description": "Forbidden"
+                        "description": "Unauthorized"
                     },
                     "422": {
                         "description": "Validation error"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             }
         },
-        "/api/v1/courses/{id}": {
+        "/api/v1/courses/{course}": {
             "get": {
                 "tags": [
                     "Courses"
                 ],
-                "summary": "Get a specific course",
-                "description": "Display the specified course with its department and prerequisites",
-                "operationId": "getCourse",
+                "summary": "Get a single course",
+                "operationId": "e041494670480ff24d76c7191143774c",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "course",
                         "in": "path",
-                        "description": "Course ID",
+                        "description": "ID of the course",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -952,110 +775,37 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully retrieved course",
+                        "description": "The requested course.",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "code": {
-                                                    "type": "string",
-                                                    "example": "CS101"
-                                                },
-                                                "name": {
-                                                    "type": "string",
-                                                    "example": "Introduction to Computer Science"
-                                                },
-                                                "description": {
-                                                    "type": "string",
-                                                    "example": "Basic concepts of computer science"
-                                                },
-                                                "credits": {
-                                                    "type": "integer",
-                                                    "example": 3
-                                                },
-                                                "department_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time"
-                                                },
-                                                "department": {
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "integer"
-                                                        },
-                                                        "name": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                },
-                                                "prerequisites": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "integer"
-                                                            },
-                                                            "code": {
-                                                                "type": "string"
-                                                            },
-                                                            "name": {
-                                                                "type": "string"
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    }
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/CourseResource"
                                 }
                             }
                         }
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     },
                     "403": {
-                        "description": "Forbidden"
+                        "description": "Unauthorized"
                     },
                     "404": {
-                        "description": "Course not found"
+                        "description": "Not Found"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             },
             "put": {
                 "tags": [
                     "Courses"
                 ],
                 "summary": "Update a course",
-                "description": "Update the specified course",
-                "operationId": "updateCourse",
+                "operationId": "c57e5081c7a5e3a381be7b32611032f6",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "course",
                         "in": "path",
-                        "description": "Course ID",
+                        "description": "ID of the course",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -1063,142 +813,51 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Course data to update",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "properties": {
-                                    "code": {
-                                        "type": "string",
-                                        "maxLength": 10,
-                                        "example": "CS101"
-                                    },
-                                    "name": {
-                                        "type": "string",
-                                        "maxLength": 255,
-                                        "example": "Advanced Computer Science"
-                                    },
-                                    "description": {
-                                        "type": "string",
-                                        "example": "Advanced concepts of computer science"
-                                    },
-                                    "credits": {
-                                        "type": "integer",
-                                        "maximum": 6,
-                                        "minimum": 1,
-                                        "example": 4
-                                    },
-                                    "department_id": {
-                                        "description": "ID of the department this course belongs to",
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "prerequisites": {
-                                        "description": "Array of prerequisite course IDs",
-                                        "type": "array",
-                                        "items": {
-                                            "type": "integer"
-                                        }
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/UpdateCourseRequest"
                             }
                         }
                     }
                 },
                 "responses": {
                     "200": {
-                        "description": "Course updated successfully",
+                        "description": "Course updated successfully.",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "code": {
-                                                    "type": "string",
-                                                    "example": "CS101"
-                                                },
-                                                "name": {
-                                                    "type": "string",
-                                                    "example": "Advanced Computer Science"
-                                                },
-                                                "description": {
-                                                    "type": "string",
-                                                    "example": "Advanced concepts of computer science"
-                                                },
-                                                "credits": {
-                                                    "type": "integer",
-                                                    "example": 4
-                                                },
-                                                "department_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time"
-                                                },
-                                                "department": {
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "integer"
-                                                        },
-                                                        "name": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/CourseResource"
                                 }
                             }
                         }
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     },
                     "403": {
-                        "description": "Forbidden"
+                        "description": "Unauthorized"
                     },
                     "404": {
-                        "description": "Course not found"
+                        "description": "Not Found"
                     },
                     "422": {
                         "description": "Validation error"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             },
             "delete": {
                 "tags": [
                     "Courses"
                 ],
                 "summary": "Delete a course",
-                "description": "Remove the specified course from storage",
-                "operationId": "deleteCourse",
+                "operationId": "abe203e12027b72fdc6ba6c593413aa4",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "course",
                         "in": "path",
-                        "description": "Course ID",
+                        "description": "ID of the course",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -1207,23 +866,18 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "Course deleted successfully"
+                        "description": "Course deleted successfully."
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthenticated"
                     },
                     "403": {
-                        "description": "Forbidden"
+                        "description": "Unauthorized"
                     },
                     "404": {
-                        "description": "Course not found"
+                        "description": "Not Found"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             }
         },
         "/api/v1/departments": {
@@ -3466,6 +3120,53 @@
     },
     "components": {
         "schemas": {
+            "StoreCourseRequest": {
+                "title": "Store Course Request",
+                "description": "Request body for creating a new course.",
+                "required": [
+                    "course_code",
+                    "title",
+                    "credits",
+                    "department_id"
+                ],
+                "properties": {
+                    "course_code": {
+                        "type": "string",
+                        "maxLength": 20,
+                        "example": "CS101"
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Introduction to Computer Science"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Basic concepts and principles of computer science."
+                    },
+                    "credits": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "example": 3
+                    },
+                    "department_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "prerequisites": {
+                        "description": "Array of prerequisite course IDs",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "example": [
+                            1,
+                            2
+                        ]
+                    }
+                },
+                "type": "object"
+            },
             "StoreProgramRequest": {
                 "title": "Store Program Request",
                 "description": "Request body for creating a new program.",
@@ -3567,6 +3268,47 @@
                         "type": "string",
                         "format": "date",
                         "example": "2024-12-15"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateCourseRequest": {
+                "title": "Update Course Request",
+                "description": "Request body for updating an existing course. All fields are optional.",
+                "properties": {
+                    "course_code": {
+                        "type": "string",
+                        "maxLength": 20,
+                        "example": "CS101"
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Introduction to Computer Science"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Basic concepts and principles of computer science."
+                    },
+                    "credits": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "example": 3
+                    },
+                    "department_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "prerequisites": {
+                        "description": "Array of prerequisite course IDs",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "example": [
+                            1,
+                            2
+                        ]
                     }
                 },
                 "type": "object"
@@ -3780,6 +3522,62 @@
                         "items": {
                             "$ref": "#/components/schemas/ProgramChoiceResource"
                         }
+                    }
+                },
+                "type": "object"
+            },
+            "CourseResource": {
+                "title": "Course Resource",
+                "description": "A course offered by a department in the university.",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "course_code": {
+                        "type": "string",
+                        "maxLength": 20,
+                        "example": "CS101"
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Introduction to Computer Science"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Basic concepts and principles of computer science."
+                    },
+                    "credits": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "example": 3
+                    },
+                    "department_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "department": {
+                        "description": "The department this course belongs to",
+                        "type": "object"
+                    },
+                    "prerequisites": {
+                        "description": "Courses that must be completed before taking this course",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CourseResource"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
                     }
                 },
                 "type": "object"
@@ -4136,7 +3934,7 @@
         },
         {
             "name": "Courses",
-            "description": "Course management endpoints"
+            "description": "Endpoints for managing courses and their prerequisites."
         },
         {
             "name": "Departments",

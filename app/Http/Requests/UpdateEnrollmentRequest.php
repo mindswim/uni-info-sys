@@ -4,7 +4,16 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    title: "Update Enrollment Request",
+    description: "Request body for updating an enrollment. All fields are optional.",
+    properties: [
+        new OA\Property(property: "status", type: "string", enum: ["enrolled", "waitlisted", "completed", "withdrawn"], description: "The new status of the enrollment.", example: "completed"),
+        new OA\Property(property: "grade", type: "string", maxLength: 5, nullable: true, description: "The grade received (required when status is 'completed').", example: "A"),
+    ]
+)]
 class UpdateEnrollmentRequest extends FormRequest
 {
     /**

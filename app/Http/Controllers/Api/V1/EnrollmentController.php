@@ -18,7 +18,12 @@ use App\Exceptions\EnrollmentCapacityExceededException;
 use App\Exceptions\StudentNotActiveException;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(
+    name: "Enrollments",
+    description: "Endpoints for managing student enrollments in course sections."
+)]
 class EnrollmentController extends Controller
 {
     public function __construct(
@@ -29,6 +34,36 @@ class EnrollmentController extends Controller
     /**
      * Display a listing of enrollments with filtering
      */
+    #[OA\Get(
+        path: "/api/v1/enrollments",
+        summary: "List and filter enrollments",
+        tags: ["Enrollments"],
+        parameters: [
+            new OA\Parameter(ref: "#/components/parameters/enrollment_student_id_filter"),
+            new OA\Parameter(ref: "#/components/parameters/enrollment_course_section_id_filter"),
+            new OA\Parameter(ref: "#/components/parameters/enrollment_status_filter"),
+            new OA\Parameter(name: "per_page", in: "query", required: false, schema: new OA\Schema(type: "integer", default: 15)),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "A paginated list of enrollments.",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "data", type: "array", items: new OA\Items(ref: "#/components/schemas/EnrollmentResource")),
+                        new OA\Property(property: "meta", type: "object", properties: [
+                            new OA\Property(property: "current_page", type: "integer"),
+                            new OA\Property(property: "last_page", type: "integer"),
+                            new OA\Property(property: "per_page", type: "integer"),
+                            new OA\Property(property: "total", type: "integer"),
+                        ]),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+        ]
+    )]
     public function index(Request $request): JsonResponse
     {
         $this->authorize('viewAny', Enrollment::class);
@@ -67,6 +102,31 @@ class EnrollmentController extends Controller
     /**
      * Store a newly created enrollment
      */
+    #[OA\Post(
+        path: "/api/v1/enrollments",
+        summary: "Enroll a student in a course section",
+        description: "Enrolls a student. If the course is full, they may be placed on the waitlist.",
+        tags: ["Enrollments"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: "#/components/schemas/StoreEnrollmentRequest")
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: "Enrollment successful or waitlisted.",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "message", type: "string"),
+                        new OA\Property(property: "data", ref: "#/components/schemas/EnrollmentResource"),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+            new OA\Response(response: 422, description: "Validation error or business rule violation (e.g., duplicate enrollment, prerequisites not met)."),
+        ]
+    )]
     public function store(StoreEnrollmentRequest $request): JsonResponse
     {
         $this->authorize('create', Enrollment::class);
@@ -100,6 +160,28 @@ class EnrollmentController extends Controller
     /**
      * Display the specified enrollment
      */
+    #[OA\Get(
+        path: "/api/v1/enrollments/{enrollment}",
+        summary: "Get a single enrollment record",
+        tags: ["Enrollments"],
+        parameters: [
+            new OA\Parameter(name: "enrollment", in: "path", required: true, description: "ID of the enrollment record", schema: new OA\Schema(type: "integer")),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "The requested enrollment record.",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "data", ref: "#/components/schemas/EnrollmentResource"),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+            new OA\Response(response: 404, description: "Not Found"),
+        ]
+    )]
     public function show(Enrollment $enrollment): JsonResponse
     {
         $this->authorize('view', $enrollment);
@@ -125,6 +207,35 @@ class EnrollmentController extends Controller
     /**
      * Update the specified enrollment
      */
+    #[OA\Put(
+        path: "/api/v1/enrollments/{enrollment}",
+        summary: "Update an enrollment record",
+        description: "Updates the status or grade of an enrollment. Certain status transitions are restricted.",
+        tags: ["Enrollments"],
+        parameters: [
+            new OA\Parameter(name: "enrollment", in: "path", required: true, description: "ID of the enrollment record", schema: new OA\Schema(type: "integer")),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: "#/components/schemas/UpdateEnrollmentRequest")
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Enrollment updated successfully.",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "message", type: "string"),
+                        new OA\Property(property: "data", ref: "#/components/schemas/EnrollmentResource"),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+            new OA\Response(response: 404, description: "Not Found"),
+            new OA\Response(response: 422, description: "Validation error or invalid status transition."),
+        ]
+    )]
     public function update(UpdateEnrollmentRequest $request, Enrollment $enrollment): JsonResponse
     {
         $this->authorize('update', $enrollment);
@@ -167,6 +278,25 @@ class EnrollmentController extends Controller
     /**
      * Remove the specified enrollment (withdraw)
      */
+    #[OA\Delete(
+        path: "/api/v1/enrollments/{enrollment}",
+        summary: "Withdraw a student from a course section (soft delete)",
+        description: "This is the standard 'delete' action, which updates the enrollment status to 'withdrawn'.",
+        tags: ["Enrollments"],
+        parameters: [
+            new OA\Parameter(name: "enrollment", in: "path", required: true, description: "ID of the enrollment record", schema: new OA\Schema(type: "integer")),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Student withdrawn successfully.",
+                content: new OA\JsonContent(properties: [new OA\Property(property: "message", type: "string")])
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+            new OA\Response(response: 404, description: "Not Found"),
+        ]
+    )]
     public function destroy(Enrollment $enrollment): JsonResponse
     {
         $this->authorize('delete', $enrollment);
@@ -190,6 +320,26 @@ class EnrollmentController extends Controller
     /**
      * Withdraw a student from enrollment
      */
+    #[OA\Post(
+        path: "/api/v1/enrollments/{enrollment}/withdraw",
+        summary: "Explicitly withdraw a student from an enrollment",
+        description: "Sets the enrollment status to 'withdrawn' and may trigger waitlist promotions.",
+        tags: ["Enrollments"],
+        parameters: [
+            new OA\Parameter(name: "enrollment", in: "path", required: true, description: "ID of the enrollment to withdraw from", schema: new OA\Schema(type: "integer")),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Student withdrawn successfully.",
+                content: new OA\JsonContent(properties: [new OA\Property(property: "message", type: "string")])
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+            new OA\Response(response: 404, description: "Not Found"),
+            new OA\Response(response: 422, description: "Enrollment already withdrawn or completed."),
+        ]
+    )]
     public function withdraw(Enrollment $enrollment): JsonResponse
     {
         $this->authorize('update', $enrollment);
@@ -219,6 +369,33 @@ class EnrollmentController extends Controller
     /**
      * Mark enrollment as completed
      */
+    #[OA\Post(
+        path: "/api/v1/enrollments/{enrollment}/complete",
+        summary: "Mark an enrollment as completed",
+        description: "Sets the enrollment status to 'completed' and assigns a grade.",
+        tags: ["Enrollments"],
+        parameters: [
+            new OA\Parameter(name: "enrollment", in: "path", required: true, description: "ID of the enrollment to complete", schema: new OA\Schema(type: "integer")),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["grade"],
+                properties: [new OA\Property(property: "grade", type: "string", maxLength: 5, example: "B+")]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Enrollment marked as completed.",
+                content: new OA\JsonContent(properties: [new OA\Property(property: "message", type: "string")])
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+            new OA\Response(response: 404, description: "Not Found"),
+            new OA\Response(response: 422, description: "Validation error (e.g., not an enrolled student, missing grade)."),
+        ]
+    )]
     public function complete(Enrollment $enrollment, Request $request): JsonResponse
     {
         $this->authorize('update', $enrollment);
@@ -250,6 +427,27 @@ class EnrollmentController extends Controller
     /**
      * Get enrollments for a specific student
      */
+    #[OA\Get(
+        path: "/api/v1/students/{student}/enrollments",
+        summary: "Get all enrollments for a specific student",
+        tags: ["Enrollments"],
+        parameters: [
+            new OA\Parameter(name: "student", in: "path", required: true, description: "ID of the student", schema: new OA\Schema(type: "integer")),
+            new OA\Parameter(ref: "#/components/parameters/enrollment_status_filter"),
+            new OA\Parameter(name: "per_page", in: "query", required: false, schema: new OA\Schema(type: "integer", default: 15)),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "A paginated list of the student's enrollments.", content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: "data", type: "array", items: new OA\Items(ref: "#/components/schemas/EnrollmentResource")),
+                    new OA\Property(property: "meta", type: "object"),
+                ]
+            )),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Unauthorized"),
+            new OA\Response(response: 404, description: "Student Not Found"),
+        ]
+    )]
     public function byStudent(Student $student, Request $request): JsonResponse
     {
         $this->authorize('view', $student);
@@ -298,6 +496,26 @@ class EnrollmentController extends Controller
     /**
      * Get enrollments for a specific course section
      */
+    #[OA\Get(
+        path: "/api/v1/course-sections/{courseSection}/enrollments",
+        summary: "Get all enrollments for a specific course section",
+        tags: ["Enrollments"],
+        parameters: [
+            new OA\Parameter(name: "courseSection", in: "path", required: true, description: "ID of the course section", schema: new OA\Schema(type: "integer")),
+            new OA\Parameter(ref: "#/components/parameters/enrollment_status_filter"),
+            new OA\Parameter(name: "per_page", in: "query", required: false, schema: new OA\Schema(type: "integer", default: 15)),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "A paginated list of the course section's enrollments.", content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: "data", type: "array", items: new OA\Items(ref: "#/components/schemas/EnrollmentResource")),
+                    new OA\Property(property: "meta", type: "object"),
+                ]
+            )),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 404, description: "Course Section Not Found"),
+        ]
+    )]
     public function byCourseSection(CourseSection $courseSection, Request $request): JsonResponse
     {
         $this->authorize('view', $courseSection);

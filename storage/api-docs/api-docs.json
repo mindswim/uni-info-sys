@@ -1085,6 +1085,216 @@
                 }
             }
         },
+        "/api/v1/course-sections": {
+            "get": {
+                "tags": [
+                    "Course Sections"
+                ],
+                "summary": "List all course sections",
+                "operationId": "9e98a64880317142c6b363ad45315d45",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "course_id",
+                        "in": "query",
+                        "description": "Filter by course ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "term_id",
+                        "in": "query",
+                        "description": "Filter by term ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "instructor_id",
+                        "in": "query",
+                        "description": "Filter by instructor (staff) ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "room_id",
+                        "in": "query",
+                        "description": "Filter by room ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A paginated list of course sections.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CourseSectionResource"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Course Sections"
+                ],
+                "summary": "Create a new course section",
+                "operationId": "86c6f4c982488e3403f8c1609a48859a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreCourseSectionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Course section created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseSectionResource"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/v1/course-sections/{courseSection}": {
+            "get": {
+                "tags": [
+                    "Course Sections"
+                ],
+                "summary": "Get a single course section",
+                "operationId": "00d59e0c4c524487238b8c275fb68320",
+                "parameters": [
+                    {
+                        "name": "courseSection",
+                        "in": "path",
+                        "description": "ID of the course section",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested course section.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseSectionResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Course Sections"
+                ],
+                "summary": "Update a course section",
+                "operationId": "c0b5f2f664d7c3cbfc27980b0f5504cb",
+                "parameters": [
+                    {
+                        "name": "courseSection",
+                        "in": "path",
+                        "description": "ID of the course section",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateCourseSectionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Course section updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseSectionResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Course Sections"
+                ],
+                "summary": "Delete a course section",
+                "operationId": "733375b2778eb586823f46cbfc36aeeb",
+                "parameters": [
+                    {
+                        "name": "courseSection",
+                        "in": "path",
+                        "description": "ID of the course section",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Course section deleted successfully."
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            }
+        },
         "/api/v1/departments": {
             "get": {
                 "tags": [
@@ -1715,6 +1925,526 @@
                         "sanctum": []
                     }
                 ]
+            }
+        },
+        "/api/v1/enrollments": {
+            "get": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "List and filter enrollments",
+                "description": "Display a listing of enrollments with filtering",
+                "operationId": "6061c8b5014f860a258a2f973df92d7d",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/enrollment_student_id_filter"
+                    },
+                    {
+                        "$ref": "#/components/parameters/enrollment_course_section_id_filter"
+                    },
+                    {
+                        "$ref": "#/components/parameters/enrollment_status_filter"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A paginated list of enrollments.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/EnrollmentResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "per_page": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Enroll a student in a course section",
+                "description": "Enrolls a student. If the course is full, they may be placed on the waitlist.",
+                "operationId": "86c57a559d3c0a7399072fbd221d073c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreEnrollmentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Enrollment successful or waitlisted.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/EnrollmentResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation error or business rule violation (e.g., duplicate enrollment, prerequisites not met)."
+                    }
+                }
+            }
+        },
+        "/api/v1/enrollments/{enrollment}": {
+            "get": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Get a single enrollment record",
+                "description": "Display the specified enrollment",
+                "operationId": "e29c9ce8aa599f8e59cb8c31c6c9b8a2",
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "description": "ID of the enrollment record",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested enrollment record.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/EnrollmentResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Update an enrollment record",
+                "description": "Updates the status or grade of an enrollment. Certain status transitions are restricted.",
+                "operationId": "ecd9eb810da877a69b02fb166dea0276",
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "description": "ID of the enrollment record",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateEnrollmentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Enrollment updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/EnrollmentResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation error or invalid status transition."
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Withdraw a student from a course section (soft delete)",
+                "description": "This is the standard 'delete' action, which updates the enrollment status to 'withdrawn'.",
+                "operationId": "9186ac1d4ef41da811e4bea2b36c0d91",
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "description": "ID of the enrollment record",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Student withdrawn successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            }
+        },
+        "/api/v1/enrollments/{enrollment}/withdraw": {
+            "post": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Explicitly withdraw a student from an enrollment",
+                "description": "Sets the enrollment status to 'withdrawn' and may trigger waitlist promotions.",
+                "operationId": "fbd6183bdc0668e9b2af371fb0105a4a",
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "description": "ID of the enrollment to withdraw from",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Student withdrawn successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Enrollment already withdrawn or completed."
+                    }
+                }
+            }
+        },
+        "/api/v1/enrollments/{enrollment}/complete": {
+            "post": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Mark an enrollment as completed",
+                "description": "Sets the enrollment status to 'completed' and assigns a grade.",
+                "operationId": "70ec7f93001b67d31d7d03cbc4681c72",
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "description": "ID of the enrollment to complete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "grade"
+                                ],
+                                "properties": {
+                                    "grade": {
+                                        "type": "string",
+                                        "maxLength": 5,
+                                        "example": "B+"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Enrollment marked as completed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation error (e.g., not an enrolled student, missing grade)."
+                    }
+                }
+            }
+        },
+        "/api/v1/students/{student}/enrollments": {
+            "get": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Get all enrollments for a specific student",
+                "description": "Get enrollments for a specific student",
+                "operationId": "6e00802059e2223b7f503d4a651b068b",
+                "parameters": [
+                    {
+                        "name": "student",
+                        "in": "path",
+                        "description": "ID of the student",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/enrollment_status_filter"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A paginated list of the student's enrollments.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/EnrollmentResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Student Not Found"
+                    }
+                }
+            }
+        },
+        "/api/v1/course-sections/{courseSection}/enrollments": {
+            "get": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Get all enrollments for a specific course section",
+                "description": "Get enrollments for a specific course section",
+                "operationId": "949805d06a40872fc0cde05325bff5e3",
+                "parameters": [
+                    {
+                        "name": "courseSection",
+                        "in": "path",
+                        "description": "ID of the course section",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/enrollment_status_filter"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A paginated list of the course section's enrollments.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/EnrollmentResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Course Section Not Found"
+                    }
+                }
             }
         },
         "/api/v1/faculties": {
@@ -3813,6 +4543,103 @@
                 },
                 "type": "object"
             },
+            "StoreCourseSectionRequest": {
+                "title": "Store Course Section Request",
+                "description": "Request body for creating a new course section.",
+                "required": [
+                    "course_id",
+                    "term_id",
+                    "instructor_id",
+                    "room_id",
+                    "capacity",
+                    "schedule_days",
+                    "start_time",
+                    "end_time"
+                ],
+                "properties": {
+                    "course_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "term_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "instructor_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "room_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "capacity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "example": 50
+                    },
+                    "schedule_days": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "Monday",
+                                "Tuesday",
+                                "Wednesday",
+                                "Thursday",
+                                "Friday",
+                                "Saturday",
+                                "Sunday"
+                            ]
+                        },
+                        "example": [
+                            "Monday",
+                            "Wednesday"
+                        ]
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "time",
+                        "example": "09:00"
+                    },
+                    "end_time": {
+                        "type": "string",
+                        "format": "time",
+                        "example": "10:30"
+                    }
+                },
+                "type": "object"
+            },
+            "StoreEnrollmentRequest": {
+                "title": "Store Enrollment Request",
+                "description": "Request body for enrolling a student in a course section.",
+                "required": [
+                    "student_id",
+                    "course_section_id"
+                ],
+                "properties": {
+                    "student_id": {
+                        "description": "The ID of the student to enroll.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "course_section_id": {
+                        "description": "The ID of the course section to enroll in.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "status": {
+                        "description": "Optional status, defaults to logic in EnrollmentService.",
+                        "type": "string",
+                        "enum": [
+                            "enrolled",
+                            "waitlisted"
+                        ],
+                        "example": "enrolled"
+                    }
+                },
+                "type": "object"
+            },
             "StoreProgramRequest": {
                 "title": "Store Program Request",
                 "description": "Request body for creating a new program.",
@@ -4073,6 +4900,88 @@
                             1,
                             2
                         ]
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateCourseSectionRequest": {
+                "title": "Update Course Section Request",
+                "description": "Request body for updating a course section. All fields are optional.",
+                "properties": {
+                    "course_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "term_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "instructor_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "room_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "capacity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "example": 55
+                    },
+                    "schedule_days": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "Monday",
+                                "Tuesday",
+                                "Wednesday",
+                                "Thursday",
+                                "Friday",
+                                "Saturday",
+                                "Sunday"
+                            ]
+                        },
+                        "example": [
+                            "Tuesday",
+                            "Thursday"
+                        ]
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "time",
+                        "example": "13:00"
+                    },
+                    "end_time": {
+                        "type": "string",
+                        "format": "time",
+                        "example": "14:30"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateEnrollmentRequest": {
+                "title": "Update Enrollment Request",
+                "description": "Request body for updating an enrollment. All fields are optional.",
+                "properties": {
+                    "status": {
+                        "description": "The new status of the enrollment.",
+                        "type": "string",
+                        "enum": [
+                            "enrolled",
+                            "waitlisted",
+                            "completed",
+                            "withdrawn"
+                        ],
+                        "example": "completed"
+                    },
+                    "grade": {
+                        "description": "The grade received (required when status is 'completed').",
+                        "type": "string",
+                        "maxLength": 5,
+                        "example": "A",
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -4439,6 +5348,63 @@
                 },
                 "type": "object"
             },
+            "CourseSectionResource": {
+                "title": "Course Section Resource",
+                "description": "Represents a specific section of a course offered in a term.",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "capacity": {
+                        "type": "integer",
+                        "example": 40
+                    },
+                    "schedule_days": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "Monday",
+                                "Tuesday",
+                                "Wednesday",
+                                "Thursday",
+                                "Friday",
+                                "Saturday",
+                                "Sunday"
+                            ]
+                        },
+                        "example": [
+                            "Tuesday",
+                            "Thursday"
+                        ]
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "time",
+                        "example": "10:00"
+                    },
+                    "end_time": {
+                        "type": "string",
+                        "format": "time",
+                        "example": "11:30"
+                    },
+                    "course": {
+                        "$ref": "#/components/schemas/CourseResource"
+                    },
+                    "term": {
+                        "$ref": "#/components/schemas/TermResource"
+                    },
+                    "instructor": {
+                        "$ref": "#/components/schemas/StaffResource"
+                    },
+                    "room": {
+                        "$ref": "#/components/schemas/RoomResource"
+                    }
+                },
+                "type": "object"
+            },
             "DepartmentResource": {
                 "title": "Department Resource",
                 "description": "Represents a department within a faculty.",
@@ -4502,6 +5468,127 @@
                     "updated_at": {
                         "type": "string",
                         "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "EnrollmentResource": {
+                "title": "Enrollment Resource",
+                "description": "Represents a student's enrollment in a course section.",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "enrolled",
+                            "waitlisted",
+                            "completed",
+                            "withdrawn"
+                        ],
+                        "example": "enrolled"
+                    },
+                    "grade": {
+                        "type": "string",
+                        "example": "A-",
+                        "nullable": true
+                    },
+                    "enrolled_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "student": {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "student_number": {
+                                "type": "string",
+                                "example": "SN2024001"
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "John Doe"
+                            },
+                            "email": {
+                                "type": "string",
+                                "format": "email",
+                                "example": "john.doe@example.com"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "course_section": {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "section_number": {
+                                "type": "string",
+                                "example": "A01",
+                                "nullable": true
+                            },
+                            "capacity": {
+                                "type": "integer",
+                                "example": 40
+                            },
+                            "enrolled_count": {
+                                "type": "integer",
+                                "example": 38
+                            },
+                            "available_spots": {
+                                "type": "integer",
+                                "example": 2
+                            },
+                            "schedule_days": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "example": [
+                                    "Tuesday",
+                                    "Thursday"
+                                ]
+                            },
+                            "start_time": {
+                                "type": "string",
+                                "format": "time",
+                                "example": "10:00"
+                            },
+                            "end_time": {
+                                "type": "string",
+                                "format": "time",
+                                "example": "11:30"
+                            },
+                            "schedule_display": {
+                                "type": "string",
+                                "example": "Tuesday, Thursday 10:00 AM-11:30 AM"
+                            },
+                            "course": {
+                                "$ref": "#/components/schemas/CourseResource"
+                            },
+                            "term": {
+                                "$ref": "#/components/schemas/TermResource"
+                            },
+                            "instructor": {
+                                "$ref": "#/components/schemas/StaffResource"
+                            },
+                            "room": {
+                                "$ref": "#/components/schemas/RoomResource"
+                            }
+                        },
+                        "type": "object"
                     }
                 },
                 "type": "object"
@@ -4884,6 +5971,41 @@
                 "type": "object"
             }
         },
+        "parameters": {
+            "enrollment_student_id_filter": {
+                "name": "student_id",
+                "in": "query",
+                "description": "Filter by student ID",
+                "required": false,
+                "schema": {
+                    "type": "integer"
+                }
+            },
+            "enrollment_course_section_id_filter": {
+                "name": "course_section_id",
+                "in": "query",
+                "description": "Filter by course section ID",
+                "required": false,
+                "schema": {
+                    "type": "integer"
+                }
+            },
+            "enrollment_status_filter": {
+                "name": "status",
+                "in": "query",
+                "description": "Filter by enrollment status",
+                "required": false,
+                "schema": {
+                    "type": "string",
+                    "enum": [
+                        "enrolled",
+                        "waitlisted",
+                        "completed",
+                        "withdrawn"
+                    ]
+                }
+            }
+        },
         "securitySchemes": {
             "bearerAuth": {
                 "type": "http",
@@ -4910,12 +6032,20 @@
             "description": "Endpoints for managing courses and their prerequisites."
         },
         {
+            "name": "Course Sections",
+            "description": "Endpoints for managing course sections."
+        },
+        {
             "name": "Departments",
             "description": "Department management endpoints"
         },
         {
             "name": "Documents",
             "description": "API endpoints for managing student documents"
+        },
+        {
+            "name": "Enrollments",
+            "description": "Endpoints for managing student enrollments in course sections."
         },
         {
             "name": "Faculties",

@@ -4,7 +4,28 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    title: "Course Section Resource",
+    description: "Represents a specific section of a course offered in a term.",
+    properties: [
+        new OA\Property(property: "id", type: "integer", readOnly: true, example: 1),
+        new OA\Property(property: "capacity", type: "integer", example: 40),
+        new OA\Property(
+            property: "schedule_days",
+            type: "array",
+            items: new OA\Items(type: "string", enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]),
+            example: ["Tuesday", "Thursday"]
+        ),
+        new OA\Property(property: "start_time", type: "string", format: "time", example: "10:00"),
+        new OA\Property(property: "end_time", type: "string", format: "time", example: "11:30"),
+        new OA\Property(property: "course", ref: "#/components/schemas/CourseResource"),
+        new OA\Property(property: "term", ref: "#/components/schemas/TermResource"),
+        new OA\Property(property: "instructor", ref: "#/components/schemas/StaffResource"),
+        new OA\Property(property: "room", ref: "#/components/schemas/RoomResource"),
+    ]
+)]
 class CourseSectionResource extends JsonResource
 {
     /**

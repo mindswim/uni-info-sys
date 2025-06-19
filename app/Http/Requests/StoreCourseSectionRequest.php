@@ -5,7 +5,28 @@ namespace App\Http\Requests;
 use App\Models\CourseSection;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    title: "Store Course Section Request",
+    description: "Request body for creating a new course section.",
+    required: ["course_id", "term_id", "instructor_id", "room_id", "capacity", "schedule_days", "start_time", "end_time"],
+    properties: [
+        new OA\Property(property: "course_id", type: "integer", example: 1),
+        new OA\Property(property: "term_id", type: "integer", example: 1),
+        new OA\Property(property: "instructor_id", type: "integer", example: 1),
+        new OA\Property(property: "room_id", type: "integer", example: 1),
+        new OA\Property(property: "capacity", type: "integer", minimum: 1, example: 50),
+        new OA\Property(
+            property: "schedule_days",
+            type: "array",
+            items: new OA\Items(type: "string", enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]),
+            example: ["Monday", "Wednesday"]
+        ),
+        new OA\Property(property: "start_time", type: "string", format: "time", example: "09:00"),
+        new OA\Property(property: "end_time", type: "string", format: "time", example: "10:30"),
+    ]
+)]
 class StoreCourseSectionRequest extends FormRequest
 {
     /**

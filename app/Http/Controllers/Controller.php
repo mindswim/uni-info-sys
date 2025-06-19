@@ -26,6 +26,30 @@ use Illuminate\Routing\Controller as BaseController;
  *     scheme="bearer",
  *     bearerFormat="JWT"
  * )
+ * @OA\Parameter(
+ *    parameter="enrollment_student_id_filter",
+ *    name="student_id",
+ *    in="query",
+ *    description="Filter by student ID",
+ *    required=false,
+ *    @OA\Schema(type="integer")
+ * )
+ * @OA\Parameter(
+ *   parameter="enrollment_course_section_id_filter",
+ *   name="course_section_id",
+ *   in="query",
+ *   description="Filter by course section ID",
+ *   required=false,
+ *   @OA\Schema(type="integer")
+ * )
+ * @OA\Parameter(
+ *  parameter="enrollment_status_filter",
+ *  name="status",
+ *  in="query",
+ *  description="Filter by enrollment status",
+ *  required=false,
+ *  @OA\Schema(type="string", enum={"enrolled", "waitlisted", "completed", "withdrawn"})
+ * )
  */
 abstract class Controller extends BaseController
 {

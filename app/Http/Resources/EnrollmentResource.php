@@ -4,7 +4,65 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    schema: "EnrollmentResource",
+    title: "Enrollment Resource",
+    description: "Represents a student's enrollment in a course section.",
+    properties: [
+        new OA\Property(property: "id", type: "integer", readOnly: true, example: 1),
+        new OA\Property(property: "status", type: "string", enum: ["enrolled", "waitlisted", "completed", "withdrawn"], example: "enrolled"),
+        new OA\Property(property: "grade", type: "string", nullable: true, example: "A-"),
+        new OA\Property(property: "enrolled_at", type: "string", format: "date-time", readOnly: true),
+        new OA\Property(property: "updated_at", type: "string", format: "date-time", readOnly: true),
+        new OA\Property(
+            property: "student",
+            type: "object",
+            properties: [
+                new OA\Property(property: "id", type: "integer", example: 1),
+                new OA\Property(property: "student_number", type: "string", example: "SN2024001"),
+                new OA\Property(property: "name", type: "string", example: "John Doe"),
+                new OA\Property(property: "email", type: "string", format: "email", example: "john.doe@example.com"),
+            ]
+        ),
+        new OA\Property(
+            property: "course_section",
+            type: "object",
+            properties: [
+                new OA\Property(property: "id", type: "integer", example: 1),
+                new OA\Property(property: "section_number", type: "string", nullable: true, example: "A01"),
+                new OA\Property(property: "capacity", type: "integer", example: 40),
+                new OA\Property(property: "enrolled_count", type: "integer", example: 38),
+                new OA\Property(property: "available_spots", type: "integer", example: 2),
+                new OA\Property(property: "schedule_days", type: "array", items: new OA\Items(type: "string"), example: ["Tuesday", "Thursday"]),
+                new OA\Property(property: "start_time", type: "string", format: "time", example: "10:00"),
+                new OA\Property(property: "end_time", type: "string", format: "time", example: "11:30"),
+                new OA\Property(property: "schedule_display", type: "string", example: "Tuesday, Thursday 10:00 AM-11:30 AM"),
+                new OA\Property(
+                    property: "course",
+                    type: "object",
+                    ref: "#/components/schemas/CourseResource"
+                ),
+                new OA\Property(
+                    property: "term",
+                    type: "object",
+                    ref: "#/components/schemas/TermResource"
+                ),
+                new OA\Property(
+                    property: "instructor",
+                    type: "object",
+                    ref: "#/components/schemas/StaffResource"
+                ),
+                new OA\Property(
+                    property: "room",
+                    type: "object",
+                    ref: "#/components/schemas/RoomResource"
+                ),
+            ]
+        ),
+    ]
+)]
 class EnrollmentResource extends JsonResource
 {
     /**

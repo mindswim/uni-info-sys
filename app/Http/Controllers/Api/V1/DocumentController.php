@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\AcademicRecord;
+use App\Models\Document;
 use Illuminate\Http\Request;
 
-class AcademicRecordController extends Controller
+class DocumentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +27,7 @@ class AcademicRecordController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(AcademicRecord $academicRecord)
+    public function show(Document $document)
     {
         //
     }
@@ -35,7 +35,7 @@ class AcademicRecordController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, AcademicRecord $academicRecord)
+    public function update(Request $request, Document $document)
     {
         //
     }
@@ -43,7 +43,7 @@ class AcademicRecordController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(AcademicRecord $academicRecord)
+    public function destroy(Document $document)
     {
         //
     }

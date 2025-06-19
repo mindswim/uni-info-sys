@@ -153,14 +153,15 @@ This phase focuses on adding OpenAPI annotations and comprehensive feature tests
 **Goal**: Add comprehensive OpenAPI documentation and ensure full test coverage for the `Student`, `AcademicRecord`, and `Document` API endpoints.
 
 **Implementation Steps**:
-1.  **Review Controllers**: Systematically go through `Api/V1/StudentController.php`, `Api/V1/AcademicRecordController.php`, and `Api/V1/DocumentController.php`.
-2.  **Add Annotations**: For each method (`index`, `show`, `store`, `update`, `destroy`), add detailed OpenAPI annotations. Document all query parameters for filtering, path parameters, request body schemas, and all possible success and error responses.
-3.  **Create Missing Tests**: If they don't exist, create feature tests: `Api/V1/StudentApiTest.php`, `Api/V1/AcademicRecordApiTest.php`, and `Api/V1/DocumentApiTest.php`.
-4.  **Enhance Existing Tests**: Ensure tests cover all documented parameters and responses.
+1.  **Review Controllers and Resources**: Systematically go through `Api/V1/StudentController.php`, `Api/V1/AcademicRecordController.php`, `Api/V1/DocumentController.php` and their corresponding Resource classes (`StudentResource.php`, etc.).
+2.  **Add Resource Schemas**: Add `#[OA\Schema]` annotations to `StudentResource`, `AcademicRecordResource`, and `DocumentResource` to define their structure for the OpenAPI specification.
+3.  **Add Controller Annotations**: For each method (`index`, `show`, `store`, `update`, `destroy`), add detailed OpenAPI annotations (`@OA\Get`, `@OA\Post`, etc.). Document all query parameters for filtering, path parameters, request body schemas, and all possible success and error responses.
+4.  **Update Related Resources**: After adding the schema to `StudentResource`, update `AdmissionApplicationResource` to use `ref: "#/components/schemas/StudentResource"` instead of the temporary `type: "object"` definition.
+5.  **Create/Enhance Tests**: If they don't exist, create feature tests: `Api/V1/StudentApiTest.php`, `Api/V1/AcademicRecordApiTest.php`, and `Api/V1/DocumentApiTest.php`. Ensure tests cover all documented parameters and responses.
 
 **Testing & Verification**:
 1.  **Run Tests**: Execute all related tests and ensure they pass.
-2.  **Generate and Verify Docs**: Run `php artisan l5-swagger:generate`. Navigate to the documentation UI and confirm that the "Student", "Academic Record", and "Document" sections are now complete and accurate. Use the "Try it out" feature to confirm functionality.
+2.  **Generate and Verify Docs**: Run `php artisan l5-swagger:generate`. Navigate to the documentation UI and confirm that the "Student", "Academic Record", and "Document" sections are now complete and that the `AdmissionApplication` schema correctly references the `Student` schema.
 
 **Checkpoint & Human Approval (Mandatory Stop)**:
 1.  **AI Statement of Completion**: Task 14 is complete.
@@ -174,11 +175,15 @@ This phase focuses on adding OpenAPI annotations and comprehensive feature tests
 **Goal**: Add documentation and tests for `Program` and `Term` API endpoints.
 
 **Implementation Steps**:
-1.  **Annotate Controllers**: Add full OpenAPI annotations to `Api/V1/ProgramController.php` and `Api/V1/TermController.php`.
-2.  **Create/Enhance Tests**: Create or improve `Api/V1/ProgramApiTest.php` and `Api/V1/TermApiTest.php`.
+1.  **Add Resource Schemas**: Add `#[OA\Schema]` annotations to `ProgramResource.php` and `TermResource.php`.
+2.  **Annotate Controllers**: Add full OpenAPI annotations to `Api/V1/ProgramController.php` and `Api/V1/TermController.php`.
+3.  **Update Related Resources**:
+    *   In `ProgramChoiceResource.php`, update the `program` property to use `ref: "#/components/schemas/ProgramResource"`.
+    *   In `AdmissionApplicationResource.php`, update the `term` property to use `ref: "#/components/schemas/TermResource"`.
+4.  **Create/Enhance Tests**: Create or improve `Api/V1/ProgramApiTest.php` and `Api/V1/TermApiTest.php`.
 
 **Testing & Verification**:
-1.  **Run Tests & Verify Docs**: Run tests, regenerate documentation, and verify the "Program" and "Term" sections in the Swagger UI.
+1.  **Run Tests & Verify Docs**: Run tests, regenerate documentation, and verify the "Program" and "Term" sections in the Swagger UI. Confirm that the `AdmissionApplication` and `ProgramChoice` schemas now correctly reference their related schemas.
 
 **Checkpoint & Human Approval (Mandatory Stop)**:
 1.  **AI Statement of Completion**: Task 15 is complete.
@@ -192,8 +197,9 @@ This phase focuses on adding OpenAPI annotations and comprehensive feature tests
 **Goal**: Add documentation and tests for `CourseSection` and `Enrollment` API endpoints.
 
 **Implementation Steps**:
-1.  **Annotate Controllers**: Add full OpenAPI annotations to `Api/V1/CourseSectionController.php` and `Api/V1/EnrollmentController.php`. These are complex controllers, so pay special attention to documenting the extensive filtering capabilities.
-2.  **Create/Enhance Tests**: Create or improve `Api/V1/CourseSectionApiTest.php` and review the existing `Api/V1/EnrollmentApiTest.php` to ensure it covers all documented functionality.
+1.  **Add Resource Schemas**: Add `#[OA\Schema]` annotations to `CourseSectionResource.php` and `EnrollmentResource.php`.
+2.  **Annotate Controllers**: Add full OpenAPI annotations to `Api/V1/CourseSectionController.php` and `Api/V1/EnrollmentController.php`. These are complex controllers, so pay special attention to documenting the extensive filtering capabilities.
+3.  **Create/Enhance Tests**: Create or improve `Api/V1/CourseSectionApiTest.php` and review the existing `Api/V1/EnrollmentApiTest.php` to ensure it covers all documented functionality.
 
 **Testing & Verification**:
 1.  **Run Tests & Verify Docs**: Run tests, regenerate documentation, and verify the "Course Section" and "Enrollment" sections in the Swagger UI.
@@ -210,8 +216,9 @@ This phase focuses on adding OpenAPI annotations and comprehensive feature tests
 **Goal**: Add documentation and tests for the `Staff` API endpoint.
 
 **Implementation Steps**:
-1.  **Annotate Controller**: Add full OpenAPI annotations to `Api/V1/StaffController.php`.
-2.  **Create/Enhance Tests**: Create or improve `Api/V1/StaffApiTest.php`.
+1.  **Add Resource Schema**: Add an `#[OA\Schema]` annotation to `StaffResource.php`.
+2.  **Annotate Controller**: Add full OpenAPI annotations to `Api/V1/StaffController.php`.
+3.  **Create/Enhance Tests**: Create or improve `Api/V1/StaffApiTest.php`.
 
 **Testing & Verification**:
 1.  **Run Tests & Verify Docs**: Run tests, regenerate documentation, and verify the "Staff" section in the Swagger UI.
@@ -228,8 +235,9 @@ This phase focuses on adding OpenAPI annotations and comprehensive feature tests
 **Goal**: Add documentation and tests for `Building` and `Room` API endpoints.
 
 **Implementation Steps**:
-1.  **Annotate Controllers**: Add full OpenAPI annotations to `Api/V1/BuildingController.php` and `Api/V1/RoomController.php`.
-2.  **Create/Enhance Tests**: Create or improve `Api/V1/BuildingApiTest.php` and `Api/V1/RoomApiTest.php`.
+1.  **Add Resource Schemas**: Add `#[OA\Schema]` annotations to `BuildingResource.php` and `RoomResource.php`.
+2.  **Annotate Controllers**: Add full OpenAPI annotations to `Api/V1/BuildingController.php` and `Api/V1/RoomController.php`.
+3.  **Create/Enhance Tests**: Create or improve `Api/V1/BuildingApiTest.php` and `Api/V1/RoomApiTest.php`.
 
 **Testing & Verification**:
 1.  **Run Tests & Verify Docs**: Run tests, regenerate documentation, and verify the "Building" and "Room" sections in the Swagger UI.

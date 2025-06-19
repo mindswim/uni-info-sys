@@ -1,0 +1,132 @@
+<?php
+
+namespace Tests\Feature\Api\V1;
+
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
+use Tests\TestCase;
+use App\Models\User;
+use App\Models\Student;
+use App\Models\Role;
+use Laravel\Sanctum\Sanctum;
+
+class StudentApiTest extends TestCase
+{
+    use RefreshDatabase, WithFaker;
+
+    private $adminUser, $staffUser, $studentUser1, $studentUser2;
+    private $student1, $student2;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        // Create Roles
+        $adminRole = Role::create(['name' => 'admin']);
+        $staffRole = Role::create(['name' => 'staff']);
+        $studentRole = Role::create(['name' => 'student']);
+
+        // Create Users
+        $this->adminUser = User::factory()->create();
+        $this->adminUser->roles()->attach($adminRole);
+
+        $this->staffUser = User::factory()->create();
+        $this->staffUser->roles()->attach($staffRole);
+
+        $this->studentUser1 = User::factory()->create();
+        $this->studentUser1->roles()->attach($studentRole);
+        $this->student1 = Student::factory()->create(['user_id' => $this->studentUser1->id]);
+
+        $this->studentUser2 = User::factory()->create();
+        $this->studentUser2->roles()->attach($studentRole);
+        $this->student2 = Student::factory()->create(['user_id' => $this->studentUser2->id]);
+    }
+
+    public function test_unauthenticated_user_cannot_access_student_endpoints()
+    {
+        $this->getJson('/api/v1/students')->assertStatus(401);
+        $this->getJson("/api/v1/students/{$this->student1->id}")->assertStatus(401);
+        $this->postJson('/api/v1/students')->assertStatus(401);
+        $this->putJson("/api/v1/students/{$this->student1->id}")->assertStatus(401);
+        $this->deleteJson("/api/v1/students/{$this->student1->id}")->assertStatus(401);
+    }
+
+    public function test_admin_can_view_all_students()
+    {
+        Sanctum::actingAs($this->adminUser);
+        $this->getJson('/api/v1/students')
+            ->assertStatus(200)
+            ->assertJsonCount(2, 'data');
+    }
+
+    public function test_staff_can_view_all_students()
+    {
+        Sanctum::actingAs($this->staffUser);
+        $this->getJson('/api/v1/students')
+            ->assertStatus(200)
+            ->assertJsonCount(2, 'data');
+    }
+
+    public function test_student_can_only_view_their_own_record_from_index()
+    {
+        Sanctum::actingAs($this->studentUser1);
+        $response = $this->getJson('/api/v1/students')
+            ->assertStatus(200)
+            ->assertJsonCount(1, 'data');
+        
+        $this->assertEquals($this->student1->id, $response->json('data.0.id'));
+    }
+
+    public function test_student_can_view_their_own_record_from_show()
+    {
+        Sanctum::actingAs($this->studentUser1);
+        $this->getJson("/api/v1/students/{$this->student1->id}")
+            ->assertStatus(200)
+            ->assertJsonFragment(['id' => $this->student1->id]);
+    }
+
+    public function test_student_cannot_view_another_students_record()
+    {
+        Sanctum::actingAs($this->studentUser1);
+        $this->getJson("/api/v1/students/{$this->student2->id}")
+            ->assertStatus(403);
+    }
+
+    public function test_student_index_can_include_user_data()
+    {
+        Sanctum::actingAs($this->adminUser);
+        $this->getJson('/api/v1/students?include_user=true')
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'student_number',
+                        'user' => ['id', 'name', 'email']
+                    ]
+                ]
+            ]);
+    }
+
+    public function test_student_show_can_include_user_data()
+    {
+        Sanctum::actingAs($this->adminUser);
+        $this->getJson("/api/v1/students/{$this->student1->id}?include_user=true")
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'student_number',
+                    'user' => ['id', 'name', 'email']
+                ]
+            ]);
+    }
+
+    public function test_store_update_destroy_are_not_implemented()
+    {
+        Sanctum::actingAs($this->adminUser);
+        $this->postJson('/api/v1/students')->assertStatus(501);
+        $this->putJson("/api/v1/students/{$this->student1->id}")->assertStatus(501);
+        $this->deleteJson("/api/v1/students/{$this->student1->id}")->assertStatus(501);
+    }
+}

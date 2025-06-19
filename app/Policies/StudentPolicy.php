@@ -13,7 +13,9 @@ class StudentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermission('view-any-student');
+        // Any authenticated user can attempt to view the list.
+        // The controller query will scope the results appropriately based on role.
+        return true;
     }
 
     /**
@@ -21,8 +23,9 @@ class StudentPolicy
      */
     public function view(User $user, Student $student): bool
     {
+        $userRoles = $user->roles()->pluck('name')->toArray();
         // An admin/staff can view any student, or a student can view their own record.
-        return $user->hasPermission('view-any-student') || $user->id === $student->user_id;
+        return in_array('admin', $userRoles) || in_array('staff', $userRoles) || $user->id === $student->user_id;
     }
 
     /**
@@ -30,7 +33,9 @@ class StudentPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermission('create-student');
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        // Only admin can create students for now.
+        return in_array('admin', $userRoles);
     }
 
     /**
@@ -38,8 +43,9 @@ class StudentPolicy
      */
     public function update(User $user, Student $student): bool
     {
-        // An admin/staff can update any student, or a student can update their own record.
-        return $user->hasPermission('update-any-student') || $user->id === $student->user_id;
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        // Only admin can update students for now.
+        return in_array('admin', $userRoles);
     }
 
     /**
@@ -47,7 +53,9 @@ class StudentPolicy
      */
     public function delete(User $user, Student $student): bool
     {
-        return $user->hasPermission('delete-any-student');
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        // Only admin can delete students for now.
+        return in_array('admin', $userRoles);
     }
 
     /**
@@ -55,7 +63,8 @@ class StudentPolicy
      */
     public function restore(User $user, Student $student): bool
     {
-        return $user->hasPermission('restore-any-student');
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        return in_array('admin', $userRoles);
     }
 
     /**
@@ -63,6 +72,7 @@ class StudentPolicy
      */
     public function forceDelete(User $user, Student $student): bool
     {
-        return $user->hasPermission('force-delete-any-student');
+        $userRoles = $user->roles()->pluck('name')->toArray();
+        return in_array('admin', $userRoles);
     }
 }

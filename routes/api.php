@@ -107,6 +107,11 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::apiResource('roles', \App\Http\Controllers\Api\V1\RoleController::class)->only(['index', 'show']);
     Route::apiResource('permissions', \App\Http\Controllers\Api\V1\PermissionController::class)->only(['index', 'show']);
     
+    // Student-centric resources
+    Route::apiResource('students', \App\Http\Controllers\Api\V1\StudentController::class);
+    Route::apiResource('students.academic-records', \App\Http\Controllers\Api\V1\AcademicRecordController::class)->scoped()->shallow();
+    Route::apiResource('students.documents', \App\Http\Controllers\Api\V1\DocumentController::class)->scoped()->shallow();
+    
     // Enrollment API routes
     Route::apiResource('enrollments', EnrollmentController::class);
     

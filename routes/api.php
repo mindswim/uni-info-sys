@@ -100,6 +100,9 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::apiResource('course-sections', CourseSectionController::class);
     Route::apiResource('admission-applications', \App\Http\Controllers\Api\V1\AdmissionApplicationController::class);
     
+    // Nested ProgramChoice routes - both nested and shallow for RESTful best practices
+    Route::apiResource('admission-applications.program-choices', \App\Http\Controllers\Api\V1\ProgramChoiceController::class)->scoped()->shallow();
+    
     // Enrollment API routes
     Route::apiResource('enrollments', EnrollmentController::class);
     

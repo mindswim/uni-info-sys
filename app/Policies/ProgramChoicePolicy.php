@@ -13,8 +13,9 @@ class ProgramChoicePolicy
      */
     public function viewAny(User $user): bool
     {
+        $userRoles = $user->roles()->pluck('name')->toArray();
         // Admin/staff can view all program choices, students can view their own
-        return $user->hasRole('admin') || $user->hasRole('staff') || $user->hasRole('student');
+        return in_array('admin', $userRoles) || in_array('staff', $userRoles) || in_array('student', $userRoles);
     }
 
     /**
@@ -22,10 +23,11 @@ class ProgramChoicePolicy
      */
     public function view(User $user, ProgramChoice $programChoice): bool
     {
+        $userRoles = $user->roles()->pluck('name')->toArray();
         // Admin/staff can view any program choice, student can view their own
-        return $user->hasRole('admin') || 
-               $user->hasRole('staff') || 
-               ($user->hasRole('student') && $user->id === $programChoice->application->student->user_id);
+        return in_array('admin', $userRoles) || 
+               in_array('staff', $userRoles) || 
+               (in_array('student', $userRoles) && $user->id === $programChoice->admissionApplication->student->user_id);
     }
 
     /**
@@ -33,8 +35,9 @@ class ProgramChoicePolicy
      */
     public function create(User $user): bool
     {
+        $userRoles = $user->roles()->pluck('name')->toArray();
         // Admin, staff, and students can create program choices
-        return $user->hasRole('admin') || $user->hasRole('staff') || $user->hasRole('student');
+        return in_array('admin', $userRoles) || in_array('staff', $userRoles) || in_array('student', $userRoles);
     }
 
     /**
@@ -42,15 +45,16 @@ class ProgramChoicePolicy
      */
     public function update(User $user, ProgramChoice $programChoice): bool
     {
+        $userRoles = $user->roles()->pluck('name')->toArray();
         // Admin/staff can update any program choice, student can update their own if application is draft
-        if ($user->hasRole('admin') || $user->hasRole('staff')) {
+        if (in_array('admin', $userRoles) || in_array('staff', $userRoles)) {
             return true;
         }
         
         // Student can only update their own program choices if the application is still a draft
-        return $user->hasRole('student') && 
-               $user->id === $programChoice->application->student->user_id &&
-               $programChoice->application->status === 'draft';
+        return in_array('student', $userRoles) && 
+               $user->id === $programChoice->admissionApplication->student->user_id &&
+               $programChoice->admissionApplication->status === 'draft';
     }
 
     /**
@@ -58,15 +62,16 @@ class ProgramChoicePolicy
      */
     public function delete(User $user, ProgramChoice $programChoice): bool
     {
+        $userRoles = $user->roles()->pluck('name')->toArray();
         // Admin can delete any, student can delete their own if application is draft
-        if ($user->hasRole('admin')) {
+        if (in_array('admin', $userRoles)) {
             return true;
         }
         
         // Student can only delete their own program choices if the application is still a draft
-        return $user->hasRole('student') && 
-               $user->id === $programChoice->application->student->user_id &&
-               $programChoice->application->status === 'draft';
+        return in_array('student', $userRoles) && 
+               $user->id === $programChoice->admissionApplication->student->user_id &&
+               $programChoice->admissionApplication->status === 'draft';
     }
 
     /**
@@ -75,7 +80,7 @@ class ProgramChoicePolicy
     public function restore(User $user, ProgramChoice $programChoice): bool
     {
         // Only admin can restore
-        return $user->hasRole('admin');
+        return in_array('admin', $user->roles()->pluck('name')->toArray());
     }
 
     /**
@@ -84,6 +89,6 @@ class ProgramChoicePolicy
     public function forceDelete(User $user, ProgramChoice $programChoice): bool
     {
         // Only admin can force delete
-        return $user->hasRole('admin');
+        return in_array('admin', $user->roles()->pluck('name')->toArray());
     }
 }

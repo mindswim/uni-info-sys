@@ -8,14 +8,44 @@ use App\Http\Resources\TermResource;
 use App\Http\Requests\StoreTermRequest;
 use App\Http\Requests\UpdateTermRequest;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(
+    name: 'Terms',
+    description: 'Endpoints for managing academic terms and semesters.'
+)]
 class TermController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    #[OA\Get(
+        path: '/api/v1/terms',
+        summary: 'List all terms',
+        tags: ['Terms'],
+        parameters: [
+            new OA\Parameter(
+                name: 'academic_year',
+                in: 'query',
+                required: false,
+                description: 'Filter terms by academic year',
+                schema: new OA\Schema(type: 'integer', minimum: 2000)
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'A paginated list of terms.',
+                content: new OA\JsonContent(
+                    type: 'array',
+                    items: new OA\Items(ref: '#/components/schemas/TermResource')
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+        ]
+    )]
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Term::class);
+        
         $query = Term::query();
 
         if ($request->has('academic_year')) {
@@ -25,38 +55,125 @@ class TermController extends Controller
         return TermResource::collection($query->paginate(10));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    #[OA\Post(
+        path: '/api/v1/terms',
+        summary: 'Create a new term',
+        tags: ['Terms'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: '#/components/schemas/StoreTermRequest')
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Term created successfully.',
+                content: new OA\JsonContent(ref: '#/components/schemas/TermResource')
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
     public function store(StoreTermRequest $request)
     {
+        $this->authorize('create', Term::class);
+        
         $term = Term::create($request->validated());
         return new TermResource($term);
     }
 
-    /**
-     * Display the specified resource.
-     */
+    #[OA\Get(
+        path: '/api/v1/terms/{term}',
+        summary: 'Get a single term',
+        tags: ['Terms'],
+        parameters: [
+            new OA\Parameter(
+                name: 'term',
+                in: 'path',
+                required: true,
+                description: 'ID of the term',
+                schema: new OA\Schema(type: 'integer')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'The requested term.',
+                content: new OA\JsonContent(ref: '#/components/schemas/TermResource')
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+            new OA\Response(response: 404, description: 'Not Found'),
+        ]
+    )]
     public function show(Term $term)
     {
+        $this->authorize('view', $term);
+        
         return new TermResource($term);
     }
 
-    /**
-     * Update the specified resource in storage.
-     * @hideFromAPIDocumentation
-     */
+    #[OA\Put(
+        path: '/api/v1/terms/{term}',
+        summary: 'Update a term',
+        tags: ['Terms'],
+        parameters: [
+            new OA\Parameter(
+                name: 'term',
+                in: 'path',
+                required: true,
+                description: 'ID of the term',
+                schema: new OA\Schema(type: 'integer')
+            ),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: '#/components/schemas/UpdateTermRequest')
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Term updated successfully.',
+                content: new OA\JsonContent(ref: '#/components/schemas/TermResource')
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+            new OA\Response(response: 404, description: 'Not Found'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
     public function update(UpdateTermRequest $request, Term $term)
     {
+        $this->authorize('update', $term);
+        
         $term->update($request->validated());
         return new TermResource($term);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    #[OA\Delete(
+        path: '/api/v1/terms/{term}',
+        summary: 'Delete a term',
+        tags: ['Terms'],
+        parameters: [
+            new OA\Parameter(
+                name: 'term',
+                in: 'path',
+                required: true,
+                description: 'ID of the term',
+                schema: new OA\Schema(type: 'integer')
+            ),
+        ],
+        responses: [
+            new OA\Response(response: 204, description: 'Term deleted successfully.'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+            new OA\Response(response: 404, description: 'Not Found'),
+        ]
+    )]
     public function destroy(Term $term)
     {
+        $this->authorize('delete', $term);
+        
         $term->delete();
         return response()->noContent();
     }

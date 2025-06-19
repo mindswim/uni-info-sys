@@ -3257,6 +3257,211 @@
                     }
                 ]
             }
+        },
+        "/api/v1/terms": {
+            "get": {
+                "tags": [
+                    "Terms"
+                ],
+                "summary": "List all terms",
+                "operationId": "4e73b3cc0e29d7f685bdd1d808290e58",
+                "parameters": [
+                    {
+                        "name": "academic_year",
+                        "in": "query",
+                        "description": "Filter terms by academic year",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 2000
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A paginated list of terms.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/TermResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Terms"
+                ],
+                "summary": "Create a new term",
+                "operationId": "fd0843d412ad1a5b6f877435e7a4c063",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreTermRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Term created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TermResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/v1/terms/{term}": {
+            "get": {
+                "tags": [
+                    "Terms"
+                ],
+                "summary": "Get a single term",
+                "operationId": "27161167a937b29a4bcdd5595679b8d5",
+                "parameters": [
+                    {
+                        "name": "term",
+                        "in": "path",
+                        "description": "ID of the term",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested term.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TermResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Terms"
+                ],
+                "summary": "Update a term",
+                "operationId": "2093c90e581a28acc2c44d898a8f7f80",
+                "parameters": [
+                    {
+                        "name": "term",
+                        "in": "path",
+                        "description": "ID of the term",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateTermRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Term updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TermResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Terms"
+                ],
+                "summary": "Delete a term",
+                "operationId": "0d641a5d4a4939efe095142183532e81",
+                "parameters": [
+                    {
+                        "name": "term",
+                        "in": "path",
+                        "description": "ID of the term",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Term deleted successfully."
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -3323,6 +3528,49 @@
                 },
                 "type": "object"
             },
+            "StoreTermRequest": {
+                "title": "Store Term Request",
+                "description": "Request body for creating a new academic term.",
+                "required": [
+                    "name",
+                    "academic_year",
+                    "semester",
+                    "start_date",
+                    "end_date"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Fall 2024"
+                    },
+                    "academic_year": {
+                        "type": "integer",
+                        "minimum": 2000,
+                        "example": 2024
+                    },
+                    "semester": {
+                        "type": "string",
+                        "enum": [
+                            "Fall",
+                            "Spring",
+                            "Summer"
+                        ],
+                        "example": "Fall"
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-08-26"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-12-15"
+                    }
+                },
+                "type": "object"
+            },
             "UpdateProgramRequest": {
                 "title": "Update Program Request",
                 "description": "Request body for updating an existing program. All fields are optional.",
@@ -3372,6 +3620,42 @@
                             "suspended"
                         ],
                         "example": "active"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateTermRequest": {
+                "title": "Update Term Request",
+                "description": "Request body for updating an existing academic term. All fields are optional.",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Fall 2024"
+                    },
+                    "academic_year": {
+                        "type": "integer",
+                        "minimum": 2000,
+                        "example": 2024
+                    },
+                    "semester": {
+                        "type": "string",
+                        "enum": [
+                            "Fall",
+                            "Spring",
+                            "Summer"
+                        ],
+                        "example": "Fall"
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-08-26"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-12-15"
                     }
                 },
                 "type": "object"
@@ -3758,6 +4042,57 @@
                 },
                 "type": "object"
             },
+            "TermResource": {
+                "title": "Term Resource",
+                "description": "An academic term/semester in the university calendar.",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Fall 2024"
+                    },
+                    "academic_year": {
+                        "type": "integer",
+                        "minimum": 2000,
+                        "example": 2024
+                    },
+                    "semester": {
+                        "type": "string",
+                        "enum": [
+                            "Fall",
+                            "Spring",
+                            "Summer"
+                        ],
+                        "example": "Fall"
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-08-26"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-12-15"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "type": "object"
+            },
             "UserResource": {
                 "title": "User Resource",
                 "description": "Represents a user in the system.",
@@ -3834,6 +4169,10 @@
         {
             "name": "Students",
             "description": "API endpoints for managing student records"
+        },
+        {
+            "name": "Terms",
+            "description": "Endpoints for managing academic terms and semesters."
         }
     ]
 }

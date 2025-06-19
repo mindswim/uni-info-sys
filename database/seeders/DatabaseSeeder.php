@@ -299,7 +299,7 @@ class DatabaseSeeder extends Seeder
                     'course_section_id' => $section->id,
                     'status' => 'enrolled',
                     'enrollment_date' => fake()->dateTimeBetween('-3 months', 'now'),
-                ]);
+        ]);
             }
             
             // Add waitlist students

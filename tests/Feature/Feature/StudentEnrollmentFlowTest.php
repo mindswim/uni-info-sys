@@ -237,7 +237,7 @@ class StudentEnrollmentFlowTest extends TestCase
 
         $enrollmentResponse = $this->actingAs($user)
             ->postJson('/api/v1/enrollments', $enrollmentData);
-        
+
         $enrollmentResponse->assertCreated()
             ->assertJson([
                 'message' => 'Student has been successfully enrolled in the course section.',

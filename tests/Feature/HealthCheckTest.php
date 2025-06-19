@@ -67,7 +67,7 @@ class HealthCheckTest extends TestCase
     {
         // No authentication headers required
         $response = $this->get('/api/health');
-        
+
         $response->assertStatus(200);
         
         // Should not return authentication error

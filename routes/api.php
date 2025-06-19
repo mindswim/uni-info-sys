@@ -98,6 +98,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::apiResource('buildings', BuildingController::class);
     Route::apiResource('rooms', RoomController::class);
     Route::apiResource('course-sections', CourseSectionController::class);
+    Route::apiResource('admission-applications', \App\Http\Controllers\Api\V1\AdmissionApplicationController::class);
     
     // Enrollment API routes
     Route::apiResource('enrollments', EnrollmentController::class);

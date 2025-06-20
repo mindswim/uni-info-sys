@@ -131,8 +131,9 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     // Nested ProgramChoice routes - both nested and shallow for RESTful best practices
     Route::apiResource('admission-applications.program-choices', \App\Http\Controllers\Api\V1\ProgramChoiceController::class)->scoped()->shallow();
     
-    // Read-only Role and Permission resources for administrative purposes
-    Route::apiResource('roles', \App\Http\Controllers\Api\V1\RoleController::class)->only(['index', 'show']);
+    // Role and Permission management resources - full CRUD for roles, read-only for permissions
+    Route::apiResource('roles', \App\Http\Controllers\Api\V1\RoleController::class);
+    Route::post('roles/{role}/permissions', [\App\Http\Controllers\Api\V1\RoleController::class, 'syncPermissions']);
     Route::apiResource('permissions', \App\Http\Controllers\Api\V1\PermissionController::class)->only(['index', 'show']);
     
     // Student-centric resources

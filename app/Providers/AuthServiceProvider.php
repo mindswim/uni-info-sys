@@ -14,8 +14,10 @@ use App\Models\Department;
 use App\Models\Document;
 use App\Models\Enrollment;
 use App\Models\Faculty;
+use App\Models\Permission;
 use App\Models\Program;
 use App\Models\ProgramChoice;
+use App\Models\Role;
 use App\Models\Room;
 use App\Models\Staff;
 use App\Models\Student;
@@ -30,8 +32,10 @@ use App\Policies\DepartmentPolicy;
 use App\Policies\DocumentPolicy;
 use App\Policies\EnrollmentPolicy;
 use App\Policies\FacultyPolicy;
+use App\Policies\PermissionPolicy;
 use App\Policies\ProgramPolicy;
 use App\Policies\ProgramChoicePolicy;
+use App\Policies\RolePolicy;
 use App\Policies\RoomPolicy;
 use App\Policies\StaffPolicy;
 use App\Policies\StudentPolicy;
@@ -54,8 +58,10 @@ class AuthServiceProvider extends ServiceProvider
         Document::class => DocumentPolicy::class,
         Enrollment::class => EnrollmentPolicy::class,
         Faculty::class => FacultyPolicy::class,
+        Permission::class => PermissionPolicy::class,
         Program::class => ProgramPolicy::class,
         ProgramChoice::class => ProgramChoicePolicy::class,
+        Role::class => RolePolicy::class,
         Room::class => RoomPolicy::class,
         Staff::class => StaffPolicy::class,
         Student::class => StudentPolicy::class,

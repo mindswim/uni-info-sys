@@ -69,7 +69,7 @@
                     "Academic Records"
                 ],
                 "summary": "Create a new academic record",
-                "description": "Create a new academic record for a student. Not implemented.",
+                "description": "Create a new academic record for a student. Only administrators can create academic records.",
                 "operationId": "9277acecd95bca24b717ed4c13c0d027",
                 "parameters": [
                     {
@@ -82,9 +82,35 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreAcademicRecordRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "201": {
+                        "description": "Academic record created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AcademicRecordResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation Error"
                     }
                 },
                 "security": [
@@ -144,7 +170,7 @@
                     "Academic Records"
                 ],
                 "summary": "Update an academic record",
-                "description": "Update an academic record. Not implemented.",
+                "description": "Update an academic record. Only administrators can update academic records.",
                 "operationId": "acbef71c9974f13cfa64cf79cbd33b42",
                 "parameters": [
                     {
@@ -156,9 +182,38 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateAcademicRecordRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "200": {
+                        "description": "Academic record updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AcademicRecordResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation Error"
                     }
                 },
                 "security": [
@@ -172,7 +227,7 @@
                     "Academic Records"
                 ],
                 "summary": "Delete an academic record",
-                "description": "Delete an academic record. Not implemented.",
+                "description": "Delete an academic record. Only administrators can delete academic records.",
                 "operationId": "28039e25049d3ab874642d02c00e8b24",
                 "parameters": [
                     {
@@ -185,8 +240,17 @@
                     }
                 ],
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "200": {
+                        "description": "Academic record deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
                     }
                 },
                 "security": [
@@ -1887,7 +1951,7 @@
                     "Documents"
                 ],
                 "summary": "Upload a document",
-                "description": "Upload a new document for a student. File upload handling is not implemented in this version.",
+                "description": "Upload a new document for a student. Supports PDF, DOC, and DOCX files up to 5MB.",
                 "operationId": "650bef47ce745d45feada24058c152f1",
                 "parameters": [
                     {
@@ -1900,9 +1964,35 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreDocumentRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "201": {
+                        "description": "Document uploaded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DocumentResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation Error"
                     }
                 },
                 "security": [
@@ -1962,11 +2052,53 @@
                     "Documents"
                 ],
                 "summary": "Update a document",
-                "description": "Update a document's details. Not implemented.",
+                "description": "Update a document's details (not the file itself). Only document type can be updated.",
                 "operationId": "b6ae17d9b33f9c98f394f31ced88bbd2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "document_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "transcript",
+                                            "essay",
+                                            "recommendation",
+                                            "certificate",
+                                            "other"
+                                        ],
+                                        "example": "transcript"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "200": {
+                        "description": "Document updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DocumentResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation Error"
                     }
                 },
                 "security": [
@@ -1980,7 +2112,7 @@
                     "Documents"
                 ],
                 "summary": "Delete a document",
-                "description": "Delete a document. Not implemented.",
+                "description": "Delete a document and its associated file from storage.",
                 "operationId": "867bc0947afcbba0319db67b27716bea",
                 "parameters": [
                     {
@@ -1993,8 +2125,17 @@
                     }
                 ],
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "200": {
+                        "description": "Document deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
                     }
                 },
                 "security": [
@@ -3669,7 +3810,7 @@
                     "Roles"
                 ],
                 "summary": "Get list of all roles",
-                "description": "Retrieve a paginated list of all system roles. Only accessible by admin and staff users.",
+                "description": "Retrieve a paginated list of all system roles. Only accessible by users with roles.manage permission.",
                 "operationId": "c1294bb85dfc016a8f9c0d3f0907293f",
                 "parameters": [
                     {
@@ -3745,6 +3886,74 @@
                         "sanctum": []
                     }
                 ]
+            },
+            "post": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Create a new role",
+                "description": "Create a new system role. Only accessible by users with roles.manage permission.",
+                "operationId": "c7f58f49125e9b60da0f0db6890a4f22",
+                "requestBody": {
+                    "description": "Role data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Unique role name",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Content Manager"
+                                    },
+                                    "description": {
+                                        "description": "Role description",
+                                        "type": "string",
+                                        "maxLength": 1000,
+                                        "example": "Can manage content and moderate posts",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Role created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/RoleResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/api/v1/roles/{role}": {
@@ -3753,7 +3962,7 @@
                     "Roles"
                 ],
                 "summary": "Get a specific role",
-                "description": "Retrieve details of a specific role by ID. Only accessible by admin and staff users.",
+                "description": "Retrieve details of a specific role by ID. Only accessible by users with roles.manage permission.",
                 "operationId": "15615945226214c177b27790822dc8d0",
                 "parameters": [
                     {
@@ -3800,6 +4009,206 @@
                     },
                     "404": {
                         "description": "Role not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Update a role",
+                "description": "Update an existing role. Only accessible by users with roles.manage permission.",
+                "operationId": "5163df5b35ed5ce06eba2d71ce09628d",
+                "parameters": [
+                    {
+                        "name": "role",
+                        "in": "path",
+                        "description": "ID of the role",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Updated role data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "Unique role name",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Content Manager"
+                                    },
+                                    "description": {
+                                        "description": "Role description",
+                                        "type": "string",
+                                        "maxLength": 1000,
+                                        "example": "Can manage content and moderate posts",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Role updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/RoleResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "404": {
+                        "description": "Role not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Delete a role",
+                "description": "Delete an existing role. Only accessible by users with roles.manage permission.",
+                "operationId": "ec17b5f4a0d3350c1e180e9f7aaa35b3",
+                "parameters": [
+                    {
+                        "name": "role",
+                        "in": "path",
+                        "description": "ID of the role",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Role deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "404": {
+                        "description": "Role not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/roles/{role}/permissions": {
+            "post": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Sync permissions to a role",
+                "description": "Synchronize the permissions assigned to a role. This will replace all existing permissions with the provided list. Only accessible by users with roles.manage permission.",
+                "operationId": "847952406ef1dba65dc9b73d35edc1db",
+                "parameters": [
+                    {
+                        "name": "role",
+                        "in": "path",
+                        "description": "ID of the role",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Array of permission IDs to assign to the role",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "permissions"
+                                ],
+                                "properties": {
+                                    "permissions": {
+                                        "description": "Array of permission IDs",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Permissions synced successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/RoleResource"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Permissions synced successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "404": {
+                        "description": "Role not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
                     }
                 },
                 "security": [
@@ -4307,11 +4716,37 @@
                     "Students"
                 ],
                 "summary": "Create a new student",
-                "description": "Create a new student record. This is a complex administrative action and is not implemented in this version.",
+                "description": "Create a new student record. Requires admin or staff permissions.",
                 "operationId": "20b07e0eabfb966bf0029eef43b01b6e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreStudentRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "201": {
+                        "description": "Student created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudentResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation Error"
                     }
                 },
                 "security": [
@@ -4379,7 +4814,7 @@
                     "Students"
                 ],
                 "summary": "Update a student",
-                "description": "Update a student's record. This is a complex administrative action and is not implemented in this version.",
+                "description": "Update a student's record. Students can update their own profile, admins can update any student.",
                 "operationId": "2ddcce83cea189c24a97e11fb2d86050",
                 "parameters": [
                     {
@@ -4391,9 +4826,38 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateStudentRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "200": {
+                        "description": "Student updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudentResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation Error"
                     }
                 },
                 "security": [
@@ -4407,7 +4871,7 @@
                     "Students"
                 ],
                 "summary": "Delete a student",
-                "description": "Delete a student's record. This is a complex administrative action and is not implemented in this version.",
+                "description": "Delete a student's record. Requires admin permissions.",
                 "operationId": "3c247e6248fe468b02cf4534ab92e24d",
                 "parameters": [
                     {
@@ -4420,8 +4884,17 @@
                     }
                 ],
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "204": {
+                        "description": "Student deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
                     }
                 },
                 "security": [
@@ -4639,6 +5112,53 @@
     },
     "components": {
         "schemas": {
+            "StoreAcademicRecordRequest": {
+                "title": "Store Academic Record Request",
+                "required": [
+                    "institution_name",
+                    "qualification_type",
+                    "start_date",
+                    "end_date",
+                    "gpa"
+                ],
+                "properties": {
+                    "institution_name": {
+                        "description": "The name of the educational institution",
+                        "type": "string",
+                        "example": "University of California"
+                    },
+                    "qualification_type": {
+                        "description": "The type of qualification or degree",
+                        "type": "string",
+                        "example": "Bachelor of Science"
+                    },
+                    "start_date": {
+                        "description": "The start date of the academic program",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2020-09-01"
+                    },
+                    "end_date": {
+                        "description": "The end date of the academic program",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-06-15"
+                    },
+                    "gpa": {
+                        "description": "The Grade Point Average achieved (0.00-4.00)",
+                        "type": "number",
+                        "format": "float",
+                        "example": 3.85
+                    },
+                    "transcript_url": {
+                        "description": "URL to the transcript document",
+                        "type": "string",
+                        "example": "https://example.com/transcript.pdf",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "StoreBuildingRequest": {
                 "title": "Store Building Request",
                 "description": "Request body for creating a new building.",
@@ -4769,6 +5289,32 @@
                         "type": "string",
                         "format": "time",
                         "example": "10:30"
+                    }
+                },
+                "type": "object"
+            },
+            "StoreDocumentRequest": {
+                "title": "Store Document Request",
+                "required": [
+                    "document_type",
+                    "file"
+                ],
+                "properties": {
+                    "document_type": {
+                        "type": "string",
+                        "enum": [
+                            "transcript",
+                            "essay",
+                            "recommendation",
+                            "certificate",
+                            "other"
+                        ],
+                        "example": "transcript"
+                    },
+                    "file": {
+                        "description": "The document file to upload (PDF, DOC, DOCX)",
+                        "type": "string",
+                        "format": "binary"
                     }
                 },
                 "type": "object"
@@ -4966,6 +5512,86 @@
                 },
                 "type": "object"
             },
+            "StoreStudentRequest": {
+                "title": "Store Student Request",
+                "required": [
+                    "user_id",
+                    "first_name",
+                    "last_name",
+                    "date_of_birth",
+                    "gender",
+                    "nationality",
+                    "address",
+                    "city",
+                    "state",
+                    "postal_code",
+                    "country",
+                    "phone",
+                    "emergency_contact_name",
+                    "emergency_contact_phone"
+                ],
+                "properties": {
+                    "user_id": {
+                        "description": "The ID of the associated user.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2005-01-15"
+                    },
+                    "gender": {
+                        "type": "string",
+                        "example": "Male"
+                    },
+                    "nationality": {
+                        "type": "string",
+                        "example": "American"
+                    },
+                    "address": {
+                        "type": "string",
+                        "example": "123 Main St"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "Anytown"
+                    },
+                    "state": {
+                        "type": "string",
+                        "example": "CA"
+                    },
+                    "postal_code": {
+                        "type": "string",
+                        "example": "12345"
+                    },
+                    "country": {
+                        "type": "string",
+                        "example": "USA"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "555-1234"
+                    },
+                    "emergency_contact_name": {
+                        "type": "string",
+                        "example": "Jane Doe"
+                    },
+                    "emergency_contact_phone": {
+                        "type": "string",
+                        "example": "555-5678"
+                    }
+                },
+                "type": "object"
+            },
             "StoreTermRequest": {
                 "title": "Store Term Request",
                 "description": "Request body for creating a new academic term.",
@@ -5005,6 +5631,46 @@
                         "type": "string",
                         "format": "date",
                         "example": "2024-12-15"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateAcademicRecordRequest": {
+                "title": "Update Academic Record Request",
+                "properties": {
+                    "institution_name": {
+                        "description": "The name of the educational institution",
+                        "type": "string",
+                        "example": "University of California"
+                    },
+                    "qualification_type": {
+                        "description": "The type of qualification or degree",
+                        "type": "string",
+                        "example": "Bachelor of Science"
+                    },
+                    "start_date": {
+                        "description": "The start date of the academic program",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2020-09-01"
+                    },
+                    "end_date": {
+                        "description": "The end date of the academic program",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-06-15"
+                    },
+                    "gpa": {
+                        "description": "The Grade Point Average achieved (0.00-4.00)",
+                        "type": "number",
+                        "format": "float",
+                        "example": 3.85
+                    },
+                    "transcript_url": {
+                        "description": "URL to the transcript document",
+                        "type": "string",
+                        "example": "https://example.com/transcript.pdf",
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -5269,6 +5935,65 @@
                 },
                 "type": "object"
             },
+            "UpdateStudentRequest": {
+                "title": "Update Student Request",
+                "properties": {
+                    "first_name": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2005-01-15"
+                    },
+                    "gender": {
+                        "type": "string",
+                        "example": "Male"
+                    },
+                    "nationality": {
+                        "type": "string",
+                        "example": "American"
+                    },
+                    "address": {
+                        "type": "string",
+                        "example": "123 Main St"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "Anytown"
+                    },
+                    "state": {
+                        "type": "string",
+                        "example": "CA"
+                    },
+                    "postal_code": {
+                        "type": "string",
+                        "example": "12345"
+                    },
+                    "country": {
+                        "type": "string",
+                        "example": "USA"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "555-1234"
+                    },
+                    "emergency_contact_name": {
+                        "type": "string",
+                        "example": "Jane Doe"
+                    },
+                    "emergency_contact_phone": {
+                        "type": "string",
+                        "example": "555-5678"
+                    }
+                },
+                "type": "object"
+            },
             "UpdateTermRequest": {
                 "title": "Update Term Request",
                 "description": "Request body for updating an existing academic term. All fields are optional.",
@@ -5307,7 +6032,7 @@
             },
             "AcademicRecordResource": {
                 "title": "Academic Record Resource",
-                "description": "Represents an academic record for a student, such as their GPA for a specific program in a given term.",
+                "description": "Represents an academic record for a student, such as their educational background and qualifications.",
                 "properties": {
                     "id": {
                         "description": "The unique identifier for the academic record.",
@@ -5319,28 +6044,44 @@
                         "type": "integer",
                         "example": 1
                     },
-                    "program_id": {
-                        "description": "The ID of the program this record is associated with.",
-                        "type": "integer",
-                        "example": 1,
-                        "nullable": true
+                    "institution_name": {
+                        "description": "The name of the educational institution.",
+                        "type": "string",
+                        "example": "University of California"
                     },
-                    "term_id": {
-                        "description": "The ID of the term this record is for.",
-                        "type": "integer",
-                        "example": 1,
-                        "nullable": true
+                    "qualification_type": {
+                        "description": "The type of qualification or degree.",
+                        "type": "string",
+                        "example": "Bachelor of Science"
+                    },
+                    "start_date": {
+                        "description": "The start date of the academic program.",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2020-09-01"
+                    },
+                    "end_date": {
+                        "description": "The end date of the academic program.",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-06-15"
                     },
                     "gpa": {
-                        "description": "The Grade Point Average for this record.",
+                        "description": "The Grade Point Average achieved.",
                         "type": "number",
                         "format": "float",
                         "example": 3.85
                     },
-                    "status": {
-                        "description": "The academic standing or status.",
+                    "transcript_url": {
+                        "description": "URL to the transcript document.",
                         "type": "string",
-                        "example": "Good Standing"
+                        "example": "https://example.com/transcript.pdf",
+                        "nullable": true
+                    },
+                    "verified": {
+                        "description": "Whether the academic record has been verified.",
+                        "type": "boolean",
+                        "example": false
                     },
                     "created_at": {
                         "type": "string",
@@ -5595,14 +6336,14 @@
             },
             "DocumentResource": {
                 "title": "Document Resource",
-                "description": "Represents a document uploaded by a user, such as a transcript or a resume.",
+                "description": "Represents a document uploaded by a student, such as a transcript or essay.",
                 "properties": {
                     "id": {
                         "description": "The unique identifier for the document.",
                         "type": "integer"
                     },
-                    "user_id": {
-                        "description": "The ID of the user who owns this document.",
+                    "student_id": {
+                        "description": "The ID of the student who owns this document.",
                         "type": "integer"
                     },
                     "document_type": {
@@ -5614,9 +6355,31 @@
                         "description": "The storage path of the document file.",
                         "type": "string"
                     },
-                    "file_name": {
+                    "original_filename": {
                         "description": "The original name of the document file.",
                         "type": "string"
+                    },
+                    "mime_type": {
+                        "description": "The MIME type of the document file.",
+                        "type": "string"
+                    },
+                    "file_size": {
+                        "description": "The size of the document file in bytes.",
+                        "type": "integer"
+                    },
+                    "status": {
+                        "description": "The status of the document.",
+                        "type": "string",
+                        "example": "pending"
+                    },
+                    "verified": {
+                        "description": "Whether the document has been verified.",
+                        "type": "boolean"
+                    },
+                    "uploaded_at": {
+                        "description": "When the document was uploaded.",
+                        "type": "string",
+                        "format": "date-time"
                     },
                     "verified_at": {
                         "description": "When the document was verified by an administrator.",
@@ -6053,6 +6816,63 @@
                         "type": "string",
                         "example": "2024-00001"
                     },
+                    "first_name": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "full_name": {
+                        "type": "string",
+                        "example": "John Doe"
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2005-01-15"
+                    },
+                    "gender": {
+                        "type": "string",
+                        "example": "Male"
+                    },
+                    "nationality": {
+                        "type": "string",
+                        "example": "American"
+                    },
+                    "address": {
+                        "type": "string",
+                        "example": "123 Main St"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "Anytown"
+                    },
+                    "state": {
+                        "type": "string",
+                        "example": "CA"
+                    },
+                    "postal_code": {
+                        "type": "string",
+                        "example": "12345"
+                    },
+                    "country": {
+                        "type": "string",
+                        "example": "USA"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "555-1234"
+                    },
+                    "emergency_contact_name": {
+                        "type": "string",
+                        "example": "Jane Doe"
+                    },
+                    "emergency_contact_phone": {
+                        "type": "string",
+                        "example": "555-5678"
+                    },
                     "user": {
                         "$ref": "#/components/schemas/UserResource"
                     }
@@ -6236,7 +7056,7 @@
         },
         {
             "name": "Roles",
-            "description": "API endpoints for viewing system roles (read-only access for administrators)"
+            "description": "API endpoints for managing system roles (admin access required)"
         },
         {
             "name": "Rooms",

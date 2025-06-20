@@ -13,9 +13,7 @@ class PermissionPolicy
      */
     public function viewAny(User $user): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        // Only admin and staff can view permissions
-        return in_array('admin', $userRoles) || in_array('staff', $userRoles);
+        return $user->hasPermission('permissions.view');
     }
 
     /**
@@ -23,9 +21,7 @@ class PermissionPolicy
      */
     public function view(User $user, Permission $permission): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        // Only admin and staff can view specific permissions
-        return in_array('admin', $userRoles) || in_array('staff', $userRoles);
+        return $user->hasPermission('permissions.view');
     }
 
     /**
@@ -33,9 +29,8 @@ class PermissionPolicy
      */
     public function create(User $user): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        // Only admin can create permissions
-        return in_array('admin', $userRoles);
+        // Permissions are managed through code/seeders, not via API
+        return false;
     }
 
     /**
@@ -43,9 +38,8 @@ class PermissionPolicy
      */
     public function update(User $user, Permission $permission): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        // Only admin can update permissions
-        return in_array('admin', $userRoles);
+        // Permissions are managed through code/seeders, not via API
+        return false;
     }
 
     /**
@@ -53,9 +47,8 @@ class PermissionPolicy
      */
     public function delete(User $user, Permission $permission): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        // Only admin can delete permissions
-        return in_array('admin', $userRoles);
+        // Permissions are managed through code/seeders, not via API
+        return false;
     }
 
     /**
@@ -63,9 +56,8 @@ class PermissionPolicy
      */
     public function restore(User $user, Permission $permission): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        // Only admin can restore permissions
-        return in_array('admin', $userRoles);
+        // Permissions are managed through code/seeders, not via API
+        return false;
     }
 
     /**
@@ -73,8 +65,7 @@ class PermissionPolicy
      */
     public function forceDelete(User $user, Permission $permission): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        // Only admin can force delete permissions
-        return in_array('admin', $userRoles);
+        // Permissions are managed through code/seeders, not via API
+        return false;
     }
 }

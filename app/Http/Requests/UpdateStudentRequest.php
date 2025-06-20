@@ -3,7 +3,27 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    schema: "UpdateStudentRequest",
+    title: "Update Student Request",
+    properties: [
+        new OA\Property(property: "first_name", type: "string", example: "John"),
+        new OA\Property(property: "last_name", type: "string", example: "Doe"),
+        new OA\Property(property: "date_of_birth", type: "string", format: "date", example: "2005-01-15"),
+        new OA\Property(property: "gender", type: "string", example: "Male"),
+        new OA\Property(property: "nationality", type: "string", example: "American"),
+        new OA\Property(property: "address", type: "string", example: "123 Main St"),
+        new OA\Property(property: "city", type: "string", example: "Anytown"),
+        new OA\Property(property: "state", type: "string", example: "CA"),
+        new OA\Property(property: "postal_code", type: "string", example: "12345"),
+        new OA\Property(property: "country", type: "string", example: "USA"),
+        new OA\Property(property: "phone", type: "string", example: "555-1234"),
+        new OA\Property(property: "emergency_contact_name", type: "string", example: "Jane Doe"),
+        new OA\Property(property: "emergency_contact_phone", type: "string", example: "555-5678"),
+    ]
+)]
 class UpdateStudentRequest extends FormRequest
 {
     /**

@@ -13,9 +13,7 @@ class RolePolicy
      */
     public function viewAny(User $user): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        // Only admin and staff can view roles
-        return in_array('admin', $userRoles) || in_array('staff', $userRoles);
+        return $user->hasPermission('roles.manage');
     }
 
     /**
@@ -23,9 +21,7 @@ class RolePolicy
      */
     public function view(User $user, Role $role): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        // Only admin and staff can view specific roles
-        return in_array('admin', $userRoles) || in_array('staff', $userRoles);
+        return $user->hasPermission('roles.manage');
     }
 
     /**
@@ -33,9 +29,7 @@ class RolePolicy
      */
     public function create(User $user): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        // Only admin can create roles
-        return in_array('admin', $userRoles);
+        return $user->hasPermission('roles.manage');
     }
 
     /**
@@ -43,9 +37,7 @@ class RolePolicy
      */
     public function update(User $user, Role $role): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        // Only admin can update roles
-        return in_array('admin', $userRoles);
+        return $user->hasPermission('roles.manage');
     }
 
     /**
@@ -53,9 +45,7 @@ class RolePolicy
      */
     public function delete(User $user, Role $role): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        // Only admin can delete roles
-        return in_array('admin', $userRoles);
+        return $user->hasPermission('roles.manage');
     }
 
     /**
@@ -63,9 +53,7 @@ class RolePolicy
      */
     public function restore(User $user, Role $role): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        // Only admin can restore roles
-        return in_array('admin', $userRoles);
+        return $user->hasPermission('roles.manage');
     }
 
     /**
@@ -73,8 +61,14 @@ class RolePolicy
      */
     public function forceDelete(User $user, Role $role): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        // Only admin can force delete roles
-        return in_array('admin', $userRoles);
+        return $user->hasPermission('roles.manage');
+    }
+
+    /**
+     * Determine whether the user can sync permissions to a role.
+     */
+    public function syncPermissions(User $user, Role $role): bool
+    {
+        return $user->hasPermission('roles.manage');
     }
 }

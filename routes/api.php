@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\V1\EnrollmentController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\CourseImportController;
 use App\Http\Controllers\Api\V1\GradeImportController;
+use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 
 /**
  * @OA\Get(
@@ -117,6 +118,14 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 // Unprotected route for creating tokens (still rate limited)
 Route::post('/v1/tokens/create', [\App\Http\Controllers\Api\V1\AuthController::class, 'login'])
     ->middleware('throttle:api');
+
+// Password reset routes (unauthenticated)
+Route::post('/v1/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])
+    ->middleware('throttle:api')
+    ->name('api.password.email');
+Route::post('/v1/reset-password', [PasswordResetController::class, 'reset'])
+    ->middleware('throttle:api')
+    ->name('api.password.update');
 
 Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::apiResource('faculties', FacultyController::class);

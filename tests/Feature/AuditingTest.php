@@ -5,9 +5,11 @@ namespace Tests\Feature;
 use App\Models\AdmissionApplication;
 use App\Models\CourseSection;
 use App\Models\Enrollment;
+use App\Models\Role;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use OwenIt\Auditing\Models\Audit;
 use Tests\TestCase;
 
@@ -204,5 +206,171 @@ class AuditingTest extends TestCase
         
         $this->assertGreaterThan(0, $studentAudits);
         $this->assertGreaterThan(0, $userAudits);
+    }
+
+    /** @test */
+    public function test_grade_change_audit_trail_with_reason()
+    {
+        // Create authenticated admin user
+        $user = User::factory()->create();
+        $adminRole = Role::factory()->create(['name' => 'admin']);
+        $user->roles()->attach($adminRole);
+        Sanctum::actingAs($user);
+
+        // Create necessary related models
+        $studentUser = User::factory()->create();
+        $student = Student::factory()->create(['user_id' => $studentUser->id]);
+        $courseSection = CourseSection::factory()->create();
+
+        // Create enrollment with initial grade
+        $enrollment = Enrollment::factory()->create([
+            'student_id' => $student->id,
+            'course_section_id' => $courseSection->id,
+            'status' => 'completed',
+            'grade' => 'B'
+        ]);
+
+        // Update the grade via API with reason for change
+        $response = $this->putJson("/api/v1/enrollments/{$enrollment->id}", [
+            'grade' => 'A',
+            'reason_for_change' => 'Correcting calculation error in final exam'
+        ]);
+
+        $response->assertOk();
+
+        // Verify the grade was updated
+        $enrollment->refresh();
+        $this->assertEquals('A', $enrollment->grade);
+
+        // Check that audit record was created
+        $audit = Audit::where('auditable_type', 'App\\Models\\Enrollment')
+            ->where('auditable_id', $enrollment->id)
+            ->where('event', 'updated')
+            ->latest()
+            ->first();
+
+        $this->assertNotNull($audit);
+        $this->assertEquals('updated', $audit->event);
+        
+        // Verify old and new grade values
+        $this->assertArrayHasKey('grade', $audit->old_values);
+        $this->assertArrayHasKey('grade', $audit->new_values);
+        $this->assertEquals('B', $audit->old_values['grade']);
+        $this->assertEquals('A', $audit->new_values['grade']);
+        
+        // Verify reason for change is stored in tags
+        $this->assertNotEmpty($audit->tags);
+        $this->assertStringContainsString('reason:Correcting calculation error in final exam', $audit->tags);
+    }
+
+    /** @test */
+    public function test_status_change_audit_trail()
+    {
+        // Create authenticated admin user
+        $user = User::factory()->create();
+        $adminRole = Role::factory()->create(['name' => 'admin']);
+        $user->roles()->attach($adminRole);
+        Sanctum::actingAs($user);
+
+        // Create necessary related models
+        $studentUser = User::factory()->create();
+        $student = Student::factory()->create(['user_id' => $studentUser->id]);
+        $courseSection = CourseSection::factory()->create();
+
+        // Create enrollment
+        $enrollment = Enrollment::factory()->create([
+            'student_id' => $student->id,
+            'course_section_id' => $courseSection->id,
+            'status' => 'enrolled'
+        ]);
+
+        // Update the status via API
+        $response = $this->putJson("/api/v1/enrollments/{$enrollment->id}", [
+            'status' => 'completed',
+            'grade' => 'B+',
+            'reason_for_change' => 'Course completion'
+        ]);
+
+        $response->assertOk();
+
+        // Check that audit record was created
+        $audit = Audit::where('auditable_type', 'App\\Models\\Enrollment')
+            ->where('auditable_id', $enrollment->id)
+            ->where('event', 'updated')
+            ->latest()
+            ->first();
+
+        $this->assertNotNull($audit);
+        
+        // Verify both status and grade changes are audited
+        $this->assertArrayHasKey('status', $audit->old_values);
+        $this->assertArrayHasKey('status', $audit->new_values);
+        $this->assertEquals('enrolled', $audit->old_values['status']);
+        $this->assertEquals('completed', $audit->new_values['status']);
+        
+        $this->assertArrayHasKey('grade', $audit->new_values);
+        $this->assertEquals('B+', $audit->new_values['grade']);
+    }
+
+    /** @test */
+    public function test_reason_for_change_required_when_updating_grade()
+    {
+        // Create authenticated admin user
+        $user = User::factory()->create();
+        $adminRole = Role::factory()->create(['name' => 'admin']);
+        $user->roles()->attach($adminRole);
+        Sanctum::actingAs($user);
+
+        // Create necessary related models
+        $studentUser = User::factory()->create();
+        $student = Student::factory()->create(['user_id' => $studentUser->id]);
+        $courseSection = CourseSection::factory()->create();
+
+        // Create enrollment with initial grade
+        $enrollment = Enrollment::factory()->create([
+            'student_id' => $student->id,
+            'course_section_id' => $courseSection->id,
+            'status' => 'completed',
+            'grade' => 'B'
+        ]);
+
+        // Try to update grade without reason_for_change
+        $response = $this->putJson("/api/v1/enrollments/{$enrollment->id}", [
+            'grade' => 'A'
+            // Missing reason_for_change
+        ]);
+
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['reason_for_change']);
+    }
+
+    /** @test */
+    public function test_reason_for_change_not_required_when_not_updating_grade()
+    {
+        // Create authenticated admin user
+        $user = User::factory()->create();
+        $adminRole = Role::factory()->create(['name' => 'admin']);
+        $user->roles()->attach($adminRole);
+        Sanctum::actingAs($user);
+
+        // Create necessary related models
+        $studentUser = User::factory()->create();
+        $student = Student::factory()->create(['user_id' => $studentUser->id]);
+        $courseSection = CourseSection::factory()->create();
+
+        // Create enrollment
+        $enrollment = Enrollment::factory()->create([
+            'student_id' => $student->id,
+            'course_section_id' => $courseSection->id,
+            'status' => 'enrolled'
+        ]);
+
+        // Update status without grade change (no reason_for_change needed)
+        $response = $this->putJson("/api/v1/enrollments/{$enrollment->id}", [
+            'status' => 'withdrawn'
+            // No reason_for_change needed when not updating grade
+        ]);
+
+        $response->assertOk();
     }
 }

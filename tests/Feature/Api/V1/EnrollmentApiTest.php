@@ -296,6 +296,7 @@ class EnrollmentApiTest extends TestCase
         $updateData = [
             'status' => 'completed',
             'grade' => 'A',
+            'reason_for_change' => 'Course completion with final grade',
         ];
 
         $response = $this->putJson("/api/v1/enrollments/{$enrollment->id}", $updateData);
@@ -345,6 +346,7 @@ class EnrollmentApiTest extends TestCase
         $updateData = [
             'status' => 'completed',
             'grade' => 'INVALID_GRADE',
+            'reason_for_change' => 'Test invalid grade format',
         ];
 
         $response = $this->putJson("/api/v1/enrollments/{$enrollment->id}", $updateData);

@@ -242,6 +242,11 @@ class EnrollmentController extends Controller
 
         $validated = $request->validated();
         
+        // Set reason for change for audit trail if grade is being changed
+        if (isset($validated['grade']) && $request->has('reason_for_change')) {
+            $enrollment->reasonForChange = $request->input('reason_for_change');
+        }
+        
         $oldStatus = $enrollment->status;
         $enrollment->update($validated);
 

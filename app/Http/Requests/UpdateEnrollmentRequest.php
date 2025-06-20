@@ -12,6 +12,7 @@ use OpenApi\Attributes as OA;
     properties: [
         new OA\Property(property: "status", type: "string", enum: ["enrolled", "waitlisted", "completed", "withdrawn"], description: "The new status of the enrollment.", example: "completed"),
         new OA\Property(property: "grade", type: "string", maxLength: 5, nullable: true, description: "The grade received (required when status is 'completed').", example: "A"),
+        new OA\Property(property: "reason_for_change", type: "string", maxLength: 255, nullable: true, description: "Required when changing the grade. Reason for the grade change for audit trail.", example: "Correcting calculation error"),
     ]
 )]
 class UpdateEnrollmentRequest extends FormRequest
@@ -50,6 +51,11 @@ class UpdateEnrollmentRequest extends FormRequest
                 function ($attribute, $value, $fail) {
                     $this->validateGradeFormat($value, $fail);
                 },
+            ],
+            'reason_for_change' => [
+                'required_with:grade',
+                'string',
+                'max:255',
             ],
         ];
     }

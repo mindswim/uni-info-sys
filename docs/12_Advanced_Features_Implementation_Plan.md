@@ -815,13 +815,24 @@ The following roles and permissions form the foundation of our access control po
 
 ---
 
-### Task 15: Set up GitHub Actions CI + Test-Coverage Pipeline ⏳ PENDING
+### Task 15: Set up GitHub Actions CI + Test-Coverage Pipeline 🚫 DEFERRED
 
 **Goal**: To catch regressions automatically before they are merged and to maintain a high standard of code quality.
 
-**Status**: ⏳ **PENDING** - Ready for implementation (FINAL TASK)
+**Status**: 🚫 **DEFERRED** - Intentionally postponed until production deployment phase
 
-**Implementation Steps**:
+**Rationale for Deferral**: 
+- CI/CD pipelines are most valuable when deploying to production environments
+- Current focus is on core functionality completion and comprehensive testing
+- Will be implemented as part of production deployment strategy
+- Ensures CI/CD setup aligns with final production infrastructure decisions
+
+**When to Revisit**: 
+- After all core features are implemented and tested
+- When preparing for production deployment
+- As part of DevOps and infrastructure setup phase
+
+**Implementation Steps** (for future reference):
 1.  **Create Workflow Directory**:
     ```bash
     mkdir -p .github/workflows

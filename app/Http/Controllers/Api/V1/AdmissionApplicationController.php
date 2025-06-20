@@ -275,14 +275,14 @@ class AdmissionApplicationController extends Controller
      * Display the specified admission application
      */
     #[OA\Get(
-        path: "/api/v1/admission-applications/{id}",
+        path: "/api/v1/admission-applications/{admission_application}",
         summary: "Get a specific admission application",
         description: "Retrieve details of a specific admission application. Students can only view their own applications.",
         security: [["sanctum" => []]],
         tags: ["Admission Applications"],
         parameters: [
             new OA\Parameter(
-                name: "id",
+                name: "admission_application",
                 description: "ID of the admission application",
                 in: "path",
                 required: true,
@@ -337,14 +337,14 @@ class AdmissionApplicationController extends Controller
      * Update the specified admission application
      */
     #[OA\Put(
-        path: "/api/v1/admission-applications/{id}",
+        path: "/api/v1/admission-applications/{admission_application}",
         summary: "Update an admission application",
         description: "Update an admission application. Students can only update their own draft applications. Admin/staff can update any application.",
         security: [["sanctum" => []]],
         tags: ["Admission Applications"],
         parameters: [
             new OA\Parameter(
-                name: "id",
+                name: "admission_application",
                 description: "ID of the admission application",
                 in: "path",
                 required: true,
@@ -451,14 +451,14 @@ class AdmissionApplicationController extends Controller
      * Remove the specified admission application
      */
     #[OA\Delete(
-        path: "/api/v1/admission-applications/{id}",
+        path: "/api/v1/admission-applications/{admission_application}",
         summary: "Delete an admission application",
         description: "Delete an admission application. Students can only delete their own draft applications. Admin can delete any application.",
         security: [["sanctum" => []]],
         tags: ["Admission Applications"],
         parameters: [
             new OA\Parameter(
-                name: "id",
+                name: "admission_application",
                 description: "ID of the admission application",
                 in: "path",
                 required: true,

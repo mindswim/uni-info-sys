@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\V1\CourseSectionController;
 use App\Http\Controllers\Api\V1\EnrollmentController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\CourseImportController;
+use App\Http\Controllers\Api\V1\GradeImportController;
 
 /**
  * @OA\Get(
@@ -157,4 +158,5 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     
     // Import routes (requires specific permissions)
     Route::post('imports/courses', [CourseImportController::class, 'store']);
+    Route::post('course-sections/{courseSection}/import-grades', [GradeImportController::class, 'store']);
 }); 

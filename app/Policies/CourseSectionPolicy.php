@@ -70,4 +70,25 @@ class CourseSectionPolicy
         // Only admin can force delete
         return $user->hasRole('admin');
     }
+
+    /**
+     * Determine whether the user can upload grades for the course section.
+     * Only the assigned instructor can upload grades.
+     */
+    public function uploadGrades(User $user, CourseSection $courseSection): bool
+    {
+        // Check if user has grades.upload permission
+        if (!$user->hasPermission('grades.upload')) {
+            return false;
+        }
+
+        // Check if user is the assigned instructor for this course section
+        // The instructor_id in course_sections table should match a staff record linked to the user
+        if ($user->staff && $courseSection->instructor_id === $user->staff->id) {
+            return true;
+        }
+
+        // Admins can also upload grades as a fallback
+        return $user->hasPermission('enrollments.manage');
+    }
 }

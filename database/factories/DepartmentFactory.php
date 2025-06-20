@@ -17,24 +17,33 @@ class DepartmentFactory extends Factory
      */
     public function definition(): array
     {
+        static $departmentIndex = 0;
+        $departments = [
+            'Computer Science' => 'CS',
+            'Electrical Engineering' => 'EE',
+            'Mechanical Engineering' => 'ME',
+            'Mathematics' => 'MATH',
+            'Physics' => 'PHYS',
+            'Chemistry' => 'CHEM',
+            'Biology' => 'BIO',
+            'Economics' => 'ECON',
+            'Psychology' => 'PSYC',
+            'History' => 'HIST',
+            'English Literature' => 'ENGL',
+            'Business Administration' => 'BUS',
+            'Marketing' => 'MKT',
+            'Finance' => 'FIN'
+        ];
+        
+        $keys = array_keys($departments);
+        $name = $keys[$departmentIndex % count($keys)];
+        $code = $departments[$name] . ($departmentIndex > 13 ? '_' . ($departmentIndex - 13) : '');
+        $departmentIndex++;
+        
         return [
             'faculty_id' => Faculty::factory(),
-            'name' => $this->faker->randomElement([
-                'Computer Science',
-                'Electrical Engineering',
-                'Mechanical Engineering',
-                'Mathematics',
-                'Physics',
-                'Chemistry',
-                'Biology',
-                'Economics',
-                'Psychology',
-                'History',
-                'English Literature',
-                'Business Administration',
-                'Marketing',
-                'Finance'
-            ]),
+            'name' => $name . ($departmentIndex > 14 ? ' ' . ($departmentIndex - 14) : ''),
+            'code' => $code,
         ];
     }
 
@@ -42,6 +51,7 @@ class DepartmentFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'name' => 'Computer Science',
+            'code' => 'CS',
         ]);
     }
 
@@ -49,6 +59,7 @@ class DepartmentFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'name' => 'Electrical Engineering',
+            'code' => 'EE',
         ]);
     }
 
@@ -56,6 +67,7 @@ class DepartmentFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'name' => 'Business Administration',
+            'code' => 'BUS',
         ]);
     }
 }

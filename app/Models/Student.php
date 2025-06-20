@@ -34,7 +34,12 @@ class Student extends Model implements Auditable
 
     public function documents()
     {
-        return $this->hasMany(Document::class);
+        return $this->hasMany(Document::class)->where('is_active', true);
+    }
+
+    public function allDocuments()
+    {
+        return $this->hasMany(Document::class)->orderBy('version', 'desc');
     }
 
     public function admissionApplications()

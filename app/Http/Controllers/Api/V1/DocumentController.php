@@ -11,7 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use OpenApi\Attributes as OA;
+use Illuminate\Support\Facades\Gate;
 
 #[OA\Tag(
     name: "Documents",
@@ -21,7 +23,8 @@ class DocumentController extends Controller
 {
     public function __construct()
     {
-        $this->authorizeResource(Document::class, 'document');
+        // Note: Manual authorization is used in each method instead of authorizeResource
+        // to avoid policy argument count issues with nested resources
     }
 
     #[OA\Get(
@@ -40,12 +43,43 @@ class DocumentController extends Controller
             new OA\Response(response: 404, description: "Not Found"),
         ]
     )]
-    public function index(Request $request, Student $student): AnonymousResourceCollection
+    public function index(Request $request, Student $student)
     {
-        // Authorize that the current user can see documents for the given student.
-        $this->authorize('viewAny', [Document::class, $student]);
+        // Manual authorization check
+        $user = auth()->user();
+        if (!($user->hasRole('Admin') || $user->hasRole('admin') || $user->hasRole('staff') || $user->id === $student->user_id)) {
+            return response()->json(['message' => 'Unauthorized to view documents for this student.'], 403);
+        }
+        
         // Documents are linked to a Student directly.
         return DocumentResource::collection($student->documents);
+    }
+
+    #[OA\Get(
+        path: "/api/v1/students/{student}/documents/all-versions",
+        summary: "Get all document versions for a student (Admin only)",
+        description: "Retrieve all document versions for a specific student, including inactive versions. Only accessible by admins.",
+        security: [["sanctum" => []]],
+        tags: ["Documents"],
+        parameters: [
+            new OA\Parameter(name: "student", in: "path", required: true, schema: new OA\Schema(type: "integer"), description: "The ID of the student."),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Successful", content: new OA\JsonContent(type: "array", items: new OA\Items(ref: "#/components/schemas/DocumentResource"))),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden - Admin access required"),
+            new OA\Response(response: 404, description: "Not Found"),
+        ]
+    )]
+    public function allVersions(Request $request, Student $student)
+    {
+        // Only admins can view all document versions
+        if (!auth()->user()->hasRole('Admin')) {
+            return response()->json(['message' => 'Admin access required to view all document versions.'], 403);
+        }
+        
+        // Return all document versions ordered by version desc
+        return DocumentResource::collection($student->allDocuments);
     }
 
     #[OA\Post(
@@ -73,32 +107,51 @@ class DocumentController extends Controller
     )]
     public function store(StoreDocumentRequest $request, Student $student): JsonResponse
     {
-        $this->authorize('create', [Document::class, $student]);
+        // Manual authorization check
+        $user = auth()->user();
+        if (!($user->hasRole('Admin') || $user->hasRole('admin') || $user->hasRole('staff') || $user->id === $student->user_id)) {
+            return response()->json(['message' => 'Unauthorized to upload documents for this student.'], 403);
+        }
         
         $uploadedFile = $request->file('file');
+        $documentType = $request->document_type;
         
-        // Generate a unique filename to prevent conflicts
-        $filename = time() . '_' . $uploadedFile->getClientOriginalName();
-        
-        // Store the file in the documents directory
-        $filePath = $uploadedFile->storeAs('documents', $filename, 'public');
-        
-        // Create the document record
-        $document = Document::create([
-            'student_id' => $student->id,
-            'document_type' => $request->document_type,
-            'file_path' => $filePath,
-            'original_filename' => $uploadedFile->getClientOriginalName(),
-            'mime_type' => $uploadedFile->getMimeType(),
-            'file_size' => $uploadedFile->getSize(),
-            'status' => 'pending',
-            'uploaded_at' => now(),
-        ]);
-        
-        return response()->json([
-            'message' => 'Document uploaded successfully',
-            'data' => new DocumentResource($document)
-        ], 201);
+        return DB::transaction(function () use ($uploadedFile, $documentType, $student) {
+            // Get the next version number for this student and document type
+            $nextVersion = Document::getNextVersionNumber($student->id, $documentType);
+            
+            // Deactivate all previous versions of this document type for the student
+            Document::deactivatePreviousVersions($student->id, $documentType);
+            
+            // Generate a unique filename to prevent conflicts
+            $filename = time() . '_v' . $nextVersion . '_' . $uploadedFile->getClientOriginalName();
+            
+            // Store the file in the documents directory
+            $filePath = $uploadedFile->storeAs('documents', $filename, 'public');
+            
+            // Create the new document record with version and active status
+            $document = Document::create([
+                'student_id' => $student->id,
+                'document_type' => $documentType,
+                'file_path' => $filePath,
+                'original_filename' => $uploadedFile->getClientOriginalName(),
+                'mime_type' => $uploadedFile->getMimeType(),
+                'file_size' => $uploadedFile->getSize(),
+                'status' => 'pending',
+                'version' => $nextVersion,
+                'is_active' => true,
+                'uploaded_at' => now(),
+            ]);
+            
+            $message = $nextVersion === 1 
+                ? 'Document uploaded successfully'
+                : "Document uploaded successfully (version {$nextVersion})";
+            
+            return response()->json([
+                'message' => $message,
+                'data' => new DocumentResource($document)
+            ], 201);
+        });
     }
 
     #[OA\Get(
@@ -117,8 +170,14 @@ class DocumentController extends Controller
             new OA\Response(response: 404, description: "Not Found"),
         ]
     )]
-    public function show(Document $document): DocumentResource
+    public function show(Document $document)
     {
+        // Manual authorization check
+        $user = auth()->user();
+        if (!($user->hasRole('Admin') || $user->hasRole('admin') || $user->hasRole('staff') || $user->id === $document->student->user_id)) {
+            return response()->json(['message' => 'Unauthorized to view this document.'], 403);
+        }
+        
         return new DocumentResource($document);
     }
 
@@ -149,6 +208,12 @@ class DocumentController extends Controller
     )]
     public function update(Request $request, Document $document): JsonResponse
     {
+        // Manual authorization check
+        $user = auth()->user();
+        if (!($user->hasRole('Admin') || $user->hasRole('admin') || $user->hasRole('staff') || $user->id === $document->student->user_id)) {
+            return response()->json(['message' => 'Unauthorized to update this document.'], 403);
+        }
+        
         $request->validate([
             'document_type' => 'required|string|in:transcript,essay,recommendation,certificate,other',
         ]);
@@ -181,6 +246,12 @@ class DocumentController extends Controller
     )]
     public function destroy(Document $document): JsonResponse
     {
+        // Manual authorization check
+        $user = auth()->user();
+        if (!($user->hasRole('Admin') || $user->hasRole('admin') || $user->hasRole('staff') || $user->id === $document->student->user_id)) {
+            return response()->json(['message' => 'Unauthorized to delete this document.'], 403);
+        }
+        
         // Delete the file from storage
         if (Storage::disk('public')->exists($document->file_path)) {
             Storage::disk('public')->delete($document->file_path);

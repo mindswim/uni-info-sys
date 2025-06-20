@@ -82,5 +82,11 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
+        
+        // Define custom gates
+        Gate::define('create-document-for-student', function ($user, $student) {
+            // A student can add a document to their own profile. Admin/staff can add to any.
+            return $user->hasRole('Admin') || $user->hasRole('admin') || $user->hasRole('staff') || $user->id === $student->user_id;
+        });
     }
 }

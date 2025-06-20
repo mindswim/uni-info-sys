@@ -18,11 +18,16 @@ class DocumentFactory extends Factory
                 'cv'
             ]),
             'file_path' => 'documents/test.pdf',
+            'original_filename' => 'test.pdf',
+            'mime_type' => 'application/pdf',
+            'file_size' => 1000,
             'status' => $this->faker->randomElement([
                 'pending',
                 'approved',
                 'rejected'
             ]),
+            'version' => 1,
+            'is_active' => true,
             'verified' => $this->faker->boolean,
             'uploaded_at' => now(),
             'verified_at' => $this->faker->optional()->dateTime(),

@@ -142,6 +142,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::apiResource('students', \App\Http\Controllers\Api\V1\StudentController::class);
     Route::apiResource('students.academic-records', \App\Http\Controllers\Api\V1\AcademicRecordController::class)->scoped()->shallow();
     Route::apiResource('students.documents', \App\Http\Controllers\Api\V1\DocumentController::class)->scoped()->shallow();
+    Route::get('students/{student}/documents/all-versions', [\App\Http\Controllers\Api\V1\DocumentController::class, 'allVersions']);
     
     // Enrollment API routes
     Route::apiResource('enrollments', \App\Http\Controllers\Api\V1\EnrollmentController::class);

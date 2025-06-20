@@ -2067,6 +2067,56 @@
                 ]
             }
         },
+        "/api/v1/students/{student}/documents/all-versions": {
+            "get": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Get all document versions for a student (Admin only)",
+                "description": "Retrieve all document versions for a specific student, including inactive versions. Only accessible by admins.",
+                "operationId": "3204cd47335ab3985cbe625023b2275f",
+                "parameters": [
+                    {
+                        "name": "student",
+                        "in": "path",
+                        "description": "The ID of the student.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DocumentResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/documents/{document}": {
             "get": {
                 "tags": [
@@ -2726,6 +2776,66 @@
                     },
                     "404": {
                         "description": "Course Section Not Found"
+                    }
+                }
+            }
+        },
+        "/api/v1/enrollments/swap": {
+            "post": {
+                "tags": [
+                    "Enrollment Swaps"
+                ],
+                "summary": "Swap a student from one course section to another",
+                "description": "Atomically withdraws a student from one enrollment and enrolls them in a different course section. If the new enrollment fails, the withdrawal is rolled back.",
+                "operationId": "c249a45cf048e4cf1071d13093f35fe0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreEnrollmentSwapRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Enrollment swap successful.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "from_enrollment": {
+                                                    "$ref": "#/components/schemas/EnrollmentResource"
+                                                },
+                                                "to_enrollment": {
+                                                    "$ref": "#/components/schemas/EnrollmentResource"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized - cannot perform swap (deadline passed, not owner, etc.)"
+                    },
+                    "404": {
+                        "description": "Enrollment or course section not found"
+                    },
+                    "422": {
+                        "description": "Validation error or business rule violation (e.g., target section full, duplicate enrollment)"
                     }
                 }
             }
@@ -5524,6 +5634,27 @@
                 },
                 "type": "object"
             },
+            "StoreEnrollmentSwapRequest": {
+                "title": "Store Enrollment Swap Request",
+                "description": "Request body for swapping a student from one course section to another.",
+                "required": [
+                    "from_enrollment_id",
+                    "to_course_section_id"
+                ],
+                "properties": {
+                    "from_enrollment_id": {
+                        "description": "The ID of the enrollment to withdraw from.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "to_course_section_id": {
+                        "description": "The ID of the course section to enroll in.",
+                        "type": "integer",
+                        "example": 2
+                    }
+                },
+                "type": "object"
+            },
             "StoreGradeImportRequest": {
                 "title": "Store Grade Import Request",
                 "required": [
@@ -6568,6 +6699,15 @@
                         "type": "string",
                         "example": "pending"
                     },
+                    "version": {
+                        "description": "The version number of the document.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "is_active": {
+                        "description": "Whether this is the active version of the document.",
+                        "type": "boolean"
+                    },
                     "verified": {
                         "description": "Whether the document has been verified.",
                         "type": "boolean"
@@ -7233,6 +7373,10 @@
         {
             "name": "Enrollments",
             "description": "Endpoints for managing student enrollments in course sections."
+        },
+        {
+            "name": "Enrollment Swaps",
+            "description": "Endpoints for swapping student enrollments between course sections."
         },
         {
             "name": "Faculties",

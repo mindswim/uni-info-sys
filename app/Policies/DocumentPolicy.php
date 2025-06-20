@@ -14,9 +14,8 @@ class DocumentPolicy
      */
     public function viewAny(User $user, Student $student): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
         // Admin/staff can view anyone's documents. A student can only view their own.
-        return in_array('admin', $userRoles) || in_array('staff', $userRoles) || $user->id === $student->user_id;
+        return $user->hasRole('Admin') || $user->hasRole('admin') || $user->hasRole('staff') || $user->id === $student->user_id;
     }
 
     /**
@@ -24,9 +23,8 @@ class DocumentPolicy
      */
     public function view(User $user, Document $document): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
         // Admin/staff can view any document, student can view their own.
-        return in_array('admin', $userRoles) || in_array('staff', $userRoles) || $user->id === $document->user_id;
+        return $user->hasRole('Admin') || $user->hasRole('admin') || $user->hasRole('staff') || $user->id === $document->student->user_id;
     }
 
     /**
@@ -34,9 +32,8 @@ class DocumentPolicy
      */
     public function create(User $user, Student $student): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
         // A student can add a document to their own profile. Admin/staff can add to any.
-        return in_array('admin', $userRoles) || in_array('staff', $userRoles) || $user->id === $student->user_id;
+        return $user->hasRole('Admin') || $user->hasRole('admin') || $user->hasRole('staff') || $user->id === $student->user_id;
     }
 
     /**
@@ -44,9 +41,8 @@ class DocumentPolicy
      */
     public function update(User $user, Document $document): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
         // Only admin/staff can update for now (e.g., to verify)
-        return in_array('admin', $userRoles) || in_array('staff', $userRoles);
+        return $user->hasRole('Admin') || $user->hasRole('admin') || $user->hasRole('staff');
     }
 
     /**
@@ -54,9 +50,8 @@ class DocumentPolicy
      */
     public function delete(User $user, Document $document): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
         // A student can delete their own document, or an admin/staff can.
-        return in_array('admin', $userRoles) || in_array('staff', $userRoles) || $user->id === $document->user_id;
+        return $user->hasRole('Admin') || $user->hasRole('admin') || $user->hasRole('staff') || $user->id === $document->student->user_id;
     }
 
     /**
@@ -64,8 +59,7 @@ class DocumentPolicy
      */
     public function restore(User $user, Document $document): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        return in_array('admin', $userRoles);
+        return $user->hasRole('Admin') || $user->hasRole('admin');
     }
 
     /**
@@ -73,8 +67,7 @@ class DocumentPolicy
      */
     public function forceDelete(User $user, Document $document): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        return in_array('admin', $userRoles);
+        return $user->hasRole('Admin') || $user->hasRole('admin');
     }
 
     /**
@@ -83,6 +76,6 @@ class DocumentPolicy
     public function verify(User $user): bool
     {
         // Only admin and staff with verification permissions can verify
-        return $user->hasRole('admin') || ($user->hasRole('staff') && $user->hasPermission('verify-documents'));
+        return $user->hasRole('Admin') || $user->hasRole('admin') || ($user->hasRole('staff') && $user->hasPermission('verify-documents'));
     }
 }

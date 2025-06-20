@@ -2067,6 +2067,56 @@
                 ]
             }
         },
+        "/api/v1/students/{student}/documents/all-versions": {
+            "get": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Get all document versions for a student (Admin only)",
+                "description": "Retrieve all document versions for a specific student, including inactive versions. Only accessible by admins.",
+                "operationId": "3204cd47335ab3985cbe625023b2275f",
+                "parameters": [
+                    {
+                        "name": "student",
+                        "in": "path",
+                        "description": "The ID of the student.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DocumentResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/documents/{document}": {
             "get": {
                 "tags": [
@@ -6648,6 +6698,15 @@
                         "description": "The status of the document.",
                         "type": "string",
                         "example": "pending"
+                    },
+                    "version": {
+                        "description": "The version number of the document.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "is_active": {
+                        "description": "Whether this is the active version of the document.",
+                        "type": "boolean"
                     },
                     "verified": {
                         "description": "Whether the document has been verified.",

@@ -7,6 +7,7 @@ use App\Exceptions\DuplicateEnrollmentException;
 use App\Exceptions\EnrollmentCapacityExceededException;
 use App\Exceptions\StudentNotActiveException;
 use App\Jobs\SendEnrollmentConfirmation;
+use App\Jobs\ProcessWaitlistPromotion;
 use App\Models\CourseSection;
 use App\Models\Enrollment;
 use App\Models\Student;
@@ -108,6 +109,41 @@ class EnrollmentService
             }
 
             return null;
+        });
+    }
+
+    /**
+     * Withdraw a student from a course section
+     *
+     * @param Enrollment $enrollment
+     * @return bool
+     */
+    public function withdrawStudent(Enrollment $enrollment): bool
+    {
+        return DB::transaction(function () use ($enrollment) {
+            $wasEnrolled = $enrollment->status === 'enrolled';
+            $courseSection = $enrollment->courseSection;
+            
+            // Update enrollment status to withdrawn
+            $enrollment->update(['status' => 'withdrawn']);
+
+            Log::info('Student withdrawn from course section', [
+                'enrollment_id' => $enrollment->id,
+                'student_id' => $enrollment->student_id,
+                'course_section_id' => $courseSection->id,
+                'was_enrolled' => $wasEnrolled,
+            ]);
+
+            // If student was enrolled (not waitlisted), try to promote someone from waitlist
+            if ($wasEnrolled) {
+                ProcessWaitlistPromotion::dispatch($courseSection);
+                
+                Log::info('Waitlist promotion job dispatched', [
+                    'course_section_id' => $courseSection->id,
+                ]);
+            }
+
+            return true;
         });
     }
 

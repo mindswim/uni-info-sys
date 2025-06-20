@@ -8,12 +8,14 @@ use App\Models\CourseSection;
 use App\Models\Department;
 use App\Models\Enrollment;
 use App\Models\Faculty;
+use App\Models\Role;
 use App\Models\Room;
 use App\Models\Staff;
 use App\Models\Student;
 use App\Models\Term;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class EnrollmentApiTest extends TestCase
@@ -32,6 +34,12 @@ class EnrollmentApiTest extends TestCase
         
         // Create test data
         $this->createTestData();
+        
+        // Authenticate as an admin user for API tests
+        $user = User::factory()->create();
+        $adminRole = Role::factory()->create(['name' => 'admin']);
+        $user->roles()->attach($adminRole);
+        Sanctum::actingAs($user);
     }
 
     private function createTestData(): void

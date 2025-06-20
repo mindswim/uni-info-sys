@@ -15,6 +15,8 @@ use App\Services\EnrollmentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
+use App\Models\Term;
+use Illuminate\Support\Facades\Artisan;
 
 class BackgroundJobIntegrationTest extends TestCase
 {
@@ -164,5 +166,113 @@ class BackgroundJobIntegrationTest extends TestCase
         Queue::assertPushed(ProcessWaitlistPromotion::class, function ($job) use ($courseSection) {
             return $job->courseSection->id === $courseSection->id;
         });
+    }
+
+    /** @test */
+    public function check_waitlists_command_dispatches_jobs_for_eligible_sections()
+    {
+        // Create a term
+        $term = Term::factory()->create([
+            'start_date' => now()->addDays(1)->toDateString(),
+            'end_date' => now()->addMonths(4)->toDateString(),
+        ]);
+
+        // Create a course section with capacity for 2 students
+        $courseSection = CourseSection::factory()->create([
+            'term_id' => $term->id,
+            'capacity' => 2,
+        ]);
+
+        // Create one enrolled student (leaving capacity for one more)
+        $enrolledStudent = Student::factory()->create();
+        Enrollment::factory()->create([
+            'student_id' => $enrolledStudent->id,
+            'course_section_id' => $courseSection->id,
+            'status' => 'enrolled',
+        ]);
+
+        // Create waitlisted students
+        $waitlistedStudent = Student::factory()->create();
+        Enrollment::factory()->create([
+            'student_id' => $waitlistedStudent->id,
+            'course_section_id' => $courseSection->id,
+            'status' => 'waitlisted',
+        ]);
+
+        // Run the command
+        Artisan::call('waitlists:check');
+
+        // Assert that the waitlist promotion job was dispatched
+        Queue::assertPushed(ProcessWaitlistPromotion::class, function ($job) use ($courseSection) {
+            return $job->courseSection->id === $courseSection->id;
+        });
+    }
+
+    /** @test */
+    public function check_waitlists_command_ignores_full_sections()
+    {
+        // Create a term
+        $term = Term::factory()->create([
+            'start_date' => now()->addDays(1)->toDateString(),
+            'end_date' => now()->addMonths(4)->toDateString(),
+        ]);
+
+        // Create a course section with capacity for 1 student
+        $courseSection = CourseSection::factory()->create([
+            'term_id' => $term->id,
+            'capacity' => 1,
+        ]);
+
+        // Fill the course section to capacity
+        $enrolledStudent = Student::factory()->create();
+        Enrollment::factory()->create([
+            'student_id' => $enrolledStudent->id,
+            'course_section_id' => $courseSection->id,
+            'status' => 'enrolled',
+        ]);
+
+        // Create waitlisted student
+        $waitlistedStudent = Student::factory()->create();
+        Enrollment::factory()->create([
+            'student_id' => $waitlistedStudent->id,
+            'course_section_id' => $courseSection->id,
+            'status' => 'waitlisted',
+        ]);
+
+        // Run the command
+        Artisan::call('waitlists:check');
+
+        // Assert that NO waitlist promotion job was dispatched (section is full)
+        Queue::assertNotPushed(ProcessWaitlistPromotion::class);
+    }
+
+    /** @test */
+    public function check_waitlists_command_ignores_sections_without_waitlisted_students()
+    {
+        // Create a term
+        $term = Term::factory()->create([
+            'start_date' => now()->addDays(1)->toDateString(),
+            'end_date' => now()->addMonths(4)->toDateString(),
+        ]);
+
+        // Create a course section with capacity for 2 students
+        $courseSection = CourseSection::factory()->create([
+            'term_id' => $term->id,
+            'capacity' => 2,
+        ]);
+
+        // Create one enrolled student (leaving capacity but no waitlisted students)
+        $enrolledStudent = Student::factory()->create();
+        Enrollment::factory()->create([
+            'student_id' => $enrolledStudent->id,
+            'course_section_id' => $courseSection->id,
+            'status' => 'enrolled',
+        ]);
+
+        // Run the command
+        Artisan::call('waitlists:check');
+
+        // Assert that NO waitlist promotion job was dispatched (no waitlisted students)
+        Queue::assertNotPushed(ProcessWaitlistPromotion::class);
     }
 }

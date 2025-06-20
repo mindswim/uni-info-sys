@@ -301,16 +301,7 @@ class EnrollmentController extends Controller
     {
         $this->authorize('delete', $enrollment);
 
-        $wasEnrolled = $enrollment->status === 'enrolled';
-        $courseSection = $enrollment->courseSection;
-        
-        // Update status to withdrawn instead of deleting
-        $enrollment->update(['status' => 'withdrawn']);
-
-        // If student was enrolled, try to promote someone from waitlist
-        if ($wasEnrolled) {
-            ProcessWaitlistPromotion::dispatch($courseSection);
-        }
+        $this->enrollmentService->withdrawStudent($enrollment);
 
         return response()->json([
             'message' => 'Student has been withdrawn from the course section.',
@@ -351,15 +342,7 @@ class EnrollmentController extends Controller
             ], 422);
         }
 
-        $wasEnrolled = $enrollment->status === 'enrolled';
-        $courseSection = $enrollment->courseSection;
-        
-        $enrollment->update(['status' => 'withdrawn']);
-
-        // If student was enrolled, try to promote someone from waitlist
-        if ($wasEnrolled) {
-            ProcessWaitlistPromotion::dispatch($courseSection);
-        }
+        $this->enrollmentService->withdrawStudent($enrollment);
 
         return response()->json([
             'message' => 'Student has been withdrawn from the course section.',

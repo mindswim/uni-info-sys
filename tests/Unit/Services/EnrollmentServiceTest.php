@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Services\EnrollmentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Illuminate\Support\Facades\Queue;
 
 class EnrollmentServiceTest extends TestCase
 {
@@ -329,5 +330,77 @@ class EnrollmentServiceTest extends TestCase
 
         // Assert
         $this->assertNull($result);
+    }
+
+    public function test_withdraw_student_successfully()
+    {
+        Queue::fake();
+        
+        // Arrange
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        $student = Student::factory()->create(['user_id' => $user->id]);
+        $term = Term::factory()->create([
+            'start_date' => now()->addDays(1)->toDateString(),
+            'end_date' => now()->addMonths(4)->toDateString(),
+        ]);
+        $courseSection = CourseSection::factory()->create([
+            'term_id' => $term->id,
+            'capacity' => 2,
+        ]);
+        $enrollment = Enrollment::factory()->create([
+            'student_id' => $student->id,
+            'course_section_id' => $courseSection->id,
+            'status' => 'enrolled',
+        ]);
+
+        // Act
+        $result = $this->enrollmentService->withdrawStudent($enrollment);
+
+        // Assert
+        $this->assertTrue($result);
+        $this->assertDatabaseHas('enrollments', [
+            'id' => $enrollment->id,
+            'status' => 'withdrawn',
+        ]);
+        
+        // Assert that waitlist promotion job was dispatched
+        Queue::assertPushed(\App\Jobs\ProcessWaitlistPromotion::class, function ($job) use ($courseSection) {
+            return $job->courseSection->id === $courseSection->id;
+        });
+    }
+
+    public function test_withdraw_student_from_waitlist_does_not_dispatch_promotion_job()
+    {
+        Queue::fake();
+        
+        // Arrange
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        $student = Student::factory()->create(['user_id' => $user->id]);
+        $term = Term::factory()->create([
+            'start_date' => now()->addDays(1)->toDateString(),
+            'end_date' => now()->addMonths(4)->toDateString(),
+        ]);
+        $courseSection = CourseSection::factory()->create([
+            'term_id' => $term->id,
+            'capacity' => 2,
+        ]);
+        $enrollment = Enrollment::factory()->create([
+            'student_id' => $student->id,
+            'course_section_id' => $courseSection->id,
+            'status' => 'waitlisted',
+        ]);
+
+        // Act
+        $result = $this->enrollmentService->withdrawStudent($enrollment);
+
+        // Assert
+        $this->assertTrue($result);
+        $this->assertDatabaseHas('enrollments', [
+            'id' => $enrollment->id,
+            'status' => 'withdrawn',
+        ]);
+        
+        // Assert that NO waitlist promotion job was dispatched
+        Queue::assertNotPushed(\App\Jobs\ProcessWaitlistPromotion::class);
     }
 }

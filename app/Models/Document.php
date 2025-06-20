@@ -8,12 +8,11 @@ class Document extends Model
     use HasFactory;
 
     protected $fillable = [
-        'student_id', 'document_type', 'file_path', 'status',
-        'verified', 'uploaded_at', 'verified_at'
+        'student_id', 'document_type', 'file_path', 'original_filename', 
+        'mime_type', 'file_size', 'status'
     ];
 
     protected $casts = [
-        'verified' => 'boolean',
         'uploaded_at' => 'datetime',
         'verified_at' => 'datetime',
     ];

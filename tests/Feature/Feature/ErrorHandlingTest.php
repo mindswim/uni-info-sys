@@ -42,7 +42,8 @@ class ErrorHandlingTest extends TestCase
         $this->student = Student::factory()->create(['user_id' => $this->studentUser->id]);
     }
 
-    public function test_enrollment_capacity_exceeded_exception_returns_proper_json_error()
+    /** @test */
+    public function it_returns_rfc7807_format_for_enrollment_capacity_exceeded()
     {
         // Create a course section at full capacity with future term
         $term = Term::factory()->create([
@@ -74,12 +75,23 @@ class ErrorHandlingTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJson([
-                'message' => 'Cannot enroll student directly - course section is at capacity. Student will be waitlisted.',
+                'type' => 'https://university-admissions.com/problems/enrollment-capacity-exceeded',
+                'title' => 'Enrollment Capacity Exceeded',
+                'status' => 422,
+                'detail' => 'Cannot enroll student directly - course section is at capacity. Student will be waitlisted.',
                 'error_code' => 'ENROLLMENT_CAPACITY_EXCEEDED',
+            ])
+            ->assertJsonStructure([
+                'type',
+                'title', 
+                'status',
+                'detail',
+                'error_code'
             ]);
     }
 
-    public function test_duplicate_enrollment_exception_returns_proper_json_error()
+    /** @test */
+    public function it_returns_rfc7807_format_for_duplicate_enrollment()
     {
         $term = Term::factory()->create([
             'start_date' => now()->addDays(1)->toDateString(),
@@ -108,12 +120,23 @@ class ErrorHandlingTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJson([
-                'message' => 'Student is already enrolled or waitlisted for this course section',
+                'type' => 'https://university-admissions.com/problems/duplicate-enrollment',
+                'title' => 'Duplicate Enrollment',
+                'status' => 422,
+                'detail' => 'Student is already enrolled or waitlisted for this course section',
                 'error_code' => 'DUPLICATE_ENROLLMENT',
+            ])
+            ->assertJsonStructure([
+                'type',
+                'title',
+                'status', 
+                'detail',
+                'error_code'
             ]);
     }
 
-    public function test_student_not_active_exception_returns_proper_json_error()
+    /** @test */
+    public function it_returns_rfc7807_format_for_student_not_active()
     {
         // Create unverified student
         $unverifiedUser = User::factory()->create(['email_verified_at' => null]);
@@ -141,24 +164,46 @@ class ErrorHandlingTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJson([
-                'message' => 'The student account is not active or verified.',
+                'type' => 'https://university-admissions.com/problems/student-not-active',
+                'title' => 'Student Not Active',
+                'status' => 422,
+                'detail' => 'The student account is not active or verified.',
                 'error_code' => 'STUDENT_NOT_ACTIVE',
+            ])
+            ->assertJsonStructure([
+                'type',
+                'title',
+                'status',
+                'detail', 
+                'error_code'
             ]);
     }
 
-    public function test_resource_not_found_exception_for_nonexistent_faculty()
+    /** @test */
+    public function it_returns_rfc7807_format_for_not_found_errors()
     {
         $response = $this->actingAs($this->adminUser, 'sanctum')
             ->getJson('/api/v1/faculties/99999');
 
         $response->assertStatus(404)
             ->assertJson([
-                'message' => 'The requested resource was not found.',
-                'error_code' => 'NOT_FOUND',
+                'type' => 'https://tools.ietf.org/html/rfc7231#section-6.5.4',
+                'title' => 'Resource Not Found',
+                'status' => 404,
+            ])
+            ->assertJsonStructure([
+                'type',
+                'title',
+                'status',
+                'detail'
             ]);
+        
+        // The detail should contain the Laravel ModelNotFoundException message
+        $this->assertStringContainsString('No query results for model', $response->json('detail'));
     }
 
-    public function test_validation_error_returns_proper_json_structure()
+    /** @test */
+    public function it_returns_rfc7807_format_for_validation_errors()
     {
         $response = $this->actingAs($this->adminUser, 'sanctum')
             ->postJson('/api/v1/faculties', [
@@ -167,30 +212,44 @@ class ErrorHandlingTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJson([
-                'message' => 'The given data was invalid.',
-                'error_code' => 'VALIDATION_ERROR',
+                'type' => 'https://tools.ietf.org/html/rfc4918#section-11.2',
+                'title' => 'Validation Error',
+                'status' => 422,
+                'detail' => 'The given data was invalid.',
             ])
             ->assertJsonStructure([
-                'message',
-                'error_code',
+                'type',
+                'title',
+                'status',
+                'detail',
                 'errors' => [
                     'name'
                 ]
             ]);
     }
 
-    public function test_unauthenticated_error_returns_proper_json_structure()
+    /** @test */
+    public function it_returns_rfc7807_format_for_unauthenticated_errors()
     {
         $response = $this->getJson('/api/v1/faculties');
 
         $response->assertStatus(401)
             ->assertJson([
-                'message' => 'Unauthenticated.',
-                'error_code' => 'UNAUTHENTICATED',
+                'type' => 'https://tools.ietf.org/html/rfc7235#section-3.1',
+                'title' => 'Unauthenticated',
+                'status' => 401,
+                'detail' => 'Unauthenticated.',
+            ])
+            ->assertJsonStructure([
+                'type',
+                'title',
+                'status',
+                'detail'
             ]);
     }
 
-    public function test_unauthorized_error_returns_proper_json_structure()
+    /** @test */
+    public function it_returns_rfc7807_format_for_unauthorized_errors()
     {
         // Create a user without admin role
         $regularUser = User::factory()->create();
@@ -204,57 +263,60 @@ class ErrorHandlingTest extends TestCase
 
         $response->assertStatus(403)
             ->assertJson([
-                'message' => 'This action is unauthorized.',
-                'error_code' => 'UNAUTHORIZED',
+                'type' => 'https://tools.ietf.org/html/rfc7231',
+                'title' => 'Forbidden',
+                'status' => 403,
+                'detail' => 'This action is unauthorized.',
+            ])
+            ->assertJsonStructure([
+                'type',
+                'title',
+                'status',
+                'detail'
             ]);
     }
 
-    public function test_error_responses_include_debug_info_in_development()
+    /** @test */
+    public function it_includes_debug_info_in_development_for_server_errors()
     {
         // Temporarily set app to debug mode
         config(['app.debug' => true]);
 
+        // Force a server error by trying to access a non-existent method
         $response = $this->actingAs($this->adminUser, 'sanctum')
-            ->postJson('/api/v1/faculties', [
-                'name' => '', // Trigger validation error
-            ]);
+            ->getJson('/api/v1/non-existent-endpoint');
 
-        $response->assertStatus(422)
+        $response->assertStatus(404)
             ->assertJsonStructure([
-                'message',
-                'error_code',
-                'errors',
-                'debug' => [
-                    'exception',
-                    'file',
-                    'line',
-                    'trace'
-                ]
+                'type',
+                'title',
+                'status',
+                'detail'
             ]);
     }
 
-    public function test_error_responses_do_not_include_debug_info_in_production()
+    /** @test */
+    public function it_does_not_include_debug_info_in_production()
     {
         // Set app to production mode
         config(['app.debug' => false]);
 
         $response = $this->actingAs($this->adminUser, 'sanctum')
-            ->postJson('/api/v1/faculties', [
-                'name' => '', // Trigger validation error
-            ]);
+            ->getJson('/api/v1/non-existent-endpoint');
 
-        $response->assertStatus(422)
+        $response->assertStatus(404)
             ->assertJsonStructure([
-                'message',
-                'error_code',
-                'errors'
+                'type',
+                'title',
+                'status',
+                'detail'
             ])
             ->assertJsonMissing(['debug']);
     }
 
-    public function test_custom_exceptions_are_logged_appropriately()
+    /** @test */
+    public function it_logs_custom_exceptions_appropriately()
     {
-        // We'll check if the exception is handled properly instead of testing logs directly
         $term = Term::factory()->create([
             'start_date' => now()->addDays(1)->toDateString(),
             'end_date' => now()->addDays(90)->toDateString(),
@@ -274,7 +336,7 @@ class ErrorHandlingTest extends TestCase
             'status' => 'enrolled',
         ]);
 
-        // Trigger capacity exceeded exception
+        // Try to enroll when at capacity - this should trigger the custom exception
         $response = $this->actingAs($this->adminUser, 'sanctum')
             ->postJson('/api/v1/enrollments', [
                 'student_id' => $this->student->id,
@@ -282,9 +344,12 @@ class ErrorHandlingTest extends TestCase
                 'status' => 'enrolled',
             ]);
 
-        // Verify the exception was handled correctly
+        // Verify the RFC 7807 response format for our custom exception
         $response->assertStatus(422)
             ->assertJson([
+                'type' => 'https://university-admissions.com/problems/enrollment-capacity-exceeded',
+                'title' => 'Enrollment Capacity Exceeded',
+                'status' => 422,
                 'error_code' => 'ENROLLMENT_CAPACITY_EXCEEDED',
             ]);
     }

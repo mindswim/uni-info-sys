@@ -97,9 +97,9 @@ class FacultyController extends Controller
      *             )
      *         )
      *     ),
-     *     @OA\Response(response=401, description="Unauthorized"),
-     *     @OA\Response(response=403, description="Forbidden"),
-     *     @OA\Response(response=422, description="Validation error")
+     *     @OA\Response(response=401, description="Unauthorized", @OA\JsonContent(ref="#/components/schemas/UnauthorizedError")),
+     *     @OA\Response(response=403, description="Forbidden", @OA\JsonContent(ref="#/components/schemas/ForbiddenError")),
+     *     @OA\Response(response=422, description="Validation error", @OA\JsonContent(ref="#/components/schemas/ValidationError"))
      * )
      */
     public function store(Request $request)
@@ -153,9 +153,9 @@ class FacultyController extends Controller
      *             )
      *         )
      *     ),
-     *     @OA\Response(response=401, description="Unauthorized"),
-     *     @OA\Response(response=403, description="Forbidden"),
-     *     @OA\Response(response=404, description="Faculty not found")
+     *     @OA\Response(response=401, description="Unauthorized", @OA\JsonContent(ref="#/components/schemas/UnauthorizedError")),
+     *     @OA\Response(response=403, description="Forbidden", @OA\JsonContent(ref="#/components/schemas/ForbiddenError")),
+     *     @OA\Response(response=404, description="Faculty not found", @OA\JsonContent(ref="#/components/schemas/NotFoundError"))
      * )
      */
     public function show(Faculty $faculty)
@@ -199,10 +199,10 @@ class FacultyController extends Controller
      *             )
      *         )
      *     ),
-     *     @OA\Response(response=401, description="Unauthorized"),
-     *     @OA\Response(response=403, description="Forbidden"),
-     *     @OA\Response(response=404, description="Faculty not found"),
-     *     @OA\Response(response=422, description="Validation error")
+     *     @OA\Response(response=401, description="Unauthorized", @OA\JsonContent(ref="#/components/schemas/UnauthorizedError")),
+     *     @OA\Response(response=403, description="Forbidden", @OA\JsonContent(ref="#/components/schemas/ForbiddenError")),
+     *     @OA\Response(response=404, description="Faculty not found", @OA\JsonContent(ref="#/components/schemas/NotFoundError")),
+     *     @OA\Response(response=422, description="Validation error", @OA\JsonContent(ref="#/components/schemas/ValidationError"))
      * )
      */
     public function update(Request $request, Faculty $faculty)
@@ -237,9 +237,9 @@ class FacultyController extends Controller
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Response(response=204, description="Faculty deleted successfully"),
-     *     @OA\Response(response=401, description="Unauthorized"),
-     *     @OA\Response(response=403, description="Forbidden"),
-     *     @OA\Response(response=404, description="Faculty not found")
+     *     @OA\Response(response=401, description="Unauthorized", @OA\JsonContent(ref="#/components/schemas/UnauthorizedError")),
+     *     @OA\Response(response=403, description="Forbidden", @OA\JsonContent(ref="#/components/schemas/ForbiddenError")),
+     *     @OA\Response(response=404, description="Faculty not found", @OA\JsonContent(ref="#/components/schemas/NotFoundError"))
      * )
      */
     public function destroy(Faculty $faculty)

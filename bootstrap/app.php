@@ -30,163 +30,209 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (Throwable $e, Illuminate\Http\Request $request) {
             if ($request->is('api/*') || $request->expectsJson()) {
-                $message = 'An unexpected error occurred.';
-                $statusCode = 500;
-                $errors = [];
-                $errorCode = null;
-
-                // Handle our custom domain exceptions
+                // Handle our custom domain exceptions first
                 if ($e instanceof App\Exceptions\EnrollmentCapacityExceededException) {
-                    $message = $e->getMessage();
-                    $statusCode = 422;
-                    $errorCode = 'ENROLLMENT_CAPACITY_EXCEEDED';
                     \Log::warning('Enrollment capacity exceeded', [
                         'message' => $e->getMessage(),
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
+                    
+                    $problem = new App\Exceptions\ProblemDetails(
+                        type: 'https://university-admissions.com/problems/enrollment-capacity-exceeded',
+                        title: 'Enrollment Capacity Exceeded',
+                        status: 422,
+                        detail: $e->getMessage(),
+                        extensions: ['error_code' => 'ENROLLMENT_CAPACITY_EXCEEDED']
+                    );
+                    
+                    return $problem->toResponse();
                 } elseif ($e instanceof App\Exceptions\DuplicateEnrollmentException) {
-                    $message = $e->getMessage();
-                    $statusCode = 422;
-                    $errorCode = 'DUPLICATE_ENROLLMENT';
                     \Log::warning('Duplicate enrollment attempt', [
                         'message' => $e->getMessage(),
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
+                    
+                    $problem = new App\Exceptions\ProblemDetails(
+                        type: 'https://university-admissions.com/problems/duplicate-enrollment',
+                        title: 'Duplicate Enrollment',
+                        status: 422,
+                        detail: $e->getMessage(),
+                        extensions: ['error_code' => 'DUPLICATE_ENROLLMENT']
+                    );
+                    
+                    return $problem->toResponse();
                 } elseif ($e instanceof App\Exceptions\StudentNotActiveException) {
-                    $message = $e->getMessage();
-                    $statusCode = 422;
-                    $errorCode = 'STUDENT_NOT_ACTIVE';
                     \Log::warning('Inactive student enrollment attempt', [
                         'message' => $e->getMessage(),
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
+                    
+                    $problem = new App\Exceptions\ProblemDetails(
+                        type: 'https://university-admissions.com/problems/student-not-active',
+                        title: 'Student Not Active',
+                        status: 422,
+                        detail: $e->getMessage(),
+                        extensions: ['error_code' => 'STUDENT_NOT_ACTIVE']
+                    );
+                    
+                    return $problem->toResponse();
                 } elseif ($e instanceof App\Exceptions\CourseSectionUnavailableException) {
-                    $message = $e->getMessage();
-                    $statusCode = 422;
-                    $errorCode = 'COURSE_SECTION_UNAVAILABLE';
                     \Log::warning('Course section unavailable', [
                         'message' => $e->getMessage(),
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
+                    
+                    $problem = new App\Exceptions\ProblemDetails(
+                        type: 'https://university-admissions.com/problems/course-section-unavailable',
+                        title: 'Course Section Unavailable',
+                        status: 422,
+                        detail: $e->getMessage(),
+                        extensions: ['error_code' => 'COURSE_SECTION_UNAVAILABLE']
+                    );
+                    
+                    return $problem->toResponse();
                 } elseif ($e instanceof App\Exceptions\PrerequisiteNotMetException) {
-                    $message = $e->getMessage();
-                    $statusCode = 422;
-                    $errorCode = 'PREREQUISITE_NOT_MET';
                     \Log::warning('Course prerequisites not met', [
                         'message' => $e->getMessage(),
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
+                    
+                    $problem = new App\Exceptions\ProblemDetails(
+                        type: 'https://university-admissions.com/problems/prerequisite-not-met',
+                        title: 'Prerequisite Not Met',
+                        status: 422,
+                        detail: $e->getMessage(),
+                        extensions: ['error_code' => 'PREREQUISITE_NOT_MET']
+                    );
+                    
+                    return $problem->toResponse();
                 } elseif ($e instanceof App\Exceptions\InvalidApplicationStatusException) {
-                    $message = $e->getMessage();
-                    $statusCode = 422;
-                    $errorCode = 'INVALID_APPLICATION_STATUS';
                     \Log::warning('Invalid application status transition', [
                         'message' => $e->getMessage(),
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
+                    
+                    $problem = new App\Exceptions\ProblemDetails(
+                        type: 'https://university-admissions.com/problems/invalid-application-status',
+                        title: 'Invalid Application Status',
+                        status: 422,
+                        detail: $e->getMessage(),
+                        extensions: ['error_code' => 'INVALID_APPLICATION_STATUS']
+                    );
+                    
+                    return $problem->toResponse();
                 } elseif ($e instanceof App\Exceptions\ResourceNotFoundException) {
-                    $message = $e->getMessage();
-                    $statusCode = 404;
-                    $errorCode = 'RESOURCE_NOT_FOUND';
                     \Log::info('Resource not found', [
                         'message' => $e->getMessage(),
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
+                    
+                    $problem = new App\Exceptions\ProblemDetails(
+                        type: 'https://university-admissions.com/problems/resource-not-found',
+                        title: 'Resource Not Found',
+                        status: 404,
+                        detail: $e->getMessage(),
+                        extensions: ['error_code' => 'RESOURCE_NOT_FOUND']
+                    );
+                    
+                    return $problem->toResponse();
                 } elseif ($e instanceof App\Exceptions\InsufficientPermissionsException) {
-                    $message = $e->getMessage();
-                    $statusCode = 403;
-                    $errorCode = 'INSUFFICIENT_PERMISSIONS';
                     \Log::warning('Insufficient permissions', [
                         'message' => $e->getMessage(),
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
+                    
+                    $problem = new App\Exceptions\ProblemDetails(
+                        type: 'https://university-admissions.com/problems/insufficient-permissions',
+                        title: 'Insufficient Permissions',
+                        status: 403,
+                        detail: $e->getMessage(),
+                        extensions: ['error_code' => 'INSUFFICIENT_PERMISSIONS']
+                    );
+                    
+                    return $problem->toResponse();
                 } elseif ($e instanceof App\Exceptions\BusinessRuleViolationException) {
-                    $message = $e->getMessage();
-                    $statusCode = 422;
-                    $errorCode = 'BUSINESS_RULE_VIOLATION';
                     \Log::warning('Business rule violation', [
                         'message' => $e->getMessage(),
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
-                }
-                // Handle standard Laravel/Symfony exceptions
-                elseif ($e instanceof Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
-                    $message = 'The requested resource was not found.';
-                    $statusCode = 404;
-                    $errorCode = 'NOT_FOUND';
-                } elseif ($e instanceof Illuminate\Auth\AuthenticationException) {
-                    $message = 'Unauthenticated.';
-                    $statusCode = 401;
-                    $errorCode = 'UNAUTHENTICATED';
-                } elseif ($e instanceof Illuminate\Auth\Access\AuthorizationException) {
-                    $message = 'This action is unauthorized.';
-                    $statusCode = 403;
-                    $errorCode = 'UNAUTHORIZED';
-                } elseif ($e instanceof Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException) {
-                    $message = 'This action is unauthorized.';
-                    $statusCode = 403;
-                    $errorCode = 'UNAUTHORIZED';
-                } elseif ($e instanceof Illuminate\Validation\ValidationException) {
-                    $message = 'The given data was invalid.';
-                    $statusCode = 422;
-                    $errorCode = 'VALIDATION_ERROR';
-                    $errors = $e->errors();
+                    
+                    $problem = new App\Exceptions\ProblemDetails(
+                        type: 'https://university-admissions.com/problems/business-rule-violation',
+                        title: 'Business Rule Violation',
+                        status: 422,
+                        detail: $e->getMessage(),
+                        extensions: ['error_code' => 'BUSINESS_RULE_VIOLATION']
+                    );
+                    
+                    return $problem->toResponse();
                 } elseif ($e instanceof Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException) {
-                    $message = 'Too many requests. Please try again later.';
-                    $statusCode = 429;
-                    $errorCode = 'RATE_LIMIT_EXCEEDED';
+                    $problem = new App\Exceptions\ProblemDetails(
+                        type: 'https://tools.ietf.org/html/rfc6585#section-4',
+                        title: 'Too Many Requests',
+                        status: 429,
+                        detail: 'Too many requests. Please try again later.',
+                        extensions: ['error_code' => 'RATE_LIMIT_EXCEEDED']
+                    );
+                    
+                    return $problem->toResponse();
                 } elseif ($e instanceof Illuminate\Database\Eloquent\ModelNotFoundException) {
-                    $message = 'The requested resource was not found.';
-                    $statusCode = 404;
-                    $errorCode = 'MODEL_NOT_FOUND';
+                    $problem = new App\Exceptions\ProblemDetails(
+                        type: 'https://tools.ietf.org/html/rfc7231#section-6.5.4',
+                        title: 'Resource Not Found',
+                        status: 404,
+                        detail: 'The requested resource was not found.',
+                        extensions: ['error_code' => 'MODEL_NOT_FOUND']
+                    );
+                    
+                    return $problem->toResponse();
                 } else {
+                    // For all other exceptions, use the standard RFC 7807 handler
+                    // but add debug information if needed
+                    $problem = App\Exceptions\ProblemDetails::fromException($e);
+                    
                     // Log unexpected errors
-                    \Log::error('Unexpected API error', [
-                        'exception' => get_class($e),
-                        'message' => $e->getMessage(),
-                        'file' => $e->getFile(),
-                        'line' => $e->getLine(),
-                        'user_id' => $request->user()?->id,
-                        'url' => $request->url(),
-                        'request_data' => $request->except(['password', 'password_confirmation']),
-                    ]);
+                    if ($problem->status >= 500) {
+                        \Log::error('Unexpected API error', [
+                            'exception' => get_class($e),
+                            'message' => $e->getMessage(),
+                            'file' => $e->getFile(),
+                            'line' => $e->getLine(),
+                            'user_id' => $request->user()?->id,
+                            'url' => $request->url(),
+                            'request_data' => $request->except(['password', 'password_confirmation']),
+                        ]);
+                    }
+                    
+                    // Include debug information in development
+                    if (config('app.debug') && $problem->status >= 500) {
+                        $problem = $problem->withExtensions([
+                            'debug' => [
+                                'exception' => get_class($e),
+                                'file' => $e->getFile(),
+                                'line' => $e->getLine(),
+                                'trace' => collect($e->getTrace())->take(5)->map(function ($trace) {
+                                    return [
+                                        'file' => $trace['file'] ?? 'Unknown',
+                                        'line' => $trace['line'] ?? 'Unknown',
+                                        'function' => $trace['function'] ?? 'Unknown',
+                                    ];
+                                })->all(),
+                            ]
+                        ]);
+                    }
+                    
+                    return $problem->toResponse();
                 }
-
-                $response = [
-                    'message' => $message,
-                    'error_code' => $errorCode,
-                ];
-
-                if (!empty($errors)) {
-                    $response['errors'] = $errors;
-                }
-
-                // Include debug information in development
-                if (config('app.debug')) {
-                    $response['debug'] = [
-                        'exception' => get_class($e),
-                        'file' => $e->getFile(),
-                        'line' => $e->getLine(),
-                        'trace' => collect($e->getTrace())->take(5)->map(function ($trace) {
-                            return [
-                                'file' => $trace['file'] ?? 'Unknown',
-                                'line' => $trace['line'] ?? 'Unknown',
-                                'function' => $trace['function'] ?? 'Unknown',
-                            ];
-                        })->all(),
-                    ];
-                }
-
-                return response()->json($response, $statusCode);
             }
         });
     })->create();

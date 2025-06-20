@@ -33,7 +33,15 @@ class BackgroundJobIntegrationTest extends TestCase
     {
         $user = User::factory()->create();
         $student = Student::factory()->create(['user_id' => $user->id]);
-        $courseSection = CourseSection::factory()->create(['capacity' => 10]);
+        $term = Term::factory()->create([
+            'start_date' => now()->addDays(1)->toDateString(),
+            'end_date' => now()->addMonths(4)->toDateString(),
+            'add_drop_deadline' => now()->addWeeks(2), // Future deadline to avoid deadline validation
+        ]);
+        $courseSection = CourseSection::factory()->create([
+            'term_id' => $term->id,
+            'capacity' => 10
+        ]);
 
         $enrollmentService = app(EnrollmentService::class);
 
@@ -53,7 +61,15 @@ class BackgroundJobIntegrationTest extends TestCase
     {
         $user = User::factory()->create();
         $student = Student::factory()->create(['user_id' => $user->id]);
-        $courseSection = CourseSection::factory()->create(['capacity' => 1]);
+        $term = Term::factory()->create([
+            'start_date' => now()->addDays(1)->toDateString(),
+            'end_date' => now()->addMonths(4)->toDateString(),
+            'add_drop_deadline' => now()->addWeeks(2), // Future deadline to avoid deadline validation
+        ]);
+        $courseSection = CourseSection::factory()->create([
+            'term_id' => $term->id,
+            'capacity' => 1
+        ]);
 
         // Fill the course section
         $otherStudent = Student::factory()->create();

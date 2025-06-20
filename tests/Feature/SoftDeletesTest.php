@@ -8,6 +8,7 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\Student;
 use App\Models\Course;
+use App\Models\CourseSection;
 use App\Models\Enrollment;
 use App\Models\Document;
 use App\Models\AdmissionApplication;
@@ -110,7 +111,18 @@ class SoftDeletesTest extends TestCase
     {
         Sanctum::actingAs($this->adminUser);
 
-        $enrollment = Enrollment::factory()->create(['student_id' => $this->student->id]);
+        // Create a term with proper deadline to avoid deadline validation
+        $term = Term::factory()->create([
+            'start_date' => now()->addDays(1)->toDateString(),
+            'end_date' => now()->addMonths(4)->toDateString(),
+            'add_drop_deadline' => now()->addWeeks(4), // Future deadline to allow withdrawal
+        ]);
+        
+        $courseSection = CourseSection::factory()->create(['term_id' => $term->id]);
+        $enrollment = Enrollment::factory()->create([
+            'student_id' => $this->student->id,
+            'course_section_id' => $courseSection->id
+        ]);
 
         // "Soft delete" enrollment (sets status to withdrawn)
         $response = $this->deleteJson("/api/v1/enrollments/{$enrollment->id}");

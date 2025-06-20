@@ -62,7 +62,7 @@ class AdmissionApplicationApiTest extends TestCase
         $response = $this->getJson('/api/v1/admission-applications');
 
         $response->assertStatus(401)
-                 ->assertJson(['message' => 'Unauthenticated.']);
+                 ->assertJson(['detail' => 'Unauthenticated.']);
     }
 
     /** @test */

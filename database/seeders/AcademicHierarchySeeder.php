@@ -23,55 +23,65 @@ class AcademicHierarchySeeder extends Seeder
         // Create Departments for Engineering Faculty
         $csDepartment = Department::firstOrCreate([
             'faculty_id' => $engineeringFaculty->id,
-            'name' => 'Computer Science'
+            'name' => 'Computer Science',
+            'code' => 'CS'
         ]);
 
         $eeDepartment = Department::firstOrCreate([
             'faculty_id' => $engineeringFaculty->id,
-            'name' => 'Electrical Engineering'
+            'name' => 'Electrical Engineering',
+            'code' => 'EE'
         ]);
 
         $meDepartment = Department::firstOrCreate([
             'faculty_id' => $engineeringFaculty->id,
-            'name' => 'Mechanical Engineering'
+            'name' => 'Mechanical Engineering',
+            'code' => 'ME'
         ]);
 
         // Create Departments for Science Faculty
         $mathDepartment = Department::firstOrCreate([
             'faculty_id' => $scienceFaculty->id,
-            'name' => 'Mathematics'
+            'name' => 'Mathematics',
+            'code' => 'MATH'
         ]);
 
         $physicsDepartment = Department::firstOrCreate([
             'faculty_id' => $scienceFaculty->id,
-            'name' => 'Physics'
+            'name' => 'Physics',
+            'code' => 'PHYS'
         ]);
 
         $chemistryDepartment = Department::firstOrCreate([
             'faculty_id' => $scienceFaculty->id,
-            'name' => 'Chemistry'
+            'name' => 'Chemistry',
+            'code' => 'CHEM'
         ]);
 
         // Create Departments for Business Faculty
         $businessAdminDepartment = Department::firstOrCreate([
             'faculty_id' => $businessFaculty->id,
-            'name' => 'Business Administration'
+            'name' => 'Business Administration',
+            'code' => 'BUS'
         ]);
 
         $economicsDepartment = Department::firstOrCreate([
             'faculty_id' => $businessFaculty->id,
-            'name' => 'Economics'
+            'name' => 'Economics',
+            'code' => 'ECON'
         ]);
 
         // Create Departments for Arts Faculty
         $englishDepartment = Department::firstOrCreate([
             'faculty_id' => $artsFaculty->id,
-            'name' => 'English Literature'
+            'name' => 'English Literature',
+            'code' => 'ENGL'
         ]);
 
         $historyDepartment = Department::firstOrCreate([
             'faculty_id' => $artsFaculty->id,
-            'name' => 'History'
+            'name' => 'History',
+            'code' => 'HIST'
         ]);
 
         // Create Programs for Computer Science Department

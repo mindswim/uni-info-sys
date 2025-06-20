@@ -49,6 +49,7 @@ class ErrorHandlingTest extends TestCase
         $term = Term::factory()->create([
             'start_date' => now()->addDays(1)->toDateString(),
             'end_date' => now()->addDays(90)->toDateString(),
+            'add_drop_deadline' => now()->addWeeks(2), // Future deadline to avoid deadline validation
         ]);
         $course = Course::factory()->create();
         $courseSection = CourseSection::factory()->create([
@@ -96,6 +97,7 @@ class ErrorHandlingTest extends TestCase
         $term = Term::factory()->create([
             'start_date' => now()->addDays(1)->toDateString(),
             'end_date' => now()->addDays(90)->toDateString(),
+            'add_drop_deadline' => now()->addWeeks(2), // Future deadline to avoid deadline validation
         ]);
         $course = Course::factory()->create();
         $courseSection = CourseSection::factory()->create([
@@ -320,6 +322,7 @@ class ErrorHandlingTest extends TestCase
         $term = Term::factory()->create([
             'start_date' => now()->addDays(1)->toDateString(),
             'end_date' => now()->addDays(90)->toDateString(),
+            'add_drop_deadline' => now()->addWeeks(4), // Future deadline to avoid deadline validation
         ]);
         $course = Course::factory()->create();
         $courseSection = CourseSection::factory()->create([

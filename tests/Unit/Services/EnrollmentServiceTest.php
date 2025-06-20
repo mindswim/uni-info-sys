@@ -36,6 +36,7 @@ class EnrollmentServiceTest extends TestCase
         $term = Term::factory()->create([
             'start_date' => now()->addDays(1)->toDateString(),
             'end_date' => now()->addMonths(4)->toDateString(),
+            'add_drop_deadline' => now()->addWeeks(2), // Future deadline to avoid deadline validation
         ]);
         $courseSection = CourseSection::factory()->create([
             'term_id' => $term->id,
@@ -70,6 +71,7 @@ class EnrollmentServiceTest extends TestCase
         $term = Term::factory()->create([
             'start_date' => now()->addDays(1)->toDateString(),
             'end_date' => now()->addMonths(4)->toDateString(),
+            'add_drop_deadline' => now()->addWeeks(2), // Future deadline to avoid deadline validation
         ]);
         $courseSection = CourseSection::factory()->create([
             'term_id' => $term->id,
@@ -153,6 +155,7 @@ class EnrollmentServiceTest extends TestCase
         $term = Term::factory()->create([
             'start_date' => now()->addDays(1)->toDateString(),
             'end_date' => now()->addMonths(4)->toDateString(),
+            'add_drop_deadline' => now()->addWeeks(2), // Future deadline to avoid deadline validation
         ]);
         $courseSection = CourseSection::factory()->create(['term_id' => $term->id]);
 

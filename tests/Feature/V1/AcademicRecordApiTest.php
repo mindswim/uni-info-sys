@@ -9,12 +9,13 @@ use Tests\TestCase;
 class AcademicRecordApiTest extends TestCase
 {
     /**
-     * A basic feature test example.
+     * Test that health check endpoint is accessible.
      */
-    public function test_example(): void
+    public function test_health_check_endpoint(): void
     {
-        $response = $this->get('/');
+        $response = $this->get('/api/health');
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+                 ->assertJson(['status' => 'healthy']);
     }
 }

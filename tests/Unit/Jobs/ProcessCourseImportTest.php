@@ -20,13 +20,13 @@ class ProcessCourseImportTest extends TestCase
         parent::setUp();
         
         // Create test departments
-        Department::factory()->create(['code' => 'CS', 'name' => 'Computer Science']);
-        Department::factory()->create(['code' => 'MATH', 'name' => 'Mathematics']);
-        Department::factory()->create(['code' => 'ENG', 'name' => 'Engineering']);
+        $csDept = Department::factory()->create(['code' => 'CS', 'name' => 'Computer Science']);
+        $mathDept = Department::factory()->create(['code' => 'MATH', 'name' => 'Mathematics']);
+        $engDept = Department::factory()->create(['code' => 'ENG', 'name' => 'Engineering']);
         
         // Create prerequisite courses
-        Course::factory()->create(['course_code' => 'CS101', 'title' => 'Intro to CS', 'department_id' => 1]);
-        Course::factory()->create(['course_code' => 'MATH101', 'title' => 'Calculus I', 'department_id' => 2]);
+        Course::factory()->create(['course_code' => 'CS101', 'title' => 'Intro to CS', 'department_id' => $csDept->id]);
+        Course::factory()->create(['course_code' => 'MATH101', 'title' => 'Calculus I', 'department_id' => $mathDept->id]);
     }
 
     public function test_processes_valid_csv_data_successfully()
@@ -106,12 +106,13 @@ class ProcessCourseImportTest extends TestCase
         $user = User::factory()->create();
         
         // Create existing course
+        $csDept = Department::where('code', 'CS')->first();
         $existingCourse = Course::factory()->create([
             'course_code' => 'CS301',
             'title' => 'Old Title',
             'description' => 'Old Description',
             'credits' => 3,
-            'department_id' => 1
+            'department_id' => $csDept->id
         ]);
         
         // CSV with updated data

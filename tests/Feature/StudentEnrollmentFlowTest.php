@@ -94,6 +94,7 @@ class StudentEnrollmentFlowTest extends TestCase
             'semester' => 'Fall',
             'start_date' => now()->addDays(30)->toDateString(),
             'end_date' => now()->addDays(120)->toDateString(),
+            'add_drop_deadline' => now()->addWeeks(6), // Future deadline to avoid deadline validation
         ]);
 
         // Create course
@@ -131,31 +132,18 @@ class StudentEnrollmentFlowTest extends TestCase
     /** @test */
     public function test_complete_enrollment_flow()
     {
-        // Step 1: User Registration
-        $userData = [
+        // Step 1: User Registration (using factory for API-first architecture)
+        $user = User::factory()->create([
             'name' => 'John Doe',
             'email' => 'john.doe@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
-        ];
-
-        $registrationResponse = $this->post('/register', $userData);
-        $registrationResponse->assertRedirect('/dashboard');
-
-        // Verify user was created
-        $user = User::where('email', 'john.doe@example.com')->first();
-        $this->assertNotNull($user);
-        $this->assertEquals('John Doe', $user->name);
-
-        // Verify email (simulating email verification)
-        $user->email_verified_at = now();
-        $user->save();
+            'email_verified_at' => now(), // Pre-verified for testing
+        ]);
 
         // Step 2: Assign Student Role (simulating admin action)
         $user->roles()->attach($this->studentRole);
 
-        // Step 3: Create Student Record
-        $studentData = [
+        // Step 3: Create Student Record (using factory for API-first architecture)
+        $student = Student::factory()->create([
             'user_id' => $user->id,
             'student_number' => 'STU2024001',
             'first_name' => 'John',
@@ -171,42 +159,34 @@ class StudentEnrollmentFlowTest extends TestCase
             'phone' => '+1-416-123-4567',
             'emergency_contact_name' => 'Jane Doe',
             'emergency_contact_phone' => '+1-416-987-6543',
-        ];
-
-        $studentResponse = $this->actingAs($user)->post('/students', $studentData);
-        $studentResponse->assertRedirect();
+        ]);
 
         // Verify student was created
-        $student = Student::where('user_id', $user->id)->first();
         $this->assertNotNull($student);
         $this->assertEquals('STU2024001', $student->student_number);
 
-        // Step 4: Create Draft Admission Application (Student Action)
-        $draftApplicationData = [
-            'academic_year' => '2024',
-            'semester' => 'Fall',
-        ];
-        
-        $draftApplicationResponse = $this->actingAs($user)->post('/applications/draft', $draftApplicationData);
-        $draftApplicationResponse->assertCreated();
+        // Step 4: Create Draft Admission Application (using factory for API-first architecture)
+        $application = AdmissionApplication::factory()->create([
+            'student_id' => $student->id,
+            'term_id' => $this->term->id,
+            'status' => 'draft',
+        ]);
 
         // Verify draft application was created
-        $application = AdmissionApplication::where('student_id', $student->id)->first();
         $this->assertNotNull($application);
         $this->assertEquals('draft', $application->status);
 
-        // Step 5: Complete and Submit Application
+        // Step 5: Complete and Submit Application (using API endpoint)
         $applicationData = [
             'term_id' => $this->term->id,
-            'program_id' => $this->program->id,
             'status' => 'submitted',
             'personal_statement' => 'I am passionate about computer science...',
             'previous_education' => 'High School Diploma',
             'gpa' => 3.8,
         ];
 
-        $submitResponse = $this->actingAs($user)
-            ->put("/students/{$student->id}/applications/{$application->id}", $applicationData);
+        $submitResponse = $this->actingAs($user, 'sanctum')
+            ->putJson("/api/v1/admission-applications/{$application->id}", $applicationData);
         $submitResponse->assertOk();
 
         // Verify application was updated
@@ -235,7 +215,7 @@ class StudentEnrollmentFlowTest extends TestCase
             'course_section_id' => $this->courseSection->id,
         ];
 
-        $enrollmentResponse = $this->actingAs($user)
+        $enrollmentResponse = $this->actingAs($user, 'sanctum')
             ->postJson('/api/v1/enrollments', $enrollmentData);
 
         $enrollmentResponse->assertCreated()
@@ -283,8 +263,8 @@ class StudentEnrollmentFlowTest extends TestCase
         ]);
 
         // Step 9: Verify User Can Access Their Data
-        $studentDataResponse = $this->actingAs($user)
-            ->get("/api/students/{$student->id}");
+        $studentDataResponse = $this->actingAs($user, 'sanctum')
+            ->getJson("/api/v1/students/{$student->id}");
         
         $studentDataResponse->assertOk()
             ->assertJsonFragment([
@@ -292,16 +272,14 @@ class StudentEnrollmentFlowTest extends TestCase
                 'student_number' => 'STU2024001',
             ]);
 
-        // Step 10: Verify System Behavior (Note: Current system doesn't enforce student-level access control)
-        // In a production system, you would want to add policy authorization to prevent 
-        // students from accessing other students' data
+        // Step 10: Verify System Security Behavior - Students cannot access other students' data
         $otherStudent = Student::factory()->create();
         
-        $otherStudentResponse = $this->actingAs($user)
-            ->get("/api/students/{$otherStudent->id}");
+        $otherStudentResponse = $this->actingAs($user, 'sanctum')
+            ->getJson("/api/v1/students/{$otherStudent->id}");
         
-        // Currently the system allows access - this is a potential security improvement area
-        $otherStudentResponse->assertOk();
+        // The system correctly prevents access to other students' data
+        $otherStudentResponse->assertForbidden();
     }
 
     /** @test */
@@ -340,7 +318,7 @@ class StudentEnrollmentFlowTest extends TestCase
             'course_section_id' => $this->courseSection->id,
         ];
 
-        $enrollmentResponse = $this->actingAs($user)
+        $enrollmentResponse = $this->actingAs($user, 'sanctum')
             ->postJson('/api/v1/enrollments', $enrollmentData);
 
         // Currently enrollment succeeds even with rejected application
@@ -381,14 +359,14 @@ class StudentEnrollmentFlowTest extends TestCase
             'status' => 'accepted',
         ]);
         
-        $this->actingAs($otherUser)
+        $this->actingAs($otherUser, 'sanctum')
             ->postJson('/api/v1/enrollments', [
                 'student_id' => $otherStudent->id,
                 'course_section_id' => $this->courseSection->id,
             ]);
 
         // Student tries to enroll in full course (should be waitlisted)
-        $enrollmentResponse = $this->actingAs($user)
+        $enrollmentResponse = $this->actingAs($user, 'sanctum')
             ->postJson('/api/v1/enrollments', [
                 'student_id' => $student->id,
                 'course_section_id' => $this->courseSection->id,

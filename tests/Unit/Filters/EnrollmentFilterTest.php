@@ -28,7 +28,7 @@ class EnrollmentFilterTest extends TestCase
 
         $result = $this->filter->apply($query, $filters);
 
-        $this->assertStringContainsString('where "student_id" = ?', $result->toSql());
+        $this->assertStringContainsString('where `student_id` = ?', $result->toSql());
     }
 
     /** @test */
@@ -39,7 +39,7 @@ class EnrollmentFilterTest extends TestCase
 
         $result = $this->filter->apply($query, $filters);
 
-        $this->assertStringContainsString('where "course_section_id" = ?', $result->toSql());
+        $this->assertStringContainsString('where `course_section_id` = ?', $result->toSql());
     }
 
     /** @test */
@@ -50,7 +50,7 @@ class EnrollmentFilterTest extends TestCase
 
         $result = $this->filter->apply($query, $filters);
 
-        $this->assertStringContainsString('where "status" in (?)', $result->toSql());
+        $this->assertStringContainsString('where `status` in (?)', $result->toSql());
     }
 
     /** @test */
@@ -61,7 +61,7 @@ class EnrollmentFilterTest extends TestCase
 
         $result = $this->filter->apply($query, $filters);
 
-        $this->assertStringContainsString('where "status" in (?, ?)', $result->toSql());
+        $this->assertStringContainsString('where `status` in (?, ?)', $result->toSql());
     }
 
     /** @test */
@@ -73,8 +73,8 @@ class EnrollmentFilterTest extends TestCase
         $result = $this->filter->apply($query, $filters);
 
         $sql = $result->toSql();
-        $this->assertStringContainsString('exists (select * from "course_sections"', $sql);
-        $this->assertStringContainsString('"term_id" = ?', $sql);
+        $this->assertStringContainsString('exists (select * from `course_sections`', $sql);
+        $this->assertStringContainsString('`term_id` = ?', $sql);
     }
 
     /** @test */
@@ -86,8 +86,8 @@ class EnrollmentFilterTest extends TestCase
         $result = $this->filter->apply($query, $filters);
 
         $sql = $result->toSql();
-        $this->assertStringContainsString('exists (select * from "course_sections"', $sql);
-        $this->assertStringContainsString('"course_id" = ?', $sql);
+        $this->assertStringContainsString('exists (select * from `course_sections`', $sql);
+        $this->assertStringContainsString('`course_id` = ?', $sql);
     }
 
     /** @test */
@@ -99,9 +99,9 @@ class EnrollmentFilterTest extends TestCase
         $result = $this->filter->apply($query, $filters);
 
         $sql = $result->toSql();
-        $this->assertStringContainsString('exists (select * from "course_sections"', $sql);
-        $this->assertStringContainsString('exists (select * from "courses"', $sql);
-        $this->assertStringContainsString('"department_id" = ?', $sql);
+        $this->assertStringContainsString('exists (select * from `course_sections`', $sql);
+        $this->assertStringContainsString('exists (select * from `courses`', $sql);
+        $this->assertStringContainsString('`department_id` = ?', $sql);
     }
 
     /** @test */
@@ -113,8 +113,8 @@ class EnrollmentFilterTest extends TestCase
         $result = $this->filter->apply($query, $filters);
 
         $sql = $result->toSql();
-        $this->assertStringContainsString('exists (select * from "course_sections"', $sql);
-        $this->assertStringContainsString('"instructor_id" = ?', $sql);
+        $this->assertStringContainsString('exists (select * from `course_sections`', $sql);
+        $this->assertStringContainsString('`instructor_id` = ?', $sql);
     }
 
     /** @test */
@@ -132,11 +132,11 @@ class EnrollmentFilterTest extends TestCase
 
         $sql = $result->toSql();
         // Check that all filters are applied
-        $this->assertStringContainsString('where "student_id" = ?', $sql);
-        $this->assertStringContainsString('and "status" in (?, ?)', $sql);
-        $this->assertStringContainsString('and exists (select * from "course_sections"', $sql);
-        $this->assertStringContainsString('"term_id" = ?', $sql);
-        $this->assertStringContainsString('"department_id" = ?', $sql);
+        $this->assertStringContainsString('where `student_id` = ?', $sql);
+        $this->assertStringContainsString('and `status` in (?, ?)', $sql);
+        $this->assertStringContainsString('and exists (select * from `course_sections`', $sql);
+        $this->assertStringContainsString('`term_id` = ?', $sql);
+        $this->assertStringContainsString('`department_id` = ?', $sql);
     }
 
     /** @test */
@@ -153,7 +153,7 @@ class EnrollmentFilterTest extends TestCase
         $result = $this->filter->apply($query, $filters);
 
         // Should return the original query without any where clauses
-        $this->assertEquals('select * from "enrollments"', $result->toSql());
+        $this->assertEquals('select * from `enrollments` where `enrollments`.`deleted_at` is null', $result->toSql());
     }
 
     /** @test */
@@ -175,7 +175,7 @@ class EnrollmentFilterTest extends TestCase
 
         $result = $this->filter->apply($query, $filters);
 
-        $this->assertEquals('select * from "enrollments"', $result->toSql());
+        $this->assertEquals('select * from `enrollments` where `enrollments`.`deleted_at` is null', $result->toSql());
     }
 
     /** @test */
@@ -192,7 +192,7 @@ class EnrollmentFilterTest extends TestCase
 
         // Should only apply the known filter
         $sql = $result->toSql();
-        $this->assertStringContainsString('where "student_id" = ?', $sql);
+        $this->assertStringContainsString('where `student_id` = ?', $sql);
         $this->assertStringNotContainsString('unknown_field', $sql);
         $this->assertStringNotContainsString('another_unknown', $sql);
     }

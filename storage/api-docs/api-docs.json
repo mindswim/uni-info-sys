@@ -6000,6 +6000,13 @@
                         "maxLength": 5,
                         "example": "A",
                         "nullable": true
+                    },
+                    "reason_for_change": {
+                        "description": "Required when changing the grade. Reason for the grade change for audit trail.",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Correcting calculation error",
+                        "nullable": true
                     }
                 },
                 "type": "object"

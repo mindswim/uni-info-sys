@@ -69,7 +69,7 @@
                     "Academic Records"
                 ],
                 "summary": "Create a new academic record",
-                "description": "Create a new academic record for a student. Not implemented.",
+                "description": "Create a new academic record for a student. Only administrators can create academic records.",
                 "operationId": "9277acecd95bca24b717ed4c13c0d027",
                 "parameters": [
                     {
@@ -82,9 +82,35 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreAcademicRecordRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "201": {
+                        "description": "Academic record created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AcademicRecordResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation Error"
                     }
                 },
                 "security": [
@@ -144,7 +170,7 @@
                     "Academic Records"
                 ],
                 "summary": "Update an academic record",
-                "description": "Update an academic record. Not implemented.",
+                "description": "Update an academic record. Only administrators can update academic records.",
                 "operationId": "acbef71c9974f13cfa64cf79cbd33b42",
                 "parameters": [
                     {
@@ -156,9 +182,38 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateAcademicRecordRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "200": {
+                        "description": "Academic record updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AcademicRecordResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation Error"
                     }
                 },
                 "security": [
@@ -172,7 +227,7 @@
                     "Academic Records"
                 ],
                 "summary": "Delete an academic record",
-                "description": "Delete an academic record. Not implemented.",
+                "description": "Delete an academic record. Only administrators can delete academic records.",
                 "operationId": "28039e25049d3ab874642d02c00e8b24",
                 "parameters": [
                     {
@@ -185,8 +240,17 @@
                     }
                 ],
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "200": {
+                        "description": "Academic record deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
                     }
                 },
                 "security": [
@@ -665,6 +729,288 @@
                 ]
             }
         },
+        "/api/v1/tokens/create": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login and obtain API token",
+                "description": "Authenticate with email and password to receive an API token for subsequent requests.",
+                "operationId": "20f9ed47a7a17709741d60d449c3bcf4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password",
+                                    "device_name"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@university.edu"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "device_name": {
+                                        "type": "string",
+                                        "example": "Mobile App"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful, token returned.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|abc123def456..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid credentials or validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/buildings": {
+            "get": {
+                "tags": [
+                    "Buildings"
+                ],
+                "summary": "List all buildings",
+                "operationId": "9f193058e5003964427f14c0c664a723",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A paginated list of buildings.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/BuildingResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Buildings"
+                ],
+                "summary": "Create a new building",
+                "operationId": "ecc041a304d7624120f353fb99a9d3a9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreBuildingRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Building created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BuildingResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/v1/buildings/{building}": {
+            "get": {
+                "tags": [
+                    "Buildings"
+                ],
+                "summary": "Get a single building",
+                "operationId": "79ccfc686b8329243f7ad0c8df111c18",
+                "parameters": [
+                    {
+                        "name": "building",
+                        "in": "path",
+                        "description": "ID of the building",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested building.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BuildingResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Buildings"
+                ],
+                "summary": "Update a building",
+                "description": "Update the specified resource in storage.",
+                "operationId": "38c4ebebdebc4bdcb51324b71824f87e",
+                "parameters": [
+                    {
+                        "name": "building",
+                        "in": "path",
+                        "description": "ID of the building",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateBuildingRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Building updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BuildingResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Buildings"
+                ],
+                "summary": "Delete a building",
+                "operationId": "7e5e9926c468daa4db27fe3eb20f387a",
+                "parameters": [
+                    {
+                        "name": "building",
+                        "in": "path",
+                        "description": "ID of the building",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Building deleted successfully."
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            }
+        },
         "/api/v1/courses": {
             "get": {
                 "tags": [
@@ -873,6 +1219,281 @@
                     },
                     "403": {
                         "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            }
+        },
+        "/api/v1/imports/courses": {
+            "post": {
+                "tags": [
+                    "Course Import"
+                ],
+                "summary": "Import courses from CSV file",
+                "description": "Upload a CSV file to bulk import or update courses. Requires courses.manage permission. The CSV must contain headers: course_code, title, description, credits, department_code, prerequisite_course_codes.",
+                "operationId": "8284085ece7db0837d7def541b495262",
+                "requestBody": {
+                    "description": "CSV file containing course data",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreCourseImportRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Import started successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course import has been started. You will be notified when the process is complete."
+                                        },
+                                        "import_id": {
+                                            "type": "string",
+                                            "example": "import_courses_2024-01-15_abc123"
+                                        },
+                                        "file_name": {
+                                            "type": "string",
+                                            "example": "courses_import.csv"
+                                        },
+                                        "estimated_processing_time": {
+                                            "type": "string",
+                                            "example": "Processing typically takes 1-5 minutes depending on file size."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - requires courses.manage permission"
+                    },
+                    "422": {
+                        "description": "Validation error - invalid file format or size"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/course-sections": {
+            "get": {
+                "tags": [
+                    "Course Sections"
+                ],
+                "summary": "List all course sections",
+                "operationId": "9e98a64880317142c6b363ad45315d45",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "course_id",
+                        "in": "query",
+                        "description": "Filter by course ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "term_id",
+                        "in": "query",
+                        "description": "Filter by term ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "instructor_id",
+                        "in": "query",
+                        "description": "Filter by instructor (staff) ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "room_id",
+                        "in": "query",
+                        "description": "Filter by room ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A paginated list of course sections.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CourseSectionResource"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Course Sections"
+                ],
+                "summary": "Create a new course section",
+                "operationId": "86c6f4c982488e3403f8c1609a48859a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreCourseSectionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Course section created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseSectionResource"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/v1/course-sections/{courseSection}": {
+            "get": {
+                "tags": [
+                    "Course Sections"
+                ],
+                "summary": "Get a single course section",
+                "operationId": "00d59e0c4c524487238b8c275fb68320",
+                "parameters": [
+                    {
+                        "name": "courseSection",
+                        "in": "path",
+                        "description": "ID of the course section",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested course section.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseSectionResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Course Sections"
+                ],
+                "summary": "Update a course section",
+                "operationId": "c0b5f2f664d7c3cbfc27980b0f5504cb",
+                "parameters": [
+                    {
+                        "name": "courseSection",
+                        "in": "path",
+                        "description": "ID of the course section",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateCourseSectionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Course section updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseSectionResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Course Sections"
+                ],
+                "summary": "Delete a course section",
+                "operationId": "733375b2778eb586823f46cbfc36aeeb",
+                "parameters": [
+                    {
+                        "name": "courseSection",
+                        "in": "path",
+                        "description": "ID of the course section",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Course section deleted successfully."
                     },
                     "404": {
                         "description": "Not Found"
@@ -1395,7 +2016,7 @@
                     "Documents"
                 ],
                 "summary": "Upload a document",
-                "description": "Upload a new document for a student. File upload handling is not implemented in this version.",
+                "description": "Upload a new document for a student. Supports PDF, DOC, and DOCX files up to 5MB.",
                 "operationId": "650bef47ce745d45feada24058c152f1",
                 "parameters": [
                     {
@@ -1408,9 +2029,35 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreDocumentRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "201": {
+                        "description": "Document uploaded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DocumentResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation Error"
                     }
                 },
                 "security": [
@@ -1470,11 +2117,53 @@
                     "Documents"
                 ],
                 "summary": "Update a document",
-                "description": "Update a document's details. Not implemented.",
+                "description": "Update a document's details (not the file itself). Only document type can be updated.",
                 "operationId": "b6ae17d9b33f9c98f394f31ced88bbd2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "document_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "transcript",
+                                            "essay",
+                                            "recommendation",
+                                            "certificate",
+                                            "other"
+                                        ],
+                                        "example": "transcript"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "200": {
+                        "description": "Document updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DocumentResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation Error"
                     }
                 },
                 "security": [
@@ -1488,7 +2177,7 @@
                     "Documents"
                 ],
                 "summary": "Delete a document",
-                "description": "Delete a document. Not implemented.",
+                "description": "Delete a document and its associated file from storage.",
                 "operationId": "867bc0947afcbba0319db67b27716bea",
                 "parameters": [
                     {
@@ -1501,8 +2190,17 @@
                     }
                 ],
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "200": {
+                        "description": "Document deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
                     }
                 },
                 "security": [
@@ -1510,6 +2208,526 @@
                         "sanctum": []
                     }
                 ]
+            }
+        },
+        "/api/v1/enrollments": {
+            "get": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "List and filter enrollments",
+                "description": "Display a listing of enrollments with filtering",
+                "operationId": "6061c8b5014f860a258a2f973df92d7d",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/enrollment_student_id_filter"
+                    },
+                    {
+                        "$ref": "#/components/parameters/enrollment_course_section_id_filter"
+                    },
+                    {
+                        "$ref": "#/components/parameters/enrollment_status_filter"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A paginated list of enrollments.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/EnrollmentResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "per_page": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Enroll a student in a course section",
+                "description": "Enrolls a student. If the course is full, they may be placed on the waitlist.",
+                "operationId": "86c57a559d3c0a7399072fbd221d073c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreEnrollmentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Enrollment successful or waitlisted.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/EnrollmentResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation error or business rule violation (e.g., duplicate enrollment, prerequisites not met)."
+                    }
+                }
+            }
+        },
+        "/api/v1/enrollments/{enrollment}": {
+            "get": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Get a single enrollment record",
+                "description": "Display the specified enrollment",
+                "operationId": "e29c9ce8aa599f8e59cb8c31c6c9b8a2",
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "description": "ID of the enrollment record",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested enrollment record.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/EnrollmentResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Update an enrollment record",
+                "description": "Updates the status or grade of an enrollment. Certain status transitions are restricted.",
+                "operationId": "ecd9eb810da877a69b02fb166dea0276",
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "description": "ID of the enrollment record",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateEnrollmentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Enrollment updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/EnrollmentResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation error or invalid status transition."
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Withdraw a student from a course section (soft delete)",
+                "description": "This is the standard 'delete' action, which updates the enrollment status to 'withdrawn'.",
+                "operationId": "9186ac1d4ef41da811e4bea2b36c0d91",
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "description": "ID of the enrollment record",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Student withdrawn successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            }
+        },
+        "/api/v1/enrollments/{enrollment}/withdraw": {
+            "post": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Explicitly withdraw a student from an enrollment",
+                "description": "Sets the enrollment status to 'withdrawn' and may trigger waitlist promotions.",
+                "operationId": "fbd6183bdc0668e9b2af371fb0105a4a",
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "description": "ID of the enrollment to withdraw from",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Student withdrawn successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Enrollment already withdrawn or completed."
+                    }
+                }
+            }
+        },
+        "/api/v1/enrollments/{enrollment}/complete": {
+            "post": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Mark an enrollment as completed",
+                "description": "Sets the enrollment status to 'completed' and assigns a grade.",
+                "operationId": "70ec7f93001b67d31d7d03cbc4681c72",
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "description": "ID of the enrollment to complete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "grade"
+                                ],
+                                "properties": {
+                                    "grade": {
+                                        "type": "string",
+                                        "maxLength": 5,
+                                        "example": "B+"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Enrollment marked as completed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation error (e.g., not an enrolled student, missing grade)."
+                    }
+                }
+            }
+        },
+        "/api/v1/students/{student}/enrollments": {
+            "get": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Get all enrollments for a specific student",
+                "description": "Get enrollments for a specific student",
+                "operationId": "6e00802059e2223b7f503d4a651b068b",
+                "parameters": [
+                    {
+                        "name": "student",
+                        "in": "path",
+                        "description": "ID of the student",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/enrollment_status_filter"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A paginated list of the student's enrollments.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/EnrollmentResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Student Not Found"
+                    }
+                }
+            }
+        },
+        "/api/v1/course-sections/{courseSection}/enrollments": {
+            "get": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Get all enrollments for a specific course section",
+                "description": "Get enrollments for a specific course section",
+                "operationId": "949805d06a40872fc0cde05325bff5e3",
+                "parameters": [
+                    {
+                        "name": "courseSection",
+                        "in": "path",
+                        "description": "ID of the course section",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/enrollment_status_filter"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A paginated list of the course section's enrollments.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/EnrollmentResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Course Section Not Found"
+                    }
+                }
             }
         },
         "/api/v1/faculties": {
@@ -1891,6 +3109,188 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/api/v1/course-sections/{courseSection}/import-grades": {
+            "post": {
+                "tags": [
+                    "Grade Import"
+                ],
+                "summary": "Import grades from CSV file for a course section",
+                "description": "Upload a CSV file to bulk import grades for students enrolled in a course section. Only the assigned instructor or admins can upload grades. The CSV must contain headers: student_id, grade.",
+                "operationId": "5138631de85572b06be7d5ab8695523d",
+                "parameters": [
+                    {
+                        "name": "courseSection",
+                        "in": "path",
+                        "description": "Course section ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "CSV file containing grade data",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreGradeImportRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Grade import started successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Grade import has been started. You will be notified when the process is complete."
+                                        },
+                                        "import_id": {
+                                            "type": "string",
+                                            "example": "import_grades_2024-01-15_abc123"
+                                        },
+                                        "file_name": {
+                                            "type": "string",
+                                            "example": "grades_section_1.csv"
+                                        },
+                                        "course_section": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "course_code": {
+                                                    "type": "string",
+                                                    "example": "CS101"
+                                                },
+                                                "section": {
+                                                    "type": "string",
+                                                    "example": "Section A"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "estimated_processing_time": {
+                                            "type": "string",
+                                            "example": "Processing typically takes 1-2 minutes depending on file size."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - only assigned instructor or admin can upload grades"
+                    },
+                    "404": {
+                        "description": "Course section not found"
+                    },
+                    "422": {
+                        "description": "Validation error - invalid file format or size"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/notifications": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Get user notifications",
+                "description": "Retrieve all unread notifications for the authenticated user.",
+                "operationId": "cac3bdde44f0be0512f7d05c0a6064e4",
+                "responses": {
+                    "200": {
+                        "description": "List of unread notifications.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string",
+                                                        "example": "abc-123-def"
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "example": "App\\Notifications\\ApplicationStatusUpdated"
+                                                    },
+                                                    "data": {
+                                                        "type": "object",
+                                                        "example": {
+                                                            "message": "Your application status has been updated"
+                                                        }
+                                                    },
+                                                    "read_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                }
+            }
+        },
+        "/api/v1/notifications/{id}/read": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Mark notification as read",
+                "description": "Mark a specific notification as read for the authenticated user.",
+                "operationId": "fc1834c084071515133aef066568ee30",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Notification ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Notification marked as read successfully."
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Notification not found"
+                    }
+                }
             }
         },
         "/api/v1/permissions": {
@@ -2571,7 +3971,7 @@
                     "Roles"
                 ],
                 "summary": "Get list of all roles",
-                "description": "Retrieve a paginated list of all system roles. Only accessible by admin and staff users.",
+                "description": "Retrieve a paginated list of all system roles. Only accessible by users with roles.manage permission.",
                 "operationId": "c1294bb85dfc016a8f9c0d3f0907293f",
                 "parameters": [
                     {
@@ -2647,6 +4047,74 @@
                         "sanctum": []
                     }
                 ]
+            },
+            "post": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Create a new role",
+                "description": "Create a new system role. Only accessible by users with roles.manage permission.",
+                "operationId": "c7f58f49125e9b60da0f0db6890a4f22",
+                "requestBody": {
+                    "description": "Role data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Unique role name",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Content Manager"
+                                    },
+                                    "description": {
+                                        "description": "Role description",
+                                        "type": "string",
+                                        "maxLength": 1000,
+                                        "example": "Can manage content and moderate posts",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Role created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/RoleResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/api/v1/roles/{role}": {
@@ -2655,7 +4123,7 @@
                     "Roles"
                 ],
                 "summary": "Get a specific role",
-                "description": "Retrieve details of a specific role by ID. Only accessible by admin and staff users.",
+                "description": "Retrieve details of a specific role by ID. Only accessible by users with roles.manage permission.",
                 "operationId": "15615945226214c177b27790822dc8d0",
                 "parameters": [
                     {
@@ -2709,6 +4177,627 @@
                         "sanctum": []
                     }
                 ]
+            },
+            "put": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Update a role",
+                "description": "Update an existing role. Only accessible by users with roles.manage permission.",
+                "operationId": "5163df5b35ed5ce06eba2d71ce09628d",
+                "parameters": [
+                    {
+                        "name": "role",
+                        "in": "path",
+                        "description": "ID of the role",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Updated role data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "Unique role name",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Content Manager"
+                                    },
+                                    "description": {
+                                        "description": "Role description",
+                                        "type": "string",
+                                        "maxLength": 1000,
+                                        "example": "Can manage content and moderate posts",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Role updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/RoleResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "404": {
+                        "description": "Role not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Delete a role",
+                "description": "Delete an existing role. Only accessible by users with roles.manage permission.",
+                "operationId": "ec17b5f4a0d3350c1e180e9f7aaa35b3",
+                "parameters": [
+                    {
+                        "name": "role",
+                        "in": "path",
+                        "description": "ID of the role",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Role deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "404": {
+                        "description": "Role not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/roles/{role}/permissions": {
+            "post": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Sync permissions to a role",
+                "description": "Synchronize the permissions assigned to a role. This will replace all existing permissions with the provided list. Only accessible by users with roles.manage permission.",
+                "operationId": "847952406ef1dba65dc9b73d35edc1db",
+                "parameters": [
+                    {
+                        "name": "role",
+                        "in": "path",
+                        "description": "ID of the role",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Array of permission IDs to assign to the role",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "permissions"
+                                ],
+                                "properties": {
+                                    "permissions": {
+                                        "description": "Array of permission IDs",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Permissions synced successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/RoleResource"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Permissions synced successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - insufficient permissions"
+                    },
+                    "404": {
+                        "description": "Role not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/rooms": {
+            "get": {
+                "tags": [
+                    "Rooms"
+                ],
+                "summary": "List all rooms",
+                "operationId": "31a8839ec4012ed828bcc67b19738698",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "building_id",
+                        "in": "query",
+                        "description": "Filter by building ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A paginated list of rooms.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/RoomResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Rooms"
+                ],
+                "summary": "Create a new room",
+                "operationId": "b660449fe16228d1c90a5b92f5716e7e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreRoomRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Room created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RoomResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/v1/rooms/{room}": {
+            "get": {
+                "tags": [
+                    "Rooms"
+                ],
+                "summary": "Get a single room",
+                "operationId": "3aa744ef2227fff59fd43e569e482291",
+                "parameters": [
+                    {
+                        "name": "room",
+                        "in": "path",
+                        "description": "ID of the room",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested room.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RoomResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Rooms"
+                ],
+                "summary": "Update a room",
+                "description": "Update the specified resource in storage.",
+                "operationId": "acc6edfbb08d0db8497885d41db83ba2",
+                "parameters": [
+                    {
+                        "name": "room",
+                        "in": "path",
+                        "description": "ID of the room",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateRoomRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Room updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RoomResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Rooms"
+                ],
+                "summary": "Delete a room",
+                "operationId": "b410c55e2530df7a80341586e59b100b",
+                "parameters": [
+                    {
+                        "name": "room",
+                        "in": "path",
+                        "description": "ID of the room",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Room deleted successfully."
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            }
+        },
+        "/api/v1/staff": {
+            "get": {
+                "tags": [
+                    "Staff"
+                ],
+                "summary": "List all staff members",
+                "operationId": "49eec1fde10366bcb2415cd52bf5c702",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "department_id",
+                        "in": "query",
+                        "description": "Filter by department ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "position",
+                        "in": "query",
+                        "description": "Filter by job title",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A paginated list of staff members.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/StaffResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Staff"
+                ],
+                "summary": "Create a new staff member",
+                "operationId": "f5a312874dace99b25f4f0163266d56f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreStaffRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Staff member created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StaffResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/v1/staff/{staff}": {
+            "get": {
+                "tags": [
+                    "Staff"
+                ],
+                "summary": "Get a single staff member",
+                "operationId": "ff60cc8fd72853e4a82f71345ef43803",
+                "parameters": [
+                    {
+                        "name": "staff",
+                        "in": "path",
+                        "description": "ID of the staff member",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested staff member.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StaffResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Staff"
+                ],
+                "summary": "Update a staff member",
+                "operationId": "d66fce699df399add4a832639581f7bd",
+                "parameters": [
+                    {
+                        "name": "staff",
+                        "in": "path",
+                        "description": "ID of the staff member",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateStaffRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Staff member updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StaffResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Staff"
+                ],
+                "summary": "Delete a staff member",
+                "operationId": "f613f970dfc28e2c54a11626d0f17e5f",
+                "parameters": [
+                    {
+                        "name": "staff",
+                        "in": "path",
+                        "description": "ID of the staff member",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Staff member deleted successfully."
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
             }
         },
         "/api/v1/students": {
@@ -2788,11 +4877,37 @@
                     "Students"
                 ],
                 "summary": "Create a new student",
-                "description": "Create a new student record. This is a complex administrative action and is not implemented in this version.",
+                "description": "Create a new student record. Requires admin or staff permissions.",
                 "operationId": "20b07e0eabfb966bf0029eef43b01b6e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreStudentRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "201": {
+                        "description": "Student created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudentResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation Error"
                     }
                 },
                 "security": [
@@ -2860,7 +4975,7 @@
                     "Students"
                 ],
                 "summary": "Update a student",
-                "description": "Update a student's record. This is a complex administrative action and is not implemented in this version.",
+                "description": "Update a student's record. Students can update their own profile, admins can update any student.",
                 "operationId": "2ddcce83cea189c24a97e11fb2d86050",
                 "parameters": [
                     {
@@ -2872,9 +4987,38 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateStudentRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "200": {
+                        "description": "Student updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudentResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation Error"
                     }
                 },
                 "security": [
@@ -2888,7 +5032,7 @@
                     "Students"
                 ],
                 "summary": "Delete a student",
-                "description": "Delete a student's record. This is a complex administrative action and is not implemented in this version.",
+                "description": "Delete a student's record. Requires admin permissions.",
                 "operationId": "3c247e6248fe468b02cf4534ab92e24d",
                 "parameters": [
                     {
@@ -2901,8 +5045,17 @@
                     }
                 ],
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented"
+                    "204": {
+                        "description": "Student deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
                     }
                 },
                 "security": [
@@ -3120,6 +5273,87 @@
     },
     "components": {
         "schemas": {
+            "StoreAcademicRecordRequest": {
+                "title": "Store Academic Record Request",
+                "required": [
+                    "institution_name",
+                    "qualification_type",
+                    "start_date",
+                    "end_date",
+                    "gpa"
+                ],
+                "properties": {
+                    "institution_name": {
+                        "description": "The name of the educational institution",
+                        "type": "string",
+                        "example": "University of California"
+                    },
+                    "qualification_type": {
+                        "description": "The type of qualification or degree",
+                        "type": "string",
+                        "example": "Bachelor of Science"
+                    },
+                    "start_date": {
+                        "description": "The start date of the academic program",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2020-09-01"
+                    },
+                    "end_date": {
+                        "description": "The end date of the academic program",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-06-15"
+                    },
+                    "gpa": {
+                        "description": "The Grade Point Average achieved (0.00-4.00)",
+                        "type": "number",
+                        "format": "float",
+                        "example": 3.85
+                    },
+                    "transcript_url": {
+                        "description": "URL to the transcript document",
+                        "type": "string",
+                        "example": "https://example.com/transcript.pdf",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "StoreBuildingRequest": {
+                "title": "Store Building Request",
+                "description": "Request body for creating a new building.",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Science Wing"
+                    },
+                    "address": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "456 College Rd"
+                    }
+                },
+                "type": "object"
+            },
+            "StoreCourseImportRequest": {
+                "title": "Store Course Import Request",
+                "required": [
+                    "file"
+                ],
+                "properties": {
+                    "file": {
+                        "description": "CSV file containing course data with headers: course_code, title, description, credits, department_code, prerequisite_course_codes",
+                        "type": "string",
+                        "format": "binary"
+                    }
+                },
+                "type": "object"
+            },
             "StoreCourseRequest": {
                 "title": "Store Course Request",
                 "description": "Request body for creating a new course.",
@@ -3163,6 +5397,143 @@
                             1,
                             2
                         ]
+                    }
+                },
+                "type": "object"
+            },
+            "StoreCourseSectionRequest": {
+                "title": "Store Course Section Request",
+                "description": "Request body for creating a new course section.",
+                "required": [
+                    "course_id",
+                    "term_id",
+                    "instructor_id",
+                    "room_id",
+                    "capacity",
+                    "schedule_days",
+                    "start_time",
+                    "end_time"
+                ],
+                "properties": {
+                    "course_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "term_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "instructor_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "room_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "capacity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "example": 50
+                    },
+                    "schedule_days": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "Monday",
+                                "Tuesday",
+                                "Wednesday",
+                                "Thursday",
+                                "Friday",
+                                "Saturday",
+                                "Sunday"
+                            ]
+                        },
+                        "example": [
+                            "Monday",
+                            "Wednesday"
+                        ]
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "time",
+                        "example": "09:00"
+                    },
+                    "end_time": {
+                        "type": "string",
+                        "format": "time",
+                        "example": "10:30"
+                    }
+                },
+                "type": "object"
+            },
+            "StoreDocumentRequest": {
+                "title": "Store Document Request",
+                "required": [
+                    "document_type",
+                    "file"
+                ],
+                "properties": {
+                    "document_type": {
+                        "type": "string",
+                        "enum": [
+                            "transcript",
+                            "essay",
+                            "recommendation",
+                            "certificate",
+                            "other"
+                        ],
+                        "example": "transcript"
+                    },
+                    "file": {
+                        "description": "The document file to upload (PDF, DOC, DOCX)",
+                        "type": "string",
+                        "format": "binary"
+                    }
+                },
+                "type": "object"
+            },
+            "StoreEnrollmentRequest": {
+                "title": "Store Enrollment Request",
+                "description": "Request body for enrolling a student in a course section.",
+                "required": [
+                    "student_id",
+                    "course_section_id"
+                ],
+                "properties": {
+                    "student_id": {
+                        "description": "The ID of the student to enroll.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "course_section_id": {
+                        "description": "The ID of the course section to enroll in.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "status": {
+                        "description": "Optional status, defaults to logic in EnrollmentService.",
+                        "type": "string",
+                        "enum": [
+                            "enrolled",
+                            "waitlisted"
+                        ],
+                        "example": "enrolled"
+                    }
+                },
+                "type": "object"
+            },
+            "StoreGradeImportRequest": {
+                "title": "Store Grade Import Request",
+                "required": [
+                    "file"
+                ],
+                "properties": {
+                    "file": {
+                        "description": "CSV file containing grade data with headers: student_id, grade",
+                        "type": "string",
+                        "format": "binary"
                     }
                 },
                 "type": "object"
@@ -3229,6 +5600,187 @@
                 },
                 "type": "object"
             },
+            "StoreRoomRequest": {
+                "title": "Store Room Request",
+                "description": "Request body for creating a new room.",
+                "required": [
+                    "building_id",
+                    "room_number",
+                    "capacity",
+                    "type"
+                ],
+                "properties": {
+                    "building_id": {
+                        "description": "The ID of the building this room belongs to.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "room_number": {
+                        "type": "string",
+                        "maxLength": 20,
+                        "example": "201A"
+                    },
+                    "capacity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "example": 50
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "lecture_hall",
+                            "laboratory",
+                            "seminar_room",
+                            "office"
+                        ],
+                        "example": "seminar_room"
+                    }
+                },
+                "type": "object"
+            },
+            "StoreStaffRequest": {
+                "title": "Store Staff Request",
+                "description": "Request body for creating a new staff member.",
+                "required": [
+                    "user",
+                    "job_title",
+                    "department_id"
+                ],
+                "properties": {
+                    "user": {
+                        "required": [
+                            "name",
+                            "email",
+                            "password"
+                        ],
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "maxLength": 255,
+                                "example": "Dr. Jane Smith"
+                            },
+                            "email": {
+                                "type": "string",
+                                "format": "email",
+                                "maxLength": 255,
+                                "example": "jane.smith@university.edu"
+                            },
+                            "password": {
+                                "type": "string",
+                                "format": "password",
+                                "minLength": 8,
+                                "example": "password123"
+                            },
+                            "password_confirmation": {
+                                "type": "string",
+                                "format": "password",
+                                "minLength": 8,
+                                "example": "password123"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "job_title": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Associate Professor"
+                    },
+                    "bio": {
+                        "type": "string",
+                        "example": "Specializes in artificial intelligence."
+                    },
+                    "office_location": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Tech Building, Room 305"
+                    },
+                    "department_id": {
+                        "type": "integer",
+                        "example": 1
+                    }
+                },
+                "type": "object"
+            },
+            "StoreStudentRequest": {
+                "title": "Store Student Request",
+                "required": [
+                    "user_id",
+                    "first_name",
+                    "last_name",
+                    "date_of_birth",
+                    "gender",
+                    "nationality",
+                    "address",
+                    "city",
+                    "state",
+                    "postal_code",
+                    "country",
+                    "phone",
+                    "emergency_contact_name",
+                    "emergency_contact_phone"
+                ],
+                "properties": {
+                    "user_id": {
+                        "description": "The ID of the associated user.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2005-01-15"
+                    },
+                    "gender": {
+                        "type": "string",
+                        "example": "Male"
+                    },
+                    "nationality": {
+                        "type": "string",
+                        "example": "American"
+                    },
+                    "address": {
+                        "type": "string",
+                        "example": "123 Main St"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "Anytown"
+                    },
+                    "state": {
+                        "type": "string",
+                        "example": "CA"
+                    },
+                    "postal_code": {
+                        "type": "string",
+                        "example": "12345"
+                    },
+                    "country": {
+                        "type": "string",
+                        "example": "USA"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "555-1234"
+                    },
+                    "emergency_contact_name": {
+                        "type": "string",
+                        "example": "Jane Doe"
+                    },
+                    "emergency_contact_phone": {
+                        "type": "string",
+                        "example": "555-5678"
+                    }
+                },
+                "type": "object"
+            },
             "StoreTermRequest": {
                 "title": "Store Term Request",
                 "description": "Request body for creating a new academic term.",
@@ -3272,6 +5824,63 @@
                 },
                 "type": "object"
             },
+            "UpdateAcademicRecordRequest": {
+                "title": "Update Academic Record Request",
+                "properties": {
+                    "institution_name": {
+                        "description": "The name of the educational institution",
+                        "type": "string",
+                        "example": "University of California"
+                    },
+                    "qualification_type": {
+                        "description": "The type of qualification or degree",
+                        "type": "string",
+                        "example": "Bachelor of Science"
+                    },
+                    "start_date": {
+                        "description": "The start date of the academic program",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2020-09-01"
+                    },
+                    "end_date": {
+                        "description": "The end date of the academic program",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-06-15"
+                    },
+                    "gpa": {
+                        "description": "The Grade Point Average achieved (0.00-4.00)",
+                        "type": "number",
+                        "format": "float",
+                        "example": 3.85
+                    },
+                    "transcript_url": {
+                        "description": "URL to the transcript document",
+                        "type": "string",
+                        "example": "https://example.com/transcript.pdf",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateBuildingRequest": {
+                "title": "Update Building Request",
+                "description": "Request body for updating a building. All fields are optional.",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Science & Engineering Wing"
+                    },
+                    "address": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "456 College Road"
+                    }
+                },
+                "type": "object"
+            },
             "UpdateCourseRequest": {
                 "title": "Update Course Request",
                 "description": "Request body for updating an existing course. All fields are optional.",
@@ -3309,6 +5918,95 @@
                             1,
                             2
                         ]
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateCourseSectionRequest": {
+                "title": "Update Course Section Request",
+                "description": "Request body for updating a course section. All fields are optional.",
+                "properties": {
+                    "course_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "term_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "instructor_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "room_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "capacity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "example": 55
+                    },
+                    "schedule_days": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "Monday",
+                                "Tuesday",
+                                "Wednesday",
+                                "Thursday",
+                                "Friday",
+                                "Saturday",
+                                "Sunday"
+                            ]
+                        },
+                        "example": [
+                            "Tuesday",
+                            "Thursday"
+                        ]
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "time",
+                        "example": "13:00"
+                    },
+                    "end_time": {
+                        "type": "string",
+                        "format": "time",
+                        "example": "14:30"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateEnrollmentRequest": {
+                "title": "Update Enrollment Request",
+                "description": "Request body for updating an enrollment. All fields are optional.",
+                "properties": {
+                    "status": {
+                        "description": "The new status of the enrollment.",
+                        "type": "string",
+                        "enum": [
+                            "enrolled",
+                            "waitlisted",
+                            "completed",
+                            "withdrawn"
+                        ],
+                        "example": "completed"
+                    },
+                    "grade": {
+                        "description": "The grade received (required when status is 'completed').",
+                        "type": "string",
+                        "maxLength": 5,
+                        "example": "A",
+                        "nullable": true
+                    },
+                    "reason_for_change": {
+                        "description": "Required when changing the grade. Reason for the grade change for audit trail.",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Correcting calculation error",
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -3366,6 +6064,132 @@
                 },
                 "type": "object"
             },
+            "UpdateRoomRequest": {
+                "title": "Update Room Request",
+                "description": "Request body for updating a room. All fields are optional.",
+                "properties": {
+                    "building_id": {
+                        "description": "The ID of the building this room belongs to.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "room_number": {
+                        "type": "string",
+                        "maxLength": 20,
+                        "example": "201B"
+                    },
+                    "capacity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "example": 55
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "lecture_hall",
+                            "laboratory",
+                            "seminar_room",
+                            "office"
+                        ],
+                        "example": "laboratory"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateStaffRequest": {
+                "title": "Update Staff Request",
+                "description": "Request body for updating an existing staff member. All fields are optional.",
+                "properties": {
+                    "user": {
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "maxLength": 255,
+                                "example": "Dr. Jane Smith"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "job_title": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Full Professor"
+                    },
+                    "bio": {
+                        "type": "string",
+                        "example": "Specializes in artificial intelligence and machine learning."
+                    },
+                    "office_location": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Tech Building, Room 305A"
+                    },
+                    "department_id": {
+                        "type": "integer",
+                        "example": 1
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateStudentRequest": {
+                "title": "Update Student Request",
+                "properties": {
+                    "first_name": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2005-01-15"
+                    },
+                    "gender": {
+                        "type": "string",
+                        "example": "Male"
+                    },
+                    "nationality": {
+                        "type": "string",
+                        "example": "American"
+                    },
+                    "address": {
+                        "type": "string",
+                        "example": "123 Main St"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "Anytown"
+                    },
+                    "state": {
+                        "type": "string",
+                        "example": "CA"
+                    },
+                    "postal_code": {
+                        "type": "string",
+                        "example": "12345"
+                    },
+                    "country": {
+                        "type": "string",
+                        "example": "USA"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "555-1234"
+                    },
+                    "emergency_contact_name": {
+                        "type": "string",
+                        "example": "Jane Doe"
+                    },
+                    "emergency_contact_phone": {
+                        "type": "string",
+                        "example": "555-5678"
+                    }
+                },
+                "type": "object"
+            },
             "UpdateTermRequest": {
                 "title": "Update Term Request",
                 "description": "Request body for updating an existing academic term. All fields are optional.",
@@ -3404,7 +6228,7 @@
             },
             "AcademicRecordResource": {
                 "title": "Academic Record Resource",
-                "description": "Represents an academic record for a student, such as their GPA for a specific program in a given term.",
+                "description": "Represents an academic record for a student, such as their educational background and qualifications.",
                 "properties": {
                     "id": {
                         "description": "The unique identifier for the academic record.",
@@ -3416,28 +6240,44 @@
                         "type": "integer",
                         "example": 1
                     },
-                    "program_id": {
-                        "description": "The ID of the program this record is associated with.",
-                        "type": "integer",
-                        "example": 1,
-                        "nullable": true
+                    "institution_name": {
+                        "description": "The name of the educational institution.",
+                        "type": "string",
+                        "example": "University of California"
                     },
-                    "term_id": {
-                        "description": "The ID of the term this record is for.",
-                        "type": "integer",
-                        "example": 1,
-                        "nullable": true
+                    "qualification_type": {
+                        "description": "The type of qualification or degree.",
+                        "type": "string",
+                        "example": "Bachelor of Science"
+                    },
+                    "start_date": {
+                        "description": "The start date of the academic program.",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2020-09-01"
+                    },
+                    "end_date": {
+                        "description": "The end date of the academic program.",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-06-15"
                     },
                     "gpa": {
-                        "description": "The Grade Point Average for this record.",
+                        "description": "The Grade Point Average achieved.",
                         "type": "number",
                         "format": "float",
                         "example": 3.85
                     },
-                    "status": {
-                        "description": "The academic standing or status.",
+                    "transcript_url": {
+                        "description": "URL to the transcript document.",
                         "type": "string",
-                        "example": "Good Standing"
+                        "example": "https://example.com/transcript.pdf",
+                        "nullable": true
+                    },
+                    "verified": {
+                        "description": "Whether the academic record has been verified.",
+                        "type": "boolean",
+                        "example": false
                     },
                     "created_at": {
                         "type": "string",
@@ -3526,6 +6366,32 @@
                 },
                 "type": "object"
             },
+            "BuildingResource": {
+                "title": "Building Resource",
+                "description": "Represents a university building.",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Main Hall"
+                    },
+                    "address": {
+                        "type": "string",
+                        "example": "123 University Ave"
+                    },
+                    "rooms": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RoomResource"
+                        }
+                    }
+                },
+                "type": "object"
+            },
             "CourseResource": {
                 "title": "Course Resource",
                 "description": "A course offered by a department in the university.",
@@ -3582,16 +6448,98 @@
                 },
                 "type": "object"
             },
+            "CourseSectionResource": {
+                "title": "Course Section Resource",
+                "description": "Represents a specific section of a course offered in a term.",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "capacity": {
+                        "type": "integer",
+                        "example": 40
+                    },
+                    "schedule_days": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "Monday",
+                                "Tuesday",
+                                "Wednesday",
+                                "Thursday",
+                                "Friday",
+                                "Saturday",
+                                "Sunday"
+                            ]
+                        },
+                        "example": [
+                            "Tuesday",
+                            "Thursday"
+                        ]
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "time",
+                        "example": "10:00"
+                    },
+                    "end_time": {
+                        "type": "string",
+                        "format": "time",
+                        "example": "11:30"
+                    },
+                    "course": {
+                        "$ref": "#/components/schemas/CourseResource"
+                    },
+                    "term": {
+                        "$ref": "#/components/schemas/TermResource"
+                    },
+                    "instructor": {
+                        "$ref": "#/components/schemas/StaffResource"
+                    },
+                    "room": {
+                        "$ref": "#/components/schemas/RoomResource"
+                    }
+                },
+                "type": "object"
+            },
+            "DepartmentResource": {
+                "title": "Department Resource",
+                "description": "Represents a department within a faculty.",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Computer Science"
+                    },
+                    "faculty": {
+                        "$ref": "#/components/schemas/FacultyResource"
+                    },
+                    "programs": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProgramResource"
+                        }
+                    }
+                },
+                "type": "object"
+            },
             "DocumentResource": {
                 "title": "Document Resource",
-                "description": "Represents a document uploaded by a user, such as a transcript or a resume.",
+                "description": "Represents a document uploaded by a student, such as a transcript or essay.",
                 "properties": {
                     "id": {
                         "description": "The unique identifier for the document.",
                         "type": "integer"
                     },
-                    "user_id": {
-                        "description": "The ID of the user who owns this document.",
+                    "student_id": {
+                        "description": "The ID of the student who owns this document.",
                         "type": "integer"
                     },
                     "document_type": {
@@ -3603,9 +6551,31 @@
                         "description": "The storage path of the document file.",
                         "type": "string"
                     },
-                    "file_name": {
+                    "original_filename": {
                         "description": "The original name of the document file.",
                         "type": "string"
+                    },
+                    "mime_type": {
+                        "description": "The MIME type of the document file.",
+                        "type": "string"
+                    },
+                    "file_size": {
+                        "description": "The size of the document file in bytes.",
+                        "type": "integer"
+                    },
+                    "status": {
+                        "description": "The status of the document.",
+                        "type": "string",
+                        "example": "pending"
+                    },
+                    "verified": {
+                        "description": "Whether the document has been verified.",
+                        "type": "boolean"
+                    },
+                    "uploaded_at": {
+                        "description": "When the document was uploaded.",
+                        "type": "string",
+                        "format": "date-time"
                     },
                     "verified_at": {
                         "description": "When the document was verified by an administrator.",
@@ -3620,6 +6590,149 @@
                     "updated_at": {
                         "type": "string",
                         "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "EnrollmentResource": {
+                "title": "Enrollment Resource",
+                "description": "Represents a student's enrollment in a course section.",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "enrolled",
+                            "waitlisted",
+                            "completed",
+                            "withdrawn"
+                        ],
+                        "example": "enrolled"
+                    },
+                    "grade": {
+                        "type": "string",
+                        "example": "A-",
+                        "nullable": true
+                    },
+                    "enrolled_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "student": {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "student_number": {
+                                "type": "string",
+                                "example": "SN2024001"
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "John Doe"
+                            },
+                            "email": {
+                                "type": "string",
+                                "format": "email",
+                                "example": "john.doe@example.com"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "course_section": {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "section_number": {
+                                "type": "string",
+                                "example": "A01",
+                                "nullable": true
+                            },
+                            "capacity": {
+                                "type": "integer",
+                                "example": 40
+                            },
+                            "enrolled_count": {
+                                "type": "integer",
+                                "example": 38
+                            },
+                            "available_spots": {
+                                "type": "integer",
+                                "example": 2
+                            },
+                            "schedule_days": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "example": [
+                                    "Tuesday",
+                                    "Thursday"
+                                ]
+                            },
+                            "start_time": {
+                                "type": "string",
+                                "format": "time",
+                                "example": "10:00"
+                            },
+                            "end_time": {
+                                "type": "string",
+                                "format": "time",
+                                "example": "11:30"
+                            },
+                            "schedule_display": {
+                                "type": "string",
+                                "example": "Tuesday, Thursday 10:00 AM-11:30 AM"
+                            },
+                            "course": {
+                                "$ref": "#/components/schemas/CourseResource"
+                            },
+                            "term": {
+                                "$ref": "#/components/schemas/TermResource"
+                            },
+                            "instructor": {
+                                "$ref": "#/components/schemas/StaffResource"
+                            },
+                            "room": {
+                                "$ref": "#/components/schemas/RoomResource"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "FacultyResource": {
+                "title": "Faculty Resource",
+                "description": "Represents a faculty in the university.",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Faculty of Science"
+                    },
+                    "departments": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/DepartmentResource"
+                        }
                     }
                 },
                 "type": "object"
@@ -3820,6 +6933,71 @@
                 },
                 "type": "object"
             },
+            "RoomResource": {
+                "title": "Room Resource",
+                "description": "Represents a room within a building.",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "room_number": {
+                        "type": "string",
+                        "example": "101"
+                    },
+                    "capacity": {
+                        "type": "integer",
+                        "example": 30
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "lecture_hall",
+                            "laboratory",
+                            "seminar_room",
+                            "office"
+                        ],
+                        "example": "lecture_hall"
+                    },
+                    "building": {
+                        "$ref": "#/components/schemas/BuildingResource"
+                    }
+                },
+                "type": "object"
+            },
+            "StaffResource": {
+                "title": "Staff Resource",
+                "description": "Represents a staff member in the system.",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "job_title": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Professor"
+                    },
+                    "bio": {
+                        "type": "string",
+                        "example": "Expert in computer science with 10 years of experience."
+                    },
+                    "office_location": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Building A, Room 101"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/UserResource"
+                    },
+                    "department": {
+                        "$ref": "#/components/schemas/DepartmentResource"
+                    }
+                },
+                "type": "object"
+            },
             "StudentResource": {
                 "title": "Student Resource",
                 "description": "Represents a student in the system.",
@@ -3833,6 +7011,63 @@
                         "description": "The unique student identification number.",
                         "type": "string",
                         "example": "2024-00001"
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "full_name": {
+                        "type": "string",
+                        "example": "John Doe"
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2005-01-15"
+                    },
+                    "gender": {
+                        "type": "string",
+                        "example": "Male"
+                    },
+                    "nationality": {
+                        "type": "string",
+                        "example": "American"
+                    },
+                    "address": {
+                        "type": "string",
+                        "example": "123 Main St"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "Anytown"
+                    },
+                    "state": {
+                        "type": "string",
+                        "example": "CA"
+                    },
+                    "postal_code": {
+                        "type": "string",
+                        "example": "12345"
+                    },
+                    "country": {
+                        "type": "string",
+                        "example": "USA"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "555-1234"
+                    },
+                    "emergency_contact_name": {
+                        "type": "string",
+                        "example": "Jane Doe"
+                    },
+                    "emergency_contact_phone": {
+                        "type": "string",
+                        "example": "555-5678"
                     },
                     "user": {
                         "$ref": "#/components/schemas/UserResource"
@@ -3915,6 +7150,41 @@
                 "type": "object"
             }
         },
+        "parameters": {
+            "enrollment_student_id_filter": {
+                "name": "student_id",
+                "in": "query",
+                "description": "Filter by student ID",
+                "required": false,
+                "schema": {
+                    "type": "integer"
+                }
+            },
+            "enrollment_course_section_id_filter": {
+                "name": "course_section_id",
+                "in": "query",
+                "description": "Filter by course section ID",
+                "required": false,
+                "schema": {
+                    "type": "integer"
+                }
+            },
+            "enrollment_status_filter": {
+                "name": "status",
+                "in": "query",
+                "description": "Filter by enrollment status",
+                "required": false,
+                "schema": {
+                    "type": "string",
+                    "enum": [
+                        "enrolled",
+                        "waitlisted",
+                        "completed",
+                        "withdrawn"
+                    ]
+                }
+            }
+        },
         "securitySchemes": {
             "bearerAuth": {
                 "type": "http",
@@ -3933,8 +7203,24 @@
             "description": "API endpoints for managing admission applications"
         },
         {
+            "name": "Authentication",
+            "description": "Authentication endpoints for obtaining API tokens."
+        },
+        {
+            "name": "Buildings",
+            "description": "Endpoints for managing university buildings."
+        },
+        {
             "name": "Courses",
             "description": "Endpoints for managing courses and their prerequisites."
+        },
+        {
+            "name": "Course Import",
+            "description": "API endpoints for bulk course imports via CSV"
+        },
+        {
+            "name": "Course Sections",
+            "description": "Endpoints for managing course sections."
         },
         {
             "name": "Departments",
@@ -3945,8 +7231,20 @@
             "description": "API endpoints for managing student documents"
         },
         {
+            "name": "Enrollments",
+            "description": "Endpoints for managing student enrollments in course sections."
+        },
+        {
             "name": "Faculties",
             "description": "Faculty management endpoints"
+        },
+        {
+            "name": "Grade Import",
+            "description": "API endpoints for bulk grade imports via CSV"
+        },
+        {
+            "name": "Notifications",
+            "description": "Endpoints for managing user notifications."
         },
         {
             "name": "Permissions",
@@ -3962,7 +7260,15 @@
         },
         {
             "name": "Roles",
-            "description": "API endpoints for viewing system roles (read-only access for administrators)"
+            "description": "API endpoints for managing system roles (admin access required)"
+        },
+        {
+            "name": "Rooms",
+            "description": "Endpoints for managing rooms within buildings."
+        },
+        {
+            "name": "Staff",
+            "description": "Endpoints for managing staff members."
         },
         {
             "name": "Students",

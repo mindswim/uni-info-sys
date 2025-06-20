@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\RoomController;
 use App\Http\Controllers\Api\V1\CourseSectionController;
 use App\Http\Controllers\Api\V1\EnrollmentController;
 use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\CourseImportController;
 
 /**
  * @OA\Get(
@@ -153,4 +154,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     // Notification routes
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    
+    // Import routes (requires specific permissions)
+    Route::post('imports/courses', [CourseImportController::class, 'store']);
 }); 

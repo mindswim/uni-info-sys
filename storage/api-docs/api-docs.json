@@ -1226,6 +1226,71 @@
                 }
             }
         },
+        "/api/v1/imports/courses": {
+            "post": {
+                "tags": [
+                    "Course Import"
+                ],
+                "summary": "Import courses from CSV file",
+                "description": "Upload a CSV file to bulk import or update courses. Requires courses.manage permission. The CSV must contain headers: course_code, title, description, credits, department_code, prerequisite_course_codes.",
+                "operationId": "8284085ece7db0837d7def541b495262",
+                "requestBody": {
+                    "description": "CSV file containing course data",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreCourseImportRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Import started successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course import has been started. You will be notified when the process is complete."
+                                        },
+                                        "import_id": {
+                                            "type": "string",
+                                            "example": "import_courses_2024-01-15_abc123"
+                                        },
+                                        "file_name": {
+                                            "type": "string",
+                                            "example": "courses_import.csv"
+                                        },
+                                        "estimated_processing_time": {
+                                            "type": "string",
+                                            "example": "Processing typically takes 1-5 minutes depending on file size."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - requires courses.manage permission"
+                    },
+                    "422": {
+                        "description": "Validation error - invalid file format or size"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/course-sections": {
             "get": {
                 "tags": [
@@ -5179,6 +5244,20 @@
                 },
                 "type": "object"
             },
+            "StoreCourseImportRequest": {
+                "title": "Store Course Import Request",
+                "required": [
+                    "file"
+                ],
+                "properties": {
+                    "file": {
+                        "description": "CSV file containing course data with headers: course_code, title, description, credits, department_code, prerequisite_course_codes",
+                        "type": "string",
+                        "format": "binary"
+                    }
+                },
+                "type": "object"
+            },
             "StoreCourseRequest": {
                 "title": "Store Course Request",
                 "description": "Request body for creating a new course.",
@@ -7017,6 +7096,10 @@
         {
             "name": "Courses",
             "description": "Endpoints for managing courses and their prerequisites."
+        },
+        {
+            "name": "Course Import",
+            "description": "API endpoints for bulk course imports via CSV"
         },
         {
             "name": "Course Sections",

@@ -264,4 +264,74 @@ class DocumentController extends Controller
             'message' => 'Document deleted successfully'
         ]);
     }
+
+    /**
+     * Restore a soft-deleted document
+     */
+    #[OA\Post(
+        path: "/api/v1/documents/{document}/restore",
+        summary: "Restore a soft-deleted document",
+        description: "Restore a soft-deleted document record. Requires admin permissions.",
+        security: [["sanctum" => []]],
+        tags: ["Documents"],
+        parameters: [
+            new OA\Parameter(name: "document", in: "path", required: true, schema: new OA\Schema(type: "integer")),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Document restored successfully",
+                content: new OA\JsonContent(ref: "#/components/schemas/DocumentResource")
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 404, description: "Not Found"),
+        ]
+    )]
+    public function restore($id): JsonResponse
+    {
+        $document = Document::withTrashed()->findOrFail($id);
+        $this->authorize('restore', $document);
+        
+        $document->restore();
+        
+        return response()->json([
+            'message' => 'Document restored successfully',
+            'data' => new DocumentResource($document)
+        ], 200);
+    }
+
+    /**
+     * Permanently delete a document
+     */
+    #[OA\Delete(
+        path: "/api/v1/documents/{document}/force",
+        summary: "Permanently delete a document",
+        description: "Permanently delete a document record. Requires admin permissions. This action cannot be undone.",
+        security: [["sanctum" => []]],
+        tags: ["Documents"],
+        parameters: [
+            new OA\Parameter(name: "document", in: "path", required: true, schema: new OA\Schema(type: "integer")),
+        ],
+        responses: [
+            new OA\Response(response: 204, description: "Document permanently deleted"),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 404, description: "Not Found"),
+        ]
+    )]
+    public function forceDelete($id): JsonResponse
+    {
+        $document = Document::withTrashed()->findOrFail($id);
+        $this->authorize('forceDelete', $document);
+        
+        // Delete the file from storage if it exists
+        if (Storage::disk('public')->exists($document->file_path)) {
+            Storage::disk('public')->delete($document->file_path);
+        }
+        
+        $document->forceDelete();
+        
+        return response()->json(null, 204);
+    }
 }

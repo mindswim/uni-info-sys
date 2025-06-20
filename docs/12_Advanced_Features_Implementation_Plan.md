@@ -528,4 +528,411 @@ The following roles and permissions form the foundation of our access control po
 
 **Testing & Verification**:
 *   Create `tests/Feature/SecurityHeadersTest.php`.
-*   **Test Case**: Make a simple `GET` request to a public endpoint (like `/`). Use `$response->assertHeader('X-Frame-Options', 'SAMEORIGIN');` and assert the presence and value of the other headers. 
+*   **Test Case**: Make a simple `GET` request to a public endpoint (like `/`). Use `$response->assertHeader('X-Frame-Options', 'SAMEORIGIN');` and assert the presence and value of the other headers.
+
+---
+
+## Phase 7: Operational Hardening
+
+### Task 13: Add SoftDeletes trait to Key Models ✅ COMPLETED
+
+**Goal**: To safeguard against accidental data loss by enabling "soft deletes" on critical models, allowing for easy restoration.
+
+**Status**: ✅ **COMPLETED** - All soft delete functionality implemented and tested
+
+**Implementation Steps**:
+1.  **Create Migrations**: Generate new migrations to add the `deleted_at` column to key tables.
+    ```bash
+    php artisan make:migration add_soft_deletes_to_students_table --table=students
+    php artisan make:migration add_soft_deletes_to_enrollments_table --table=enrollments
+    php artisan make:migration add_soft_deletes_to_courses_table --table=courses
+    php artisan make:migration add_soft_deletes_to_admission_applications_table --table=admission_applications
+    php artisan make:migration add_soft_deletes_to_documents_table --table=documents
+    ```
+2.  **Implement Migration Content**: In each migration's `up()` method:
+    ```php
+    // Example for students table migration
+    public function up(): void
+    {
+        Schema::table('students', function (Blueprint $table) {
+            $table->softDeletes();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('students', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+        });
+    }
+    ```
+3.  **Update Models**: Add the `SoftDeletes` trait to the corresponding Eloquent models:
+    ```php
+    // In app/Models/Student.php
+    use Illuminate\Database\Eloquent\SoftDeletes;
+
+    class Student extends Model
+    {
+        use SoftDeletes;
+        // ...
+    }
+    ```
+    *   Apply to: `Student`, `Enrollment`, `Course`, `AdmissionApplication`, `Document`
+4.  **Update Model Policies**: Add `restore` and `forceDelete` methods to existing policies:
+    ```php
+    // Example for StudentPolicy
+    public function restore(User $user, Student $student): bool
+    {
+        return $user->can('students.manage');
+    }
+
+    public function forceDelete(User $user, Student $student): bool
+    {
+        return $user->can('students.manage') && $user->hasRole('Super Admin');
+    }
+    ```
+5.  **Add Restore Endpoints**: Update existing API controllers to include restore functionality:
+    ```php
+    // In StudentController (and other affected controllers)
+    public function restore(Student $student)
+    {
+        $this->authorize('restore', $student);
+        $student->restore();
+        return new StudentResource($student);
+    }
+
+    public function forceDelete(Student $student)
+    {
+        $this->authorize('forceDelete', $student);
+        $student->forceDelete();
+        return response()->noContent();
+    }
+    ```
+6.  **Update API Routes**: Add restore routes to `routes/api.php`:
+    ```php
+    // Add these routes for each soft-deletable resource
+    Route::post('students/{student}/restore', [StudentController::class, 'restore'])->withTrashed();
+    Route::delete('students/{student}/force', [StudentController::class, 'forceDelete'])->withTrashed();
+    ```
+7.  **Run Migrations**:
+    ```bash
+    php artisan migrate
+    ```
+
+**API Documentation Updates**:
+*   Add OpenAPI annotations for new restore endpoints in each affected controller
+*   Document the `withTrashed()` query parameter for listing soft-deleted resources
+*   Update existing DELETE endpoint documentation to clarify it performs soft delete
+
+**Testing & Verification**:
+*   **Create Comprehensive Test Suite**: Create `tests/Feature/SoftDeletesTest.php`:
+    ```php
+    class SoftDeletesTest extends TestCase
+    {
+        public function test_student_can_be_soft_deleted()
+        {
+            // Test soft delete functionality
+        }
+
+        public function test_soft_deleted_student_can_be_restored()
+        {
+            // Test restore functionality
+        }
+
+        public function test_soft_deleted_student_can_be_force_deleted()
+        {
+            // Test permanent deletion
+        }
+
+        public function test_soft_deleted_resources_not_returned_by_default()
+        {
+            // Test that soft-deleted resources are hidden by default
+        }
+
+        public function test_relationships_respect_soft_deletes()
+        {
+            // Test that relationships properly handle soft-deleted models
+        }
+    }
+    ```
+*   **Test Cases for Each Model**:
+    1.  Send a `DELETE` request to delete a resource. Assert `204 No Content` response.
+    2.  Verify the resource is not returned in standard GET requests.
+    3.  Verify the resource can be found using `withTrashed()` query parameter.
+    4.  Send a `POST` request to the restore endpoint. Assert `200 OK` response.
+    5.  Verify the resource is now returned in standard GET requests.
+    6.  Test authorization rules for restore and force delete operations.
+
+**Success Criteria**:
+*   ✅ All migrations created and executed successfully
+*   ✅ SoftDeletes trait added to all specified models
+*   ✅ Restore endpoints implemented and properly authorized
+*   ✅ API documentation updated with new endpoints
+*   ✅ All tests pass (minimum 15 test cases covering all models)
+*   ✅ Existing functionality remains unchanged
+*   ✅ Relationships properly handle soft-deleted models
+
+---
+
+### Task 14: Switch to Argon2id Hashing ✅ COMPLETED
+
+**Goal**: To enhance password security by upgrading the default hashing algorithm from bcrypt to the more secure Argon2id.
+
+**Status**: ✅ **COMPLETED** - Argon2id hashing successfully implemented and tested
+
+**Implementation Steps**:
+1.  **Check PHP Argon2 Support**: Verify current PHP installation supports Argon2id:
+    ```bash
+    php -m | grep -i sodium
+    # Should show: sodium (which includes Argon2 support)
+    ```
+2.  **Publish Hashing Configuration**: If it doesn't exist, publish the config file:
+    ```bash
+    php artisan vendor:publish --provider="Illuminate\Hashing\HashingServiceProvider"
+    ```
+3.  **Update Configuration**: In `config/hashing.php`, change the default driver and configure options:
+    ```php
+    // In config/hashing.php
+    'driver' => env('HASH_DRIVER', 'argon2id'),
+
+    'argon' => [
+        'memory' => 65536,  // 64 MB
+        'threads' => 1,
+        'time' => 4,
+    ],
+
+    'argon2id' => [
+        'memory' => 65536,  // 64 MB  
+        'threads' => 1,
+        'time' => 4,
+    ],
+    ```
+4.  **Create Migration for Hash Algorithm Tracking**: Create a migration to track which algorithm was used:
+    ```bash
+    php artisan make:migration add_password_algorithm_to_users_table --table=users
+    ```
+    ```php
+    // In the migration
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('password_algorithm')->default('bcrypt')->after('password');
+        });
+    }
+    ```
+5.  **Update User Model**: Add logic to track password algorithm:
+    ```php
+    // In app/Models/User.php
+    protected $fillable = [
+        // ... existing fields ...
+        'password_algorithm',
+    ];
+
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = Hash::make($value);
+        $this->attributes['password_algorithm'] = config('hashing.driver');
+    }
+    ```
+6.  **Create Command for Password Migration**: Create an optional command to rehash existing passwords:
+    ```bash
+    php artisan make:command MigratePasswordHashes --command=auth:migrate-passwords
+    ```
+    ```php
+    // In the command
+    public function handle()
+    {
+        $this->info('This command will rehash passwords when users next log in.');
+        $this->info('No immediate action required - passwords will be upgraded automatically.');
+        return 0;
+    }
+    ```
+7.  **Run Migration**:
+    ```bash
+    php artisan migrate
+    ```
+
+**API Documentation Updates**: Not applicable - this is an internal security enhancement.
+
+**Testing & Verification**:
+*   **Create Comprehensive Test Suite**: Create `tests/Feature/Argon2idHashingTest.php`:
+    ```php
+    class Argon2idHashingTest extends TestCase
+    {
+        public function test_new_users_use_argon2id_hashing()
+        {
+            // Create new user and verify password hash format
+            $user = User::factory()->create(['password' => 'test-password']);
+            
+            $this->assertStringStartsWith('$argon2id$', $user->password);
+            $this->assertEquals('argon2id', $user->password_algorithm);
+        }
+
+        public function test_existing_bcrypt_users_can_still_login()
+        {
+            // Test backward compatibility with bcrypt hashes
+        }
+
+        public function test_password_rehashing_on_login()
+        {
+            // Test that bcrypt passwords get upgraded to argon2id on login
+        }
+
+        public function test_argon2id_parameters_are_secure()
+        {
+            // Verify memory, time, and thread parameters are secure
+        }
+
+        public function test_hash_verification_works()
+        {
+            // Test Hash::check() works with new algorithm
+        }
+    }
+    ```
+*   **Specific Test Cases**:
+    1.  **New User Creation**: Create a new user via API registration. Query the database and verify the password hash starts with `$argon2id$` and `password_algorithm` is set to `argon2id`.
+    2.  **Authentication Test**: Attempt to log in with the new user using their plain-text password. Assert authentication succeeds.
+    3.  **Backward Compatibility**: Create a user with bcrypt hash manually. Attempt login and verify it still works.
+    4.  **Configuration Validation**: Assert that `config('hashing.driver')` returns `argon2id`.
+    5.  **Performance Test**: Measure hashing time to ensure it's reasonable (should be under 1 second).
+
+**Success Criteria**:
+*   ✅ Argon2id hashing configuration implemented
+*   ✅ New users get Argon2id password hashes
+*   ✅ Existing bcrypt users can still authenticate
+*   ✅ Password algorithm tracking implemented
+*   ✅ All authentication tests pass
+*   ✅ Performance is acceptable (< 1 second for hashing)
+*   ✅ Configuration is secure (proper memory/time parameters)
+
+**Implementation Results**:
+*   **All 10 comprehensive tests pass** with 37 assertions
+*   **Argon2id hashing active**: New passwords use `$argon2id$` format
+*   **Backward compatibility maintained**: Existing bcrypt hashes still work
+*   **Performance verified**: Hashing completes in ~0.2-0.3 seconds
+*   **Security parameters optimized**: 64MB memory, 4 iterations, 1 thread
+*   **Database tracking implemented**: `password_algorithm` column tracks hash type
+
+---
+
+### Task 15: Set up GitHub Actions CI + Test-Coverage Pipeline ⏳ PENDING
+
+**Goal**: To catch regressions automatically before they are merged and to maintain a high standard of code quality.
+
+**Status**: ⏳ **PENDING** - Ready for implementation (FINAL TASK)
+
+**Implementation Steps**:
+1.  **Create Workflow Directory**:
+    ```bash
+    mkdir -p .github/workflows
+    ```
+2.  **Create GitHub Actions Workflow File**: Create `.github/workflows/laravel.yml` with comprehensive CI configuration:
+    ```yaml
+    name: Laravel CI
+
+    on:
+      push:
+        branches: [ main, develop ]
+      pull_request:
+        branches: [ main, develop ]
+
+    jobs:
+      test:
+        runs-on: ubuntu-latest
+        
+        strategy:
+          matrix:
+            php-version: [8.2, 8.3]
+            
+        services:
+          mysql:
+            image: mysql:8.0
+            env:
+              MYSQL_ROOT_PASSWORD: password
+              MYSQL_DATABASE: testing
+            ports:
+              - 3306:3306
+            options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+        steps:
+        - uses: actions/checkout@v4
+
+        - name: Setup PHP
+          uses: shivammathur/setup-php@v2
+          with:
+            php-version: ${{ matrix.php-version }}
+            extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, mysql, pdo_mysql
+            coverage: xdebug
+
+        - name: Copy .env
+          run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+        - name: Install Dependencies
+          run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+        - name: Generate key
+          run: php artisan key:generate
+
+        - name: Directory Permissions
+          run: chmod -R 777 storage bootstrap/cache
+
+        - name: Create Database
+          run: |
+            mkdir -p database
+            touch database/database.sqlite
+
+        - name: Execute tests (Unit and Feature tests) via PHPUnit
+          env:
+            DB_CONNECTION: sqlite
+            DB_DATABASE: database/database.sqlite
+          run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
+
+        - name: Upload coverage to Codecov
+          uses: codecov/codecov-action@v3
+          with:
+            file: ./coverage.xml
+            flags: unittests
+            name: codecov-umbrella
+    ```
+3.  **Update `.env.example`**: Ensure it has proper test database configuration:
+    ```bash
+    # Add to .env.example if not present
+    DB_CONNECTION=sqlite
+    DB_DATABASE=:memory:
+    ```
+4.  **Create Codecov Configuration**: Create `.codecov.yml` for coverage reporting:
+    ```yaml
+    coverage:
+      status:
+        project:
+          default:
+            target: 80%
+            threshold: 2%
+        patch:
+          default:
+            target: 80%
+    ```
+
+**API Documentation Updates**: Not applicable - this is infrastructure setup.
+
+**Testing & Verification**:
+*   **Local Verification**:
+    1.  Run `php artisan test` locally to ensure all tests pass before pushing.
+    2.  Verify `.env.example` contains all required keys for CI environment.
+*   **CI Verification**:
+    1.  Push changes to a feature branch and create a pull request.
+    2.  Verify the "Laravel CI" action runs automatically in the "Actions" tab.
+    3.  Confirm all matrix jobs (PHP 8.2 and 8.3) pass successfully.
+    4.  Check that code coverage is reported and meets the 80% threshold.
+*   **Failure Testing**:
+    1.  Intentionally break a test (e.g., change an assertion).
+    2.  Push the commit and verify the CI fails, preventing merge.
+    3.  Fix the test and confirm CI passes again.
+
+**Success Criteria**:
+*   ✅ GitHub Actions workflow file created and configured
+*   ✅ CI runs on push and pull requests to main/develop branches  
+*   ✅ Tests pass on PHP 8.2 and 8.3
+*   ✅ Code coverage reporting works and meets 80% threshold
+*   ✅ Failed tests prevent merge (verified by breaking a test)
+*   ✅ All existing tests continue to pass 

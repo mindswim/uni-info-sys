@@ -540,5 +540,68 @@ class EnrollmentController extends Controller
         // For now, it's a placeholder for future enhancement
     }
 
+    /**
+     * Restore a soft-deleted enrollment
+     */
+    #[OA\Post(
+        path: "/api/v1/enrollments/{enrollment}/restore",
+        summary: "Restore a soft-deleted enrollment",
+        description: "Restore a soft-deleted enrollment record. Requires admin permissions.",
+        security: [["sanctum" => []]],
+        tags: ["Enrollments"],
+        parameters: [
+            new OA\Parameter(name: "enrollment", in: "path", required: true, schema: new OA\Schema(type: "integer")),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Enrollment restored successfully",
+                content: new OA\JsonContent(ref: "#/components/schemas/EnrollmentResource")
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 404, description: "Not Found"),
+        ]
+    )]
+    public function restore($id): JsonResponse
+    {
+        $enrollment = Enrollment::withTrashed()->findOrFail($id);
+        $this->authorize('restore', $enrollment);
+        
+        $enrollment->restore();
+        
+        return response()->json([
+            'message' => 'Enrollment restored successfully',
+            'data' => new EnrollmentResource($enrollment)
+        ], 200);
+    }
 
+    /**
+     * Permanently delete an enrollment
+     */
+    #[OA\Delete(
+        path: "/api/v1/enrollments/{enrollment}/force",
+        summary: "Permanently delete an enrollment",
+        description: "Permanently delete an enrollment record. Requires admin permissions. This action cannot be undone.",
+        security: [["sanctum" => []]],
+        tags: ["Enrollments"],
+        parameters: [
+            new OA\Parameter(name: "enrollment", in: "path", required: true, schema: new OA\Schema(type: "integer")),
+        ],
+        responses: [
+            new OA\Response(response: 204, description: "Enrollment permanently deleted"),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 404, description: "Not Found"),
+        ]
+    )]
+    public function forceDelete($id): JsonResponse
+    {
+        $enrollment = Enrollment::withTrashed()->findOrFail($id);
+        $this->authorize('forceDelete', $enrollment);
+        
+        $enrollment->forceDelete();
+        
+        return response()->json(null, 204);
+    }
 }

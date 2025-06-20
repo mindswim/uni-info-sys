@@ -149,12 +149,29 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     
     // Student-centric resources
     Route::apiResource('students', \App\Http\Controllers\Api\V1\StudentController::class);
+    Route::post('students/{student}/restore', [\App\Http\Controllers\Api\V1\StudentController::class, 'restore'])->withTrashed();
+    Route::delete('students/{student}/force', [\App\Http\Controllers\Api\V1\StudentController::class, 'forceDelete'])->withTrashed();
+    
     Route::apiResource('students.academic-records', \App\Http\Controllers\Api\V1\AcademicRecordController::class)->scoped()->shallow();
     Route::apiResource('students.documents', \App\Http\Controllers\Api\V1\DocumentController::class)->scoped()->shallow();
     Route::get('students/{student}/documents/all-versions', [\App\Http\Controllers\Api\V1\DocumentController::class, 'allVersions']);
     
+    // Document restore routes
+    Route::post('documents/{document}/restore', [\App\Http\Controllers\Api\V1\DocumentController::class, 'restore'])->withTrashed();
+    Route::delete('documents/{document}/force', [\App\Http\Controllers\Api\V1\DocumentController::class, 'forceDelete'])->withTrashed();
+    
     // Enrollment API routes
     Route::apiResource('enrollments', \App\Http\Controllers\Api\V1\EnrollmentController::class);
+    Route::post('enrollments/{enrollment}/restore', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'restore'])->withTrashed();
+    Route::delete('enrollments/{enrollment}/force', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'forceDelete'])->withTrashed();
+    
+    // Course restore routes
+    Route::post('courses/{course}/restore', [\App\Http\Controllers\Api\V1\CourseController::class, 'restore'])->withTrashed();
+    Route::delete('courses/{course}/force', [\App\Http\Controllers\Api\V1\CourseController::class, 'forceDelete'])->withTrashed();
+    
+    // Admission application restore routes
+    Route::post('admission-applications/{admission_application}/restore', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'restore'])->withTrashed();
+    Route::delete('admission-applications/{admission_application}/force', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'forceDelete'])->withTrashed();
     
     // Enrollment management with custom business logic endpoints
     Route::post('enrollments/{enrollment}/withdraw', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'withdraw']);

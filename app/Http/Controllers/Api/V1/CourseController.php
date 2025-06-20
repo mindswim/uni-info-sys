@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateCourseRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use OpenApi\Attributes as OA;
+use Illuminate\Http\JsonResponse;
 
 #[OA\Tag(
     name: 'Courses',
@@ -227,5 +228,72 @@ class CourseController extends Controller
         $course->delete();
         
         return response()->noContent();
+    }
+
+    #[OA\Post(
+        path: '/api/v1/courses/{course}/restore',
+        summary: 'Restore a soft-deleted course',
+        description: 'Restore a soft-deleted course record. Requires admin permissions.',
+        security: [['sanctum' => []]],
+        tags: ['Courses'],
+        parameters: [
+            new OA\Parameter(name: 'course', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Course restored successfully',
+                content: new OA\JsonContent(ref: '#/components/schemas/CourseResource')
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 404, description: 'Not Found'),
+        ]
+    )]
+    public function restore($id): JsonResponse
+    {
+        $course = Course::withTrashed()->findOrFail($id);
+        $this->authorize('restore', $course);
+        
+        $course->restore();
+        
+        // Clear courses cache
+        Cache::forget('courses.all');
+        Cache::forget('courses.department.' . $course->department_id);
+        
+        return response()->json([
+            'message' => 'Course restored successfully',
+            'data' => new CourseResource($course)
+        ], 200);
+    }
+
+    #[OA\Delete(
+        path: '/api/v1/courses/{course}/force',
+        summary: 'Permanently delete a course',
+        description: 'Permanently delete a course record. Requires admin permissions. This action cannot be undone.',
+        security: [['sanctum' => []]],
+        tags: ['Courses'],
+        parameters: [
+            new OA\Parameter(name: 'course', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 204, description: 'Course permanently deleted'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 404, description: 'Not Found'),
+        ]
+    )]
+    public function forceDelete($id): JsonResponse
+    {
+        $course = Course::withTrashed()->findOrFail($id);
+        $this->authorize('forceDelete', $course);
+        
+        // Clear courses cache
+        Cache::forget('courses.all');
+        Cache::forget('courses.department.' . $course->department_id);
+        
+        $course->forceDelete();
+        
+        return response()->json(null, 204);
     }
 }

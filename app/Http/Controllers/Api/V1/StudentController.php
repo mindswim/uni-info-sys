@@ -180,4 +180,63 @@ class StudentController extends Controller
         
         return response()->json(null, 204);
     }
+
+    #[OA\Post(
+        path: "/api/v1/students/{student}/restore",
+        summary: "Restore a soft-deleted student",
+        description: "Restore a soft-deleted student record. Requires admin permissions.",
+        security: [["sanctum" => []]],
+        tags: ["Students"],
+        parameters: [
+            new OA\Parameter(name: "student", in: "path", required: true, schema: new OA\Schema(type: "integer")),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Student restored successfully",
+                content: new OA\JsonContent(ref: "#/components/schemas/StudentResource")
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 404, description: "Not Found"),
+        ]
+    )]
+    public function restore($id): JsonResponse
+    {
+        $student = Student::withTrashed()->findOrFail($id);
+        $this->authorize('restore', $student);
+        
+        $student->restore();
+        
+        return response()->json([
+            'message' => 'Student restored successfully',
+            'data' => new StudentResource($student)
+        ], 200);
+    }
+
+    #[OA\Delete(
+        path: "/api/v1/students/{student}/force",
+        summary: "Permanently delete a student",
+        description: "Permanently delete a student record. Requires admin permissions. This action cannot be undone.",
+        security: [["sanctum" => []]],
+        tags: ["Students"],
+        parameters: [
+            new OA\Parameter(name: "student", in: "path", required: true, schema: new OA\Schema(type: "integer")),
+        ],
+        responses: [
+            new OA\Response(response: 204, description: "Student permanently deleted"),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 404, description: "Not Found"),
+        ]
+    )]
+    public function forceDelete($id): JsonResponse
+    {
+        $student = Student::withTrashed()->findOrFail($id);
+        $this->authorize('forceDelete', $student);
+        
+        $student->forceDelete();
+        
+        return response()->json(null, 204);
+    }
 }

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable implements Auditable
 {
@@ -24,6 +25,7 @@ class User extends Authenticatable implements Auditable
         'name',
         'email',
         'password',
+        'password_algorithm',
     ];
 
     /**
@@ -47,6 +49,15 @@ class User extends Authenticatable implements Auditable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Set the password attribute and track the algorithm used.
+     */
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = Hash::make($value);
+        $this->attributes['password_algorithm'] = config('hashing.driver');
     }
 
     public function roles()

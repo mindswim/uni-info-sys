@@ -2,10 +2,12 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Document extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'student_id', 'document_type', 'file_path', 'original_filename', 

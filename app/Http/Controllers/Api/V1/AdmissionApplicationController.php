@@ -499,4 +499,69 @@ class AdmissionApplicationController extends Controller
             'message' => 'Admission application deleted successfully.',
         ]);
     }
+
+    /**
+     * Restore a soft-deleted admission application
+     */
+    #[OA\Post(
+        path: "/api/v1/admission-applications/{admission_application}/restore",
+        summary: "Restore a soft-deleted admission application",
+        description: "Restore a soft-deleted admission application record. Requires admin permissions.",
+        security: [["sanctum" => []]],
+        tags: ["Admission Applications"],
+        parameters: [
+            new OA\Parameter(name: "admission_application", in: "path", required: true, schema: new OA\Schema(type: "integer")),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Admission application restored successfully",
+                content: new OA\JsonContent(ref: "#/components/schemas/AdmissionApplicationResource")
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 404, description: "Not Found"),
+        ]
+    )]
+    public function restore($id): JsonResponse
+    {
+        $admissionApplication = AdmissionApplication::withTrashed()->findOrFail($id);
+        $this->authorize('restore', $admissionApplication);
+        
+        $admissionApplication->restore();
+        
+        return response()->json([
+            'message' => 'Admission application restored successfully',
+            'data' => new AdmissionApplicationResource($admissionApplication)
+        ], 200);
+    }
+
+    /**
+     * Permanently delete an admission application
+     */
+    #[OA\Delete(
+        path: "/api/v1/admission-applications/{admission_application}/force",
+        summary: "Permanently delete an admission application",
+        description: "Permanently delete an admission application record. Requires admin permissions. This action cannot be undone.",
+        security: [["sanctum" => []]],
+        tags: ["Admission Applications"],
+        parameters: [
+            new OA\Parameter(name: "admission_application", in: "path", required: true, schema: new OA\Schema(type: "integer")),
+        ],
+        responses: [
+            new OA\Response(response: 204, description: "Admission application permanently deleted"),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 404, description: "Not Found"),
+        ]
+    )]
+    public function forceDelete($id): JsonResponse
+    {
+        $admissionApplication = AdmissionApplication::withTrashed()->findOrFail($id);
+        $this->authorize('forceDelete', $admissionApplication);
+        
+        $admissionApplication->forceDelete();
+        
+        return response()->json(null, 204);
+    }
 }

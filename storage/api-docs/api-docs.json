@@ -729,6 +729,91 @@
                 ]
             }
         },
+        "/api/v1/admission-applications/{admission_application}/restore": {
+            "post": {
+                "tags": [
+                    "Admission Applications"
+                ],
+                "summary": "Restore a soft-deleted admission application",
+                "description": "Restore a soft-deleted admission application record. Requires admin permissions.",
+                "operationId": "8a02fcb6306ead9b8c5a68be7f5f07aa",
+                "parameters": [
+                    {
+                        "name": "admission_application",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Admission application restored successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdmissionApplicationResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admission-applications/{admission_application}/force": {
+            "delete": {
+                "tags": [
+                    "Admission Applications"
+                ],
+                "summary": "Permanently delete an admission application",
+                "description": "Permanently delete an admission application record. Requires admin permissions. This action cannot be undone.",
+                "operationId": "a0b886e8156f7e82b08de8455d559b7e",
+                "parameters": [
+                    {
+                        "name": "admission_application",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Admission application permanently deleted"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/forgot-password": {
             "post": {
                 "tags": [
@@ -1450,6 +1535,91 @@
                         "description": "Not Found"
                     }
                 }
+            }
+        },
+        "/api/v1/courses/{course}/restore": {
+            "post": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Restore a soft-deleted course",
+                "description": "Restore a soft-deleted course record. Requires admin permissions.",
+                "operationId": "890cafc5adc57c357e33b7da270917aa",
+                "parameters": [
+                    {
+                        "name": "course",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course restored successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/courses/{course}/force": {
+            "delete": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Permanently delete a course",
+                "description": "Permanently delete a course record. Requires admin permissions. This action cannot be undone.",
+                "operationId": "26bd1830e227417c99eb8583fa23eaa0",
+                "parameters": [
+                    {
+                        "name": "course",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Course permanently deleted"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/api/v1/imports/courses": {
@@ -2486,6 +2656,91 @@
                 ]
             }
         },
+        "/api/v1/documents/{document}/restore": {
+            "post": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Restore a soft-deleted document",
+                "description": "Restore a soft-deleted document record. Requires admin permissions.",
+                "operationId": "5bd4e0c711d719888e70719225458dc6",
+                "parameters": [
+                    {
+                        "name": "document",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Document restored successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DocumentResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/documents/{document}/force": {
+            "delete": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Permanently delete a document",
+                "description": "Permanently delete a document record. Requires admin permissions. This action cannot be undone.",
+                "operationId": "84e9f4e701339a98d683034f1e593189",
+                "parameters": [
+                    {
+                        "name": "document",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Document permanently deleted"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/enrollments": {
             "get": {
                 "tags": [
@@ -3004,6 +3259,91 @@
                         "description": "Course Section Not Found"
                     }
                 }
+            }
+        },
+        "/api/v1/enrollments/{enrollment}/restore": {
+            "post": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Restore a soft-deleted enrollment",
+                "description": "Restore a soft-deleted enrollment record. Requires admin permissions.",
+                "operationId": "5fe351bc568802bafa08a85449466292",
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Enrollment restored successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EnrollmentResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/enrollments/{enrollment}/force": {
+            "delete": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Permanently delete an enrollment",
+                "description": "Permanently delete an enrollment record. Requires admin permissions. This action cannot be undone.",
+                "operationId": "eeaec5f6f1cce6632727ebe18011e07f",
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Enrollment permanently deleted"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/api/v1/enrollments/swap": {
@@ -5474,6 +5814,91 @@
                 "responses": {
                     "204": {
                         "description": "Student deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/students/{student}/restore": {
+            "post": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Restore a soft-deleted student",
+                "description": "Restore a soft-deleted student record. Requires admin permissions.",
+                "operationId": "4bbeaa7e6df9aa9559ca729d6cafb016",
+                "parameters": [
+                    {
+                        "name": "student",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Student restored successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudentResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/students/{student}/force": {
+            "delete": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Permanently delete a student",
+                "description": "Permanently delete a student record. Requires admin permissions. This action cannot be undone.",
+                "operationId": "743e553d3c20196b9ba7c1b65add1a2b",
+                "parameters": [
+                    {
+                        "name": "student",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Student permanently deleted"
                     },
                     "401": {
                         "description": "Unauthenticated"

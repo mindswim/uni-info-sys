@@ -20,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Use Laravel 11's built-in API throttling
         $middleware->throttleApi();
 
+        // Add trace ID to all API requests for structured logging
+        $middleware->api(append: [
+            \App\Http\Middleware\AddTraceIdToLogs::class,
+        ]);
+
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {

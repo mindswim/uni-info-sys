@@ -44,8 +44,8 @@ class StudentPolicy
     public function update(User $user, Student $student): bool
     {
         $userRoles = $user->roles()->pluck('name')->toArray();
-        // Only admin can update students for now.
-        return in_array('admin', $userRoles);
+        // Admin can update any student, or a student can update their own profile.
+        return in_array('admin', $userRoles) || $user->id === $student->user_id;
     }
 
     /**

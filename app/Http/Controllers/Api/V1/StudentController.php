@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Student;
 use App\Http\Resources\StudentResource;
+use App\Http\Requests\StoreStudentRequest;
+use App\Http\Requests\UpdateStudentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\JsonResponse;
@@ -68,16 +70,32 @@ class StudentController extends Controller
     #[OA\Post(
         path: "/api/v1/students",
         summary: "Create a new student",
-        description: "Create a new student record. This is a complex administrative action and is not implemented in this version.",
+        description: "Create a new student record. Requires admin or staff permissions.",
         security: [["sanctum" => []]],
         tags: ["Students"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: "#/components/schemas/StoreStudentRequest")
+        ),
         responses: [
-            new OA\Response(response: 501, description: "Not Implemented"),
+            new OA\Response(
+                response: 201,
+                description: "Student created successfully",
+                content: new OA\JsonContent(ref: "#/components/schemas/StudentResource")
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 422, description: "Validation Error"),
         ]
     )]
-    public function store(Request $request): JsonResponse
+    public function store(StoreStudentRequest $request): JsonResponse
     {
-        return response()->json(['message' => 'Not Implemented'], 501);
+        $student = Student::create($request->validated());
+        
+        return response()->json([
+            'message' => 'Student created successfully',
+            'data' => new StudentResource($student)
+        ], 201);
     }
 
     #[OA\Get(
@@ -108,36 +126,58 @@ class StudentController extends Controller
     #[OA\Put(
         path: "/api/v1/students/{student}",
         summary: "Update a student",
-        description: "Update a student's record. This is a complex administrative action and is not implemented in this version.",
+        description: "Update a student's record. Students can update their own profile, admins can update any student.",
         security: [["sanctum" => []]],
         tags: ["Students"],
         parameters: [
             new OA\Parameter(name: "student", in: "path", required: true, schema: new OA\Schema(type: "integer")),
         ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: "#/components/schemas/UpdateStudentRequest")
+        ),
         responses: [
-            new OA\Response(response: 501, description: "Not Implemented"),
+            new OA\Response(
+                response: 200,
+                description: "Student updated successfully",
+                content: new OA\JsonContent(ref: "#/components/schemas/StudentResource")
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 404, description: "Not Found"),
+            new OA\Response(response: 422, description: "Validation Error"),
         ]
     )]
-    public function update(Request $request, Student $student): JsonResponse
+    public function update(UpdateStudentRequest $request, Student $student): JsonResponse
     {
-        return response()->json(['message' => 'Not Implemented'], 501);
+        $student->update($request->validated());
+        
+        return response()->json([
+            'message' => 'Student updated successfully',
+            'data' => new StudentResource($student)
+        ], 200);
     }
 
     #[OA\Delete(
         path: "/api/v1/students/{student}",
         summary: "Delete a student",
-        description: "Delete a student's record. This is a complex administrative action and is not implemented in this version.",
+        description: "Delete a student's record. Requires admin permissions.",
         security: [["sanctum" => []]],
         tags: ["Students"],
         parameters: [
             new OA\Parameter(name: "student", in: "path", required: true, schema: new OA\Schema(type: "integer")),
         ],
         responses: [
-            new OA\Response(response: 501, description: "Not Implemented"),
+            new OA\Response(response: 204, description: "Student deleted successfully"),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 404, description: "Not Found"),
         ]
     )]
     public function destroy(Student $student): JsonResponse
     {
-        return response()->json(['message' => 'Not Implemented'], 501);
+        $student->delete();
+        
+        return response()->json(null, 204);
     }
 }

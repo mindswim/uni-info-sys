@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Add trace ID to all API requests for structured logging
         $middleware->api(append: [
             \App\Http\Middleware\AddTraceIdToLogs::class,
+            \App\Http\Middleware\PrometheusMetrics::class,
         ]);
 
         //

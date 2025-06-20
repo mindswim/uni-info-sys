@@ -173,3 +173,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::post('imports/courses', [CourseImportController::class, 'store']);
     Route::post('course-sections/{courseSection}/import-grades', [GradeImportController::class, 'store']);
 }); 
+
+// Prometheus metrics endpoint (unauthenticated for monitoring systems)
+Route::get('/metrics', [\App\Http\Controllers\MetricsController::class, 'index'])
+    ->middleware('throttle:60,1'); // Allow 60 requests per minute for metrics scraping 

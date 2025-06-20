@@ -33,12 +33,16 @@ class TermFactory extends Factory
             $end_date = Carbon::create($year, 8, 15);
         }
 
+        // Set add/drop deadline to 2 weeks after start date
+        $add_drop_deadline = $start_date->copy()->addWeeks(2);
+
         return [
             'name' => $name,
             'academic_year' => $year,
             'semester' => $semester,
             'start_date' => $start_date,
             'end_date' => $end_date,
+            'add_drop_deadline' => $add_drop_deadline,
         ];
     }
 }

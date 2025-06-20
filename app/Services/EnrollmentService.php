@@ -117,12 +117,19 @@ class EnrollmentService
      *
      * @param Enrollment $enrollment
      * @return bool
+     * @throws CourseSectionUnavailableException
      */
     public function withdrawStudent(Enrollment $enrollment): bool
     {
         return DB::transaction(function () use ($enrollment) {
-            $wasEnrolled = $enrollment->status === 'enrolled';
             $courseSection = $enrollment->courseSection;
+            
+            // Check if withdrawal is within the add/drop deadline
+            if ($courseSection->term && !$courseSection->term->isWithinAddDropPeriod()) {
+                throw new CourseSectionUnavailableException('The add/drop deadline for this term has passed. Withdrawal is no longer allowed.');
+            }
+            
+            $wasEnrolled = $enrollment->status === 'enrolled';
             
             // Update enrollment status to withdrawn
             $enrollment->update(['status' => 'withdrawn']);
@@ -184,6 +191,11 @@ class EnrollmentService
         // Check if the term is current or future (basic enrollment timing)
         if ($courseSection->term && $courseSection->term->end_date < now()->toDateString()) {
             throw new CourseSectionUnavailableException('Cannot enroll in a course section from a past term.');
+        }
+
+        // Check if enrollment is within the add/drop deadline
+        if ($courseSection->term && !$courseSection->term->isWithinAddDropPeriod()) {
+            throw new CourseSectionUnavailableException('The add/drop deadline for this term has passed. Enrollment is no longer allowed.');
         }
     }
 

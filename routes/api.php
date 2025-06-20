@@ -144,13 +144,16 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::apiResource('students.documents', \App\Http\Controllers\Api\V1\DocumentController::class)->scoped()->shallow();
     
     // Enrollment API routes
-    Route::apiResource('enrollments', EnrollmentController::class);
+    Route::apiResource('enrollments', \App\Http\Controllers\Api\V1\EnrollmentController::class);
     
-    // Additional custom routes for business logic
-    Route::post('enrollments/{enrollment}/withdraw', [EnrollmentController::class, 'withdraw']);
-    Route::post('enrollments/{enrollment}/complete', [EnrollmentController::class, 'complete']);
-    Route::get('students/{student}/enrollments', [EnrollmentController::class, 'byStudent']);
-    Route::get('course-sections/{courseSection}/enrollments', [EnrollmentController::class, 'byCourseSection']);
+    // Enrollment management with custom business logic endpoints
+    Route::post('enrollments/{enrollment}/withdraw', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'withdraw']);
+    Route::post('enrollments/{enrollment}/complete', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'complete']);
+    Route::get('students/{student}/enrollments', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'byStudent']);
+    Route::get('course-sections/{courseSection}/enrollments', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'byCourseSection']);
+    
+    // Enrollment swap endpoint
+    Route::post('enrollments/swap', [\App\Http\Controllers\Api\V1\EnrollmentSwapController::class, 'store']);
     
     // Notification routes
     Route::get('notifications', [NotificationController::class, 'index']);

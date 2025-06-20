@@ -181,6 +181,7 @@ class EnrollmentServiceTest extends TestCase
         $term = Term::factory()->create([
             'start_date' => now()->addDays(1)->toDateString(),
             'end_date' => now()->addMonths(4)->toDateString(),
+            'add_drop_deadline' => now()->addWeeks(2), // Future deadline to avoid deadline validation
         ]);
         $courseSection = CourseSection::factory()->create([
             'term_id' => $term->id,
@@ -342,6 +343,7 @@ class EnrollmentServiceTest extends TestCase
         $term = Term::factory()->create([
             'start_date' => now()->addDays(1)->toDateString(),
             'end_date' => now()->addMonths(4)->toDateString(),
+            'add_drop_deadline' => now()->addWeeks(2), // Future deadline
         ]);
         $courseSection = CourseSection::factory()->create([
             'term_id' => $term->id,
@@ -379,6 +381,7 @@ class EnrollmentServiceTest extends TestCase
         $term = Term::factory()->create([
             'start_date' => now()->addDays(1)->toDateString(),
             'end_date' => now()->addMonths(4)->toDateString(),
+            'add_drop_deadline' => now()->addWeeks(2), // Future deadline
         ]);
         $courseSection = CourseSection::factory()->create([
             'term_id' => $term->id,
@@ -402,5 +405,118 @@ class EnrollmentServiceTest extends TestCase
         
         // Assert that NO waitlist promotion job was dispatched
         Queue::assertNotPushed(\App\Jobs\ProcessWaitlistPromotion::class);
+    }
+
+    public function test_throws_exception_when_enrollment_deadline_has_passed()
+    {
+        // Arrange
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        $student = Student::factory()->create(['user_id' => $user->id]);
+        $term = Term::factory()->create([
+            'start_date' => now()->addDays(1)->toDateString(),
+            'end_date' => now()->addMonths(4)->toDateString(),
+            'add_drop_deadline' => now()->subDays(1), // Past deadline
+        ]);
+        $courseSection = CourseSection::factory()->create([
+            'term_id' => $term->id,
+            'capacity' => 30,
+        ]);
+
+        $data = [
+            'student_id' => $student->id,
+            'course_section_id' => $courseSection->id,
+        ];
+
+        // Act & Assert
+        $this->expectException(\App\Exceptions\CourseSectionUnavailableException::class);
+        $this->expectExceptionMessage('The add/drop deadline for this term has passed. Enrollment is no longer allowed.');
+        $this->enrollmentService->enrollStudent($data);
+    }
+
+    public function test_throws_exception_when_withdrawal_deadline_has_passed()
+    {
+        // Arrange
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        $student = Student::factory()->create(['user_id' => $user->id]);
+        $term = Term::factory()->create([
+            'start_date' => now()->addDays(1)->toDateString(),
+            'end_date' => now()->addMonths(4)->toDateString(),
+            'add_drop_deadline' => now()->subDays(1), // Past deadline
+        ]);
+        $courseSection = CourseSection::factory()->create([
+            'term_id' => $term->id,
+            'capacity' => 30,
+        ]);
+        $enrollment = Enrollment::factory()->create([
+            'student_id' => $student->id,
+            'course_section_id' => $courseSection->id,
+            'status' => 'enrolled',
+        ]);
+
+        // Act & Assert
+        $this->expectException(\App\Exceptions\CourseSectionUnavailableException::class);
+        $this->expectExceptionMessage('The add/drop deadline for this term has passed. Withdrawal is no longer allowed.');
+        $this->enrollmentService->withdrawStudent($enrollment);
+    }
+
+    public function test_allows_enrollment_when_no_deadline_is_set()
+    {
+        // Arrange
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        $student = Student::factory()->create(['user_id' => $user->id]);
+        $term = Term::factory()->create([
+            'start_date' => now()->addDays(1)->toDateString(),
+            'end_date' => now()->addMonths(4)->toDateString(),
+            'add_drop_deadline' => null, // No deadline set
+        ]);
+        $courseSection = CourseSection::factory()->create([
+            'term_id' => $term->id,
+            'capacity' => 30,
+        ]);
+
+        $data = [
+            'student_id' => $student->id,
+            'course_section_id' => $courseSection->id,
+        ];
+
+        // Act
+        $enrollment = $this->enrollmentService->enrollStudent($data);
+
+        // Assert
+        $this->assertInstanceOf(\App\Models\Enrollment::class, $enrollment);
+        $this->assertEquals('enrolled', $enrollment->status);
+    }
+
+    public function test_allows_withdrawal_when_no_deadline_is_set()
+    {
+        Queue::fake();
+        
+        // Arrange
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        $student = Student::factory()->create(['user_id' => $user->id]);
+        $term = Term::factory()->create([
+            'start_date' => now()->addDays(1)->toDateString(),
+            'end_date' => now()->addMonths(4)->toDateString(),
+            'add_drop_deadline' => null, // No deadline set
+        ]);
+        $courseSection = CourseSection::factory()->create([
+            'term_id' => $term->id,
+            'capacity' => 30,
+        ]);
+        $enrollment = Enrollment::factory()->create([
+            'student_id' => $student->id,
+            'course_section_id' => $courseSection->id,
+            'status' => 'enrolled',
+        ]);
+
+        // Act
+        $result = $this->enrollmentService->withdrawStudent($enrollment);
+
+        // Assert
+        $this->assertTrue($result);
+        $this->assertDatabaseHas('enrollments', [
+            'id' => $enrollment->id,
+            'status' => 'withdrawn',
+        ]);
     }
 }

@@ -155,13 +155,13 @@ Consistent with the API-first approach, this application uses **stateless, token
 
 Crucially, the server does not maintain any "session" state for the user. Every request is authenticated independently with the token, making the system truly stateless and highly scalable. This is the active, modern, and fully functional authentication system for this project.
 
-### Testing Database: In-Memory for Speed and Isolation
+### Testing Database: MySQL for Engine Parity and Isolation
 
-A key part of a robust development workflow is automated testing. To ensure tests are fast and reliable, this project uses a dedicated **in-memory SQLite database**.
+A key part of a robust development workflow is automated testing. To ensure tests are both fast and reflect the production environment as accurately as possible, this project uses a dedicated **MySQL testing database**.
 
--   **What is an In-Memory Database?** When tests are run, Laravel creates a brand new, completely empty database directly in the server's RAM. Because no data is being written to or read from a physical file on a hard drive, operations are incredibly fast. As soon as the tests are finished, this database is destroyed.
--   **Why is this a best practice?** This approach guarantees that every single test run starts from a perfectly clean slate. One test cannot accidentally leave data behind that might influence or break a subsequent test. The speed advantage also means you can run your full test suite more frequently.
--   **Project Status**: The `phpunit.xml` file is correctly configured to use this `:memory:` database. The `database/database.sqlite` file, which was a remnant of a different approach, was unused and has been safely deleted.
+-   **Why MySQL for Testing?** While in-memory SQLite databases can be faster, using the same database engine (MySQL) for both development and testing eliminates an entire class of potential bugs. It ensures that tests run against the exact same rules, data types, and constraints as the production application, providing higher fidelity and preventing environment-specific surprises.
+-   **How is Isolation Achieved?** To keep tests independent, the project uses Laravel's built-in `RefreshDatabase` trait in its tests. Before each test file is run, this trait completely drops all tables from the test database and re-runs all migrations from scratch. This guarantees that every test class starts with a perfectly clean, predictable schema, preventing data from one test from interfering with another.
+-   **Project Status**: The `phpunit.xml` file is correctly configured to use the `mysql` connection for testing, but it points to a separate database defined in the environment variables (e.g., `university_admissions_testing`). This is the current, active, and robust strategy for ensuring reliable test results.
 
 ---
 

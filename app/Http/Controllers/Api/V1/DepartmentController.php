@@ -107,8 +107,9 @@ class DepartmentController extends Controller
      *         required=true,
      *         description="Department data",
      *         @OA\JsonContent(
-     *             required={"name", "faculty_id"},
+     *             required={"name", "code", "faculty_id"},
      *             @OA\Property(property="name", type="string", example="Computer Science", maxLength=255),
+     *             @OA\Property(property="code", type="string", example="CS", maxLength=10, description="Unique department code"),
      *             @OA\Property(property="faculty_id", type="integer", example=1, description="ID of the faculty this department belongs to")
      *         )
      *     ),
@@ -142,6 +143,7 @@ class DepartmentController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'code' => 'required|string|max:10|unique:departments,code',
             'faculty_id' => 'required|exists:faculties,id'
         ]);
 

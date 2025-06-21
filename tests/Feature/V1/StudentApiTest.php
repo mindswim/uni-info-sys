@@ -201,7 +201,7 @@ class StudentApiTest extends TestCase
         $this->deleteJson("/api/v1/students/{$this->student1->id}")
             ->assertStatus(204);
 
-        $this->assertDatabaseMissing('students', [
+        $this->assertSoftDeleted('students', [
             'id' => $this->student1->id
         ]);
     }
@@ -220,11 +220,5 @@ class StudentApiTest extends TestCase
             ]);
     }
 
-    public function test_store_update_destroy_are_not_implemented()
-    {
-        Sanctum::actingAs($this->adminUser);
-        $this->postJson('/api/v1/students')->assertStatus(501);
-        $this->putJson("/api/v1/students/{$this->student1->id}")->assertStatus(501);
-        $this->deleteJson("/api/v1/students/{$this->student1->id}")->assertStatus(501);
-    }
+
 }

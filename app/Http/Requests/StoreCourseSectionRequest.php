@@ -49,6 +49,7 @@ class StoreCourseSectionRequest extends FormRequest
             'term_id' => 'required|exists:terms,id',
             'instructor_id' => 'required|exists:staff,id',
             'room_id' => 'required|exists:rooms,id',
+            'section_number' => 'required|string|max:255',
             'capacity' => 'required|integer|min:1',
             'schedule_days' => 'required|array',
             'schedule_days.*' => 'required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',

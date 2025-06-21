@@ -16,15 +16,15 @@ class AuthenticationTest extends TestCase
         $response = $this->getJson('/api/v1/faculties');
         $response->assertStatus(401) // Unauthorized
             ->assertJson([
-                'message' => 'Unauthenticated.'
+                'detail' => 'Unauthenticated.'
             ])
-            ->assertJsonStructure(['message']);
+            ->assertJsonStructure(['type', 'title', 'status', 'detail']);
     }
 
     public function test_a_user_can_create_an_api_token()
     {
         $user = User::factory()->create([
-            'password' => bcrypt('password123'),
+            'password' => 'password123',
         ]);
 
         $response = $this->postJson('/api/v1/tokens/create', [
@@ -40,7 +40,7 @@ class AuthenticationTest extends TestCase
     public function test_a_user_cannot_create_an_api_token_with_invalid_credentials()
     {
         $user = User::factory()->create([
-            'password' => bcrypt('password123'),
+            'password' => 'password123',
         ]);
 
         $response = $this->postJson('/api/v1/tokens/create', [
@@ -51,10 +51,13 @@ class AuthenticationTest extends TestCase
 
         $response->assertStatus(422) // Validation Exception
             ->assertJson([
-                'message' => 'The given data was invalid.'
+                'detail' => 'The given data was invalid.'
             ])
             ->assertJsonStructure([
-                'message',
+                'type',
+                'title', 
+                'status',
+                'detail',
                 'errors'
             ])
             ->assertJsonValidationErrors('email');
@@ -80,8 +83,8 @@ class AuthenticationTest extends TestCase
 
         $response->assertStatus(401) // Unauthorized
             ->assertJson([
-                'message' => 'Unauthenticated.'
+                'detail' => 'Unauthenticated.'
             ])
-            ->assertJsonStructure(['message']);
+            ->assertJsonStructure(['type', 'title', 'status', 'detail']);
     }
 }

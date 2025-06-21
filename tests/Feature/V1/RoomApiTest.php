@@ -5,6 +5,7 @@ namespace Tests\Feature\Api\V1;
 use App\Models\Building;
 use App\Models\Room;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -18,7 +19,14 @@ class RoomApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        
+        // Create admin role
+        $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
+        
         $this->admin = User::factory()->create();
+        
+        // Assign admin role
+        $this->admin->roles()->attach($adminRole);
     }
 
     private function getRoomData(array $overrides = []): array

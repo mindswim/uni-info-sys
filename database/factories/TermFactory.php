@@ -18,7 +18,7 @@ class TermFactory extends Factory
      */
     public function definition(): array
     {
-        $year = $this->faker->unique()->numberBetween(2023, 2030);
+        $year = $this->faker->numberBetween(2020, 2035);
         $semester = $this->faker->randomElement(['Fall', 'Spring', 'Summer']);
         $name = "{$semester} {$year}";
 

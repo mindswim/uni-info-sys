@@ -380,7 +380,7 @@ class AdmissionApplicationApiTest extends TestCase
         $response->assertStatus(200)
                  ->assertJsonFragment(['message' => 'Admission application deleted successfully.']);
 
-        $this->assertDatabaseMissing('admission_applications', ['id' => $application->id]);
+        $this->assertSoftDeleted('admission_applications', ['id' => $application->id]);
     }
 
     /** @test */
@@ -412,7 +412,7 @@ class AdmissionApplicationApiTest extends TestCase
 
         $response->assertStatus(200);
 
-        $this->assertDatabaseMissing('admission_applications', ['id' => $application->id]);
+        $this->assertSoftDeleted('admission_applications', ['id' => $application->id]);
     }
 
     /** @test */

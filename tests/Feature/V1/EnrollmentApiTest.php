@@ -48,13 +48,14 @@ class EnrollmentApiTest extends TestCase
         $faculty = Faculty::factory()->create();
         $department = Department::factory()->create(['faculty_id' => $faculty->id]);
         
-        // Create term
+        // Create term with future add_drop_deadline
         $this->term = Term::factory()->create([
             'name' => 'Fall 2024',
             'academic_year' => 2024,
             'semester' => 'Fall',
             'start_date' => now()->addDays(30),
             'end_date' => now()->addDays(120),
+            'add_drop_deadline' => now()->addDays(60),
         ]);
         
         // Create course
@@ -223,7 +224,9 @@ class EnrollmentApiTest extends TestCase
         $response = $this->postJson('/api/v1/enrollments', $enrollmentData);
 
         $response->assertUnprocessable()
-            ->assertJsonValidationErrors(['course_section_id']);
+            ->assertJson([
+                'detail' => 'Student is already enrolled or waitlisted for this course section'
+            ]);
     }
 
     /** @test */

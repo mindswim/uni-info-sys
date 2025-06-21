@@ -24,12 +24,11 @@ class RoleApiTest extends TestCase
         $this->studentRole = Role::create(['name' => 'student', 'description' => 'Student']);
         
         // Create permissions
-        $this->viewPermission = Permission::create(['name' => 'view-roles', 'description' => 'Can view roles']);
-        $this->createPermission = Permission::create(['name' => 'create-roles', 'description' => 'Can create roles']);
+        $this->manageRolesPermission = Permission::create(['name' => 'roles.manage', 'description' => 'Can manage roles']);
         
         // Associate permissions with roles
-        $this->adminRole->permissions()->attach([$this->viewPermission->id, $this->createPermission->id]);
-        $this->staffRole->permissions()->attach([$this->viewPermission->id]);
+        $this->adminRole->permissions()->attach([$this->manageRolesPermission->id]);
+        $this->staffRole->permissions()->attach([$this->manageRolesPermission->id]);
         
         // Create users
         $this->adminUser = User::factory()->create(['email' => 'admin@example.com']);

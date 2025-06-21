@@ -7,6 +7,7 @@ use Tests\TestCase;
 use App\Models\Faculty;
 use App\Models\Department;
 use App\Models\User;
+use App\Models\Role;
 
 class FacultyApiTest extends TestCase
 {
@@ -17,8 +18,15 @@ class FacultyApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        
+        // Create admin role
+        $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
+        
         // For now, we will just use a generic user. RBAC will be added later.
         $this->admin = User::factory()->create();
+        
+        // Assign admin role
+        $this->admin->roles()->attach($adminRole);
     }
 
     /** @test */
@@ -26,7 +34,7 @@ class FacultyApiTest extends TestCase
     {
         Faculty::factory()->count(15)->create();
 
-        $response = $this->actingAs($this->admin)->getJson('/api/v1/faculties');
+        $response = $this->actingAs($this->admin, 'sanctum')->getJson('/api/v1/faculties');
 
         $response->assertStatus(200)
             ->assertJsonCount(10, 'data')
@@ -42,7 +50,7 @@ class FacultyApiTest extends TestCase
     {
         $faculty = Faculty::factory()->has(Department::factory()->count(3))->create();
 
-        $response = $this->actingAs($this->admin)->getJson("/api/v1/faculties/{$faculty->id}");
+        $response = $this->actingAs($this->admin, 'sanctum')->getJson("/api/v1/faculties/{$faculty->id}");
 
         $response->assertStatus(200)
             ->assertJson([
@@ -57,7 +65,7 @@ class FacultyApiTest extends TestCase
     /** @test */
     public function returns_404_if_faculty_not_found()
     {
-        $response = $this->actingAs($this->admin)->getJson('/api/v1/faculties/9999');
+        $response = $this->actingAs($this->admin, 'sanctum')->getJson('/api/v1/faculties/9999');
         $response->assertStatus(404);
     }
 
@@ -66,7 +74,7 @@ class FacultyApiTest extends TestCase
     {
         $facultyData = ['name' => 'Faculty of Awesome'];
 
-        $response = $this->actingAs($this->admin)->postJson('/api/v1/faculties', $facultyData);
+        $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/faculties', $facultyData);
 
         $response->assertStatus(201)
             ->assertJson([
@@ -81,7 +89,7 @@ class FacultyApiTest extends TestCase
     /** @test */
     public function create_faculty_requires_a_name()
     {
-        $response = $this->actingAs($this->admin)->postJson('/api/v1/faculties', ['name' => '']);
+        $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/faculties', ['name' => '']);
         $response->assertStatus(422)->assertJsonValidationErrors('name');
     }
 
@@ -91,7 +99,7 @@ class FacultyApiTest extends TestCase
         $faculty = Faculty::factory()->create();
         $updateData = ['name' => 'Updated Faculty Name'];
 
-        $response = $this->actingAs($this->admin)->putJson("/api/v1/faculties/{$faculty->id}", $updateData);
+        $response = $this->actingAs($this->admin, 'sanctum')->putJson("/api/v1/faculties/{$faculty->id}", $updateData);
 
         $response->assertStatus(200)
             ->assertJson([
@@ -108,7 +116,7 @@ class FacultyApiTest extends TestCase
     {
         $faculty = Faculty::factory()->create();
 
-        $response = $this->actingAs($this->admin)->deleteJson("/api/v1/faculties/{$faculty->id}");
+        $response = $this->actingAs($this->admin, 'sanctum')->deleteJson("/api/v1/faculties/{$faculty->id}");
 
         $response->assertStatus(204);
 

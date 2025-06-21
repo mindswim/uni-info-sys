@@ -4,6 +4,7 @@ namespace Tests\Feature\Api\V1;
 
 use App\Models\Term;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -17,7 +18,14 @@ class TermApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        
+        // Create admin role
+        $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
+        
         $this->admin = User::factory()->create();
+        
+        // Assign admin role
+        $this->admin->roles()->attach($adminRole);
     }
 
     private function getTermData(array $overrides = []): array
@@ -34,7 +42,19 @@ class TermApiTest extends TestCase
     
     public function test_can_get_all_terms_paginated()
     {
-        Term::factory()->count(15)->create();
+        // Create specific terms to avoid unique constraint violations
+        $years = range(2024, 2028);
+        $semesters = ['Fall', 'Spring', 'Summer'];
+        
+        foreach ($years as $year) {
+            foreach ($semesters as $semester) {
+                Term::factory()->create([
+                    'name' => "{$semester} {$year}",
+                    'academic_year' => $year,
+                    'semester' => $semester
+                ]);
+            }
+        }
 
         $response = $this->actingAs($this->admin, 'sanctum')->getJson('/api/v1/terms');
 
@@ -122,8 +142,8 @@ class TermApiTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonFragment([
                 'name' => 'Updated Term Name',
-                'end_date' => '2099-12-31',
-            ]);
+            ])
+            ->assertJsonPath('data.end_date', '2099-12-31T00:00:00.000000Z');
 
         $this->assertDatabaseHas('terms', ['id' => $term->id, 'name' => 'Updated Term Name']);
     }

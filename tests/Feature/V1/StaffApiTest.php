@@ -5,6 +5,7 @@ namespace Tests\Feature\Api\V1;
 use App\Models\Department;
 use App\Models\Staff;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -18,10 +19,15 @@ class StaffApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        
+        // Create admin role
+        $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
+        
         // Create a user to act as an admin for authentication
         $this->admin = User::factory()->create();
-        // In a real app, you would assign roles/permissions
-        // $this->admin->assignRole('admin');
+        
+        // Assign admin role
+        $this->admin->roles()->attach($adminRole);
     }
 
     private function getStaffData(array $overrides = []): array

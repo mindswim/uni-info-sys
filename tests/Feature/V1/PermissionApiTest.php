@@ -24,9 +24,9 @@ class PermissionApiTest extends TestCase
         $this->studentRole = Role::create(['name' => 'student', 'description' => 'Student']);
         
         // Create permissions
-        $this->viewPermission = Permission::create(['name' => 'view-permissions', 'description' => 'Can view permissions']);
-        $this->createPermission = Permission::create(['name' => 'create-permissions', 'description' => 'Can create permissions']);
-        $this->editPermission = Permission::create(['name' => 'edit-permissions', 'description' => 'Can edit permissions']);
+        $this->viewPermission = Permission::create(['name' => 'permissions.view', 'description' => 'Can view permissions']);
+        $this->createPermission = Permission::create(['name' => 'permissions.create', 'description' => 'Can create permissions']);
+        $this->editPermission = Permission::create(['name' => 'permissions.update', 'description' => 'Can edit permissions']);
         
         // Associate permissions with roles
         $this->adminRole->permissions()->attach([$this->viewPermission->id, $this->createPermission->id, $this->editPermission->id]);
@@ -59,7 +59,7 @@ class PermissionApiTest extends TestCase
 
     public function test_admin_can_view_permissions_index()
     {
-        Sanctum::actingAs($this->adminUser);
+        Sanctum::actingAs($this->adminUser, ['*']);
         
         $response = $this->getJson('/api/v1/permissions');
         
@@ -128,7 +128,7 @@ class PermissionApiTest extends TestCase
                 ->assertJson([
                     'data' => [
                         'id' => $this->viewPermission->id,
-                        'name' => 'view-permissions',
+                        'name' => 'permissions.view',
                         'description' => 'Can view permissions'
                     ]
                 ]);
@@ -144,7 +144,7 @@ class PermissionApiTest extends TestCase
                 ->assertJson([
                     'data' => [
                         'id' => $this->viewPermission->id,
-                        'name' => 'view-permissions'
+                        'name' => 'permissions.view'
                     ]
                 ]);
     }
@@ -254,6 +254,6 @@ class PermissionApiTest extends TestCase
         $permissions = $response->json('data');
         $permissionNames = array_column($permissions, 'name');
         
-        $this->assertEquals(['create-permissions', 'edit-permissions', 'view-permissions'], $permissionNames);
+        $this->assertEquals(['permissions.create', 'permissions.update', 'permissions.view'], $permissionNames);
     }
 }

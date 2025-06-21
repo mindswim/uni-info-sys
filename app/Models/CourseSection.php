@@ -11,7 +11,7 @@ class CourseSection extends Model implements Auditable
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
     
-    protected $fillable = ['course_id', 'term_id', 'instructor_id', 'room_id', 'capacity', 'schedule_days', 'start_time', 'end_time', 'status'];
+    protected $fillable = ['course_id', 'term_id', 'instructor_id', 'room_id', 'section_number', 'capacity', 'schedule_days', 'start_time', 'end_time', 'status'];
 
     protected $casts = [
         'schedule_days' => 'array',

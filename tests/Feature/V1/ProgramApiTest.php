@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Models\Faculty;
 use App\Models\Department;
 use App\Models\Program;
+use App\Models\Role;
+use App\Models\Permission;
 
 class ProgramApiTest extends TestCase
 {
@@ -18,7 +20,30 @@ class ProgramApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        
+        // Create admin role
+        $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
+        
+        // Create program permissions
+        $viewAnyPermission = Permission::create(['name' => 'view-any-program', 'description' => 'Can view any program']);
+        $viewPermission = Permission::create(['name' => 'view-program', 'description' => 'Can view program']);
+        $createPermission = Permission::create(['name' => 'create-program', 'description' => 'Can create program']);
+        $updatePermission = Permission::create(['name' => 'update-program', 'description' => 'Can update program']);
+        $deletePermission = Permission::create(['name' => 'delete-program', 'description' => 'Can delete program']);
+        
+        // Assign permissions to admin role
+        $adminRole->permissions()->attach([
+            $viewAnyPermission->id,
+            $viewPermission->id,
+            $createPermission->id,
+            $updatePermission->id,
+            $deletePermission->id,
+        ]);
+        
         $this->admin = User::factory()->create();
+        
+        // Assign admin role
+        $this->admin->roles()->attach($adminRole);
     }
 
     /** @test */
@@ -26,11 +51,11 @@ class ProgramApiTest extends TestCase
     {
         Program::factory()->count(15)->create();
 
-        $response = $this->actingAs($this->admin)->getJson('/api/v1/programs');
+        $response = $this->actingAs($this->admin, 'sanctum')->getJson('/api/v1/programs');
 
         $response->assertStatus(200)
             ->assertJsonCount(10, 'data')
-            ->assertJsonStructure(['data' => [['id', 'name', 'department']], 'links', 'meta']);
+            ->assertJsonStructure(['data' => [['id', 'name', 'department_id']], 'links', 'meta']);
     }
 
     /** @test */
@@ -41,7 +66,7 @@ class ProgramApiTest extends TestCase
         Program::factory()->count(3)->create(['department_id' => $department1->id]);
         Program::factory()->count(2)->create(['department_id' => $department2->id]);
 
-        $response = $this->actingAs($this->admin)->getJson("/api/v1/programs?department_id={$department1->id}");
+        $response = $this->actingAs($this->admin, 'sanctum')->getJson("/api/v1/programs?department_id={$department1->id}");
         
         $response->assertStatus(200)->assertJsonCount(3, 'data');
     }
@@ -51,14 +76,14 @@ class ProgramApiTest extends TestCase
     {
         $program = Program::factory()->create();
 
-        $response = $this->actingAs($this->admin)->getJson("/api/v1/programs/{$program->id}");
+        $response = $this->actingAs($this->admin, 'sanctum')->getJson("/api/v1/programs/{$program->id}");
 
         $response->assertStatus(200)
             ->assertJson([
                 'data' => [
                     'id' => $program->id,
                     'name' => $program->name,
-                    'department' => ['id' => $program->department->id],
+                    'department_id' => $program->department->id,
                 ]
             ]);
     }
@@ -72,12 +97,12 @@ class ProgramApiTest extends TestCase
             'department_id' => $department->id,
             'degree_level' => 'Bachelors',
             'duration' => 4,
-            'capacity' => 50,
-            'requirements' => 'A passion for food.',
             'description' => 'A delicious program.',
+            'requirements' => 'A passion for food.',
+            'capacity' => 50,
         ];
 
-        $response = $this->actingAs($this->admin)->postJson('/api/v1/programs', $programData);
+        $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/programs', $programData);
 
         $response->assertStatus(201)
             ->assertJson(['data' => ['name' => 'B.Sc. in Extraordinary Gastronomy']]);
@@ -90,7 +115,7 @@ class ProgramApiTest extends TestCase
         $program = Program::factory()->create();
         $updateData = ['name' => 'Updated Program Name'];
 
-        $response = $this->actingAs($this->admin)->putJson("/api/v1/programs/{$program->id}", $updateData);
+        $response = $this->actingAs($this->admin, 'sanctum')->putJson("/api/v1/programs/{$program->id}", $updateData);
 
         $response->assertStatus(200)
             ->assertJson(['data' => ['name' => 'Updated Program Name']]);
@@ -101,7 +126,7 @@ class ProgramApiTest extends TestCase
     public function can_delete_a_program()
     {
         $program = Program::factory()->create();
-        $response = $this->actingAs($this->admin)->deleteJson("/api/v1/programs/{$program->id}");
+        $response = $this->actingAs($this->admin, 'sanctum')->deleteJson("/api/v1/programs/{$program->id}");
         $response->assertStatus(204);
         $this->assertDatabaseMissing('programs', ['id' => $program->id]);
     }

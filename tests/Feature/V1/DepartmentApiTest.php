@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Faculty;
 use App\Models\Department;
 use App\Models\Program;
+use App\Models\Role;
 
 class DepartmentApiTest extends TestCase
 {
@@ -18,7 +19,14 @@ class DepartmentApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        
+        // Create admin role
+        $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
+        
         $this->admin = User::factory()->create();
+        
+        // Assign admin role
+        $this->admin->roles()->attach($adminRole);
     }
 
     /** @test */
@@ -26,7 +34,7 @@ class DepartmentApiTest extends TestCase
     {
         Department::factory()->count(15)->create();
 
-        $response = $this->actingAs($this->admin)->getJson('/api/v1/departments');
+        $response = $this->actingAs($this->admin, 'sanctum')->getJson('/api/v1/departments');
 
         $response->assertStatus(200)
             ->assertJsonCount(10, 'data')
@@ -41,7 +49,7 @@ class DepartmentApiTest extends TestCase
         Department::factory()->count(3)->create(['faculty_id' => $faculty1->id]);
         Department::factory()->count(2)->create(['faculty_id' => $faculty2->id]);
 
-        $response = $this->actingAs($this->admin)->getJson("/api/v1/departments?faculty_id={$faculty1->id}");
+        $response = $this->actingAs($this->admin, 'sanctum')->getJson("/api/v1/departments?faculty_id={$faculty1->id}");
         
         $response->assertStatus(200)->assertJsonCount(3, 'data');
     }
@@ -51,7 +59,7 @@ class DepartmentApiTest extends TestCase
     {
         $department = Department::factory()->has(Program::factory()->count(2))->create();
 
-        $response = $this->actingAs($this->admin)->getJson("/api/v1/departments/{$department->id}");
+        $response = $this->actingAs($this->admin, 'sanctum')->getJson("/api/v1/departments/{$department->id}");
 
         $response->assertStatus(200)
             ->assertJson([
@@ -68,9 +76,9 @@ class DepartmentApiTest extends TestCase
     public function can_create_a_new_department()
     {
         $faculty = Faculty::factory()->create();
-        $departmentData = ['name' => 'Department of Computer Science', 'faculty_id' => $faculty->id];
+        $departmentData = ['name' => 'Department of Computer Science', 'code' => 'CS', 'faculty_id' => $faculty->id];
 
-        $response = $this->actingAs($this->admin)->postJson('/api/v1/departments', $departmentData);
+        $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/departments', $departmentData);
 
         $response->assertStatus(201)
             ->assertJson(['data' => ['name' => 'Department of Computer Science']]);
@@ -83,7 +91,7 @@ class DepartmentApiTest extends TestCase
         $department = Department::factory()->create();
         $updateData = ['name' => 'Updated Department Name'];
 
-        $response = $this->actingAs($this->admin)->putJson("/api/v1/departments/{$department->id}", $updateData);
+        $response = $this->actingAs($this->admin, 'sanctum')->putJson("/api/v1/departments/{$department->id}", $updateData);
 
         $response->assertStatus(200)
             ->assertJson(['data' => ['name' => 'Updated Department Name']]);
@@ -94,7 +102,7 @@ class DepartmentApiTest extends TestCase
     public function can_delete_a_department()
     {
         $department = Department::factory()->create();
-        $response = $this->actingAs($this->admin)->deleteJson("/api/v1/departments/{$department->id}");
+        $response = $this->actingAs($this->admin, 'sanctum')->deleteJson("/api/v1/departments/{$department->id}");
         $response->assertStatus(204);
         $this->assertDatabaseMissing('departments', ['id' => $department->id]);
     }

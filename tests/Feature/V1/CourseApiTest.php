@@ -5,6 +5,7 @@ namespace Tests\Feature\Api\V1;
 use App\Models\Course;
 use App\Models\Department;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -18,9 +19,14 @@ class CourseApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        
+        // Create admin role
+        $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
+        
         $this->admin = User::factory()->create();
-        // Ideally, you'd have roles and permissions set up
-        // $this->admin->assignRole('admin'); 
+        
+        // Assign admin role
+        $this->admin->roles()->attach($adminRole);
     }
 
     private function getCourseData(array $overrides = []): array
@@ -173,6 +179,7 @@ class CourseApiTest extends TestCase
 
         $response->assertStatus(204);
 
-        $this->assertDatabaseMissing('courses', ['id' => $course->id]);
+        // Check for soft delete
+        $this->assertSoftDeleted('courses', ['id' => $course->id]);
     }
 }

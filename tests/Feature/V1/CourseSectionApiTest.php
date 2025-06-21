@@ -8,6 +8,7 @@ use App\Models\Room;
 use App\Models\Staff;
 use App\Models\Term;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -21,7 +22,14 @@ class CourseSectionApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        
+        // Create admin role
+        $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
+        
         $this->admin = User::factory()->create();
+        
+        // Assign admin role
+        $this->admin->roles()->attach($adminRole);
     }
 
     private function getSectionData(array $overrides = []): array
@@ -31,6 +39,7 @@ class CourseSectionApiTest extends TestCase
             'term_id' => Term::factory()->create()->id,
             'instructor_id' => Staff::factory()->create()->id,
             'room_id' => Room::factory()->create()->id,
+            'section_number' => '001',
             'capacity' => 100,
             'schedule_days' => ['Monday', 'Wednesday'],
             'start_time' => '10:00',
@@ -40,7 +49,29 @@ class CourseSectionApiTest extends TestCase
     
     public function test_can_get_all_course_sections_paginated()
     {
-        CourseSection::factory()->count(15)->create();
+        // Create specific terms and courses to avoid unique constraint violations
+        $term1 = Term::factory()->create(['name' => 'Fall 2024', 'academic_year' => 2024, 'semester' => 'Fall']);
+        $term2 = Term::factory()->create(['name' => 'Spring 2025', 'academic_year' => 2025, 'semester' => 'Spring']);
+        $course1 = Course::factory()->create();
+        $course2 = Course::factory()->create();
+        $course3 = Course::factory()->create();
+        
+        // Create sections with specific combinations to avoid duplicates
+        CourseSection::factory()->create(['course_id' => $course1->id, 'term_id' => $term1->id, 'section_number' => '001']);
+        CourseSection::factory()->create(['course_id' => $course1->id, 'term_id' => $term1->id, 'section_number' => '002']);
+        CourseSection::factory()->create(['course_id' => $course1->id, 'term_id' => $term2->id, 'section_number' => '001']);
+        CourseSection::factory()->create(['course_id' => $course2->id, 'term_id' => $term1->id, 'section_number' => '001']);
+        CourseSection::factory()->create(['course_id' => $course2->id, 'term_id' => $term2->id, 'section_number' => '001']);
+        CourseSection::factory()->create(['course_id' => $course3->id, 'term_id' => $term1->id, 'section_number' => '001']);
+        CourseSection::factory()->create(['course_id' => $course3->id, 'term_id' => $term2->id, 'section_number' => '001']);
+        CourseSection::factory()->create(['course_id' => $course1->id, 'term_id' => $term1->id, 'section_number' => '003']);
+        CourseSection::factory()->create(['course_id' => $course1->id, 'term_id' => $term2->id, 'section_number' => '002']);
+        CourseSection::factory()->create(['course_id' => $course2->id, 'term_id' => $term1->id, 'section_number' => '002']);
+        CourseSection::factory()->create(['course_id' => $course2->id, 'term_id' => $term2->id, 'section_number' => '002']);
+        CourseSection::factory()->create(['course_id' => $course3->id, 'term_id' => $term1->id, 'section_number' => '002']);
+        CourseSection::factory()->create(['course_id' => $course3->id, 'term_id' => $term2->id, 'section_number' => '002']);
+        CourseSection::factory()->create(['course_id' => $course1->id, 'term_id' => $term1->id, 'section_number' => '004']);
+        CourseSection::factory()->create(['course_id' => $course1->id, 'term_id' => $term2->id, 'section_number' => '003']);
 
         $response = $this->actingAs($this->admin, 'sanctum')->getJson('/api/v1/course-sections');
 
@@ -57,10 +88,14 @@ class CourseSectionApiTest extends TestCase
     {
         $course1 = Course::factory()->create();
         $course2 = Course::factory()->create();
-        $term = Term::factory()->create();
+        $term = Term::factory()->create(['name' => 'Test Term 2024', 'academic_year' => 2024, 'semester' => 'Fall']);
 
-        CourseSection::factory()->count(3)->create(['course_id' => $course1->id, 'term_id' => $term->id]);
-        CourseSection::factory()->count(2)->create(['course_id' => $course2->id, 'term_id' => $term->id]);
+        // Create sections with specific section numbers to avoid duplicates
+        CourseSection::factory()->create(['course_id' => $course1->id, 'term_id' => $term->id, 'section_number' => '001']);
+        CourseSection::factory()->create(['course_id' => $course1->id, 'term_id' => $term->id, 'section_number' => '002']);
+        CourseSection::factory()->create(['course_id' => $course1->id, 'term_id' => $term->id, 'section_number' => '003']);
+        CourseSection::factory()->create(['course_id' => $course2->id, 'term_id' => $term->id, 'section_number' => '001']);
+        CourseSection::factory()->create(['course_id' => $course2->id, 'term_id' => $term->id, 'section_number' => '002']);
 
         $response = $this->actingAs($this->admin, 'sanctum')->getJson("/api/v1/course-sections?course_id={$course1->id}&term_id={$term->id}");
 

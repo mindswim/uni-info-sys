@@ -169,6 +169,26 @@ A key part of a robust development workflow is automated testing. To ensure test
 
 The `app` directory is the heart of your application. While the other directories in the root are mostly for configuration and framework boilerplate, this is where your project's unique code lives. Laravel organizes the `app` directory by convention to keep different types of logic separate and predictable.
 
+### Quick Reference: Core Logic at a Glance
+
+This is a high-level summary of the key directories within `app/` and their roles in this API-first project.
+
+**Core Business Logic (Platform Agnostic):**
+- **`app/Models`**: Your data structure.
+- **`app/Services`**: Your business operations.
+- **`app/Jobs`**: Your background tasks.
+- **`app/Policies`**: Your security rules.
+- **`app/Exceptions`**: Your custom error handling.
+- **`app/Notifications`**: Your user notification system.
+- **`app/Providers`**: Your application's service configuration.
+- **`app/Console`**: Your command-line tasks.
+- **`app/Filters`**: Your query filtering logic.
+
+**API-Specific Logic (HTTP Layer):**
+- **`app/Http/Controllers`**: Your API's entry points.
+- **`app/Http/Requests`**: Your API's validation rules.
+- **`app/Http/Resources`**: Your API's data transformers.
+
 ### Standard Laravel Directories
 
 These directories are part of the standard Laravel framework. Even if they don't all exist when you start a new project, Laravel knows about them and will create them when you use `artisan` commands.

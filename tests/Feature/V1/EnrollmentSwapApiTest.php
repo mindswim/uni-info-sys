@@ -202,28 +202,38 @@ class EnrollmentSwapApiTest extends TestCase
     /** @test */
     public function it_fails_when_user_does_not_own_enrollment()
     {
-        // Create another user and student
-        $otherUser = User::factory()->create(['email_verified_at' => now()]);
+        // Create a different user and student
+        $otherUser = User::factory()->create();
         $otherStudent = Student::factory()->create(['user_id' => $otherUser->id]);
-        
-        // Create enrollment for other student
-        $otherEnrollment = Enrollment::factory()->create([
+
+        // Create enrollment for the other student
+        $enrollment = Enrollment::factory()->create([
             'student_id' => $otherStudent->id,
             'course_section_id' => $this->fromCourseSection->id,
-            'status' => 'enrolled',
+            'status' => 'enrolled'
+        ]);
+
+        // Create target section with unique section number
+        $targetSection = CourseSection::factory()->create([
+            'course_id' => $this->fromCourseSection->course_id,
+            'term_id' => $this->term->id,
+            'section_number' => 'UNIQUE-' . uniqid(), // Ensure unique section number
+            'capacity' => 30
         ]);
 
         $swapData = [
-            'from_enrollment_id' => $otherEnrollment->id,
-            'to_course_section_id' => $this->toCourseSection->id,
+            'from_enrollment_id' => $enrollment->id,
+            'to_course_section_id' => $targetSection->id
         ];
 
+        // Act as the original user (not the owner)
+        $this->actingAs($this->user, 'sanctum');
         $response = $this->postJson('/api/v1/enrollments/swap', $swapData);
 
         // The policy will throw an unauthorized exception before our custom logic
         $response->assertForbidden()
             ->assertJson([
-                'message' => 'This action is unauthorized.',
+                'detail' => 'This action is unauthorized.',
             ]);
     }
 

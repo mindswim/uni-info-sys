@@ -11,16 +11,15 @@ use OpenApi\Attributes as OA;
     type: 'object',
     title: 'Store Program Request',
     description: 'Request body for creating a new program.',
-    required: ['name', 'code', 'faculty_id', 'department_id', 'duration_years', 'level', 'status'],
+    required: ['name', 'department_id', 'degree_level', 'duration', 'description', 'requirements', 'capacity'],
     properties: [
         new OA\Property(property: 'name', type: 'string', maxLength: 255, example: 'Bachelor of Science in Computer Science'),
-        new OA\Property(property: 'code', type: 'string', maxLength: 50, example: 'BSc-CS'),
-        new OA\Property(property: 'description', type: 'string', example: 'A comprehensive program covering the fundamentals of computer science.'),
-        new OA\Property(property: 'faculty_id', type: 'integer', example: 1),
         new OA\Property(property: 'department_id', type: 'integer', example: 1),
-        new OA\Property(property: 'duration_years', type: 'integer', minimum: 1, example: 4),
-        new OA\Property(property: 'level', type: 'string', enum: ['undergraduate', 'graduate', 'diploma', 'certificate'], example: 'undergraduate'),
-        new OA\Property(property: 'status', type: 'string', enum: ['active', 'inactive', 'suspended'], example: 'active'),
+        new OA\Property(property: 'degree_level', type: 'string', maxLength: 255, example: 'Bachelors'),
+        new OA\Property(property: 'duration', type: 'integer', example: 4),
+        new OA\Property(property: 'description', type: 'string', example: 'A comprehensive program covering the fundamentals of computer science.'),
+        new OA\Property(property: 'requirements', type: 'string', example: 'High school diploma with mathematics and science.'),
+        new OA\Property(property: 'capacity', type: 'integer', example: 100),
     ],
 )]
 class StoreProgramRequest extends FormRequest
@@ -42,13 +41,12 @@ class StoreProgramRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:programs,code',
-            'description' => 'nullable|string',
-            'faculty_id' => 'required|exists:faculties,id',
             'department_id' => 'required|exists:departments,id',
-            'duration_years' => 'required|integer|min:1',
-            'level' => 'required|string|in:undergraduate,graduate,diploma,certificate',
-            'status' => 'required|string|in:active,inactive,suspended',
+            'degree_level' => 'required|string|max:255',
+            'duration' => 'required|integer|min:1',
+            'description' => 'required|string',
+            'requirements' => 'required|string',
+            'capacity' => 'required|integer|min:1',
         ];
     }
 }

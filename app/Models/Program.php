@@ -8,8 +8,13 @@ class Program extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'department_id', 'degree_level', 'duration',
-        'description', 'requirements', 'capacity'
+        'name', 
+        'department_id', 
+        'degree_level', 
+        'duration',
+        'description', 
+        'requirements', 
+        'capacity'
     ];
 
     public function department()

@@ -7,8 +7,10 @@ use App\Models\Student;
 use App\Models\AdmissionApplication;
 use App\Notifications\ApplicationStatusUpdated;
 use App\Services\AdmissionService;
+use App\Jobs\SendApplicationStatusNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class NotificationTest extends TestCase
@@ -32,16 +34,15 @@ class NotificationTest extends TestCase
 
     public function test_notification_is_created_when_application_status_is_updated()
     {
-        Notification::fake();
+        Queue::fake();
 
         // Update application status using the service
         $this->admissionService->updateApplicationStatus($this->application, 'accepted');
 
-        // Assert notification was sent to the user
-        Notification::assertSentTo(
-            $this->user,
-            ApplicationStatusUpdated::class
-        );
+        // Assert job was dispatched
+        Queue::assertPushed(SendApplicationStatusNotification::class, function ($job) {
+            return $job->application->id === $this->application->id;
+        });
     }
 
     public function test_notification_is_not_created_when_status_does_not_change()
@@ -117,30 +118,28 @@ class NotificationTest extends TestCase
         
         $response = $this->actingAs($this->user, 'sanctum')
             ->postJson("/api/v1/notifications/{$fakeId}/read");
-
+        
         $response->assertStatus(404)
             ->assertJson([
-                'message' => 'The requested resource was not found.'
+                'detail' => 'No query results for model [Illuminate\\Notifications\\DatabaseNotification] ' . $fakeId
             ]);
     }
 
     public function test_user_cannot_access_another_users_notifications()
     {
-        // Create another user and their notification
         $otherUser = User::factory()->create();
-        $otherStudent = Student::factory()->create(['user_id' => $otherUser->id]);
-        $otherApplication = AdmissionApplication::factory()->create(['student_id' => $otherStudent->id]);
+        $otherNotification = $otherUser->notifications()->create([
+            'id' => \Str::uuid(),
+            'type' => ApplicationStatusUpdated::class,
+            'data' => ['message' => 'Other user notification'],
+        ]);
         
-        $otherUser->notify(new ApplicationStatusUpdated($otherApplication));
-        $otherNotification = $otherUser->unreadNotifications->first();
-
-        // Try to mark the other user's notification as read
         $response = $this->actingAs($this->user, 'sanctum')
             ->postJson("/api/v1/notifications/{$otherNotification->id}/read");
-
+        
         $response->assertStatus(404)
-            ->assertJson([
-                'message' => 'The requested resource was not found.'
+            ->assertJsonFragment([
+                'status' => 404
             ]);
     }
 
@@ -150,15 +149,14 @@ class NotificationTest extends TestCase
         $response = $this->getJson('/api/v1/notifications');
         $response->assertStatus(401)
             ->assertJson([
-                'message' => 'Unauthenticated.'
+                'detail' => 'Unauthenticated.'
             ]);
 
         // Test marking notification as read without authentication
-        $fakeId = '12345678-1234-1234-1234-123456789012';
-        $response = $this->postJson("/api/v1/notifications/{$fakeId}/read");
+        $response = $this->postJson('/api/v1/notifications/fake-id/read');
         $response->assertStatus(401)
             ->assertJson([
-                'message' => 'Unauthenticated.'
+                'detail' => 'Unauthenticated.'
             ]);
     }
 

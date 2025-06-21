@@ -1,0 +1,1578 @@
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Filters\EnrollmentFilterTest::it_can_filter_by_student_id(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Filters\EnrollmentFilterTest::it_can_filter_by_course_section_id(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Filters\EnrollmentFilterTest::it_can_filter_by_single_status(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Filters\EnrollmentFilterTest::it_can_filter_by_multiple_statuses(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Filters\EnrollmentFilterTest::it_can_filter_by_term_id_through_course_section(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Filters\EnrollmentFilterTest::it_can_filter_by_course_id_through_course_section(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Filters\EnrollmentFilterTest::it_can_filter_by_department_id_through_nested_relationships(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Filters\EnrollmentFilterTest::it_can_filter_by_instructor_id_through_course_section(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Filters\EnrollmentFilterTest::it_can_apply_multiple_filters_simultaneously(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Filters\EnrollmentFilterTest::it_ignores_empty_filters(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Filters\EnrollmentFilterTest::it_returns_query_builder_instance(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Filters\EnrollmentFilterTest::it_handles_empty_filter_array(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Filters\EnrollmentFilterTest::it_handles_unknown_filter_keys(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Jobs\BackgroundJobsTest::send_enrollment_confirmation_job_handles_enrolled_status(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Jobs\BackgroundJobsTest::send_enrollment_confirmation_job_handles_waitlisted_status(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Jobs\BackgroundJobsTest::send_enrollment_confirmation_job_logs_correctly(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Jobs\BackgroundJobsTest::send_application_status_notification_job_works(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Jobs\BackgroundJobsTest::process_waitlist_promotion_job_works(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Jobs\BackgroundJobsTest::process_waitlist_promotion_job_dispatches_confirmation_when_promotion_occurs(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Jobs\BackgroundJobsTest::jobs_are_queued(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Jobs\BackgroundJobsTest::jobs_implement_should_queue_interface(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Jobs\ProcessGradeImportTest::it_processes_valid_grade_csv_successfully(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Jobs\ProcessGradeImportTest::it_handles_invalid_student_ids(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Jobs\ProcessGradeImportTest::it_validates_grade_values(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Jobs\ProcessGradeImportTest::it_skips_duplicate_grades(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Jobs\ProcessGradeImportTest::it_handles_missing_headers(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Jobs\ProcessGradeImportTest::it_handles_empty_csv_file(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Unit\Jobs\ProcessGradeImportTest::it_processes_mixed_valid_and_invalid_rows(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\AuditingTest::test_student_model_auditing_on_creation(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\AuditingTest::test_student_model_auditing_on_update(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\AuditingTest::test_user_model_auditing(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\AuditingTest::test_enrollment_model_auditing(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\AuditingTest::test_admission_application_auditing(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\AuditingTest::test_course_section_auditing(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\AuditingTest::test_audit_includes_metadata(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\AuditingTest::test_audits_are_stored_in_database(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\AuditingTest::test_grade_change_audit_trail_with_reason(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\AuditingTest::test_status_change_audit_trail(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\AuditingTest::test_reason_for_change_required_when_updating_grade(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\AuditingTest::test_reason_for_change_not_required_when_not_updating_grade(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\BackgroundJobIntegrationTest::enrollment_service_dispatches_confirmation_job_on_enrollment(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\BackgroundJobIntegrationTest::enrollment_service_dispatches_waitlist_confirmation_job_when_full(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\BackgroundJobIntegrationTest::enrollment_service_dispatches_promotion_job_on_waitlist_promotion(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\BackgroundJobIntegrationTest::admission_service_dispatches_notification_job_on_status_update(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\BackgroundJobIntegrationTest::admission_service_does_not_dispatch_job_when_status_unchanged(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\BackgroundJobIntegrationTest::controller_logic_dispatches_waitlist_promotion_job(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\BackgroundJobIntegrationTest::check_waitlists_command_dispatches_jobs_for_eligible_sections(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\BackgroundJobIntegrationTest::check_waitlists_command_ignores_full_sections(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\BackgroundJobIntegrationTest::check_waitlists_command_ignores_sections_without_waitlisted_students(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\ErrorHandlingTest::it_returns_rfc7807_format_for_enrollment_capacity_exceeded(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\ErrorHandlingTest::it_returns_rfc7807_format_for_duplicate_enrollment(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\ErrorHandlingTest::it_returns_rfc7807_format_for_student_not_active(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\ErrorHandlingTest::it_returns_rfc7807_format_for_not_found_errors(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\ErrorHandlingTest::it_returns_rfc7807_format_for_validation_errors(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\ErrorHandlingTest::it_returns_rfc7807_format_for_unauthenticated_errors(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\ErrorHandlingTest::it_returns_rfc7807_format_for_unauthorized_errors(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\ErrorHandlingTest::it_includes_debug_info_in_development_for_server_errors(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\ErrorHandlingTest::it_does_not_include_debug_info_in_production(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\ErrorHandlingTest::it_logs_custom_exceptions_appropriately(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\InfrastructureTest::can_create_a_building(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\InfrastructureTest::building_name_must_be_unique(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\InfrastructureTest::can_create_a_room_in_a_building(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\InfrastructureTest::room_number_must_be_unique_per_building(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\InfrastructureTest::room_number_can_be_the_same_in_different_buildings(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\InfrastructureTest::building_has_many_rooms(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\InfrastructureTest::deleting_a_building_cascades_to_its_rooms(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\MetricsEndpointTest::metrics_endpoint_is_accessible(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\MetricsEndpointTest::metrics_endpoint_returns_prometheus_format(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\MetricsEndpointTest::metrics_are_collected_for_api_requests(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\MetricsEndpointTest::metrics_include_method_and_route_labels(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\MetricsEndpointTest::metrics_are_collected_for_different_status_codes(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\MetricsEndpointTest::metrics_include_request_duration_histogram(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\MetricsEndpointTest::unauthenticated_requests_are_also_tracked(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\MetricsEndpointTest::metrics_endpoint_respects_rate_limiting(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\MetricsEndpointTest::route_normalization_reduces_cardinality(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\SecurityHeadersTest::security_headers_are_added_to_web_responses(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\SecurityHeadersTest::security_headers_are_added_to_api_responses(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\SecurityHeadersTest::security_headers_are_added_to_authenticated_api_responses(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\SecurityHeadersTest::security_headers_are_added_to_error_responses(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\SecurityHeadersTest::security_headers_are_added_to_validation_error_responses(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\SecurityHeadersTest::security_headers_are_added_to_unauthorized_responses(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\SecurityHeadersTest::security_headers_are_added_to_forbidden_responses(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\SecurityHeadersTest::hsts_header_is_only_added_in_production(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\SecurityHeadersTest::content_security_policy_header_is_properly_configured(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\SecurityHeadersTest::sensitive_server_headers_are_removed(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SoftDeletesTest::admin_can_soft_delete_and_restore_student(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SoftDeletesTest::admin_can_force_delete_student(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SoftDeletesTest::admin_can_soft_delete_and_restore_course(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SoftDeletesTest::admin_can_soft_delete_and_restore_enrollment(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SoftDeletesTest::admin_can_soft_delete_and_restore_document(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SoftDeletesTest::admin_can_soft_delete_and_restore_admission_application(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SoftDeletesTest::non_admin_cannot_restore_resources(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SoftDeletesTest::non_admin_cannot_force_delete_resources(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SoftDeletesTest::restore_endpoints_return_404_for_non_existent_resources(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SoftDeletesTest::force_delete_endpoints_return_404_for_non_existent_resources(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SoftDeletesTest::soft_deleted_resources_are_not_visible_in_normal_queries(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\SoftDeletesTest::models_have_soft_deletes_trait(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\StructuredLoggingTest::it_adds_trace_id_to_request_headers(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\StructuredLoggingTest::it_preserves_existing_request_id_header(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\StructuredLoggingTest::it_adds_trace_id_to_log_context(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\StructuredLoggingTest::it_includes_request_metadata_in_log_context(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\StructuredLoggingTest::it_works_with_different_http_methods(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\StructuredLoggingTest::it_handles_api_errors_with_trace_id(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\StructuredLoggingTest::it_applies_only_to_api_routes(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\StructuredLoggingTest::trace_id_persists_through_request_lifecycle(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\StructuredLoggingTest::it_actually_logs_with_structured_format(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\StudentEnrollmentFlowTest::test_complete_enrollment_flow(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\StudentEnrollmentFlowTest::test_workflow_with_application_rejection(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Feature\StudentEnrollmentFlowTest::test_course_waitlist_workflow(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::unauthenticated_user_cannot_access_admission_applications(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::admin_can_list_all_applications(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::student_can_only_see_their_own_applications(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::can_filter_applications_by_status(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::can_filter_applications_by_term(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::student_can_create_admission_application_for_themselves(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::student_cannot_create_admission_application_for_another_student(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::admin_can_create_admission_application_for_any_student(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::validation_fails_for_missing_required_fields(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::validation_fails_for_non_existent_student_or_term(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::can_view_specific_admission_application(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::student_can_only_view_their_own_application(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::student_can_update_their_own_draft_application(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::student_cannot_update_submitted_application(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::admin_can_update_any_application_status(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::student_can_delete_their_own_draft_application(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::student_cannot_delete_submitted_application(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::admin_can_delete_any_application(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::returns_404_for_non_existent_application(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::staff_can_list_all_applications(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::staff_can_filter_applications_by_student(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\AdmissionApplicationApiTest::student_cannot_filter_by_student_id(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\DepartmentApiTest::can_get_a_paginated_list_of_departments(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\DepartmentApiTest::can_filter_departments_by_faculty_id(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\DepartmentApiTest::can_get_a_single_department(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\DepartmentApiTest::can_create_a_new_department(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\DepartmentApiTest::can_update_a_department(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\DepartmentApiTest::can_delete_a_department(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentApiTest::it_can_list_enrollments_with_pagination(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentApiTest::it_can_create_enrollment_with_available_capacity(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentApiTest::it_automatically_waitlists_when_course_section_is_full(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentApiTest::it_prevents_duplicate_enrollments(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentApiTest::it_can_show_single_enrollment_with_relationships(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentApiTest::it_can_update_enrollment_status(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentApiTest::it_validates_status_transitions(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentApiTest::it_validates_grade_format(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentApiTest::it_can_withdraw_enrollment(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentApiTest::it_can_complete_enrollment_with_grade(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentApiTest::it_can_filter_enrollments_by_student(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentApiTest::it_can_get_enrollments_by_student(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentApiTest::it_can_get_enrollments_by_course_section(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentApiTest::it_promotes_from_waitlist_when_spot_opens(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentApiTest::it_validates_required_fields_for_enrollment_creation(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentApiTest::it_validates_student_exists(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentApiTest::it_validates_course_section_exists(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentSwapApiTest::it_can_swap_enrollments_successfully(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentSwapApiTest::it_waitlists_student_when_target_section_is_full(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentSwapApiTest::it_fails_when_add_drop_deadline_has_passed(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentSwapApiTest::it_fails_when_target_term_deadline_has_passed(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentSwapApiTest::it_fails_when_user_does_not_own_enrollment(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentSwapApiTest::it_validates_required_fields(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentSwapApiTest::it_validates_enrollment_exists(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentSwapApiTest::it_validates_course_section_exists(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentSwapApiTest::it_prevents_swapping_to_same_course_section(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentSwapApiTest::it_prevents_swapping_completed_enrollments(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentSwapApiTest::it_prevents_swapping_withdrawn_enrollments(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentSwapApiTest::it_rolls_back_transaction_when_new_enrollment_fails(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\EnrollmentSwapApiTest::it_requires_authentication(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\FacultyApiTest::can_get_a_paginated_list_of_faculties(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\FacultyApiTest::can_get_a_single_faculty(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\FacultyApiTest::returns_404_if_faculty_not_found(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\FacultyApiTest::can_create_a_new_faculty(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\FacultyApiTest::create_faculty_requires_a_name(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\FacultyApiTest::can_update_a_faculty(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\FacultyApiTest::can_delete_a_faculty(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\GradeImportApiTest::unauthenticated_users_cannot_upload_grades(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\GradeImportApiTest::only_assigned_instructor_can_upload_grades(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\GradeImportApiTest::admin_can_upload_grades_for_any_section(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\GradeImportApiTest::users_without_grades_upload_permission_cannot_upload(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\GradeImportApiTest::it_validates_file_upload_requirements(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\GradeImportApiTest::it_accepts_valid_csv_file(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\GradeImportApiTest::it_dispatches_grade_import_job(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\GradeImportApiTest::it_stores_file_in_correct_location(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\GradeImportApiTest::it_returns_404_for_nonexistent_course_section(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\GradeImportApiTest::it_includes_course_information_in_response(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\PasswordResetApiTest::it_can_send_password_reset_link_for_valid_email(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\PasswordResetApiTest::it_returns_error_for_nonexistent_email(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\PasswordResetApiTest::it_validates_email_format_for_forgot_password(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\PasswordResetApiTest::it_requires_email_for_forgot_password(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\PasswordResetApiTest::it_can_reset_password_with_valid_token(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\PasswordResetApiTest::it_fails_with_invalid_token(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\PasswordResetApiTest::it_fails_with_expired_token(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\PasswordResetApiTest::it_validates_required_fields_for_reset_password(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\PasswordResetApiTest::it_validates_email_format_for_reset_password(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\PasswordResetApiTest::it_validates_password_minimum_length(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\PasswordResetApiTest::it_validates_password_confirmation_matches(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\PasswordResetApiTest::it_fails_reset_for_nonexistent_user(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\PasswordResetApiTest::it_can_complete_full_password_reset_flow(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\PasswordResetApiTest::it_respects_rate_limiting_on_forgot_password(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\PasswordResetApiTest::it_respects_rate_limiting_on_reset_password(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramApiTest::can_get_a_paginated_list_of_programs(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramApiTest::can_filter_programs_by_department_id(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramApiTest::can_get_a_single_program(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramApiTest::can_create_a_new_program(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramApiTest::can_update_a_program(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramApiTest::can_delete_a_program(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::unauthenticated_user_cannot_access_program_choices(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::admin_can_list_all_program_choices_for_any_application(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::student_can_only_view_program_choices_for_their_own_application(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::program_choices_are_ordered_by_preference(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::student_can_create_program_choice_for_their_own_application(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::student_cannot_create_program_choice_for_another_students_application(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::admin_can_create_program_choice_for_any_application(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::validation_fails_for_missing_required_fields(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::validation_fails_for_non_existent_program(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::validation_fails_for_duplicate_preference_order(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::can_view_specific_program_choice(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::student_cannot_view_other_students_program_choice(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::student_can_update_their_own_draft_program_choice(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::student_cannot_update_program_choice_for_submitted_application(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::student_cannot_update_status_field(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::admin_can_update_any_program_choice_including_status(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::validation_fails_for_duplicate_preference_order_in_update(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::student_can_delete_their_own_draft_program_choice(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::student_cannot_delete_program_choice_from_submitted_application(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::admin_can_delete_any_program_choice(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::returns_404_for_non_existent_program_choice(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::staff_can_list_program_choices_for_any_application(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\ProgramChoiceApiTest::staff_can_update_program_choice_status(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\RoleManagementApiTest::non_admin_user_cannot_access_role_endpoints(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\RoleManagementApiTest::admin_user_can_list_roles(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\RoleManagementApiTest::admin_user_can_create_role(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\RoleManagementApiTest::admin_user_can_view_specific_role(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\RoleManagementApiTest::admin_user_can_view_role_with_permissions(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\RoleManagementApiTest::admin_user_can_update_role(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\RoleManagementApiTest::admin_user_can_delete_role(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\RoleManagementApiTest::admin_user_can_sync_permissions_to_role(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\RoleManagementApiTest::role_name_must_be_unique(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\RoleManagementApiTest::role_name_is_required(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\RoleManagementApiTest::sync_permissions_requires_valid_permission_ids(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\RoleManagementApiTest::sync_permissions_requires_permissions_array(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\Api\V1\RoleManagementApiTest::user_with_roles_manage_permission_gains_access(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+PHPUnit 11.4.2 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.4.8
+Configuration: /var/www/html/phpunit.xml
+
+
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true                                                    0.01s  
+
+   DEPR  Tests\Unit\Filters\EnrollmentFilterTest
+  ! it can filter by student id → voku\helper\ASCII::to_ascii(): Implic… 0.79s  
+  ✓ it can filter by course section id                                   0.03s  
+  ✓ it can filter by single status                                       0.01s  
+  ✓ it can filter by multiple statuses                                   0.01s  
+  ✓ it can filter by term id through course section                      0.02s  
+  ✓ it can filter by course id through course section                    0.01s  
+  ✓ it can filter by department id through nested relationships          0.02s  
+  ✓ it can filter by instructor id through course section                0.04s  
+  ✓ it can apply multiple filters simultaneously                         0.02s  
+  ✓ it ignores empty filters                                             0.01s  
+  ✓ it returns query builder instance                                    0.01s  
+  ✓ it handles empty filter array                                        0.02s  
+  ✓ it handles unknown filter keys                                       0.01s  
+
+   PASS  Tests\Unit\Jobs\BackgroundJobsTest
+  ✓ send enrollment confirmation job handles enrolled status             0.59s  
+  ✓ send enrollment confirmation job handles waitlisted status           0.29s  
+  ✓ send enrollment confirmation job logs correctly                      0.32s  
+  ✓ send application status notification job works                       0.23s  
+  ✓ process waitlist promotion job works                                 0.18s  
+  ✓ process waitlist promotion job dispatches confirmation when promoti… 0.28s  
+  ✓ jobs are queued                                                      0.61s  
+  ✓ jobs implement should queue interface                                0.56s  
+
+   PASS  Tests\Unit\Jobs\ProcessCourseImportTest
+  ✓ processes valid csv data successfully                                0.32s  
+  ✓ handles invalid data gracefully                                      0.36s  
+  ✓ updates existing courses                                             0.27s  
+  ✓ handles missing prerequisites gracefully                             0.27s  
+  ✓ handles empty csv file                                               0.27s  
+  ✓ handles missing required headers                                     0.27s  
+  ✓ cleans up uploaded file after processing                             0.27s  
+
+   PASS  Tests\Unit\Jobs\ProcessGradeImportTest
+  ✓ it processes valid grade csv successfully                            0.61s  
+  ✓ it handles invalid student ids                                       0.50s  
+  ✓ it validates grade values                                            0.39s  
+  ✓ it skips duplicate grades                                            0.38s  
+  ✓ it handles missing headers                                           0.26s  
+  ✓ it handles empty csv file                                            0.31s  
+  ✓ it processes mixed valid and invalid rows                            0.56s  
+
+   PASS  Tests\Unit\Services\EnrollmentServiceTest
+  ✓ enrolls student successfully when capacity available                 0.30s  
+  ✓ waitlists student when course section at capacity                    0.38s  
+  ✓ throws exception when student not active                             0.29s  
+  ✓ throws exception when course section in past term                    0.27s  
+  ✓ throws exception when student already enrolled                       0.31s  
+  ✓ throws exception when requesting enrolled status but no capacity     0.41s  
+  ✓ promotes from waitlist successfully                                  0.57s  
+  ✓ promotes from waitlist returns null when no capacity                 0.41s  
+  ✓ promotes from waitlist returns null when no waitlisted students      0.29s  
+  ✓ withdraw student successfully                                        0.28s  
+  ✓ withdraw student from waitlist does not dispatch promotion job       0.30s  
+  ✓ throws exception when enrollment deadline has passed                 0.28s  
+  ✓ throws exception when withdrawal deadline has passed                 0.28s  
+  ✓ allows enrollment when no deadline is set                            0.29s  
+  ✓ allows withdrawal when no deadline is set                            0.29s  
+
+   PASS  Tests\Feature\AcademicHierarchyTest
+  ✓ can create faculty                                                   0.02s  
+  ✓ can create department with faculty                                   0.01s  
+  ✓ faculty has many departments                                         0.04s  
+  ✓ department belongs to faculty                                        0.04s  
+  ✓ can create program with department                                   0.01s  
+  ✓ department has many programs                                         0.01s  
+  ✓ program belongs to department                                        0.01s  
+  ✓ cascade delete faculty deletes departments                           0.02s  
+  ✓ set null department delete sets program department id null           0.01s  
+  ✓ complete hierarchy with factories                                    0.02s  
+  ✓ can query programs through hierarchy                                 0.02s  
+  ✓ faculty names can be duplicate                                       0.01s  
+  ✓ department names can be duplicate across faculties                   0.01s  
+  ✓ academic hierarchy seeder creates expected data                      0.03s  
+
+   PASS  Tests\Feature\Argon2idHashingTest
+  ✓ new users use argon2id hashing                                       0.15s  
+  ✓ existing bcrypt users can still login                                0.02s  
+  ✓ password rehashing on password change                                0.13s  
+  ✓ argon2id parameters are secure                                       0.02s  
+  ✓ hash verification works                                              0.42s  
+  ✓ user registration uses argon2id                                      0.17s  
+  ✓ configuration validation                                             0.01s  
+  ✓ performance is acceptable                                            0.25s  
+  ✓ backward compatibility with bcrypt                                   0.02s  
+  ✓ password algorithm tracking in database                              0.16s  
+  ✓ mixed algorithm environment                                          0.28s  
+
+   PASS  Tests\Feature\AuditingTest
+  ✓ student model auditing on creation                                   0.15s  
+  ✓ student model auditing on update                                     0.14s  
+  ✓ user model auditing                                                  0.14s  
+  ✓ enrollment model auditing                                            0.27s  
+  ✓ admission application auditing                                       0.14s  
+  ✓ course section auditing                                              0.14s  
+  ✓ audit includes metadata                                              0.14s  
+  ✓ audits are stored in database                                        0.17s  
+  ✓ grade change audit trail with reason                                 0.44s  
+  ✓ status change audit trail                                            0.40s  
+  ✓ reason for change required when updating grade                       0.42s  
+  ✓ reason for change not required when not updating grade               0.45s  
+
+   PASS  Tests\Feature\Feature\BackgroundJobIntegrationTest
+  ✓ enrollment service dispatches confirmation job on enrollment         0.28s  
+  ✓ enrollment service dispatches waitlist confirmation job when full    0.39s  
+  ✓ enrollment service dispatches promotion job on waitlist promotion    0.25s  
+  ✓ admission service dispatches notification job on status update       0.14s  
+  ✓ admission service does not dispatch job when status unchanged        0.14s  
+  ✓ controller logic dispatches waitlist promotion job                   0.29s  
+  ✓ check waitlists command dispatches jobs for eligible sections        0.38s  
+  ✓ check waitlists command ignores full sections                        0.39s  
+  ✓ check waitlists command ignores sections without waitlisted student… 1.19s  
+
+   FAIL  Tests\Feature\Feature\ErrorHandlingTest
+  ⨯ it returns rfc7807 format for enrollment capacity exceeded           0.57s  
+  ✓ it returns rfc7807 format for duplicate enrollment                   0.43s  
+  ✓ it returns rfc7807 format for student not active                     0.53s  
+  ✓ it returns rfc7807 format for not found errors                       0.26s  
+  ✓ it returns rfc7807 format for validation errors                      0.26s  
+  ✓ it returns rfc7807 format for unauthenticated errors                 0.25s  
+  ✓ it returns rfc7807 format for unauthorized errors                    0.38s  
+  ✓ it includes debug info in development for server errors              0.25s  
+  ✓ it does not include debug info in production                         0.26s  
+  ✓ it logs custom exceptions appropriately                              0.53s  
+
+   PASS  Tests\Feature\HealthCheckTest
+  ✓ health check returns healthy response when all services are working  0.05s  
+  ✓ health check includes application information                        0.03s  
+  ✓ health check endpoint is accessible without authentication           0.01s  
+  ✓ health check validates database connection                           0.01s  
+  ✓ health check validates cache connection                              0.01s  
+  ✓ health check respects rate limiting                                  0.02s  
+  ✓ health check returns proper json content type                        0.01s  
+  ✓ health check response includes timestamp                             0.03s  
+
+   PASS  Tests\Feature\InfrastructureTest
+  ✓ can create a building                                                0.05s  
+  ✓ building name must be unique                                         0.02s  
+  ✓ can create a room in a building                                      0.02s  
+  ✓ room number must be unique per building                              0.02s  
+  ✓ room number can be the same in different buildings                   0.03s  
+  ✓ building has many rooms                                              0.04s  
+  ✓ deleting a building cascades to its rooms                            0.04s  
+
+   PASS  Tests\Feature\Feature\MetricsEndpointTest
+  ✓ metrics endpoint is accessible                                       0.15s  
+  ✓ metrics endpoint returns prometheus format                           0.13s  
+  ✓ metrics are collected for api requests                               0.14s  
+  ✓ metrics include method and route labels                              0.13s  
+  ✓ metrics are collected for different status codes                     0.14s  
+  ✓ metrics include request duration histogram                           0.15s  
+  ✓ unauthenticated requests are also tracked                            0.14s  
+  ✓ metrics endpoint respects rate limiting                              0.18s  
+  ✓ route normalization reduces cardinality                              0.18s  
+
+   PASS  Tests\Feature\RoleBasedAccessControlTest
+  ✓ can create role                                                      0.02s  
+  ✓ can create permission                                                0.02s  
+  ✓ user can have multiple roles                                         0.14s  
+  ✓ role can have multiple permissions                                   0.04s  
+  ✓ permission can belong to multiple roles                              0.02s  
+  ✓ user role relationship cascade delete                                0.17s  
+  ✓ permission role relationship cascade delete                          0.01s  
+  ✓ role names must be unique                                            0.01s  
+  ✓ permission names must be unique                                      0.01s  
+  ✓ can create complete rbac scenario                                    0.24s  
+  ✓ user has role helper method                                          0.14s  
+  ✓ user has any role helper method                                      0.15s  
+  ✓ user has permission helper method                                    0.14s  
+  ✓ user get all permissions helper method                               0.15s  
+  ✓ role permission seeder creates expected data                         0.04s  
+
+   PASS  Tests\Feature\Feature\SecurityHeadersTest
+  ✓ security headers are added to web responses                          0.03s  
+  ✓ security headers are added to api responses                          0.01s  
+  ✓ security headers are added to authenticated api responses            0.15s  
+  ✓ security headers are added to error responses                        0.10s  
+  ✓ security headers are added to validation error responses             0.19s  
+  ✓ security headers are added to unauthorized responses                 0.05s  
+  ✓ security headers are added to forbidden responses                    0.14s  
+  ✓ hsts header is only added in production                              0.02s  
+  ✓ content security policy header is properly configured                0.01s  
+  ✓ sensitive server headers are removed                                 0.02s  
+
+   PASS  Tests\Feature\SoftDeletesTest
+  ✓ admin can soft delete and restore student                            0.25s  
+  ✓ admin can force delete student                                       0.27s  
+  ✓ admin can soft delete and restore course                             0.30s  
+  ✓ admin can soft delete and restore enrollment                         0.43s  
+  ✓ admin can soft delete and restore document                           0.27s  
+  ✓ admin can soft delete and restore admission application              0.25s  
+  ✓ non admin cannot restore resources                                   0.27s  
+  ✓ non admin cannot force delete resources                              0.27s  
+  ✓ restore endpoints return 404 for non existent resources              0.25s  
+  ✓ force delete endpoints return 404 for non existent resources         0.36s  
+  ✓ soft deleted resources are not visible in normal queries             0.35s  
+  ✓ models have soft deletes trait                                       0.34s  
+
+   PASS  Tests\Feature\Feature\StructuredLoggingTest
+  ✓ it adds trace id to request headers                                  0.04s  
+  ✓ it preserves existing request id header                              0.01s  
+  ✓ it adds trace id to log context                                      0.01s  
+  ✓ it includes request metadata in log context                          0.15s  
+  ✓ it works with different http methods                                 0.05s  
+  ✓ it handles api errors with trace id                                  0.02s  
+  ✓ it applies only to api routes                                        0.04s  
+  ✓ trace id persists through request lifecycle                          0.02s  
+  ✓ it actually logs with structured format                              0.02s  
+
+   PASS  Tests\Feature\Feature\StudentEnrollmentFlowTest
+  ✓ complete enrollment flow                                             0.52s  
+  ✓ workflow with application rejection                                  0.52s  
+  ✓ course waitlist workflow                                             0.42s  
+
+   PASS  Tests\Feature\Api\V1\AcademicRecordApiTest
+  ✓ health check endpoint                                                0.05s  
+
+   PASS  Tests\Feature\Api\V1\AdmissionApplicationApiTest
+  ✓ unauthenticated user cannot access admission applications            0.54s  
+  ✓ admin can list all applications                                      0.92s  
+  ✓ student can only see their own applications                          0.54s  
+  ✓ can filter applications by status                                    0.53s  
+  ✓ can filter applications by term                                      0.84s  
+  ✓ student can create admission application for themselves              0.53s  
+  ✓ student cannot create admission application for another student      0.58s  
+  ✓ admin can create admission application for any student               0.57s  
+  ✓ validation fails for missing required fields                         0.55s  
+  ✓ validation fails for non existent student or term                    0.48s  
+  ✓ can view specific admission application                              0.79s  
+  ✓ student can only view their own application                          0.78s  
+  ✓ student can update their own draft application                       0.78s  
+  ✓ student cannot update submitted application                          0.78s  
+  ✓ admin can update any application status                              0.79s  
+  ✓ student can delete their own draft application                       0.77s  
+  ✓ student cannot delete submitted application                          0.78s  
+  ✓ admin can delete any application                                     0.78s  
+  ✓ returns 404 for non existent application                             0.77s  
+  ✓ staff can list all applications                                      0.99s  
+  ✓ staff can filter applications by student                             0.78s  
+  ✓ student cannot filter by student id                                  0.90s  
+
+   PASS  Tests\Feature\Api\V1\AuthenticationTest
+  ✓ api endpoints are protected by auth sanctum                          0.03s  
+  ✓ a user can create an api token                                       0.28s  
+  ✓ a user cannot create an api token with invalid credentials           0.27s  
+  ✓ a user can authenticate with a valid token                           0.19s  
+  ✓ a user cannot authenticate with an invalid token                     0.04s  
+
+   PASS  Tests\Feature\Api\V1\BuildingApiTest
+  ✓ can get all buildings paginated with rooms                           0.26s  
+  ✓ can create a building                                                0.17s  
+  ✓ create building fails with duplicate name                            0.17s  
+  ✓ can get a single building with rooms                                 0.47s  
+  ✓ can update a building                                                0.48s  
+  ✓ can delete a building                                                0.48s  
+  ✓ deleting a building deletes its rooms                                0.48s  
+
+   PASS  Tests\Feature\Api\V1\CourseApiTest
+  ✓ can get all courses paginated                                        0.60s  
+  ✓ can filter courses by department                                     0.56s  
+  ✓ can create a course without prerequisites                            0.57s  
+  ✓ can create a course with prerequisites                               0.57s  
+  ✓ create course validation fails                                       0.58s  
+  ✓ can get a single course                                              0.57s  
+  ✓ can update a course                                                  0.58s  
+  ✓ update can remove prerequisites                                      0.57s  
+  ✓ can delete a course                                                  0.57s  
+
+   PASS  Tests\Feature\Api\V1\CourseImportApiTest
+  ✓ unauthenticated user cannot import courses                           0.07s  
+  ✓ user without courses manage permission cannot import courses         0.16s  
+  ✓ admin user can import courses                                        0.28s  
+  ✓ validates required file field                                        0.47s  
+  ✓ validates file type                                                  0.48s  
+  ✓ validates file size                                                  0.48s  
+  ✓ stores file in correct location                                      0.48s  
+  ✓ includes import metadata in response                                 0.48s  
+  ✓ dispatches job with correct parameters                               0.48s  
+  ✓ accepts valid csv mime types                                         0.49s  
+  ✓ throttling is applied                                                0.47s  
+
+   PASS  Tests\Feature\Api\V1\CourseSectionApiTest
+  ✓ can get all course sections paginated                                2.24s  
+  ✓ can filter course sections                                           1.01s  
+  ✓ can create a course section                                          0.59s  
+  ✓ can get a single course section                                      0.59s  
+  ✓ can update a course section                                          0.59s  
+  ✓ can delete a course section                                          0.58s  
+
+   PASS  Tests\Feature\Api\V1\DepartmentApiTest
+  ✓ can get a paginated list of departments                              0.46s  
+  ✓ can filter departments by faculty id                                 0.45s  
+  ✓ can get a single department                                          0.46s  
+  ✓ can create a new department                                          0.45s  
+  ✓ can update a department                                              0.45s  
+  ✓ can delete a department                                              0.46s  
+
+   PASS  Tests\Feature\Api\V1\EnrollmentApiTest
+  ✓ it can list enrollments with pagination                              1.30s  
+  ✓ it can create enrollment with available capacity                     0.73s  
+  ✓ it automatically waitlists when course section is full               0.90s  
+  ✓ it prevents duplicate enrollments                                    0.73s  
+  ✓ it can show single enrollment with relationships                     0.73s  
+  ✓ it can update enrollment status                                      0.76s  
+  ✓ it validates status transitions                                      1.84s  
+  ✓ it validates grade format                                            0.76s  
+  ✓ it can withdraw enrollment                                           0.85s  
+  ✓ it can complete enrollment with grade                                1.05s  
+  ✓ it can filter enrollments by student                                 1.11s  
+  ✓ it can get enrollments by student                                    1.21s  
+  ✓ it can get enrollments by course section                             1.54s  
+  ✓ it promotes from waitlist when spot opens                            1.21s  
+  ✓ it validates required fields for enrollment creation                 0.96s  
+  ✓ it validates student exists                                          0.68s  
+  ✓ it validates course section exists                                   0.59s  
+
+   FAIL  Tests\Feature\Api\V1\EnrollmentSwapApiTest
+  ✓ it can swap enrollments successfully                                 0.68s  
+  ✓ it waitlists student when target section is full                     0.60s  
+  ✓ it fails when add drop deadline has passed                           0.35s  
+  ✓ it fails when target term deadline has passed                        0.35s  
+  ⨯ it fails when user does not own enrollment                           0.57s  
+  ✓ it validates required fields                                         0.34s  
+  ✓ it validates enrollment exists                                       0.34s  
+  ✓ it validates course section exists                                   0.35s  
+  ✓ it prevents swapping to same course section                          0.36s  
+  ✓ it prevents swapping completed enrollments                           0.37s  
+  ✓ it prevents swapping withdrawn enrollments                           0.36s  
+  ✓ it rolls back transaction when new enrollment fails                  0.36s  
+  ✓ it requires authentication                                           0.34s  
+
+   PASS  Tests\Feature\Api\V1\FacultyApiTest
+  ✓ can get a paginated list of faculties                                0.13s  
+  ✓ can get a single faculty                                             0.13s  
+  ✓ returns 404 if faculty not found                                     0.12s  
+  ✓ can create a new faculty                                             0.12s  
+  ✓ create faculty requires a name                                       0.12s  
+  ✓ can update a faculty                                                 0.13s  
+  ✓ can delete a faculty                                                 0.12s  
+
+   PASS  Tests\Feature\Api\V1\GradeImportApiTest
+  ✓ unauthenticated users cannot upload grades                           0.14s  
+  ✓ only assigned instructor can upload grades                           0.26s  
+  ✓ admin can upload grades for any section                              0.27s  
+  ✓ users without grades upload permission cannot upload                 0.15s  
+  ✓ it validates file upload requirements                                0.14s  
+  ✓ it accepts valid csv file                                            0.14s  
+  ✓ it dispatches grade import job                                       0.14s  
+  ✓ it stores file in correct location                                   0.15s  
+  ✓ it returns 404 for nonexistent course section                        0.14s  
+  ✓ it includes course information in response                           0.13s  
+
+   PASS  Tests\Feature\Api\V1\NotificationTest
+  ✓ notification is created when application status is updated           0.13s  
+  ✓ notification is not created when status does not change              0.12s  
+  ✓ can list unread notifications                                        0.13s  
+  ✓ can mark notification as read                                        0.12s  
+  ✓ cannot mark nonexistent notification as read                         0.12s  
+  ✓ user cannot access another users notifications                       0.23s  
+  ✓ notifications require authentication                                 0.12s  
+  ✓ notification contains correct data                                   0.13s  
+  ✓ only unread notifications are returned                               0.13s  
+
+   PASS  Tests\Feature\Api\V1\PasswordResetApiTest
+  ✓ it can send password reset link for valid email                      0.24s  
+  ✓ it returns error for nonexistent email                               0.01s  
+  ✓ it validates email format for forgot password                        0.02s  
+  ✓ it requires email for forgot password                                0.01s  
+  ✓ it can reset password with valid token                               0.68s  
+  ✓ it fails with invalid token                                          0.12s  
+  ✓ it fails with expired token                                          0.23s  
+  ✓ it validates required fields for reset password                      0.01s  
+  ✓ it validates email format for reset password                         0.01s  
+  ✓ it validates password minimum length                                 0.01s  
+  ✓ it validates password confirmation matches                           0.02s  
+  ✓ it fails reset for nonexistent user                                  0.01s  
+  ✓ it can complete full password reset flow                             0.79s  
+  ✓ it respects rate limiting on forgot password                         0.26s  
+  ✓ it respects rate limiting on reset password                          0.02s  
+
+   PASS  Tests\Feature\Api\V1\PermissionApiTest
+  ✓ unauthenticated user cannot access permissions index                 0.37s  
+  ✓ unauthenticated user cannot access permission show                   0.34s  
+  ✓ admin can view permissions index                                     0.34s  
+  ✓ staff can view permissions index                                     0.35s  
+  ✓ student cannot view permissions index                                0.34s  
+  ✓ admin can view specific permission                                   0.34s  
+  ✓ staff can view specific permission                                   0.35s  
+  ✓ student cannot view specific permission                              0.34s  
+  ✓ permissions index with roles included                                0.34s  
+  ✓ permission show with roles included                                  0.34s  
+  ✓ permission show returns 404 for nonexistent permission               0.34s  
+  ✓ permissions index supports pagination                                0.34s  
+  ✓ permissions are ordered by name                                      0.35s  
+
+   PASS  Tests\Feature\Api\V1\ProgramApiTest
+  ✓ can get a paginated list of programs                                 0.14s  
+  ✓ can filter programs by department id                                 0.13s  
+  ✓ can get a single program                                             0.13s  
+  ✓ can create a new program                                             0.12s  
+  ✓ can update a program                                                 0.13s  
+  ✓ can delete a program                                                 0.13s  
+
+   PASS  Tests\Feature\Api\V1\ProgramChoiceApiTest
+  ✓ unauthenticated user cannot access program choices                   0.45s  
+  ✓ admin can list all program choices for any application               0.45s  
+  ✓ student can only view program choices for their own application      0.46s  
+  ✓ program choices are ordered by preference                            0.48s  
+  ✓ student can create program choice for their own application          0.46s  
+  ✓ student cannot create program choice for another students applicati… 0.45s  
+  ✓ admin can create program choice for any application                  0.47s  
+  ✓ validation fails for missing required fields                         0.47s  
+  ✓ validation fails for non existent program                            0.45s  
+  ✓ validation fails for duplicate preference order                      0.45s  
+  ✓ can view specific program choice                                     0.48s  
+  ✓ student cannot view other students program choice                    0.45s  
+  ✓ student can update their own draft program choice                    0.45s  
+  ✓ student cannot update program choice for submitted application       0.46s  
+  ✓ student cannot update status field                                   0.45s  
+  ✓ admin can update any program choice including status                 0.46s  
+  ✓ validation fails for duplicate preference order in update            0.46s  
+  ✓ student can delete their own draft program choice                    0.45s  
+  ✓ student cannot delete program choice from submitted application      0.45s  
+  ✓ admin can delete any program choice                                  0.45s  
+  ✓ returns 404 for non existent program choice                          0.45s  
+  ✓ staff can list program choices for any application                   0.48s  
+  ✓ staff can update program choice status                               0.45s  
+
+   PASS  Tests\Feature\Api\V1\RoleApiTest
+  ✓ unauthenticated user cannot access roles index                       0.34s  
+  ✓ unauthenticated user cannot access role show                         0.35s  
+  ✓ admin can view roles index                                           0.34s  
+  ✓ staff can view roles index                                           0.36s  
+  ✓ student cannot view roles index                                      0.37s  
+  ✓ admin can view specific role                                         0.37s  
+  ✓ staff can view specific role                                         0.37s  
+  ✓ student cannot view specific role                                    0.37s  
+  ✓ roles index with permissions included                                0.34s  
+  ✓ role show with permissions included                                  0.34s  
+  ✓ role show returns 404 for nonexistent role                           0.37s  
+  ✓ roles index supports pagination                                      0.38s  
+  ✓ roles are ordered by name                                            0.37s  
+
+   PASS  Tests\Feature\Api\V1\RoleManagementApiTest
+  ✓ non admin user cannot access role endpoints                          0.18s  
+  ✓ admin user can list roles                                            0.16s  
+  ✓ admin user can create role                                           0.16s  
+  ✓ admin user can view specific role                                    0.16s  
+  ✓ admin user can view role with permissions                            0.17s  
+  ✓ admin user can update role                                           0.16s  
+  ✓ admin user can delete role                                           0.16s  
+  ✓ admin user can sync permissions to role                              0.15s  
+  ✓ role name must be unique                                             0.15s  
+  ✓ role name is required                                                0.15s  
+  ✓ sync permissions requires valid permission ids                       0.15s  
+  ✓ sync permissions requires permissions array                          0.15s  
+  ✓ user with roles manage permission gains access                       0.15s  
+
+   PASS  Tests\Feature\Api\V1\RoomApiTest
+  ✓ can get all rooms paginated                                          0.15s  
+  ✓ can filter rooms by building                                         0.14s  
+  ✓ can create a room                                                    0.13s  
+  ✓ create room fails with duplicate number in same building             0.13s  
+  ✓ can create room with same number in different building               0.12s  
+  ✓ can get a single room                                                0.13s  
+  ✓ can update a room                                                    0.13s  
+  ✓ can delete a room                                                    0.13s  
+
+   PASS  Tests\Feature\Api\V1\StaffApiTest
+  ✓ can get all staff paginated                                          1.75s  
+  ✓ can filter staff by department                                       0.76s  
+  ✓ can create a staff member                                            0.35s  
+  ✓ create staff validation fails                                        0.13s  
+  ✓ can get a single staff member                                        0.24s  
+  ✓ can update a staff member                                            0.24s  
+  ✓ can delete a staff member                                            0.24s  
+
+   PASS  Tests\Feature\Api\V1\StudentApiTest
+  ✓ unauthenticated user cannot access student endpoints                 0.47s  
+  ✓ admin can view all students                                          0.45s  
+  ✓ staff can view all students                                          0.46s  
+  ✓ student can only view their own record from index                    0.46s  
+  ✓ student can view their own record from show                          0.47s  
+  ✓ student cannot view another students record                          0.47s  
+  ✓ student index can include user data                                  0.49s  
+  ✓ student show can include user data                                   0.48s  
+  ✓ admin can create student                                             0.63s  
+  ✓ admin can update student                                             0.50s  
+  ✓ admin can delete student                                             0.49s  
+  ✓ store requires validation                                            0.49s  
+
+   PASS  Tests\Feature\Api\V1\TermApiTest
+  ✓ can get all terms paginated                                          0.15s  
+  ✓ can filter terms by academic year                                    0.13s  
+  ✓ can create a term                                                    0.13s  
+  ✓ create term fails with duplicate year and semester                   0.14s  
+  ✓ can get a single term                                                0.14s  
+  ✓ can update a term                                                    0.14s  
+  ✓ can delete a term                                                    0.14s  
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Feature\ErrorHandlingTest > it retu…  QueryException   
+  SQLSTATE[40001]: Serialization failure: 1213 Deadlock found when trying to get lock; try restarting transaction (Connection: mysql, SQL: insert into `terms` (`name`, `academic_year`, `semester`, `start_date`, `end_date`, `add_drop_deadline`, `updated_at`, `created_at`) values (Summer 2023, 2023, Summer, 2025-06-22 00:00:00, 2025-09-19 00:00:00, 2025-07-05 01:32:31, 2025-06-21 01:32:31, 2025-06-21 01:32:31))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:825
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕ 
+  ➜ 825▕             throw new QueryException(
+    826▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    827▕             );
+    828▕         }
+    829▕     }
+
+      [2m+17 vendor frames [22m
+  18  tests/Feature/ErrorHandlingTest.php:49
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\V1\Enrollme…  UniqueConstraintViolationException   
+  SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '234-230-B' for key 'course_sections.course_sections_course_id_term_id_section_number_unique' (Connection: mysql, SQL: insert into `course_sections` (`course_id`, `term_id`, `instructor_id`, `room_id`, `section_number`, `capacity`, `status`, `schedule_days`, `start_time`, `end_time`, `updated_at`, `created_at`) values (234, 230, 209, 260, B, 30, open, ["Tuesday","Thursday"], 13:00:00, 14:30:00, 2025-06-21 01:33:40, 2025-06-21 01:33:40))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:820
+    816▕         // message to include the bindings with SQL, which will make this exception a
+    817▕         // lot more helpful to the developer instead of just the database's errors.
+    818▕         catch (Exception $e) {
+    819▕             if ($this->isUniqueConstraintError($e)) {
+  ➜ 820▕                 throw new UniqueConstraintViolationException(
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕
+
+      [2m+17 vendor frames [22m
+  18  tests/Feature/V1/EnrollmentSwapApiTest.php:217
+
+
+  Tests:    1 deprecated, 2 failed, 417 passed (2435 assertions)
+  Duration: 135.21s
+
+Time: 02:15.130, Memory: 78.50 MB
+
+Academic Hierarchy (Tests\Feature\AcademicHierarchy)
+ ✔ Can create faculty
+ ✔ Can create department with faculty
+ ✔ Faculty has many departments
+ ✔ Department belongs to faculty
+ ✔ Can create program with department
+ ✔ Department has many programs
+ ✔ Program belongs to department
+ ✔ Cascade delete faculty deletes departments
+ ✔ Set null department delete sets program department id null
+ ✔ Complete hierarchy with factories
+ ✔ Can query programs through hierarchy
+ ✔ Faculty names can be duplicate
+ ✔ Department names can be duplicate across faculties
+ ✔ Academic hierarchy seeder creates expected data
+
+Academic Record Api (Tests\Feature\Api\V1\AcademicRecordApi)
+ ✔ Health check endpoint
+
+Admission Application Api (Tests\Feature\Api\V1\AdmissionApplicationApi)
+ ✔ Unauthenticated user cannot access admission applications
+ ✔ Admin can list all applications
+ ✔ Student can only see their own applications
+ ✔ Can filter applications by status
+ ✔ Can filter applications by term
+ ✔ Student can create admission application for themselves
+ ✔ Student cannot create admission application for another student
+ ✔ Admin can create admission application for any student
+ ✔ Validation fails for missing required fields
+ ✔ Validation fails for non existent student or term
+ ✔ Can view specific admission application
+ ✔ Student can only view their own application
+ ✔ Student can update their own draft application
+ ✔ Student cannot update submitted application
+ ✔ Admin can update any application status
+ ✔ Student can delete their own draft application
+ ✔ Student cannot delete submitted application
+ ✔ Admin can delete any application
+ ✔ Returns 404 for non existent application
+ ✔ Staff can list all applications
+ ✔ Staff can filter applications by student
+ ✔ Student cannot filter by student id
+
+Argon2id Hashing (Tests\Feature\Argon2idHashing)
+ ✔ New users use argon2id hashing
+ ✔ Existing bcrypt users can still login
+ ✔ Password rehashing on password change
+ ✔ Argon2id parameters are secure
+ ✔ Hash verification works
+ ✔ User registration uses argon2id
+ ✔ Configuration validation
+ ✔ Performance is acceptable
+ ✔ Backward compatibility with bcrypt
+ ✔ Password algorithm tracking in database
+ ✔ Mixed algorithm environment
+
+Auditing (Tests\Feature\Auditing)
+ ✔ Student model auditing on creation
+ ✔ Student model auditing on update
+ ✔ User model auditing
+ ✔ Enrollment model auditing
+ ✔ Admission application auditing
+ ✔ Course section auditing
+ ✔ Audit includes metadata
+ ✔ Audits are stored in database
+ ✔ Grade change audit trail with reason
+ ✔ Status change audit trail
+ ✔ Reason for change required when updating grade
+ ✔ Reason for change not required when not updating grade
+
+Authentication (Tests\Feature\Api\V1\Authentication)
+ ✔ Api endpoints are protected by auth sanctum
+ ✔ A user can create an api token
+ ✔ A user cannot create an api token with invalid credentials
+ ✔ A user can authenticate with a valid token
+ ✔ A user cannot authenticate with an invalid token
+
+Background Job Integration (Tests\Feature\Feature\BackgroundJobIntegration)
+ ✔ Enrollment service dispatches confirmation job on enrollment
+ ✔ Enrollment service dispatches waitlist confirmation job when full
+ ✔ Enrollment service dispatches promotion job on waitlist promotion
+ ✔ Admission service dispatches notification job on status update
+ ✔ Admission service does not dispatch job when status unchanged
+ ✔ Controller logic dispatches waitlist promotion job
+ ✔ Check waitlists command dispatches jobs for eligible sections
+ ✔ Check waitlists command ignores full sections
+ ✔ Check waitlists command ignores sections without waitlisted students
+
+Background Jobs (Tests\Unit\Jobs\BackgroundJobs)
+ ✔ Send enrollment confirmation job handles enrolled status
+ ✔ Send enrollment confirmation job handles waitlisted status
+ ✔ Send enrollment confirmation job logs correctly
+ ✔ Send application status notification job works
+ ✔ Process waitlist promotion job works
+ ✔ Process waitlist promotion job dispatches confirmation when promotion occurs
+ ✔ Jobs are queued
+ ✔ Jobs implement should queue interface
+
+Building Api (Tests\Feature\Api\V1\BuildingApi)
+ ✔ Can get all buildings paginated with rooms
+ ✔ Can create a building
+ ✔ Create building fails with duplicate name
+ ✔ Can get a single building with rooms
+ ✔ Can update a building
+ ✔ Can delete a building
+ ✔ Deleting a building deletes its rooms
+
+Course Api (Tests\Feature\Api\V1\CourseApi)
+ ✔ Can get all courses paginated
+ ✔ Can filter courses by department
+ ✔ Can create a course without prerequisites
+ ✔ Can create a course with prerequisites
+ ✔ Create course validation fails
+ ✔ Can get a single course
+ ✔ Can update a course
+ ✔ Update can remove prerequisites
+ ✔ Can delete a course
+
+Course Import Api (Tests\Feature\Api\V1\CourseImportApi)
+ ✔ Unauthenticated user cannot import courses
+ ✔ User without courses manage permission cannot import courses
+ ✔ Admin user can import courses
+ ✔ Validates required file field
+ ✔ Validates file type
+ ✔ Validates file size
+ ✔ Stores file in correct location
+ ✔ Includes import metadata in response
+ ✔ Dispatches job with correct parameters
+ ✔ Accepts valid csv mime types
+ ✔ Throttling is applied
+
+Course Section Api (Tests\Feature\Api\V1\CourseSectionApi)
+ ✔ Can get all course sections paginated
+ ✔ Can filter course sections
+ ✔ Can create a course section
+ ✔ Can get a single course section
+ ✔ Can update a course section
+ ✔ Can delete a course section
+
+Department Api (Tests\Feature\Api\V1\DepartmentApi)
+ ✔ Can get a paginated list of departments
+ ✔ Can filter departments by faculty id
+ ✔ Can get a single department
+ ✔ Can create a new department
+ ✔ Can update a department
+ ✔ Can delete a department
+
+Enrollment Api (Tests\Feature\Api\V1\EnrollmentApi)
+ ✔ It can list enrollments with pagination
+ ✔ It can create enrollment with available capacity
+ ✔ It automatically waitlists when course section is full
+ ✔ It prevents duplicate enrollments
+ ✔ It can show single enrollment with relationships
+ ✔ It can update enrollment status
+ ✔ It validates status transitions
+ ✔ It validates grade format
+ ✔ It can withdraw enrollment
+ ✔ It can complete enrollment with grade
+ ✔ It can filter enrollments by student
+ ✔ It can get enrollments by student
+ ✔ It can get enrollments by course section
+ ✔ It promotes from waitlist when spot opens
+ ✔ It validates required fields for enrollment creation
+ ✔ It validates student exists
+ ✔ It validates course section exists
+
+Enrollment Filter (Tests\Unit\Filters\EnrollmentFilter)
+ ✔ It can filter by student id
+ ✔ It can filter by course section id
+ ✔ It can filter by single status
+ ✔ It can filter by multiple statuses
+ ✔ It can filter by term id through course section
+ ✔ It can filter by course id through course section
+ ✔ It can filter by department id through nested relationships
+ ✔ It can filter by instructor id through course section
+ ✔ It can apply multiple filters simultaneously
+ ✔ It ignores empty filters
+ ✔ It returns query builder instance
+ ✔ It handles empty filter array
+ ✔ It handles unknown filter keys
+
+Enrollment Service (Tests\Unit\Services\EnrollmentService)
+ ✔ Enrolls student successfully when capacity available
+ ✔ Waitlists student when course section at capacity
+ ✔ Throws exception when student not active
+ ✔ Throws exception when course section in past term
+ ✔ Throws exception when student already enrolled
+ ✔ Throws exception when requesting enrolled status but no capacity
+ ✔ Promotes from waitlist successfully
+ ✔ Promotes from waitlist returns null when no capacity
+ ✔ Promotes from waitlist returns null when no waitlisted students
+ ✔ Withdraw student successfully
+ ✔ Withdraw student from waitlist does not dispatch promotion job
+ ✔ Throws exception when enrollment deadline has passed
+ ✔ Throws exception when withdrawal deadline has passed
+ ✔ Allows enrollment when no deadline is set
+ ✔ Allows withdrawal when no deadline is set
+
+Enrollment Swap Api (Tests\Feature\Api\V1\EnrollmentSwapApi)
+ ✔ It can swap enrollments successfully
+ ✔ It waitlists student when target section is full
+ ✔ It fails when add drop deadline has passed
+ ✔ It fails when target term deadline has passed
+ ✘ It fails when user does not own enrollment
+   │
+   │ Illuminate\Database\UniqueConstraintViolationException: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '234-230-B' for key 'course_sections.course_sections_course_id_term_id_section_number_unique' (Connection: mysql, SQL: insert into `course_sections` (`course_id`, `term_id`, `instructor_id`, `room_id`, `section_number`, `capacity`, `status`, `schedule_days`, `start_time`, `end_time`, `updated_at`, `created_at`) values (234, 230, 209, 260, B, 30, open, ["Tuesday","Thursday"], 13:00:00, 14:30:00, 2025-06-21 01:33:40, 2025-06-21 01:33:40))
+   │
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php:820
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php:779
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/MySqlConnection.php:42
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Processors/MySqlProcessor.php:35
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php:3798
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php:2038
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php:1358
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php:1323
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php:1162
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Factories/Factory.php:338
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Collections/Traits/EnumeratesValues.php:257
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Factories/Factory.php:333
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Factories/Factory.php:287
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Factories/Factory.php:281
+   │ /var/www/html/tests/Feature/V1/EnrollmentSwapApiTest.php:217
+   │
+ ✔ It validates required fields
+ ✔ It validates enrollment exists
+ ✔ It validates course section exists
+ ✔ It prevents swapping to same course section
+ ✔ It prevents swapping completed enrollments
+ ✔ It prevents swapping withdrawn enrollments
+ ✔ It rolls back transaction when new enrollment fails
+ ✔ It requires authentication
+
+Error Handling (Tests\Feature\Feature\ErrorHandling)
+ ✘ It returns rfc7807 format for enrollment capacity exceeded
+   │
+   │ Illuminate\Database\QueryException: SQLSTATE[40001]: Serialization failure: 1213 Deadlock found when trying to get lock; try restarting transaction (Connection: mysql, SQL: insert into `terms` (`name`, `academic_year`, `semester`, `start_date`, `end_date`, `add_drop_deadline`, `updated_at`, `created_at`) values (Summer 2023, 2023, Summer, 2025-06-22 00:00:00, 2025-09-19 00:00:00, 2025-07-05 01:32:31, 2025-06-21 01:32:31, 2025-06-21 01:32:31))
+   │
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php:825
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php:779
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/MySqlConnection.php:42
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Processors/MySqlProcessor.php:35
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php:3798
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php:2038
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php:1358
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php:1323
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php:1162
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Factories/Factory.php:338
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Collections/Traits/EnumeratesValues.php:257
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Factories/Factory.php:333
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Factories/Factory.php:287
+   │ /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Factories/Factory.php:281
+   │ /var/www/html/tests/Feature/ErrorHandlingTest.php:49
+   │
+ ✔ It returns rfc7807 format for duplicate enrollment
+ ✔ It returns rfc7807 format for student not active
+ ✔ It returns rfc7807 format for not found errors
+ ✔ It returns rfc7807 format for validation errors
+ ✔ It returns rfc7807 format for unauthenticated errors
+ ✔ It returns rfc7807 format for unauthorized errors
+ ✔ It includes debug info in development for server errors
+ ✔ It does not include debug info in production
+ ✔ It logs custom exceptions appropriately
+
+Example (Tests\Unit\Example)
+ ✔ That true is true
+
+Faculty Api (Tests\Feature\Api\V1\FacultyApi)
+ ✔ Can get a paginated list of faculties
+ ✔ Can get a single faculty
+ ✔ Returns 404 if faculty not found
+ ✔ Can create a new faculty
+ ✔ Create faculty requires a name
+ ✔ Can update a faculty
+ ✔ Can delete a faculty
+
+Grade Import Api (Tests\Feature\Api\V1\GradeImportApi)
+ ✔ Unauthenticated users cannot upload grades
+ ✔ Only assigned instructor can upload grades
+ ✔ Admin can upload grades for any section
+ ✔ Users without grades upload permission cannot upload
+ ✔ It validates file upload requirements
+ ✔ It accepts valid csv file
+ ✔ It dispatches grade import job
+ ✔ It stores file in correct location
+ ✔ It returns 404 for nonexistent course section
+ ✔ It includes course information in response
+
+Health Check (Tests\Feature\HealthCheck)
+ ✔ Health check returns healthy response when all services are working
+ ✔ Health check includes application information
+ ✔ Health check endpoint is accessible without authentication
+ ✔ Health check validates database connection
+ ✔ Health check validates cache connection
+ ✔ Health check respects rate limiting
+ ✔ Health check returns proper json content type
+ ✔ Health check response includes timestamp
+
+Infrastructure (Tests\Feature\Infrastructure)
+ ✔ Can create a building
+ ✔ Building name must be unique
+ ✔ Can create a room in a building
+ ✔ Room number must be unique per building
+ ✔ Room number can be the same in different buildings
+ ✔ Building has many rooms
+ ✔ Deleting a building cascades to its rooms
+
+Metrics Endpoint (Tests\Feature\Feature\MetricsEndpoint)
+ ✔ Metrics endpoint is accessible
+ ✔ Metrics endpoint returns prometheus format
+ ✔ Metrics are collected for api requests
+ ✔ Metrics include method and route labels
+ ✔ Metrics are collected for different status codes
+ ✔ Metrics include request duration histogram
+ ✔ Unauthenticated requests are also tracked
+ ✔ Metrics endpoint respects rate limiting
+ ✔ Route normalization reduces cardinality
+
+Notification (Tests\Feature\Api\V1\Notification)
+ ✔ Notification is created when application status is updated
+ ✔ Notification is not created when status does not change
+ ✔ Can list unread notifications
+ ✔ Can mark notification as read
+ ✔ Cannot mark nonexistent notification as read
+ ✔ User cannot access another users notifications
+ ✔ Notifications require authentication
+ ✔ Notification contains correct data
+ ✔ Only unread notifications are returned
+
+Password Reset Api (Tests\Feature\Api\V1\PasswordResetApi)
+ ✔ It can send password reset link for valid email
+ ✔ It returns error for nonexistent email
+ ✔ It validates email format for forgot password
+ ✔ It requires email for forgot password
+ ✔ It can reset password with valid token
+ ✔ It fails with invalid token
+ ✔ It fails with expired token
+ ✔ It validates required fields for reset password
+ ✔ It validates email format for reset password
+ ✔ It validates password minimum length
+ ✔ It validates password confirmation matches
+ ✔ It fails reset for nonexistent user
+ ✔ It can complete full password reset flow
+ ✔ It respects rate limiting on forgot password
+ ✔ It respects rate limiting on reset password
+
+Permission Api (Tests\Feature\Api\V1\PermissionApi)
+ ✔ Unauthenticated user cannot access permissions index
+ ✔ Unauthenticated user cannot access permission show
+ ✔ Admin can view permissions index
+ ✔ Staff can view permissions index
+ ✔ Student cannot view permissions index
+ ✔ Admin can view specific permission
+ ✔ Staff can view specific permission
+ ✔ Student cannot view specific permission
+ ✔ Permissions index with roles included
+ ✔ Permission show with roles included
+ ✔ Permission show returns 404 for nonexistent permission
+ ✔ Permissions index supports pagination
+ ✔ Permissions are ordered by name
+
+Process Course Import (Tests\Unit\Jobs\ProcessCourseImport)
+ ✔ Processes valid csv data successfully
+ ✔ Handles invalid data gracefully
+ ✔ Updates existing courses
+ ✔ Handles missing prerequisites gracefully
+ ✔ Handles empty csv file
+ ✔ Handles missing required headers
+ ✔ Cleans up uploaded file after processing
+
+Process Grade Import (Tests\Unit\Jobs\ProcessGradeImport)
+ ✔ It processes valid grade csv successfully
+ ✔ It handles invalid student ids
+ ✔ It validates grade values
+ ✔ It skips duplicate grades
+ ✔ It handles missing headers
+ ✔ It handles empty csv file
+ ✔ It processes mixed valid and invalid rows
+
+Program Api (Tests\Feature\Api\V1\ProgramApi)
+ ✔ Can get a paginated list of programs
+ ✔ Can filter programs by department id
+ ✔ Can get a single program
+ ✔ Can create a new program
+ ✔ Can update a program
+ ✔ Can delete a program
+
+Program Choice Api (Tests\Feature\Api\V1\ProgramChoiceApi)
+ ✔ Unauthenticated user cannot access program choices
+ ✔ Admin can list all program choices for any application
+ ✔ Student can only view program choices for their own application
+ ✔ Program choices are ordered by preference
+ ✔ Student can create program choice for their own application
+ ✔ Student cannot create program choice for another students application
+ ✔ Admin can create program choice for any application
+ ✔ Validation fails for missing required fields
+ ✔ Validation fails for non existent program
+ ✔ Validation fails for duplicate preference order
+ ✔ Can view specific program choice
+ ✔ Student cannot view other students program choice
+ ✔ Student can update their own draft program choice
+ ✔ Student cannot update program choice for submitted application
+ ✔ Student cannot update status field
+ ✔ Admin can update any program choice including status
+ ✔ Validation fails for duplicate preference order in update
+ ✔ Student can delete their own draft program choice
+ ✔ Student cannot delete program choice from submitted application
+ ✔ Admin can delete any program choice
+ ✔ Returns 404 for non existent program choice
+ ✔ Staff can list program choices for any application
+ ✔ Staff can update program choice status
+
+Role Api (Tests\Feature\Api\V1\RoleApi)
+ ✔ Unauthenticated user cannot access roles index
+ ✔ Unauthenticated user cannot access role show
+ ✔ Admin can view roles index
+ ✔ Staff can view roles index
+ ✔ Student cannot view roles index
+ ✔ Admin can view specific role
+ ✔ Staff can view specific role
+ ✔ Student cannot view specific role
+ ✔ Roles index with permissions included
+ ✔ Role show with permissions included
+ ✔ Role show returns 404 for nonexistent role
+ ✔ Roles index supports pagination
+ ✔ Roles are ordered by name
+
+Role Based Access Control (Tests\Feature\RoleBasedAccessControl)
+ ✔ Can create role
+ ✔ Can create permission
+ ✔ User can have multiple roles
+ ✔ Role can have multiple permissions
+ ✔ Permission can belong to multiple roles
+ ✔ User role relationship cascade delete
+ ✔ Permission role relationship cascade delete
+ ✔ Role names must be unique
+ ✔ Permission names must be unique
+ ✔ Can create complete rbac scenario
+ ✔ User has role helper method
+ ✔ User has any role helper method
+ ✔ User has permission helper method
+ ✔ User get all permissions helper method
+ ✔ Role permission seeder creates expected data
+
+Role Management Api (Tests\Feature\Api\V1\RoleManagementApi)
+ ✔ Non admin user cannot access role endpoints
+ ✔ Admin user can list roles
+ ✔ Admin user can create role
+ ✔ Admin user can view specific role
+ ✔ Admin user can view role with permissions
+ ✔ Admin user can update role
+ ✔ Admin user can delete role
+ ✔ Admin user can sync permissions to role
+ ✔ Role name must be unique
+ ✔ Role name is required
+ ✔ Sync permissions requires valid permission ids
+ ✔ Sync permissions requires permissions array
+ ✔ User with roles manage permission gains access
+
+Room Api (Tests\Feature\Api\V1\RoomApi)
+ ✔ Can get all rooms paginated
+ ✔ Can filter rooms by building
+ ✔ Can create a room
+ ✔ Create room fails with duplicate number in same building
+ ✔ Can create room with same number in different building
+ ✔ Can get a single room
+ ✔ Can update a room
+ ✔ Can delete a room
+
+Security Headers (Tests\Feature\Feature\SecurityHeaders)
+ ✔ Security headers are added to web responses
+ ✔ Security headers are added to api responses
+ ✔ Security headers are added to authenticated api responses
+ ✔ Security headers are added to error responses
+ ✔ Security headers are added to validation error responses
+ ✔ Security headers are added to unauthorized responses
+ ✔ Security headers are added to forbidden responses
+ ✔ Hsts header is only added in production
+ ✔ Content security policy header is properly configured
+ ✔ Sensitive server headers are removed
+
+Soft Deletes (Tests\Feature\SoftDeletes)
+ ✔ Admin can soft delete and restore student
+ ✔ Admin can force delete student
+ ✔ Admin can soft delete and restore course
+ ✔ Admin can soft delete and restore enrollment
+ ✔ Admin can soft delete and restore document
+ ✔ Admin can soft delete and restore admission application
+ ✔ Non admin cannot restore resources
+ ✔ Non admin cannot force delete resources
+ ✔ Restore endpoints return 404 for non existent resources
+ ✔ Force delete endpoints return 404 for non existent resources
+ ✔ Soft deleted resources are not visible in normal queries
+ ✔ Models have soft deletes trait
+
+Staff Api (Tests\Feature\Api\V1\StaffApi)
+ ✔ Can get all staff paginated
+ ✔ Can filter staff by department
+ ✔ Can create a staff member
+ ✔ Create staff validation fails
+ ✔ Can get a single staff member
+ ✔ Can update a staff member
+ ✔ Can delete a staff member
+
+Structured Logging (Tests\Feature\Feature\StructuredLogging)
+ ✔ It adds trace id to request headers
+ ✔ It preserves existing request id header
+ ✔ It adds trace id to log context
+ ✔ It includes request metadata in log context
+ ✔ It works with different http methods
+ ✔ It handles api errors with trace id
+ ✔ It applies only to api routes
+ ✔ Trace id persists through request lifecycle
+ ✔ It actually logs with structured format
+
+Student Api (Tests\Feature\Api\V1\StudentApi)
+ ✔ Unauthenticated user cannot access student endpoints
+ ✔ Admin can view all students
+ ✔ Staff can view all students
+ ✔ Student can only view their own record from index
+ ✔ Student can view their own record from show
+ ✔ Student cannot view another students record
+ ✔ Student index can include user data
+ ✔ Student show can include user data
+ ✔ Admin can create student
+ ✔ Admin can update student
+ ✔ Admin can delete student
+ ✔ Store requires validation
+
+Student Enrollment Flow (Tests\Feature\Feature\StudentEnrollmentFlow)
+ ✔ Complete enrollment flow
+ ✔ Workflow with application rejection
+ ✔ Course waitlist workflow
+
+Term Api (Tests\Feature\Api\V1\TermApi)
+ ✔ Can get all terms paginated
+ ✔ Can filter terms by academic year
+ ✔ Can create a term
+ ✔ Create term fails with duplicate year and semester
+ ✔ Can get a single term
+ ✔ Can update a term
+ ✔ Can delete a term
+
+ERRORS!
+Tests: 420, Assertions: 2435, Errors: 2, Deprecations: 1, PHPUnit Deprecations: 241.
+

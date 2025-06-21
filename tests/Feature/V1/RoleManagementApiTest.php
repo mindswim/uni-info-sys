@@ -24,31 +24,30 @@ class RoleManagementApiTest extends TestCase
     /** @test */
     public function non_admin_user_cannot_access_role_endpoints(): void
     {
-        // Create a student user
-        $user = User::factory()->create();
-        $studentRole = Role::where('name', 'student')->first();
-        $user->roles()->attach($studentRole);
+        $regularUser = User::factory()->create();
+        $role = Role::factory()->create(['name' => 'test-role']);
         
-        Sanctum::actingAs($user);
+        // Create a valid permission for the sync test
+        $permission = Permission::factory()->create(['name' => 'test.permission']);
 
-        // Test all role endpoints
+        $this->actingAs($regularUser, 'sanctum');
+
         $response = $this->getJson('/api/v1/roles');
         $response->assertStatus(403);
 
-        $response = $this->postJson('/api/v1/roles', ['name' => 'Test Role']);
+        $response = $this->postJson('/api/v1/roles', ['name' => 'new-role']);
         $response->assertStatus(403);
 
-        $role = Role::first();
         $response = $this->getJson("/api/v1/roles/{$role->id}");
         $response->assertStatus(403);
 
-        $response = $this->putJson("/api/v1/roles/{$role->id}", ['name' => 'Updated Role']);
+        $response = $this->putJson("/api/v1/roles/{$role->id}", ['name' => 'updated-role']);
         $response->assertStatus(403);
 
         $response = $this->deleteJson("/api/v1/roles/{$role->id}");
         $response->assertStatus(403);
 
-        $response = $this->postJson("/api/v1/roles/{$role->id}/permissions", ['permissions' => [1]]);
+        $response = $this->postJson("/api/v1/roles/{$role->id}/permissions", ['permissions' => [$permission->id]]);
         $response->assertStatus(403);
     }
 

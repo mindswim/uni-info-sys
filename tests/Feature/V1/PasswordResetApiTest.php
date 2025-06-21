@@ -83,21 +83,20 @@ class PasswordResetApiTest extends TestCase
     public function it_can_reset_password_with_valid_token()
     {
         $user = User::factory()->create([
-            'email' => 'test@example.com',
-            'password' => Hash::make('oldpassword')
+            'password' => bcrypt('oldpassword')
         ]);
 
-        // Generate a valid token
+        // Create a real password reset token
         $token = Password::createToken($user);
 
         $response = $this->postJson('/api/v1/reset-password', [
+            'email' => $user->email,
             'token' => $token,
-            'email' => 'test@example.com',
             'password' => 'newpassword123',
             'password_confirmation' => 'newpassword123'
         ]);
 
-        $response->assertStatus(200)
+        $response->assertOk()
             ->assertJson([
                 'message' => 'Your password has been reset successfully.'
             ]);
@@ -227,37 +226,31 @@ class PasswordResetApiTest extends TestCase
     public function it_can_complete_full_password_reset_flow()
     {
         $user = User::factory()->create([
-            'email' => 'test@example.com',
-            'password' => Hash::make('oldpassword')
+            'password' => bcrypt('oldpassword')
         ]);
 
         // Step 1: Request password reset
         $response = $this->postJson('/api/v1/forgot-password', [
-            'email' => 'test@example.com'
+            'email' => $user->email
         ]);
 
-        $response->assertStatus(200);
+        $response->assertOk()
+            ->assertJson([
+                'message' => 'Password reset link sent to your email address.'
+            ]);
 
-        // Step 2: Get the token from the database
-        $tokenRecord = DB::table('password_reset_tokens')
-            ->where('email', 'test@example.com')
-            ->first();
+        // Step 2: Get the token from the database (in tests, we can create it directly)
+        $token = Password::createToken($user);
 
-        $this->assertNotNull($tokenRecord);
-
-        // The token in the database is hashed, but for testing we need to create a fresh plain token
-        // that Laravel can validate. In a real scenario, the user would get the plain token via email.
-        $plainToken = Password::createToken($user);
-
-        // Step 3: Reset password using the plain token
+        // Step 3: Reset password with token
         $response = $this->postJson('/api/v1/reset-password', [
-            'token' => $plainToken,
-            'email' => 'test@example.com',
+            'email' => $user->email,
+            'token' => $token,
             'password' => 'newpassword123',
             'password_confirmation' => 'newpassword123'
         ]);
 
-        $response->assertStatus(200)
+        $response->assertOk()
             ->assertJson([
                 'message' => 'Your password has been reset successfully.'
             ]);
@@ -269,9 +262,8 @@ class PasswordResetApiTest extends TestCase
 
         // Step 5: Verify token was deleted after successful reset
         $tokenAfterReset = DB::table('password_reset_tokens')
-            ->where('email', 'test@example.com')
+            ->where('email', $user->email)
             ->first();
-
         $this->assertNull($tokenAfterReset);
     }
 

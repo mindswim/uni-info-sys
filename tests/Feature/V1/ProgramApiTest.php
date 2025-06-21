@@ -91,15 +91,17 @@ class ProgramApiTest extends TestCase
     /** @test */
     public function can_create_a_new_program()
     {
-        $department = Department::factory()->for(Faculty::factory())->create();
+        $faculty = Faculty::factory()->create();
+        $department = Department::factory()->create(['faculty_id' => $faculty->id]);
+        
         $programData = [
             'name' => 'B.Sc. in Extraordinary Gastronomy',
             'department_id' => $department->id,
             'degree_level' => 'Bachelors',
             'duration' => 4,
-            'description' => 'A delicious program.',
-            'requirements' => 'A passion for food.',
-            'capacity' => 50,
+            'description' => 'A unique program focusing on molecular cuisine and food science',
+            'requirements' => 'High school diploma with science background',
+            'capacity' => 50
         ];
 
         $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/programs', $programData);

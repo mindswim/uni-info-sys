@@ -136,15 +136,19 @@ class ProgramChoiceApiTest extends TestCase
     /** @test */
     public function program_choices_are_ordered_by_preference()
     {
+        // Create program choices with different preference orders
+        $program1 = Program::factory()->create();
+        $program2 = Program::factory()->create();
+        
         ProgramChoice::factory()->create([
             'application_id' => $this->application->id,
-            'program_id' => $this->program->id,
+            'program_id' => $program2->id,
             'preference_order' => 2
         ]);
-
+        
         ProgramChoice::factory()->create([
             'application_id' => $this->application->id,
-            'program_id' => $this->otherProgram->id,
+            'program_id' => $program1->id,
             'preference_order' => 1
         ]);
 
@@ -152,9 +156,9 @@ class ProgramChoiceApiTest extends TestCase
         $response = $this->getJson("/api/v1/admission-applications/{$this->application->id}/program-choices");
 
         $response->assertStatus(200)
-                 ->assertJsonCount(2);
+                 ->assertJsonCount(2, 'data');
 
-        $choices = $response->json();
+        $choices = $response->json('data');
         $this->assertEquals(1, $choices[0]['preference_order']);
         $this->assertEquals(2, $choices[1]['preference_order']);
     }

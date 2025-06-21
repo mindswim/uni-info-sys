@@ -116,7 +116,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 });
 
 // Unprotected route for creating tokens (still rate limited)
-Route::post('/v1/tokens/create', [\App\Http\Controllers\Api\V1\AuthController::class, 'login'])
+Route::post('/v1/tokens/create', [\App\Http\Controllers\Api\V1\Auth\AuthController::class, 'login'])
     ->middleware('throttle:api');
 
 // Password reset routes (unauthenticated)
@@ -192,5 +192,5 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
 }); 
 
 // Prometheus metrics endpoint (unauthenticated for monitoring systems)
-Route::get('/metrics', [\App\Http\Controllers\MetricsController::class, 'index'])
+Route::get('/metrics', [\App\Http\Controllers\Api\V1\MetricsController::class, 'index'])
     ->middleware('throttle:60,1'); // Allow 60 requests per minute for metrics scraping 

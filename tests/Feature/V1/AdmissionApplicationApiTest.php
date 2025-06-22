@@ -321,8 +321,14 @@ class AdmissionApplicationApiTest extends TestCase
     {
         Sanctum::actingAs($this->studentUser);
 
-        $ownApplication = AdmissionApplication::factory()->create(['student_id' => $this->student->id]);
-        $otherApplication = AdmissionApplication::factory()->create(['student_id' => $this->otherStudent->id]);
+        $ownApplication = AdmissionApplication::factory()->create([
+            'student_id' => $this->student->id,
+            'term_id' => $this->term->id  // Reuse existing term to avoid unique constraint violation
+        ]);
+        $otherApplication = AdmissionApplication::factory()->create([
+            'student_id' => $this->otherStudent->id,
+            'term_id' => $this->term->id  // Reuse existing term to avoid unique constraint violation
+        ]);
 
         // Can view own application
         $response = $this->getJson("/api/v1/admission-applications/{$ownApplication->id}");

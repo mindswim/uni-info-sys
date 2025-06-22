@@ -193,4 +193,62 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
 
 // Prometheus metrics endpoint (unauthenticated for monitoring systems)
 Route::get('/metrics', [\App\Http\Controllers\Api\V1\MetricsController::class, 'index'])
-    ->middleware('throttle:60,1'); // Allow 60 requests per minute for metrics scraping 
+    ->middleware('throttle:60,1'); // Allow 60 requests per minute for metrics scraping
+
+// TEMPORARY: Data viewer for development (REMOVE BEFORE PRODUCTION!)
+Route::prefix('data-viewer')->middleware('throttle:60,1')->group(function () {
+    Route::get('/{table}', function ($table, Request $request) {
+        $allowedTables = [
+            'students', 'users', 'courses', 'course_sections', 'enrollments',
+            'departments', 'faculties', 'programs', 'staff', 'terms',
+            'buildings', 'rooms', 'admission_applications', 'program_choices',
+            'academic_records', 'documents', 'roles', 'permissions'
+        ];
+        
+        if (!in_array($table, $allowedTables)) {
+            return response()->json(['error' => 'Table not allowed'], 400);
+        }
+        
+        $limit = min($request->get('limit', 25), 100);
+        
+        try {
+            $data = DB::table($table)->limit($limit)->get();
+            
+            $stats = [
+                'total_records' => DB::table($table)->count(),
+                'showing_records' => count($data),
+            ];
+            
+            // Add table-specific stats
+            switch ($table) {
+                case 'students':
+                    $stats['with_enrollments'] = DB::table('students')
+                        ->join('enrollments', 'students.id', '=', 'enrollments.student_id')
+                        ->distinct('students.id')
+                        ->count();
+                    break;
+                case 'enrollments':
+                    $stats['enrolled'] = DB::table($table)->where('status', 'enrolled')->count();
+                    $stats['waitlisted'] = DB::table($table)->where('status', 'waitlisted')->count();
+                    break;
+                case 'courses':
+                    $stats['with_sections'] = DB::table('courses')
+                        ->join('course_sections', 'courses.id', '=', 'course_sections.course_id')
+                        ->distinct('courses.id')
+                        ->count();
+                    break;
+            }
+            
+            return response()->json([
+                'data' => $data,
+                'stats' => $stats,
+                'table' => $table
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Database error: ' . $e->getMessage()
+            ], 500);
+        }
+    });
+}); 

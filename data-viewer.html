@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎓 University Database Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: white;
+            border-bottom: 1px solid #e1e5e9;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            color: #1a73e8;
+            margin: 0;
+        }
+        
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        select, button, input {
+            padding: 8px 12px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+        }
+        
+        button {
+            background: #1a73e8;
+            color: white;
+            cursor: pointer;
+            border: none;
+            font-weight: 500;
+        }
+        
+        button:hover {
+            background: #1557b0;
+        }
+        
+        button:disabled {
+            background: #dadce0;
+            cursor: not-allowed;
+        }
+        
+        .search-box {
+            width: 200px;
+        }
+        
+        .stats-bar {
+            background: #f1f3f4;
+            padding: 8px 20px;
+            border-bottom: 1px solid #e1e5e9;
+            font-size: 13px;
+            color: #5f6368;
+        }
+        
+        .stats-grid {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .stat-number {
+            font-weight: 600;
+            color: #1a73e8;
+        }
+        
+        .main-content {
+            height: calc(100vh - 120px);
+            overflow: auto;
+            background: white;
+        }
+        
+        .table-container {
+            min-width: 100%;
+            position: relative;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 13px;
+        }
+        
+        th {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e5e9;
+            border-right: 1px solid #e1e5e9;
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #3c4043;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        
+        th:last-child {
+            border-right: none;
+        }
+        
+        td {
+            border-bottom: 1px solid #e8eaed;
+            border-right: 1px solid #e8eaed;
+            padding: 8px 12px;
+            color: #3c4043;
+            white-space: nowrap;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        td:last-child {
+            border-right: none;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .relationship-link {
+            color: #1a73e8;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .relationship-link:hover {
+            text-decoration: underline;
+        }
+        
+        .null-value {
+            color: #9aa0a6;
+            font-style: italic;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #5f6368;
+        }
+        
+        .error {
+            background: #fce8e6;
+            color: #d93025;
+            padding: 12px 20px;
+            border-left: 4px solid #d93025;
+            margin: 20px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #5f6368;
+        }
+        
+        .table-info {
+            background: #e8f0fe;
+            border: 1px solid #1a73e8;
+            border-radius: 4px;
+            padding: 12px;
+            margin: 20px;
+            font-size: 13px;
+        }
+        
+        .table-info strong {
+            color: #1a73e8;
+        }
+        
+        .quick-insights {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            padding: 12px;
+            margin: 20px;
+            font-size: 13px;
+        }
+        
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e1e5e9;
+        }
+        
+        .model-relationships {
+            background: #f1f3f4;
+            padding: 8px 20px;
+            font-size: 12px;
+            color: #5f6368;
+            border-bottom: 1px solid #e1e5e9;
+        }
+        
+        .relationship-chip {
+            display: inline-block;
+            background: #e8f0fe;
+            color: #1a73e8;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin: 2px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        
+        .relationship-chip:hover {
+            background: #d2e3fc;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎓 University Database Explorer</h1>
+        <div class="controls">
+            <div class="control-group">
+                <label>Table:</label>
+                <select id="tableSelect">
+                    <option value="">-- Choose a table --</option>
+                    <optgroup label="👥 Core Entities">
+                        <option value="students">Students</option>
+                        <option value="staff">Staff</option>
+                        <option value="users">Users (Login Accounts)</option>
+                    </optgroup>
+                    <optgroup label="📚 Academic Structure">
+                        <option value="faculties">Faculties</option>
+                        <option value="departments">Departments</option>
+                        <option value="programs">Programs</option>
+                        <option value="courses">Courses</option>
+                        <option value="course_sections">Course Sections</option>
+                        <option value="terms">Terms</option>
+                    </optgroup>
+                    <optgroup label="📝 Applications & Enrollment">
+                        <option value="admission_applications">Admission Applications</option>
+                        <option value="program_choices">Program Choices</option>
+                        <option value="enrollments">Enrollments</option>
+                        <option value="academic_records">Academic Records</option>
+                    </optgroup>
+                    <optgroup label="🏢 Infrastructure">
+                        <option value="buildings">Buildings</option>
+                        <option value="rooms">Rooms</option>
+                        <option value="documents">Documents</option>
+                    </optgroup>
+                    <optgroup label="🔐 Security">
+                        <option value="roles">Roles</option>
+                        <option value="permissions">Permissions</option>
+                    </optgroup>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label>Records:</label>
+                <select id="limitSelect">
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="250">250</option>
+                    <option value="500">500</option>
+                    <option value="1000">1000 (Max)</option>
+                </select>
+            </div>
+            
+            <input type="text" id="searchBox" class="search-box" placeholder="Search records...">
+            
+            <button onclick="loadTable()" id="loadBtn">Load Data</button>
+            <button onclick="exportCSV()" id="exportBtn" disabled>Export CSV</button>
+            <button onclick="showQuickInsights()" id="insightsBtn" disabled>Quick Insights</button>
+        </div>
+    </div>
+
+    <div id="statsBar" class="stats-bar" style="display:none;"></div>
+    
+    <div id="modelRelationships" class="model-relationships" style="display:none;"></div>
+    
+    <div id="tableInfo" class="table-info" style="display:none;"></div>
+    
+    <div id="quickInsights" class="quick-insights" style="display:none;"></div>
+    
+    <div class="main-content" id="mainContent">
+        <div id="loading" class="loading" style="display:none;">
+            <div>🔄 Loading data...</div>
+        </div>
+        
+        <div id="error" class="error" style="display:none;"></div>
+        
+        <div id="emptyState" class="empty-state">
+            <h3>🎓 Welcome to University Database Explorer</h3>
+            <p>Select a table from the dropdown to explore your Laravel models and data relationships.</p>
+            <br>
+            <p><strong>💡 Pro Tip:</strong> This viewer connects directly to your Laravel APIs, so data is always current!</p>
+        </div>
+        
+        <div class="table-container" id="tableContainer" style="display:none;">
+            <table id="dataTable"></table>
+        </div>
+    </div>
+    
+    <div id="pagination" class="pagination" style="display:none;">
+        <span id="recordInfo"></span>
+        <div style="margin-left: auto;">
+            <button onclick="loadMore()" id="loadMoreBtn" disabled>Load More Records</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost/api/data-viewer';
+        let currentData = [];
+        let currentTable = '';
+        let currentStats = {};
+        let filteredData = [];
+        
+        // Laravel Model Relationships (for educational purposes)
+        const MODEL_RELATIONSHIPS = {
+            students: ['User (belongsTo)', 'Enrollments (hasMany)', 'AdmissionApplications (hasMany)', 'AcademicRecords (hasMany)', 'Documents (hasMany)'],
+            enrollments: ['Student (belongsTo)', 'CourseSection (belongsTo)'],
+            courses: ['Department (belongsTo)', 'CourseSections (hasMany)'],
+            course_sections: ['Course (belongsTo)', 'Term (belongsTo)', 'Staff/Instructor (belongsTo)', 'Room (belongsTo)', 'Enrollments (hasMany)'],
+            departments: ['Faculty (belongsTo)', 'Programs (hasMany)', 'Courses (hasMany)', 'Staff (hasMany)'],
+            admission_applications: ['Student (belongsTo)', 'Term (belongsTo)', 'ProgramChoices (hasMany)'],
+            staff: ['User (belongsTo)', 'Department (belongsTo)', 'CourseSections (hasMany as instructor)'],
+            users: ['Student (hasOne)', 'Staff (hasOne)', 'Roles (belongsToMany)']
+        };
+        
+        // Table descriptions for context
+        const TABLE_INFO = {
+            students: "Student profiles with personal information, linked to User accounts for authentication. Each student can have multiple enrollments and applications.",
+            enrollments: "The core relationship between students and course sections. Tracks enrollment status (enrolled, waitlisted, completed, withdrawn) and grades.",
+            courses: "Course catalog with course codes (CS101, MATH101), titles, credits, and descriptions. Courses belong to departments.",
+            course_sections: "Actual class offerings each term. One course can have multiple sections with different instructors, rooms, and schedules.",
+            departments: "Academic departments (CS, MATH, ENG) that organize courses and programs within faculties.",
+            admission_applications: "Student applications to the university, tracked by status (pending, accepted, rejected) and linked to program choices.",
+            staff: "Faculty and administrative staff who can be instructors for course sections and belong to departments.",
+            users: "Authentication accounts that can be linked to students, staff, or admins through the role system."
+        };
+
+        async function loadTable() {
+            const table = document.getElementById('tableSelect').value;
+            const limit = document.getElementById('limitSelect').value;
+            
+            if (!table) {
+                showError('Please select a table');
+                return;
+            }
+            
+            currentTable = table;
+            showLoading(true);
+            hideError();
+            hideEmptyState();
+            
+            try {
+                const response = await fetch(`${API_BASE}/${table}?limit=${limit}`);
+                if (!response.ok) throw new Error('Failed to load data');
+                
+                const data = await response.json();
+                currentData = data.data;
+                currentStats = data.stats;
+                filteredData = [...currentData];
+                
+                displayTable();
+                displayStats();
+                displayTableInfo();
+                displayModelRelationships();
+                
+                document.getElementById('exportBtn').disabled = false;
+                document.getElementById('insightsBtn').disabled = false;
+                
+            } catch (error) {
+                showError('Error loading data. Make sure Laravel is running and the API route is available.');
+                console.error('API Error:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayTable() {
+            if (!filteredData || filteredData.length === 0) {
+                document.getElementById('tableContainer').style.display = 'none';
+                showEmptyState();
+                return;
+            }
+            
+            const columns = Object.keys(filteredData[0]);
+            let html = '<thead><tr>';
+            
+            // Headers with Laravel context
+            columns.forEach(col => {
+                let displayName = col;
+                if (col.endsWith('_id')) {
+                    displayName = `${col} 🔗`;
+                } else if (col.includes('_at')) {
+                    displayName = `${col} 📅`;
+                } else if (col === 'status') {
+                    displayName = `${col} 📊`;
+                }
+                html += `<th title="${getColumnTooltip(col)}">${displayName}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            // Rows with enhanced formatting
+            filteredData.forEach((row, index) => {
+                html += '<tr>';
+                columns.forEach(col => {
+                    let value = row[col];
+                    let cellClass = '';
+                    
+                    // Format based on column type
+                    if (col.endsWith('_id') && value) {
+                        const relatedTable = getRelatedTable(col);
+                        value = `<a class="relationship-link" onclick="exploreRelationship('${relatedTable}', ${value})" title="View ${relatedTable} record">${value}</a>`;
+                    } else if (col.includes('_at') && value) {
+                        value = new Date(value).toLocaleString();
+                    } else if (col === 'status' && value) {
+                        value = `<span style="background: ${getStatusColor(value)}; padding: 2px 8px; border-radius: 12px; font-size: 11px; color: white;">${value}</span>`;
+                    } else if (value === null) {
+                        value = '<span class="null-value">null</span>';
+                    } else if (typeof value === 'string' && value.length > 50) {
+                        value = `<span title="${value}">${value.substring(0, 47)}...</span>`;
+                    }
+                    
+                    html += `<td>${value}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody>';
+            document.getElementById('dataTable').innerHTML = html;
+            document.getElementById('tableContainer').style.display = 'block';
+            
+            updatePagination();
+        }
+
+        function displayStats() {
+            if (!currentStats) return;
+            
+            let html = '<div class="stats-grid">';
+            Object.entries(currentStats).forEach(([key, value]) => {
+                const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                html += `
+                    <div class="stat-item">
+                        <span>${label}:</span>
+                        <span class="stat-number">${value.toLocaleString()}</span>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            document.getElementById('statsBar').innerHTML = html;
+            document.getElementById('statsBar').style.display = 'block';
+        }
+
+        function displayTableInfo() {
+            const info = TABLE_INFO[currentTable];
+            if (info) {
+                document.getElementById('tableInfo').innerHTML = `
+                    <strong>About ${currentTable}:</strong> ${info}
+                `;
+                document.getElementById('tableInfo').style.display = 'block';
+            }
+        }
+
+        function displayModelRelationships() {
+            const relationships = MODEL_RELATIONSHIPS[currentTable];
+            if (relationships) {
+                let html = '<strong>Laravel Model Relationships:</strong> ';
+                relationships.forEach(rel => {
+                    html += `<span class="relationship-chip" title="Click to explore">${rel}</span>`;
+                });
+                
+                document.getElementById('modelRelationships').innerHTML = html;
+                document.getElementById('modelRelationships').style.display = 'block';
+            }
+        }
+
+        function showQuickInsights() {
+            if (!currentData.length) return;
+            
+            let insights = [];
+            
+            // Generate Laravel-specific insights
+            if (currentTable === 'students') {
+                const enrolledCount = currentStats.with_enrollments || 0;
+                const totalStudents = currentStats.total_records || 0;
+                const enrollmentRate = ((enrolledCount / totalStudents) * 100).toFixed(1);
+                insights.push(`📊 ${enrollmentRate}% of students have active enrollments`);
+                
+                if (currentData.length > 0) {
+                    const genders = currentData.reduce((acc, s) => {
+                        acc[s.gender] = (acc[s.gender] || 0) + 1;
+                        return acc;
+                    }, {});
+                    insights.push(`👥 Gender distribution: ${Object.entries(genders).map(([k,v]) => `${k}: ${v}`).join(', ')}`);
+                }
+            } else if (currentTable === 'enrollments') {
+                const enrolled = currentStats.enrolled || 0;
+                const waitlisted = currentStats.waitlisted || 0;
+                insights.push(`✅ ${enrolled} enrolled, ⏳ ${waitlisted} waitlisted`);
+                insights.push(`🎯 ${((enrolled / (enrolled + waitlisted)) * 100).toFixed(1)}% enrollment success rate`);
+            } else if (currentTable === 'courses') {
+                const withSections = currentStats.with_sections || 0;
+                const totalCourses = currentStats.total_records || 0;
+                insights.push(`📚 ${withSections}/${totalCourses} courses have active sections this term`);
+            }
+            
+            if (insights.length > 0) {
+                document.getElementById('quickInsights').innerHTML = `
+                    <strong>💡 Quick Insights:</strong><br>
+                    ${insights.join('<br>')}
+                `;
+                document.getElementById('quickInsights').style.display = 'block';
+            }
+        }
+
+        // Search functionality
+        document.getElementById('searchBox').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            if (!query) {
+                filteredData = [...currentData];
+            } else {
+                filteredData = currentData.filter(row => {
+                    return Object.values(row).some(value => 
+                        value && value.toString().toLowerCase().includes(query)
+                    );
+                });
+            }
+            displayTable();
+        });
+
+        function getRelatedTable(columnName) {
+            const mapping = {
+                'user_id': 'users',
+                'student_id': 'students',
+                'course_id': 'courses',
+                'course_section_id': 'course_sections',
+                'department_id': 'departments',
+                'faculty_id': 'faculties',
+                'program_id': 'programs',
+                'term_id': 'terms',
+                'instructor_id': 'staff',
+                'room_id': 'rooms',
+                'building_id': 'buildings'
+            };
+            return mapping[columnName] || 'unknown';
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                'enrolled': '#34a853',
+                'waitlisted': '#fbbc04',
+                'completed': '#4285f4',
+                'withdrawn': '#ea4335',
+                'accepted': '#34a853',
+                'pending': '#fbbc04',
+                'rejected': '#ea4335',
+                'open': '#34a853',
+                'closed': '#ea4335'
+            };
+            return colors[status] || '#9aa0a6';
+        }
+
+        function getColumnTooltip(column) {
+            const tooltips = {
+                'id': 'Primary key - unique identifier',
+                'created_at': 'Laravel timestamp - when record was created',
+                'updated_at': 'Laravel timestamp - when record was last updated',
+                'deleted_at': 'Soft delete timestamp - null means not deleted'
+            };
+            
+            if (column.endsWith('_id')) {
+                return `Foreign key relationship to ${getRelatedTable(column)} table`;
+            }
+            
+            return tooltips[column] || `Database column: ${column}`;
+        }
+
+        function exploreRelationship(table, id) {
+            document.getElementById('tableSelect').value = table;
+            loadTable();
+        }
+
+        function exportCSV() {
+            if (!filteredData || filteredData.length === 0) {
+                showError('No data to export');
+                return;
+            }
+            
+            const columns = Object.keys(filteredData[0]);
+            let csv = columns.join(',') + '\n';
+            
+            filteredData.forEach(row => {
+                csv += columns.map(col => {
+                    let value = row[col];
+                    if (value === null) value = '';
+                    if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+                        value = `"${value.replace(/"/g, '""')}"`;
+                    }
+                    return value;
+                }).join(',') + '\n';
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentTable}_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function updatePagination() {
+            const showing = filteredData.length;
+            const total = currentStats.total_records || 0;
+            
+            document.getElementById('recordInfo').textContent = 
+                `Showing ${showing.toLocaleString()} of ${total.toLocaleString()} records`;
+            
+            document.getElementById('loadMoreBtn').disabled = showing >= total;
+            document.getElementById('pagination').style.display = 'flex';
+        }
+
+        function loadMore() {
+            const currentLimit = parseInt(document.getElementById('limitSelect').value);
+            const newLimit = Math.min(currentLimit + 250, 1000);
+            document.getElementById('limitSelect').value = newLimit;
+            loadTable();
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+            document.getElementById('loadBtn').disabled = show;
+        }
+
+        function showError(message) {
+            document.getElementById('error').innerHTML = `❌ ${message}`;
+            document.getElementById('error').style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function showEmptyState() {
+            document.getElementById('emptyState').style.display = 'block';
+        }
+
+        function hideEmptyState() {
+            document.getElementById('emptyState').style.display = 'none';
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'r':
+                        e.preventDefault();
+                        loadTable();
+                        break;
+                    case 'e':
+                        e.preventDefault();
+                        if (!document.getElementById('exportBtn').disabled) {
+                            exportCSV();
+                        }
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

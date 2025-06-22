@@ -63,18 +63,18 @@ class DatabaseSeeder extends Seeder
         
         // Create specific faculties
         $faculties = [
-            Faculty::create(['name' => 'Faculty of Engineering']),
-            Faculty::create(['name' => 'Faculty of Arts & Sciences']),
-            Faculty::create(['name' => 'Faculty of Business']),
+            Faculty::firstOrCreate(['name' => 'Faculty of Engineering']),
+            Faculty::firstOrCreate(['name' => 'Faculty of Arts & Sciences']),
+            Faculty::firstOrCreate(['name' => 'Faculty of Business']),
         ];
         
         // Create specific departments
         $departments = [
-            Department::create(['faculty_id' => $faculties[0]->id, 'name' => 'Computer Science']),
-            Department::create(['faculty_id' => $faculties[0]->id, 'name' => 'Electrical Engineering']),  
-            Department::create(['faculty_id' => $faculties[1]->id, 'name' => 'Mathematics']),
-            Department::create(['faculty_id' => $faculties[1]->id, 'name' => 'English']),
-            Department::create(['faculty_id' => $faculties[2]->id, 'name' => 'Business Administration']),
+            Department::firstOrCreate(['code' => 'CS'], ['faculty_id' => $faculties[0]->id, 'name' => 'Computer Science']),
+            Department::firstOrCreate(['code' => 'EE'], ['faculty_id' => $faculties[0]->id, 'name' => 'Electrical Engineering']),  
+            Department::firstOrCreate(['code' => 'MATH'], ['faculty_id' => $faculties[1]->id, 'name' => 'Mathematics']),
+            Department::firstOrCreate(['code' => 'ENG'], ['faculty_id' => $faculties[1]->id, 'name' => 'English']),
+            Department::firstOrCreate(['code' => 'BUS'], ['faculty_id' => $faculties[2]->id, 'name' => 'Business Administration']),
         ];
         
         // Create specific programs
@@ -118,8 +118,17 @@ class DatabaseSeeder extends Seeder
             ]));
         }
         
-        // Create staff
-        Staff::factory()->count(25)->create();
+        // Create staff - assign to existing departments
+        for ($i = 0; $i < 25; $i++) {
+            $user = User::factory()->create();
+            Staff::create([
+                'user_id' => $user->id,
+                'department_id' => $departments[array_rand($departments)]->id,
+                'job_title' => fake()->jobTitle(),
+                'bio' => fake()->paragraph(),
+                'office_location' => 'Building ' . fake()->buildingNumber() . ', Room ' . fake()->randomNumber(3),
+            ]);
+        }
     }
     
     private function seedInfrastructure(): void

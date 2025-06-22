@@ -495,7 +495,181 @@ When demonstrating your system:
 
 ## Next Steps for Real-World Testing
 
-// ... existing code ... 
+### 1. Create Integration Test Scenarios
+
+Create a new test file `tests/Feature/WorkflowIntegrationTest.php`:
+
+```php
+class WorkflowIntegrationTest extends TestCase
+{
+    public function test_complete_student_lifecycle()
+    {
+        // 1. Student registers
+        $response = $this->postJson('/api/v1/auth/register', [...]);
+        
+        // 2. Student completes profile
+        $this->actingAs($user)->putJson('/api/v1/students/'.$student->id, [...]);
+        
+        // 3. Student applies for admission
+        $this->actingAs($user)->postJson('/api/v1/admission-applications', [...]);
+        
+        // 4. Admin reviews and accepts
+        $this->actingAs($admin)->putJson('/api/v1/admission-applications/'.$app->id, [
+            'status' => 'accepted'
+        ]);
+        
+        // 5. Student enrolls in courses
+        $this->actingAs($user)->postJson('/api/v1/enrollments', [...]);
+        
+        // 6. Verify final state
+        $this->assertDatabaseHas('enrollments', [...]);
+    }
+}
+```
+
+### 2. Create Realistic Demo Data
+
+Enhance your seeder with more realistic scenarios:
+
+```php
+// In DatabaseSeeder.php
+private function createRealisticStudentScenarios(): void
+{
+    // Scenario 1: High-achieving student
+    $topStudent = Student::factory()->create([
+        'first_name' => 'Emma',
+        'last_name' => 'Thompson',
+    ]);
+    
+    AcademicRecord::create([
+        'student_id' => $topStudent->id,
+        'gpa' => 3.95,
+        'institution_name' => 'Lincoln High School',
+        // ... more realistic data
+    ]);
+    
+    // Scenario 2: Student with waitlist situation
+    // Scenario 3: International student
+    // Scenario 4: Transfer student
+    // etc.
+}
+```
+
+### 3. API Testing Script
+
+Create `scripts/test-api-flows.sh`:
+
+```bash
+#!/bin/bash
+
+# Test complete admission flow
+echo "Testing Admission Flow..."
+
+# 1. Create student account
+RESPONSE=$(curl -X POST http://localhost/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test Student","email":"test@example.com","password":"password123"}')
+
+TOKEN=$(echo $RESPONSE | jq -r '.token')
+
+# 2. Submit application
+curl -X POST http://localhost/api/v1/admission-applications \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"term_id":1,"status":"submitted"}'
+
+# ... continue with full flow
+```
+
+### 4. Load Testing
+
+Create `tests/Performance/LoadTest.php`:
+
+```php
+class LoadTest extends TestCase
+{
+    public function test_enrollment_under_load()
+    {
+        $students = Student::factory()->count(100)->create();
+        $section = CourseSection::factory()->create(['capacity' => 30]);
+        
+        $responses = [];
+        foreach ($students as $student) {
+            $responses[] = $this->actingAs($student->user)
+                ->postJson('/api/v1/enrollments', [
+                    'course_section_id' => $section->id
+                ]);
+        }
+        
+        // Verify only 30 enrolled, rest waitlisted
+        $enrolled = collect($responses)->filter(fn($r) => 
+            $r->json('data.status') === 'enrolled'
+        )->count();
+        
+        $this->assertEquals(30, $enrolled);
+    }
+}
+```
+
+---
+
+## Demo & Portfolio Preparation
+
+### 1. Create Demo Scenarios
+
+Set up specific test accounts:
+- `student@demo.com` - A student with partial application
+- `admitted@demo.com` - An admitted student ready to enroll  
+- `enrolled@demo.com` - A current student with courses
+- `admin@demo.com` - Admin with full access
+
+### 2. API Documentation Enhancement
+
+Add example requests to your controllers:
+
+```php
+/**
+ * @OA\Post(
+ *     path="/api/v1/enrollments",
+ *     summary="Enroll in a course section",
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="course_section_id", type="integer", example=42),
+ *             @OA\Property(property="student_id", type="integer", example=1)
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Successfully enrolled",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", example="Enrolled successfully"),
+ *             @OA\Property(property="data", ref="#/components/schemas/EnrollmentResource")
+ *         )
+ *     )
+ * )
+ */
+```
+
+### 3. Create a Demo Script
+
+Create `demo/full-flow-demo.php`:
+
+```php
+// Demonstrate the complete student journey
+Artisan::call('db:seed', ['--class' => 'DemoSeeder']);
+
+$output = [];
+
+// Step 1: Show available programs
+$output['programs'] = Http::get('/api/v1/programs')->json();
+
+// Step 2: Student applies
+$output['application'] = Http::post('/api/v1/admission-applications', [...]);
+
+// ... continue through full flow
+
+file_put_contents('demo-output.json', json_encode($output, JSON_PRETTY_PRINT));
+``` 
 
 ---
 

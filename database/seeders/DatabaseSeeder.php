@@ -54,6 +54,11 @@ class DatabaseSeeder extends Seeder
         // Step 7: Create applications and enrollments
         $this->seedApplicationsAndEnrollments();
         
+        // Step 8: Create demo data
+        $this->call([
+            DemoSeeder::class,
+        ]);
+        
         Log::info('Database seeding completed successfully!');
     }
     

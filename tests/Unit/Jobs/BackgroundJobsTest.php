@@ -178,9 +178,10 @@ class BackgroundJobsTest extends TestCase
     {
         Queue::fake();
         
-        $enrollment = Enrollment::factory()->create();
-        $application = AdmissionApplication::factory()->create();
-        $courseSection = CourseSection::factory()->create();
+        // Create models with minimal data to avoid database interactions
+        $enrollment = new Enrollment(['id' => 1]);
+        $application = new AdmissionApplication(['id' => 1]);
+        $courseSection = new CourseSection(['id' => 1]);
         
         // Test job dispatching
         SendEnrollmentConfirmation::dispatch($enrollment, 'enrolled');
@@ -195,19 +196,24 @@ class BackgroundJobsTest extends TestCase
     /** @test */
     public function jobs_implement_should_queue_interface()
     {
+        // Create minimal model instances without database interaction
+        $enrollment = new Enrollment(['id' => 1]);
+        $application = new AdmissionApplication(['id' => 1]);
+        $courseSection = new CourseSection(['id' => 1]);
+        
         $this->assertInstanceOf(
             \Illuminate\Contracts\Queue\ShouldQueue::class,
-            new SendEnrollmentConfirmation(Enrollment::factory()->make())
+            new SendEnrollmentConfirmation($enrollment)
         );
         
         $this->assertInstanceOf(
             \Illuminate\Contracts\Queue\ShouldQueue::class,
-            new SendApplicationStatusNotification(AdmissionApplication::factory()->make())
+            new SendApplicationStatusNotification($application)
         );
         
         $this->assertInstanceOf(
             \Illuminate\Contracts\Queue\ShouldQueue::class,
-            new ProcessWaitlistPromotion(CourseSection::factory()->make())
+            new ProcessWaitlistPromotion($courseSection)
         );
     }
 }

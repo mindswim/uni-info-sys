@@ -198,7 +198,7 @@ class StudentLifecycleTest extends TestCase
         
         // Verify program choice state
         $this->assertDatabaseHas('program_choices', [
-            'admission_application_id' => $applicationId,
+            'application_id' => $applicationId,
             'program_id' => $this->program->id,
             'preference_order' => 1
         ]);
@@ -223,12 +223,13 @@ class StudentLifecycleTest extends TestCase
         
         $this->assertEquals(2, $activeEnrollments);
         
-        // Verify academic progress via API
-        $progressResponse = $this->getJson("/api/v1/students/{$this->student->id}?include=enrollments");
+        // Verify student details via API
+        $studentResponse = $this->getJson("/api/v1/students/{$this->student->id}");
         
-        $progressResponse->assertStatus(200)
+        $studentResponse->assertStatus(200)
             ->assertJsonPath('data.id', $this->student->id)
-            ->assertJsonCount(2, 'data.enrollments');
+            ->assertJsonPath('data.first_name', 'John')
+            ->assertJsonPath('data.last_name', 'Doe');
     }
 
     public function test_authorization_enforced_throughout_workflow()

@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Admissions System - Live Demo</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            text-align: center;
+        }
+
+        .demo-controls {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .persona-selector {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .persona-btn {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            background: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .persona-btn:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+        }
+
+        .persona-btn.active {
+            border-color: #3498db;
+            background: #e3f2fd;
+        }
+
+        .persona-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .persona-status {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .story-panel, .api-panel {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            height: 600px;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .status-submitted { background: #fff3cd; color: #856404; }
+        .status-accepted { background: #d4edda; color: #155724; }
+        .status-enrolled { background: #cce5ff; color: #004085; }
+        .status-waitlisted { background: #f8d7da; color: #721c24; }
+        .status-rejected { background: #e2e3e5; color: #383d41; }
+
+        .info-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .api-request, .api-response {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+
+        .api-request {
+            border-left: 4px solid #3498db;
+        }
+
+        .api-response {
+            border-left: 4px solid #27ae60;
+        }
+
+        .api-response.error {
+            border-left-color: #e74c3c;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .enrollment-list {
+            margin-top: 20px;
+        }
+
+        .enrollment-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .course-info {
+            flex: 1;
+        }
+
+        .course-code {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .course-title {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+
+        .demo-note {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .persona-selector {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🎓 University Admissions System Demo</h1>
+    </header>
+
+    <div class="container">
+        <div class="demo-controls">
+            <div class="demo-note">
+                <strong>👋 Welcome to the live demo!</strong> Select a persona below to see their journey through our university admissions system. 
+                The left panel tells their story, while the right panel shows the actual API calls happening behind the scenes.
+            </div>
+            
+            <div class="persona-selector">
+                <button class="persona-btn" onclick="selectPersona('admin')">
+                    <div class="persona-name">Dr. Elizabeth Harper</div>
+                    <div class="persona-status">System Administrator</div>
+                </button>
+                <button class="persona-btn" onclick="selectPersona('maria')">
+                    <div class="persona-name">Maria Rodriguez</div>
+                    <div class="persona-status">Just Applied (Mexico)</div>
+                </button>
+                <button class="persona-btn" onclick="selectPersona('david')">
+                    <div class="persona-name">David Park</div>
+                    <div class="persona-status">Enrolled Student (Korea)</div>
+                </button>
+                <button class="persona-btn" onclick="selectPersona('sophie')">
+                    <div class="persona-name">Sophie Turner</div>
+                    <div class="persona-status">Waitlisted (Local)</div>
+                </button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="story-panel">
+                <h2 class="panel-title">📖 Student Story</h2>
+                <div id="story-content">
+                    <p style="color: #666; text-align: center; padding: 40px;">
+                        Select a persona above to begin the demo...
+                    </p>
+                </div>
+            </div>
+
+            <div class="api-panel">
+                <h2 class="panel-title">🔧 API Activity</h2>
+                <div id="api-content">
+                    <p style="color: #666; text-align: center; padding: 40px;">
+                        API requests and responses will appear here...
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API configuration
+        const API_BASE = '/api/v1';
+        let currentToken = null;
+        let currentUser = null;
+
+        // Persona data
+        const personas = {
+            admin: {
+                email: 'admin@demo.com',
+                password: 'password',
+                story: 'System Administrator with full access'
+            },
+            maria: {
+                email: 'maria@demo.com',
+                password: 'password',
+                story: 'International student from Mexico who just submitted her application'
+            },
+            david: {
+                email: 'david@demo.com',
+                password: 'password',
+                story: 'Accepted student from South Korea, enrolled in AI and Data Structures'
+            },
+            sophie: {
+                email: 'sophie@demo.com',
+                password: 'password',
+                story: 'Local student waitlisted for the popular AI course'
+            }
+        };
+
+        // API helper function
+        async function apiCall(method, endpoint, data = null, showInPanel = true) {
+            const url = `${API_BASE}${endpoint}`;
+            const options = {
+                method: method,
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            if (currentToken) {
+                options.headers['Authorization'] = `Bearer ${currentToken}`;
+            }
+
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+
+            if (showInPanel) {
+                addApiRequest(method, endpoint, data);
+            }
+
+            try {
+                const response = await fetch(url, options);
+                const result = await response.json();
+                
+                if (showInPanel) {
+                    addApiResponse(response.status, result);
+                }
+                
+                return { ok: response.ok, status: response.status, data: result };
+            } catch (error) {
+                if (showInPanel) {
+                    addApiResponse(500, { error: error.message });
+                }
+                return { ok: false, status: 500, data: { error: error.message } };
+            }
+        }
+
+        // UI helper functions
+        function addApiRequest(method, endpoint, data) {
+            const apiContent = document.getElementById('api-content');
+            const requestHtml = `
+                <div class="api-request">
+                    <strong>${method}</strong> ${endpoint}
+                    ${data ? `<pre>${JSON.stringify(data, null, 2)}</pre>` : ''}
+                </div>
+            `;
+            apiContent.innerHTML += requestHtml;
+            apiContent.scrollTop = apiContent.scrollHeight;
+        }
+
+        function addApiResponse(status, data) {
+            const apiContent = document.getElementById('api-content');
+            const isError = status >= 400;
+            const responseHtml = `
+                <div class="api-response ${isError ? 'error' : ''}">
+                    <strong>Response ${status}</strong>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                </div>
+            `;
+            apiContent.innerHTML += responseHtml;
+            apiContent.scrollTop = apiContent.scrollHeight;
+        }
+
+        function updateStory(html) {
+            document.getElementById('story-content').innerHTML = html;
+        }
+
+        function clearPanels() {
+            document.getElementById('story-content').innerHTML = '<div class="loading">Loading...</div>';
+            document.getElementById('api-content').innerHTML = '';
+        }
+
+        // Persona selection
+        async function selectPersona(personaKey) {
+            // Update UI
+            document.querySelectorAll('.persona-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.persona-btn').classList.add('active');
+            
+            clearPanels();
+            
+            // Login as selected persona
+            const persona = personas[personaKey];
+            const loginResult = await apiCall('POST', '/tokens/create', {
+                email: persona.email,
+                password: persona.password,
+                device_name: 'demo'
+            });
+
+            if (!loginResult.ok) {
+                updateStory('<p style="color: red;">Login failed. Please check the demo data.</p>');
+                return;
+            }
+
+            currentToken = loginResult.data.token;
+            
+            // Load persona-specific story
+            switch (personaKey) {
+                case 'admin':
+                    await showAdminStory();
+                    break;
+                case 'maria':
+                    await showMariaStory();
+                    break;
+                case 'david':
+                    await showDavidStory();
+                    break;
+                case 'sophie':
+                    await showSophieStory();
+                    break;
+            }
+        }
+
+        // Story implementations
+        async function showAdminStory() {
+            updateStory(`
+                <div class="info-card">
+                    <h3>Dr. Elizabeth Harper</h3>
+                    <p>As the system administrator, Dr. Harper oversees all applications and enrollments.</p>
+                </div>
+                
+                <h4>📊 System Overview</h4>
+                <div id="admin-stats" class="loading">Loading statistics...</div>
+                
+                <div class="action-buttons">
+                    <button class="action-btn btn-primary" onclick="viewAllApplications()">
+                        View All Applications
+                    </button>
+                    <button class="action-btn btn-secondary" onclick="viewEnrollmentStats()">
+                        Enrollment Statistics
+                    </button>
+                </div>
+            `);
+
+            // Load admin dashboard data
+            const stats = await loadAdminStats();
+            document.getElementById('admin-stats').innerHTML = stats;
+        }
+
+        async function showMariaStory() {
+            updateStory(`
+                <div class="info-card">
+                    <h3>Maria Rodriguez</h3>
+                    <p>🇲🇽 International student from Mexico City</p>
+                    <p>High achiever with a 9.8/10 GPA from Instituto Tecnológico de México</p>
+                </div>
+                
+                <h4>Application Status</h4>
+                <div id="maria-status" class="loading">Loading application...</div>
+                
+                <div class="action-buttons">
+                    <button class="action-btn btn-primary" onclick="checkApplicationStatus('maria')">
+                        Refresh Status
+                    </button>
+                    <button class="action-btn btn-secondary" onclick="viewProgramChoices('maria')">
+                        View Program Choices
+                    </button>
+                </div>
+                
+                <div class="demo-note" style="margin-top: 20px;">
+                    <strong>Demo Scenario:</strong> Maria submitted her application 2 days ago and is anxiously waiting for a decision.
+                    As an admin, you could accept her application to see the next steps in her journey.
+                </div>
+            `);
+
+            await loadMariaStatus();
+        }
+
+        async function showDavidStory() {
+            updateStory(`
+                <div class="info-card">
+                    <h3>David Park</h3>
+                    <p>🇰🇷 International student from Seoul, South Korea</p>
+                    <p>Strong background in mathematics and programming competitions</p>
+                </div>
+                
+                <h4>Current Status</h4>
+                <p><span class="status-badge status-enrolled">Enrolled</span></p>
+                
+                <h4>My Courses</h4>
+                <div id="david-courses" class="loading">Loading enrollments...</div>
+                
+                <div class="action-buttons">
+                    <button class="action-btn btn-primary" onclick="viewMySchedule('david')">
+                        View Schedule
+                    </button>
+                    <button class="action-btn btn-secondary" onclick="exploreMoreCourses('david')">
+                        Add More Courses
+                    </button>
+                </div>
+                
+                <div class="demo-note" style="margin-top: 20px;">
+                    <strong>Demo Scenario:</strong> David secured one of only 2 spots in the highly competitive AI course.
+                    He's also enrolled in Data Structures to build his foundation.
+                </div>
+            `);
+
+            await loadDavidCourses();
+        }
+
+        async function showSophieStory() {
+            updateStory(`
+                <div class="info-card">
+                    <h3>Sophie Turner</h3>
+                    <p>🇺🇸 Local student from San Francisco</p>
+                    <p>Impressive portfolio of personal coding projects</p>
+                </div>
+                
+                <h4>Current Status</h4>
+                <p><span class="status-badge status-accepted">Accepted</span></p>
+                
+                <h4>My Enrollments</h4>
+                <div id="sophie-courses" class="loading">Loading enrollments...</div>
+                
+                <div class="action-buttons">
+                    <button class="action-btn btn-primary" onclick="checkWaitlistPosition('sophie')">
+                        Check Waitlist Position
+                    </button>
+                    <button class="action-btn btn-secondary" onclick="tryEnrollmentSwap('sophie')">
+                        Try Course Swap
+                    </button>
+                </div>
+                
+                <div class="demo-note" style="margin-top: 20px;">
+                    <strong>Demo Scenario:</strong> Sophie is waitlisted for the AI course that's already full.
+                    She's currently enrolled in Web Development while waiting for a spot to open up.
+                </div>
+            `);
+
+            await loadSophieCourses();
+        }
+
+        // Data loading functions
+        async function loadAdminStats() {
+            const studentsResult = await apiCall('GET', '/students?per_page=100');
+            const applicationsResult = await apiCall('GET', '/admission-applications?per_page=100');
+            
+            const totalStudents = studentsResult.data.meta?.total || 0;
+            const applications = applicationsResult.data.data || [];
+            
+            const submitted = applications.filter(a => a.status === 'submitted').length;
+            const accepted = applications.filter(a => a.status === 'accepted').length;
+            const rejected = applications.filter(a => a.status === 'rejected').length;
+
+            return `
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                    <div class="info-card">
+                        <h5>Total Students</h5>
+                        <p style="font-size: 2em; font-weight: bold;">${totalStudents}</p>
+                    </div>
+                    <div class="info-card">
+                        <h5>Pending Applications</h5>
+                        <p style="font-size: 2em; font-weight: bold;">${submitted}</p>
+                    </div>
+                    <div class="info-card">
+                        <h5>Accepted</h5>
+                        <p style="font-size: 2em; font-weight: bold; color: #27ae60;">${accepted}</p>
+                    </div>
+                    <div class="info-card">
+                        <h5>Rejected</h5>
+                        <p style="font-size: 2em; font-weight: bold; color: #e74c3c;">${rejected}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadMariaStatus() {
+            // Get Maria's student info
+            const meResult = await apiCall('GET', '/me', null, false);
+            if (meResult.ok && meResult.data.student) {
+                const studentId = meResult.data.student.id;
+                
+                // Get her application
+                const appResult = await apiCall('GET', `/admission-applications?student_id=${studentId}`);
+                if (appResult.ok && appResult.data.data.length > 0) {
+                    const app = appResult.data.data[0];
+                    const statusHtml = `
+                        <p>Application ID: ${app.id}</p>
+                        <p>Status: <span class="status-badge status-${app.status}">${app.status.toUpperCase()}</span></p>
+                        <p>Applied: ${new Date(app.application_date).toLocaleDateString()}</p>
+                        <p>Term: ${app.term.name}</p>
+                    `;
+                    document.getElementById('maria-status').innerHTML = statusHtml;
+                }
+            }
+        }
+
+        async function loadDavidCourses() {
+            const meResult = await apiCall('GET', '/me', null, false);
+            if (meResult.ok && meResult.data.student) {
+                const studentId = meResult.data.student.id;
+                
+                const enrollResult = await apiCall('GET', `/enrollments?student_id=${studentId}`);
+                if (enrollResult.ok) {
+                    const enrollments = enrollResult.data.data || [];
+                    let coursesHtml = '<div class="enrollment-list">';
+                    
+                    enrollments.forEach(enrollment => {
+                        const section = enrollment.course_section;
+                        const course = section.course;
+                        coursesHtml += `
+                            <div class="enrollment-item">
+                                <div class="course-info">
+                                    <div class="course-code">${course.course_code}</div>
+                                    <div class="course-title">${course.title}</div>
+                                    <div class="course-title">${section.schedule_display}</div>
+                                </div>
+                                <span class="status-badge status-${enrollment.status}">${enrollment.status}</span>
+                            </div>
+                        `;
+                    });
+                    
+                    coursesHtml += '</div>';
+                    document.getElementById('david-courses').innerHTML = coursesHtml;
+                }
+            }
+        }
+
+        async function loadSophieCourses() {
+            const meResult = await apiCall('GET', '/me', null, false);
+            if (meResult.ok && meResult.data.student) {
+                const studentId = meResult.data.student.id;
+                
+                const enrollResult = await apiCall('GET', `/enrollments?student_id=${studentId}`);
+                if (enrollResult.ok) {
+                    const enrollments = enrollResult.data.data || [];
+                    let coursesHtml = '<div class="enrollment-list">';
+                    
+                    enrollments.forEach(enrollment => {
+                        const section = enrollment.course_section;
+                        const course = section.course;
+                        const isWaitlisted = enrollment.status === 'waitlisted';
+                        
+                        coursesHtml += `
+                            <div class="enrollment-item">
+                                <div class="course-info">
+                                    <div class="course-code">${course.course_code}</div>
+                                    <div class="course-title">${course.title}</div>
+                                    <div class="course-title">${section.schedule_display}</div>
+                                    ${isWaitlisted ? '<div style="color: #e74c3c; font-size: 0.9em;">⏳ Waiting for available spot</div>' : ''}
+                                </div>
+                                <span class="status-badge status-${enrollment.status}">${enrollment.status}</span>
+                            </div>
+                        `;
+                    });
+                    
+                    coursesHtml += '</div>';
+                    document.getElementById('sophie-courses').innerHTML = coursesHtml;
+                }
+            }
+        }
+
+        // Action functions
+        async function viewAllApplications() {
+            const result = await apiCall('GET', '/admission-applications?include=student,term');
+            // In a real implementation, we'd display this in a modal or new section
+        }
+
+        async function viewEnrollmentStats() {
+            const result = await apiCall('GET', '/enrollments?per_page=100');
+            // In a real implementation, we'd show enrollment statistics
+        }
+
+        async function checkApplicationStatus(persona) {
+            // Re-fetch the current status
+            if (persona === 'maria') {
+                await loadMariaStatus();
+            }
+        }
+
+        async function viewMySchedule(persona) {
+            // Show a formatted schedule view
+            alert('Schedule view would be implemented here');
+        }
+
+        async function checkWaitlistPosition(persona) {
+            // In a real system, this would show waitlist position
+            const result = await apiCall('GET', '/enrollments?status=waitlisted');
+            alert('You are #1 on the waitlist for CS350 - AI');
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-select admin for demo
+            setTimeout(() => {
+                document.querySelector('.persona-btn').click();
+            }, 500);
+        });
+    </script>
+</body>
+</html> 

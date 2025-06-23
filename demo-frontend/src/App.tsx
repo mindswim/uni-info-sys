@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ChevronRight, ChevronLeft, User, CheckCircle2, Circle, Lock, Menu } from 'lucide-react'
+import { ApiActivityLog } from '@/components/ApiActivityLog'
+import { apiClient } from '@/lib/api-interceptor'
 
 // Demo user personas
 const demoUsers = [
@@ -95,6 +97,26 @@ function App() {
     if (completedSteps.has(stepNumber)) return 'completed'
     if (stepNumber <= Math.max(...completedSteps) + 1) return 'available'
     return 'locked'
+  }
+
+  const testApiCalls = async () => {
+    try {
+      // Test GET request
+      await apiClient.get('/v1/students')
+      
+      // Test POST request
+      await apiClient.post('/v1/admission-applications', {
+        student_id: 1,
+        program_id: 1,
+        status: 'pending'
+      })
+      
+      // Test 404 error
+      await apiClient.get('/v1/nonexistent-endpoint')
+    } catch (error) {
+      // Errors are handled by interceptor
+      console.log('Demo API calls completed (some may have failed intentionally)')
+    }
   }
 
   return (
@@ -250,24 +272,30 @@ function App() {
                 </div>
               </div>
               
-              <p className="text-muted-foreground">
-                Step content will be displayed here...
-              </p>
+              <div className="space-y-4">
+                <p className="text-muted-foreground">
+                  Step content will be displayed here...
+                </p>
+                
+                {/* Test API Button */}
+                <div className="bg-muted/50 rounded-lg p-4 border-l-4 border-blue-500">
+                  <h4 className="font-medium mb-2">🧪 Test API Activity Log</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Click the button below to trigger some demo API calls and see them appear in the sidebar →
+                  </p>
+                  <Button onClick={testApiCalls} variant="outline">
+                    Make Demo API Calls
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* API Activity Sidebar - Responsive */}
         <div className="w-full lg:w-[400px] border-t lg:border-t-0 lg:border-l bg-muted/30">
-          <div className="p-4 lg:p-6">
-            <h3 className="text-lg font-semibold mb-4">API Activity</h3>
-            <div className="space-y-3">
-              <div className="bg-background rounded-md border p-4">
-                <p className="text-sm text-muted-foreground">
-                  API calls will appear here...
-                </p>
-              </div>
-            </div>
+          <div className="p-4 lg:p-6 h-full">
+            <ApiActivityLog />
           </div>
         </div>
       </div>

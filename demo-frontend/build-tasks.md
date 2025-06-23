@@ -1,5 +1,19 @@
 ## **🚀 YES! This is the PERFECT approach - Here's the detailed plan:**
 
+### **🏃‍♂️ QUICK START (Copy & Paste Ready)**
+```bash
+# Terminal 1: Start Backend (from main directory)
+cd university-admissions && ./vendor/bin/sail artisan migrate:fresh --seed && ./vendor/bin/sail up -d
+
+# Terminal 2: Start Frontend (from demo-frontend directory)  
+cd university-admissions/demo-frontend && npm run dev
+
+# Demo URLs:
+# Frontend: http://localhost:5174
+# Backend API: http://localhost:80/api  
+# API Docs: http://localhost:80/api/documentation
+```
+
 ### **Why This Will Work:**
 - Shows **full-stack capability** (Laravel API + React frontend)
 - **Professional components** via shadcn (not amateur looking)
@@ -27,6 +41,97 @@
 
 ---
 
+## **🔧 SERVER SETUP & API INTEGRATION GUIDE**
+
+### **Backend Server (Laravel API)**
+**Directory**: `/` (main project root)
+**Command**: 
+```bash
+# Navigate to main project directory
+cd university-admissions
+
+# Start Laravel backend server via Sail
+./vendor/bin/sail up -d
+
+# OR if not using Docker:
+php artisan serve --port=80
+```
+**Endpoint**: `http://localhost:80/api`
+**Documentation**: `http://localhost:80/api/documentation`
+
+### **Frontend Server (React Demo)**
+**Directory**: `/demo-frontend`
+**Command**:
+```bash
+# Navigate to demo frontend directory
+cd university-admissions/demo-frontend
+
+# Start React development server
+npm run dev
+# OR
+pnpm dev
+```
+**Endpoint**: `http://localhost:5174`
+**API Proxy**: All `/api/*` requests automatically proxy to Laravel backend
+
+### **Database Setup & Demo Data**
+**Why Use DemoSeeder Instead of Regular Seeders?**
+- **Predictable demo personas**: 4 specific users with compelling storylines
+- **Demo-optimized data**: AI course with only 2 spots to show waitlist scenario
+- **Reset capability**: Same data state every demo run
+- **Clear narrative**: Maria (applying) → David (enrolled) → Sophie (waitlisted)
+
+**Setup Commands** (run from main directory):
+```bash
+# 1. Fresh database with demo data
+./vendor/bin/sail artisan migrate:fresh --seed
+
+# 2. The DatabaseSeeder automatically calls DemoSeeder, which creates:
+#    - Dr. Elizabeth Harper (admin@demo.com) - Admin
+#    - Maria Rodriguez (maria@demo.com) - Recently applied student from Mexico  
+#    - David Park (david@demo.com) - Enrolled Korean student
+#    - Sophie Turner (sophie@demo.com) - Waitlisted American student
+#    - Alex Chen (alex@demo.com) - Filler student
+#    - Prof. Alan Turing (turing@demo.com) - Instructor
+```
+
+### **Demo Personas & API Integration**
+| Persona | Email | Role | Story Arc | Key API Endpoints Used |
+|---------|-------|------|-----------|------------------------|
+| **Dr. Harper** | admin@demo.com | Admin | Reviews applications, manages system | `/api/v1/admission-applications`, `/api/v1/students` |
+| **Maria** | maria@demo.com | Student | Just applied, waiting for decision | `/api/v1/admission-applications/mine` |
+| **David** | david@demo.com | Student | Accepted & enrolled in 2 courses | `/api/v1/enrollments/mine`, `/api/v1/course-sections` |
+| **Sophie** | sophie@demo.com | Student | Waitlisted for popular AI course | `/api/v1/enrollments/mine` (shows waitlist) |
+
+### **Development Workflow**
+**Starting Fresh Each Demo:**
+```bash
+# Terminal 1: Backend (main directory)
+cd university-admissions
+./vendor/bin/sail artisan migrate:fresh --seed
+./vendor/bin/sail up -d
+
+# Terminal 2: Frontend (demo-frontend directory)  
+cd university-admissions/demo-frontend
+npm run dev
+```
+
+**Resetting Demo Data Mid-Demo:**
+```bash
+# If demo goes wrong, quickly reset without restarting servers
+./vendor/bin/sail artisan migrate:fresh --seed
+# Frontend automatically reconnects, no restart needed
+```
+
+**API Integration Points:**
+- ✅ **Authentication**: Login as any demo user with password `password`
+- ✅ **Authorization**: Each user sees only their authorized data
+- ✅ **Real Backend**: All API calls hit actual Laravel endpoints
+- ✅ **Live Updates**: Course capacity, waitlist status updates in real-time
+- ✅ **Error Handling**: Demonstrates proper 422 validation, 409 conflicts
+
+---
+
 ## **📋 IMPLEMENTATION PLAN**
 
 ### **PHASE 1: Project Setup (30 min)**
@@ -50,8 +155,8 @@
 - Set up path aliases (@/components, @/lib)
 
 **Step 1.4: Set Up API Proxy**
-- Configure Vite to proxy `/api` to `http://localhost:80`
-- This avoids CORS issues
+- ✅ **ALREADY CONFIGURED** - Vite proxies `/api` to `http://localhost:80`
+- This avoids CORS issues  
 - Makes deployment easier later
 
 ---
@@ -218,10 +323,11 @@
 6. **Read-only** (no actual data creation)
 
 ## **⏱️ Timeline:**
-- Phase 1-2: 1.25 hours (foundation)
-- Phase 3-4: 1.75 hours (core functionality)
+- **Setup & Launch**: 15 minutes (servers + database)
+- Phase 1-2: 1.25 hours (foundation) - ✅ **COMPLETE**
+- Phase 3-4: 1.75 hours (core functionality) - **← STARTING HERE**
 - Phase 5-6: 1.5 hours (content & polish)
-- **Total: ~4.5 hours**
+- **Total Remaining: ~3.25 hours**
 
 ## **🏆 End Result:**
 A professional, interactive demo that:

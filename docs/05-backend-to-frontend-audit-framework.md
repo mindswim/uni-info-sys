@@ -85,21 +85,35 @@ Public:        → Login, registration, course catalog
 #### **1.1 Authentication & User Management**
 | Endpoint | HTTP Method | Frontend Component | User Role | Status |
 |----------|-------------|-------------------|-----------|---------|
-| `/api/v1/auth/login` | POST | Login Form | All | ⬜ |
-| `/api/v1/auth/logout` | POST | Logout Button | Authenticated | ⬜ |
-| `/api/v1/auth/register` | POST | Registration Form | Public | ⬜ |
-| `/api/v1/users` | GET | User Management Dashboard | Admin | ⬜ |
-| `/api/v1/users/{id}` | PUT | User Profile Editor | Admin/Self | ⬜ |
+| `/api/v1/tokens/create` | POST | Login Form | All | ⬜ |
+| `/api/v1/forgot-password` | POST | Forgot Password Form | Public | ⬜ |
+| `/api/v1/reset-password` | POST | Reset Password Form | Public | ⬜ |
+| `/api/user` | GET | Current User Profile | Authenticated | ⬜ |
+| `/api/health` | GET | System Health Dashboard | Monitoring | ⬜ |
 
 #### **1.2 Academic Structure**
 | Endpoint | HTTP Method | Frontend Component | User Role | Status |
 |----------|-------------|-------------------|-----------|---------|
-| `/api/v1/faculties` | GET | Faculty Selector/List | All | ⬜ |
+| `/api/v1/faculties` | GET | Faculty List/Selector | All | ⬜ |
 | `/api/v1/faculties` | POST | Faculty Creation Form | Admin | ⬜ |
-| `/api/v1/departments` | GET | Department Selector/List | All | ⬜ |
+| `/api/v1/faculties/{id}` | GET | Faculty Detail View | All | ⬜ |
+| `/api/v1/faculties/{id}` | PUT | Faculty Edit Form | Admin | ⬜ |
+| `/api/v1/faculties/{id}` | DELETE | Faculty Delete Action | Admin | ⬜ |
+| `/api/v1/departments` | GET | Department List/Selector | All | ⬜ |
 | `/api/v1/departments` | POST | Department Creation Form | Admin | ⬜ |
-| `/api/v1/programs` | GET | Program Selector/List | All | ⬜ |
+| `/api/v1/departments/{id}` | GET | Department Detail View | All | ⬜ |
+| `/api/v1/departments/{id}` | PUT | Department Edit Form | Admin | ⬜ |
+| `/api/v1/departments/{id}` | DELETE | Department Delete Action | Admin | ⬜ |
+| `/api/v1/programs` | GET | Program List/Selector | All | ⬜ |
 | `/api/v1/programs` | POST | Program Creation Form | Admin | ⬜ |
+| `/api/v1/programs/{id}` | GET | Program Detail View | All | ⬜ |
+| `/api/v1/programs/{id}` | PUT | Program Edit Form | Admin | ⬜ |
+| `/api/v1/programs/{id}` | DELETE | Program Delete Action | Admin | ⬜ |
+| `/api/v1/terms` | GET | Term List/Selector | All | ⬜ |
+| `/api/v1/terms` | POST | Term Creation Form | Admin | ⬜ |
+| `/api/v1/terms/{id}` | GET | Term Detail View | All | ⬜ |
+| `/api/v1/terms/{id}` | PUT | Term Edit Form | Admin | ⬜ |
+| `/api/v1/terms/{id}` | DELETE | Term Delete Action | Admin | ⬜ |
 
 #### **1.3 Course Management**
 | Endpoint | HTTP Method | Frontend Component | User Role | Status |
@@ -108,41 +122,102 @@ Public:        → Login, registration, course catalog
 | `/api/v1/courses` | POST | Course Creation Form | Admin/Staff | ⬜ |
 | `/api/v1/courses/{id}` | GET | Course Detail Page | All | ⬜ |
 | `/api/v1/courses/{id}` | PUT | Course Edit Form | Admin/Staff | ⬜ |
+| `/api/v1/courses/{id}` | DELETE | Course Delete Action | Admin/Staff | ⬜ |
+| `/api/v1/courses/{course}/restore` | POST | Course Restore Action | Admin | ⬜ |
+| `/api/v1/courses/{course}/force` | DELETE | Course Force Delete | Admin | ⬜ |
 | `/api/v1/course-sections` | GET | Section Schedule View | All | ⬜ |
 | `/api/v1/course-sections` | POST | Section Creation Form | Admin/Staff | ⬜ |
+| `/api/v1/course-sections/{id}` | GET | Section Detail View | All | ⬜ |
+| `/api/v1/course-sections/{id}` | PUT | Section Edit Form | Admin/Staff | ⬜ |
+| `/api/v1/course-sections/{id}` | DELETE | Section Delete Action | Admin/Staff | ⬜ |
+| `/api/v1/buildings` | GET | Building List/Selector | All | ⬜ |
+| `/api/v1/buildings` | POST | Building Creation Form | Admin | ⬜ |
+| `/api/v1/buildings/{id}` | GET | Building Detail View | All | ⬜ |
+| `/api/v1/buildings/{id}` | PUT | Building Edit Form | Admin | ⬜ |
+| `/api/v1/buildings/{id}` | DELETE | Building Delete Action | Admin | ⬜ |
+| `/api/v1/rooms` | GET | Room List/Selector | All | ⬜ |
+| `/api/v1/rooms` | POST | Room Creation Form | Admin | ⬜ |
+| `/api/v1/rooms/{id}` | GET | Room Detail View | All | ⬜ |
+| `/api/v1/rooms/{id}` | PUT | Room Edit Form | Admin | ⬜ |
+| `/api/v1/rooms/{id}` | DELETE | Room Delete Action | Admin | ⬜ |
 
 #### **1.4 Student Operations**
 | Endpoint | HTTP Method | Frontend Component | User Role | Status |
 |----------|-------------|-------------------|-----------|---------|
-| `/api/v1/students` | GET | Student Directory | Admin/Staff | ⬜ |
+| `/api/v1/students` | GET | Student Directory | Admin/Staff/Self | ⬜ |
 | `/api/v1/students` | POST | Student Registration Form | Admin | ⬜ |
 | `/api/v1/students/{id}` | GET | Student Profile/Dashboard | Admin/Staff/Self | ⬜ |
 | `/api/v1/students/{id}` | PUT | Profile Edit Form | Admin/Self | ⬜ |
+| `/api/v1/students/{id}` | DELETE | Student Delete Action | Admin | ⬜ |
+| `/api/v1/students/{student}/restore` | POST | Student Restore Action | Admin | ⬜ |
+| `/api/v1/students/{student}/force` | DELETE | Student Force Delete | Admin | ⬜ |
+| `/api/v1/students/{student}/academic-records` | GET | Academic Records List | Admin/Staff/Self | ⬜ |
+| `/api/v1/students/{student}/academic-records` | POST | Academic Record Creation | Admin/Staff | ⬜ |
+| `/api/v1/academic-records/{id}` | GET | Academic Record Detail | Admin/Staff/Self | ⬜ |
+| `/api/v1/academic-records/{id}` | PUT | Academic Record Edit | Admin/Staff | ⬜ |
+| `/api/v1/academic-records/{id}` | DELETE | Academic Record Delete | Admin/Staff | ⬜ |
+| `/api/v1/students/{student}/documents` | GET | Document List | Admin/Staff/Self | ⬜ |
+| `/api/v1/students/{student}/documents` | POST | Document Upload Form | Admin/Staff/Self | ⬜ |
+| `/api/v1/students/{student}/documents/all-versions` | GET | All Document Versions | Admin/Staff/Self | ⬜ |
+| `/api/v1/documents/{id}` | GET | Document Detail/Download | Admin/Staff/Self | ⬜ |
+| `/api/v1/documents/{id}` | PUT | Document Update | Admin/Staff/Self | ⬜ |
+| `/api/v1/documents/{id}` | DELETE | Document Delete | Admin/Staff/Self | ⬜ |
+| `/api/v1/documents/{document}/restore` | POST | Document Restore | Admin | ⬜ |
+| `/api/v1/documents/{document}/force` | DELETE | Document Force Delete | Admin | ⬜ |
+| `/api/v1/staff` | GET | Staff Directory | Admin/Staff | ⬜ |
+| `/api/v1/staff` | POST | Staff Creation Form | Admin | ⬜ |
+| `/api/v1/staff/{id}` | GET | Staff Profile | Admin/Staff | ⬜ |
+| `/api/v1/staff/{id}` | PUT | Staff Edit Form | Admin | ⬜ |
+| `/api/v1/staff/{id}` | DELETE | Staff Delete Action | Admin | ⬜ |
 
 #### **1.5 Admissions Workflow**
 | Endpoint | HTTP Method | Frontend Component | User Role | Status |
 |----------|-------------|-------------------|-----------|---------|
 | `/api/v1/admission-applications` | GET | Application Dashboard | Admin/Staff/Student | ⬜ |
 | `/api/v1/admission-applications` | POST | Application Form | Student | ⬜ |
-| `/api/v1/admission-applications/{id}` | PUT | Status Update Interface | Admin/Staff | ⬜ |
-| `/api/v1/program-choices` | GET | Program Selection View | Student | ⬜ |
-| `/api/v1/program-choices` | POST | Program Choice Form | Student | ⬜ |
+| `/api/v1/admission-applications/{id}` | GET | Application Detail View | Admin/Staff/Self | ⬜ |
+| `/api/v1/admission-applications/{id}` | PUT | Application Edit/Status Update | Admin/Staff/Self | ⬜ |
+| `/api/v1/admission-applications/{id}` | DELETE | Application Delete | Admin/Staff | ⬜ |
+| `/api/v1/admission-applications/{application}/restore` | POST | Application Restore | Admin | ⬜ |
+| `/api/v1/admission-applications/{application}/force` | DELETE | Application Force Delete | Admin | ⬜ |
+| `/api/v1/admission-applications/{application}/program-choices` | GET | Program Choices List | Admin/Staff/Self | ⬜ |
+| `/api/v1/admission-applications/{application}/program-choices` | POST | Program Choice Creation | Student/Admin/Staff | ⬜ |
+| `/api/v1/program-choices/{id}` | GET | Program Choice Detail | Admin/Staff/Self | ⬜ |
+| `/api/v1/program-choices/{id}` | PUT | Program Choice Edit | Student/Admin/Staff | ⬜ |
+| `/api/v1/program-choices/{id}` | DELETE | Program Choice Delete | Student/Admin/Staff | ⬜ |
 
 #### **1.6 Enrollment System**
 | Endpoint | HTTP Method | Frontend Component | User Role | Status |
 |----------|-------------|-------------------|-----------|---------|
 | `/api/v1/enrollments` | GET | Enrollment Dashboard | All Roles | ⬜ |
 | `/api/v1/enrollments` | POST | Course Registration Form | Student | ⬜ |
+| `/api/v1/enrollments/{id}` | GET | Enrollment Detail View | Admin/Staff/Self | ⬜ |
 | `/api/v1/enrollments/{id}` | PUT | Grade Entry/Status Update | Staff/Admin | ⬜ |
-| `/api/v1/enrollment-swaps` | POST | Course Swap Interface | Student | ⬜ |
+| `/api/v1/enrollments/{id}` | DELETE | Enrollment Delete | Admin/Staff | ⬜ |
+| `/api/v1/enrollments/{enrollment}/restore` | POST | Enrollment Restore | Admin | ⬜ |
+| `/api/v1/enrollments/{enrollment}/force` | DELETE | Enrollment Force Delete | Admin | ⬜ |
+| `/api/v1/enrollments/{enrollment}/withdraw` | POST | Course Withdrawal Action | Student/Admin/Staff | ⬜ |
+| `/api/v1/enrollments/{enrollment}/complete` | POST | Course Completion Action | Admin/Staff | ⬜ |
+| `/api/v1/students/{student}/enrollments` | GET | Student Enrollment History | Admin/Staff/Self | ⬜ |
+| `/api/v1/course-sections/{courseSection}/enrollments` | GET | Section Enrollment List | Admin/Staff | ⬜ |
+| `/api/v1/enrollments/swap` | POST | Course Swap Interface | Student | ⬜ |
 
 #### **1.7 Administrative Features**
 | Endpoint | HTTP Method | Frontend Component | User Role | Status |
 |----------|-------------|-------------------|-----------|---------|
-| `/api/v1/roles` | GET | Role Management Interface | Admin | ⬜ |
-| `/api/v1/permissions` | GET | Permission Management | Admin | ⬜ |
-| `/api/v1/grade-imports` | POST | Bulk Grade Upload Tool | Staff | ⬜ |
+| `/api/v1/roles` | GET | Role List/Management | Admin | ⬜ |
+| `/api/v1/roles` | POST | Role Creation Form | Admin | ⬜ |
+| `/api/v1/roles/{id}` | GET | Role Detail View | Admin | ⬜ |
+| `/api/v1/roles/{id}` | PUT | Role Edit Form | Admin | ⬜ |
+| `/api/v1/roles/{id}` | DELETE | Role Delete Action | Admin | ⬜ |
+| `/api/v1/roles/{role}/permissions` | POST | Permission Assignment | Admin | ⬜ |
+| `/api/v1/permissions` | GET | Permission List | Admin | ⬜ |
+| `/api/v1/permissions/{id}` | GET | Permission Detail | Admin | ⬜ |
+| `/api/v1/imports/courses` | POST | Bulk Course Import Tool | Admin/Staff | ⬜ |
+| `/api/v1/course-sections/{courseSection}/import-grades` | POST | Bulk Grade Upload Tool | Staff | ⬜ |
 | `/api/v1/notifications` | GET | Notification Center | All | ⬜ |
+| `/api/v1/notifications/{id}/read` | POST | Mark Notification Read | All | ⬜ |
+| `/api/v1/metrics` | GET | System Metrics Dashboard | Admin/Monitoring | ⬜ |
 
 ### **Phase 2: Business Logic Audit**
 
@@ -206,58 +281,88 @@ Public:        → Login, registration, course catalog
 
 #### **1. Data Display Components**
 ```typescript
-// List/Table Components
-StudentList.vue         ← GET /api/v1/students
-CourseList.vue          ← GET /api/v1/courses  
-EnrollmentList.vue      ← GET /api/v1/enrollments
-ApplicationList.vue     ← GET /api/v1/admission-applications
+// List/Table Components (using shadcn/ui + React + Vite)
+StudentList.tsx         ← GET /api/v1/students
+CourseList.tsx          ← GET /api/v1/courses  
+EnrollmentList.tsx      ← GET /api/v1/enrollments
+ApplicationList.tsx     ← GET /api/v1/admission-applications
+FacultyList.tsx         ← GET /api/v1/faculties
+DepartmentList.tsx      ← GET /api/v1/departments
+ProgramList.tsx         ← GET /api/v1/programs
+StaffList.tsx           ← GET /api/v1/staff
+TermList.tsx            ← GET /api/v1/terms
+BuildingList.tsx        ← GET /api/v1/buildings
+RoomList.tsx            ← GET /api/v1/rooms
+CourseSectionList.tsx   ← GET /api/v1/course-sections
 
 // Detail/Profile Components  
-StudentProfile.vue      ← GET /api/v1/students/{id}
-CourseDetail.vue        ← GET /api/v1/courses/{id}
-ApplicationDetail.vue   ← GET /api/v1/admission-applications/{id}
+StudentProfile.tsx      ← GET /api/v1/students/{id}
+CourseDetail.tsx        ← GET /api/v1/courses/{id}
+ApplicationDetail.tsx   ← GET /api/v1/admission-applications/{id}
+AcademicRecord.tsx      ← GET /api/v1/students/{student}/academic-records
+DocumentViewer.tsx      ← GET /api/v1/students/{student}/documents
 
 // Dashboard Components
-StudentDashboard.vue    ← Multiple API calls + business logic
-AdminDashboard.vue      ← System-wide statistics
-StaffDashboard.vue      ← Role-specific data
+StudentDashboard.tsx    ← Multiple API calls + business logic
+AdminDashboard.tsx      ← System-wide statistics + GET /api/v1/metrics
+StaffDashboard.tsx      ← Role-specific data
 ```
 
 #### **2. Form Components**
 ```typescript
-// Creation Forms
-StudentForm.vue         ← POST /api/v1/students
-CourseForm.vue          ← POST /api/v1/courses
-ApplicationForm.vue     ← POST /api/v1/admission-applications
+// Creation Forms (using shadcn/ui form components + React Hook Form)
+StudentForm.tsx         ← POST /api/v1/students
+CourseForm.tsx          ← POST /api/v1/courses
+ApplicationForm.tsx     ← POST /api/v1/admission-applications
+FacultyForm.tsx         ← POST /api/v1/faculties
+DepartmentForm.tsx      ← POST /api/v1/departments
+ProgramForm.tsx         ← POST /api/v1/programs
+StaffForm.tsx           ← POST /api/v1/staff
+TermForm.tsx            ← POST /api/v1/terms
+BuildingForm.tsx        ← POST /api/v1/buildings
+RoomForm.tsx            ← POST /api/v1/rooms
+CourseSectionForm.tsx   ← POST /api/v1/course-sections
 
 // Edit Forms  
-StudentEditForm.vue     ← PUT /api/v1/students/{id}
-ProfileEditForm.vue     ← PUT /api/v1/students/{id} (self)
-GradeEntryForm.vue      ← PUT /api/v1/enrollments/{id}
+StudentEditForm.tsx     ← PUT /api/v1/students/{id}
+ProfileEditForm.tsx     ← PUT /api/v1/students/{id} (self)
+GradeEntryForm.tsx      ← PUT /api/v1/enrollments/{id}
+AcademicRecordForm.tsx  ← POST/PUT /api/v1/students/{student}/academic-records
+DocumentUploadForm.tsx  ← POST /api/v1/students/{student}/documents
 
 // Specialized Forms
-EnrollmentForm.vue      ← POST /api/v1/enrollments + business logic
-ProgramChoiceForm.vue   ← POST /api/v1/program-choices
-CourseSwapForm.vue      ← POST /api/v1/enrollment-swaps
+EnrollmentForm.tsx      ← POST /api/v1/enrollments + business logic
+ProgramChoiceForm.tsx   ← POST /api/v1/admission-applications/{application}/program-choices
+CourseSwapForm.tsx      ← POST /api/v1/enrollments/swap
+CourseImportForm.tsx    ← POST /api/v1/imports/courses
+GradeImportForm.tsx     ← POST /api/v1/course-sections/{courseSection}/import-grades
 ```
 
 #### **3. Interactive Components**
 ```typescript
-// Selection/Picker Components
-FacultySelector.vue     ← GET /api/v1/faculties
-DepartmentSelector.vue  ← GET /api/v1/departments
-CourseSelector.vue      ← GET /api/v1/courses
-SectionSelector.vue     ← GET /api/v1/course-sections
+// Selection/Picker Components (using shadcn/ui select + React)
+FacultySelector.tsx     ← GET /api/v1/faculties
+DepartmentSelector.tsx  ← GET /api/v1/departments
+CourseSelector.tsx      ← GET /api/v1/courses
+SectionSelector.tsx     ← GET /api/v1/course-sections
+ProgramSelector.tsx     ← GET /api/v1/programs
+TermSelector.tsx        ← GET /api/v1/terms
+RoomSelector.tsx        ← GET /api/v1/rooms
+BuildingSelector.tsx    ← GET /api/v1/buildings
 
-// Action Components
-EnrollButton.vue        ← POST /api/v1/enrollments + validation
-WithdrawButton.vue      ← PUT /api/v1/enrollments/{id}
-StatusUpdater.vue       ← PUT /api/v1/admission-applications/{id}
+// Action Components (using shadcn/ui buttons and dialogs)
+EnrollButton.tsx        ← POST /api/v1/enrollments + validation
+WithdrawButton.tsx      ← POST /api/v1/enrollments/{enrollment}/withdraw
+CompleteButton.tsx      ← POST /api/v1/enrollments/{enrollment}/complete
+StatusUpdater.tsx       ← PUT /api/v1/admission-applications/{id}
+RestoreButton.tsx       ← POST /api/v1/{resource}/{id}/restore
+ForceDeleteButton.tsx   ← DELETE /api/v1/{resource}/{id}/force
 
-// Notification Components
-NotificationCenter.vue  ← GET /api/v1/notifications
-AlertBanner.vue         ← Real-time business rule feedback
-ProgressIndicator.vue   ← Background job status
+// Notification Components (using shadcn/ui toast and alert)
+NotificationCenter.tsx  ← GET /api/v1/notifications + POST /api/v1/notifications/{id}/read
+AlertBanner.tsx         ← Real-time business rule feedback
+ProgressIndicator.tsx   ← Background job status
+HealthIndicator.tsx     ← GET /api/health
 ```
 
 ## ✅ Frontend Completeness Checklist

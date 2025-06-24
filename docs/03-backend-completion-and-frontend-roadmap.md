@@ -178,7 +178,7 @@ GET    /api/v1/notifications        → Notification center
 ### **Phase 1: Foundation & Authentication (Week 1)**
 
 #### **Setup & Infrastructure**
-- Choose framework (React/Vue/Angular + TypeScript)
+- Choose framework (React + Vite + TypeScript + shadcn/ui)
 - Setup API client with authentication
 - Create routing structure
 - Implement global state management
@@ -300,10 +300,10 @@ class ApiService {
 
 ### **2. Component-API Mapping**
 ```
-StudentDashboard.vue     ← GET /api/v1/students/{id}
-CourseRegistration.vue   ← GET /api/v1/courses, POST /api/v1/enrollments
-ApplicationForm.vue      ← POST /api/v1/admission-applications
-GradeEntry.vue          ← PUT /api/v1/enrollments/{id}
+StudentDashboard.tsx     ← GET /api/v1/students/{id}
+CourseRegistration.tsx   ← GET /api/v1/courses, POST /api/v1/enrollments
+ApplicationForm.tsx      ← POST /api/v1/admission-applications
+GradeEntry.tsx          ← PUT /api/v1/enrollments/{id}
 ```
 
 ### **3. State Management Integration**
@@ -335,7 +335,7 @@ actions: {
 
 ## 🚀 Next Steps
 
-1. **Choose frontend framework** (React/Vue/Angular)
+1. **Choose frontend framework** (React + Vite + shadcn/ui)
 2. **Set up development environment**
 3. **Create API service layer**
 4. **Start with Phase 1: Authentication**

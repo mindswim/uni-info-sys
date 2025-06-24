@@ -61,4 +61,54 @@ class Student extends Model implements Auditable
     {
         return $this->hasMany(Enrollment::class);
     }
+
+    /**
+     * Calculate GPA based on completed enrollments
+     *
+     * @return float
+     */
+    public function calculateGPA(): float
+    {
+        $gradePoints = [
+            'A+' => 4.0, 'A' => 4.0, 'A-' => 3.7,
+            'B+' => 3.3, 'B' => 3.0, 'B-' => 2.7,
+            'C+' => 2.3, 'C' => 2.0, 'C-' => 1.7,
+            'D+' => 1.3, 'D' => 1.0, 'D-' => 0.7,
+            'F' => 0.0
+        ];
+
+        $completedEnrollments = $this->enrollments()
+            ->where('status', 'completed')
+            ->whereNotNull('grade')
+            ->whereIn('grade', array_keys($gradePoints))
+            ->with('courseSection.course')
+            ->get();
+
+        if ($completedEnrollments->isEmpty()) {
+            return 0.0;
+        }
+
+        $totalPoints = 0;
+        $totalCredits = 0;
+
+        foreach ($completedEnrollments as $enrollment) {
+            $credits = $enrollment->courseSection->course->credits;
+            $points = $gradePoints[$enrollment->grade] ?? 0;
+
+            $totalPoints += ($points * $credits);
+            $totalCredits += $credits;
+        }
+
+        return $totalCredits > 0 ? round($totalPoints / $totalCredits, 2) : 0.0;
+    }
+
+    /**
+     * Get current GPA (calculated)
+     *
+     * @return float
+     */
+    public function getCurrentGPAAttribute(): float
+    {
+        return $this->calculateGPA();
+    }
 }

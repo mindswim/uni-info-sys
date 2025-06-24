@@ -41,6 +41,12 @@ class EnrollmentService
             // Check for duplicate enrollment
             $this->validateNoDuplicateEnrollment($studentId, $courseSectionId);
 
+            // Check prerequisites
+            $this->checkPrerequisites($studentId, $courseSectionId);
+
+            // Check schedule conflicts
+            $this->checkScheduleConflicts($studentId, $courseSectionId);
+
             // Determine enrollment status based on capacity
             $status = $this->determineEnrollmentStatus($courseSectionId, $requestedStatus);
 
@@ -256,4 +262,116 @@ class EnrollmentService
 
         return $requestedStatus;
     }
-} 
+
+    /**
+     * Check prerequisites for the student to enroll in the course section
+     *
+     * @param int $studentId
+     * @param int $courseSectionId
+     * @throws \App\Exceptions\PrerequisiteNotMetException
+     */
+    private function checkPrerequisites(int $studentId, int $courseSectionId): void
+    {
+        $courseSection = CourseSection::with('course.prerequisites')->find($courseSectionId);
+        $student = Student::find($studentId);
+        
+        if (!$courseSection || !$student) {
+            return; // Should have been caught by earlier validations
+        }
+        
+        $course = $courseSection->course;
+        $prerequisites = $course->prerequisites;
+        
+        if ($prerequisites->isEmpty()) {
+            return; // No prerequisites required
+        }
+        
+        $unmetPrerequisites = [];
+        
+        foreach ($prerequisites as $prerequisite) {
+            // Check if student has passed this prerequisite course
+            $hasPassed = $student->enrollments()
+                ->whereHas('courseSection.course', function ($query) use ($prerequisite) {
+                    $query->where('id', $prerequisite->id);
+                })
+                ->where('status', 'completed')
+                ->where('grade', 'NOT LIKE', 'F')
+                ->where('grade', 'NOT LIKE', 'W')
+                ->whereNotNull('grade')
+                ->exists();
+                
+            if (!$hasPassed) {
+                $unmetPrerequisites[] = $prerequisite->course_code . ' - ' . $prerequisite->title;
+            }
+        }
+        
+        if (!empty($unmetPrerequisites)) {
+                         throw new \App\Exceptions\PrerequisiteNotMetException(
+                 'Missing prerequisites: ' . implode(', ', $unmetPrerequisites)
+             );
+         }
+     }
+
+     /**
+      * Check for schedule conflicts with existing enrollments
+      *
+      * @param int $studentId
+      * @param int $courseSectionId
+      * @throws \App\Exceptions\DuplicateEnrollmentException
+      */
+     private function checkScheduleConflicts(int $studentId, int $courseSectionId): void
+     {
+         $newSection = CourseSection::find($courseSectionId);
+         
+         if (!$newSection || !$newSection->start_time || !$newSection->end_time || !$newSection->schedule_days) {
+             return; // Can't check conflicts without complete schedule info
+         }
+         
+         // Get student's active enrollments in the same term
+         $conflictingEnrollments = Enrollment::where('student_id', $studentId)
+             ->whereIn('status', ['enrolled', 'waitlisted'])
+             ->whereHas('courseSection', function ($query) use ($newSection) {
+                 $query->where('term_id', $newSection->term_id);
+             })
+             ->with('courseSection.course')
+             ->get();
+             
+         foreach ($conflictingEnrollments as $enrollment) {
+             $existingSection = $enrollment->courseSection;
+             
+             if (!$existingSection->start_time || !$existingSection->end_time || !$existingSection->schedule_days) {
+                 continue; // Skip sections without complete schedule info
+             }
+             
+             // Check if days overlap
+             $newDays = is_array($newSection->schedule_days) ? $newSection->schedule_days : [$newSection->schedule_days];
+             $existingDays = is_array($existingSection->schedule_days) ? $existingSection->schedule_days : [$existingSection->schedule_days];
+             
+             $daysOverlap = array_intersect($newDays, $existingDays);
+             
+             if (empty($daysOverlap)) {
+                 continue; // No day overlap, no conflict
+             }
+             
+             // Check if times overlap
+             $newStart = strtotime($newSection->start_time);
+             $newEnd = strtotime($newSection->end_time);
+             $existingStart = strtotime($existingSection->start_time);
+             $existingEnd = strtotime($existingSection->end_time);
+             
+             // Times overlap if: new_start < existing_end AND new_end > existing_start
+             if ($newStart < $existingEnd && $newEnd > $existingStart) {
+                 throw new \App\Exceptions\DuplicateEnrollmentException(
+                     sprintf(
+                         'Schedule conflict with %s (%s) on %s from %s to %s',
+                         $existingSection->course->course_code,
+                         $existingSection->course->title,
+                         implode(', ', $daysOverlap),
+                         date('g:i A', $existingStart),
+                         date('g:i A', $existingEnd)
+                     )
+                 );
+             }
+         }
+     }
+}  

@@ -1,0 +1,503 @@
+PASS  Tests\Unit\ExampleTest
+  ✓ that true is true                                                    0.01s  
+
+   PASS  Tests\Unit\Filters\EnrollmentFilterTest
+  ✓ it can filter by student id                                          0.55s  
+  ✓ it can filter by course section id                                   0.01s  
+  ✓ it can filter by single status                                       0.01s  
+  ✓ it can filter by multiple statuses                                   0.01s  
+  ✓ it can filter by term id through course section                      0.01s  
+  ✓ it can filter by course id through course section                    0.01s  
+  ✓ it can filter by department id through nested relationships          0.01s  
+  ✓ it can filter by instructor id through course section                0.01s  
+  ✓ it can apply multiple filters simultaneously                         0.01s  
+  ✓ it ignores empty filters                                             0.01s  
+  ✓ it returns query builder instance                                    0.01s  
+  ✓ it handles empty filter array                                        0.01s  
+  ✓ it handles unknown filter keys                                       0.01s  
+
+   PASS  Tests\Unit\Jobs\BackgroundJobsTest
+  ✓ send enrollment confirmation job handles enrolled status             0.35s  
+  ✓ send enrollment confirmation job handles waitlisted status           0.22s  
+  ✓ send enrollment confirmation job logs correctly                      0.22s  
+  ✓ send application status notification job works                       0.15s  
+  ✓ process waitlist promotion job works                                 0.13s  
+  ✓ process waitlist promotion job dispatches confirmation when promoti… 0.23s  
+  ✓ jobs are queued                                                      0.01s  
+  ✓ jobs implement should queue interface                                0.01s  
+
+   PASS  Tests\Unit\Jobs\ProcessCourseImportTest
+  ✓ processes valid csv data successfully                                0.15s  
+  ✓ handles invalid data gracefully                                      0.13s  
+  ✓ updates existing courses                                             0.12s  
+  ✓ handles missing prerequisites gracefully                             0.12s  
+  ✓ handles empty csv file                                               0.12s  
+  ✓ handles missing required headers                                     0.12s  
+  ✓ cleans up uploaded file after processing                             0.12s  
+
+   PASS  Tests\Unit\Jobs\ProcessGradeImportTest
+  ✓ it processes valid grade csv successfully                            0.42s  
+  ✓ it handles invalid student ids                                       0.32s  
+  ✓ it validates grade values                                            0.33s  
+  ✓ it skips duplicate grades                                            0.32s  
+  ✓ it handles missing headers                                           0.22s  
+  ✓ it handles empty csv file                                            0.22s  
+  ✓ it processes mixed valid and invalid rows                            0.42s  
+
+   PASS  Tests\Unit\Services\EnrollmentServiceTest
+  ✓ enrolls student successfully when capacity available                 0.23s  
+  ✓ waitlists student when course section at capacity                    0.33s  
+  ✓ throws exception when student not active                             0.22s  
+  ✓ throws exception when course section in past term                    0.21s  
+  ✓ throws exception when student already enrolled                       0.22s  
+  ✓ throws exception when requesting enrolled status but no capacity     0.33s  
+  ✓ promotes from waitlist successfully                                  0.44s  
+  ✓ promotes from waitlist returns null when no capacity                 0.34s  
+  ✓ promotes from waitlist returns null when no waitlisted students      0.22s  
+  ✓ withdraw student successfully                                        0.23s  
+  ✓ withdraw student from waitlist does not dispatch promotion job       0.22s  
+  ✓ throws exception when enrollment deadline has passed                 0.23s  
+  ✓ throws exception when withdrawal deadline has passed                 0.23s  
+  ✓ allows enrollment when no deadline is set                            0.22s  
+  ✓ allows withdrawal when no deadline is set                            0.22s  
+
+   PASS  Tests\Feature\AcademicHierarchyTest
+  ✓ can create faculty                                                   0.02s  
+  ✓ can create department with faculty                                   0.01s  
+  ✓ faculty has many departments                                         0.01s  
+  ✓ department belongs to faculty                                        0.01s  
+  ✓ can create program with department                                   0.02s  
+  ✓ department has many programs                                         0.01s  
+  ✓ program belongs to department                                        0.01s  
+  ✓ cascade delete faculty deletes departments                           0.01s  
+  ✓ set null department delete sets program department id null           0.01s  
+  ✓ complete hierarchy with factories                                    0.01s  
+  ✓ can query programs through hierarchy                                 0.01s  
+  ✓ faculty names can be duplicate                                       0.02s  
+  ✓ department names can be duplicate across faculties                   0.01s  
+  ✓ academic hierarchy seeder creates expected data                      0.03s  
+
+   PASS  Tests\Feature\Argon2idHashingTest
+  ✓ new users use argon2id hashing                                       0.12s  
+  ✓ existing bcrypt users can still login                                0.01s  
+  ✓ password rehashing on password change                                0.12s  
+  ✓ argon2id parameters are secure                                       0.01s  
+  ✓ hash verification works                                              0.32s  
+  ✓ user registration uses argon2id                                      0.13s  
+  ✓ configuration validation                                             0.01s  
+  ✓ performance is acceptable                                            0.21s  
+  ✓ backward compatibility with bcrypt                                   0.01s  
+  ✓ password algorithm tracking in database                              0.11s  
+  ✓ mixed algorithm environment                                          0.21s  
+
+   PASS  Tests\Feature\AuditingTest
+  ✓ student model auditing on creation                                   0.12s  
+  ✓ student model auditing on update                                     0.12s  
+  ✓ user model auditing                                                  0.12s  
+  ✓ enrollment model auditing                                            0.22s  
+  ✓ admission application auditing                                       0.13s  
+  ✓ course section auditing                                              0.12s  
+  ✓ audit includes metadata                                              0.11s  
+  ✓ audits are stored in database                                        0.12s  
+  ✓ grade change audit trail with reason                                 0.35s  
+  ✓ status change audit trail                                            0.34s  
+  ✓ reason for change required when updating grade                       0.33s  
+  ✓ reason for change not required when not updating grade               0.33s  
+
+   PASS  Tests\Feature\Feature\BackgroundJobIntegrationTest
+  ✓ enrollment service dispatches confirmation job on enrollment         0.23s  
+  ✓ enrollment service dispatches waitlist confirmation job when full    0.32s  
+  ✓ enrollment service dispatches promotion job on waitlist promotion    0.23s  
+  ✓ admission service dispatches notification job on status update       0.13s  
+  ✓ admission service does not dispatch job when status unchanged        0.14s  
+  ✓ controller logic dispatches waitlist promotion job                   0.22s  
+  ✓ check waitlists command dispatches jobs for eligible sections        0.34s  
+  ✓ check waitlists command ignores full sections                        0.33s  
+  ✓ check waitlists command ignores sections without waitlisted student… 0.23s  
+
+   PASS  Tests\Feature\Feature\ErrorHandlingTest
+  ✓ it returns rfc7807 format for enrollment capacity exceeded           0.50s  
+  ✓ it returns rfc7807 format for duplicate enrollment                   0.33s  
+  ✓ it returns rfc7807 format for student not active                     0.47s  
+  ✓ it returns rfc7807 format for not found errors                       0.22s  
+  ✓ it returns rfc7807 format for validation errors                      0.23s  
+  ✓ it returns rfc7807 format for unauthenticated errors                 0.22s  
+  ✓ it returns rfc7807 format for unauthorized errors                    0.33s  
+  ✓ it includes debug info in development for server errors              0.22s  
+  ✓ it does not include debug info in production                         0.22s  
+  ✓ it logs custom exceptions appropriately                              0.43s  
+
+   PASS  Tests\Feature\HealthCheckTest
+  ✓ health check returns healthy response when all services are working  0.02s  
+  ✓ health check includes application information                        0.01s  
+  ✓ health check endpoint is accessible without authentication           0.01s  
+  ✓ health check validates database connection                           0.01s  
+  ✓ health check validates cache connection                              0.01s  
+  ✓ health check respects rate limiting                                  0.02s  
+  ✓ health check returns proper json content type                        0.01s  
+  ✓ health check response includes timestamp                             0.01s  
+
+   PASS  Tests\Feature\InfrastructureTest
+  ✓ can create a building                                                0.02s  
+  ✓ building name must be unique                                         0.01s  
+  ✓ can create a room in a building                                      0.01s  
+  ✓ room number must be unique per building                              0.01s  
+  ✓ room number can be the same in different buildings                   0.01s  
+  ✓ building has many rooms                                              0.01s  
+  ✓ deleting a building cascades to its rooms                            0.01s  
+
+   PASS  Tests\Feature\Feature\MetricsEndpointTest
+  ✓ metrics endpoint is accessible                                       0.12s  
+  ✓ metrics endpoint returns prometheus format                           0.11s  
+  ✓ metrics are collected for api requests                               0.13s  
+  ✓ metrics include method and route labels                              0.11s  
+  ✓ metrics are collected for different status codes                     0.12s  
+  ✓ metrics include request duration histogram                           0.12s  
+  ✓ unauthenticated requests are also tracked                            0.12s  
+  ✓ metrics endpoint respects rate limiting                              0.15s  
+  ✓ route normalization reduces cardinality                              0.12s  
+
+   PASS  Tests\Feature\RoleBasedAccessControlTest
+  ✓ can create role                                                      0.01s  
+  ✓ can create permission                                                0.01s  
+  ✓ user can have multiple roles                                         0.11s  
+  ✓ role can have multiple permissions                                   0.01s  
+  ✓ permission can belong to multiple roles                              0.02s  
+  ✓ user role relationship cascade delete                                0.12s  
+  ✓ permission role relationship cascade delete                          0.01s  
+  ✓ role names must be unique                                            0.01s  
+  ✓ permission names must be unique                                      0.01s  
+  ✓ can create complete rbac scenario                                    0.22s  
+  ✓ user has role helper method                                          0.12s  
+  ✓ user has any role helper method                                      0.11s  
+  ✓ user has permission helper method                                    0.12s  
+  ✓ user get all permissions helper method                               0.12s  
+  ✓ role permission seeder creates expected data                         0.04s  
+
+   PASS  Tests\Feature\Feature\SecurityHeadersTest
+  ✓ security headers are added to web responses                          0.02s  
+  ✓ security headers are added to api responses                          0.01s  
+  ✓ security headers are added to authenticated api responses            0.12s  
+  ✓ security headers are added to error responses                        0.01s  
+  ✓ security headers are added to validation error responses             0.12s  
+  ✓ security headers are added to unauthorized responses                 0.01s  
+  ✓ security headers are added to forbidden responses                    0.11s  
+  ✓ hsts header is only added in production                              0.01s  
+  ✓ content security policy header is properly configured                0.01s  
+  ✓ sensitive server headers are removed                                 0.01s  
+
+   PASS  Tests\Feature\SoftDeletesTest
+  ✓ admin can soft delete and restore student                            0.23s  
+  ✓ admin can force delete student                                       0.23s  
+  ✓ admin can soft delete and restore course                             0.23s  
+  ✓ admin can soft delete and restore enrollment                         0.34s  
+  ✓ admin can soft delete and restore document                           0.31s  
+  ✓ admin can soft delete and restore admission application              0.24s  
+  ✓ non admin cannot restore resources                                   0.22s  
+  ✓ non admin cannot force delete resources                              0.22s  
+  ✓ restore endpoints return 404 for non existent resources              0.22s  
+  ✓ force delete endpoints return 404 for non existent resources         0.22s  
+  ✓ soft deleted resources are not visible in normal queries             0.26s  
+  ✓ models have soft deletes trait                                       0.22s  
+
+   PASS  Tests\Feature\Feature\StructuredLoggingTest
+  ✓ it adds trace id to request headers                                  0.02s  
+  ✓ it preserves existing request id header                              0.01s  
+  ✓ it adds trace id to log context                                      0.01s  
+  ✓ it includes request metadata in log context                          0.12s  
+  ✓ it works with different http methods                                 0.01s  
+  ✓ it handles api errors with trace id                                  0.01s  
+  ✓ it applies only to api routes                                        0.01s  
+  ✓ trace id persists through request lifecycle                          0.01s  
+  ✓ it actually logs with structured format                              0.02s  
+
+   PASS  Tests\Feature\Feature\StudentEnrollmentFlowTest
+  ✓ complete enrollment flow                                             0.48s  
+  ✓ workflow with application rejection                                  0.36s  
+  ✓ course waitlist workflow                                             0.36s  
+
+   PASS  Tests\Feature\Api\V1\AcademicRecordApiTest
+  ✓ health check endpoint                                                0.01s  
+
+   PASS  Tests\Feature\Api\V1\AdmissionApplicationApiTest
+  ✓ unauthenticated user cannot access admission applications            0.43s  
+  ✓ admin can list all applications                                      0.77s  
+  ✓ student can only see their own applications                          0.46s  
+  ✓ can filter applications by status                                    0.46s  
+  ✓ can filter applications by term                                      0.65s  
+  ✓ student can create admission application for themselves              0.43s  
+  ✓ student cannot create admission application for another student      0.43s  
+  ✓ admin can create admission application for any student               0.43s  
+  ✓ validation fails for missing required fields                         0.43s  
+  ✓ validation fails for non existent student or term                    0.43s  
+  ✓ can view specific admission application                              0.44s  
+  ✓ student can only view their own application                          0.45s  
+  ✓ student can update their own draft application                       0.45s  
+  ✓ student cannot update submitted application                          0.45s  
+  ✓ admin can update any application status                              0.44s  
+  ✓ student can delete their own draft application                       0.44s  
+  ✓ student cannot delete submitted application                          0.44s  
+  ✓ admin can delete any application                                     0.44s  
+  ✓ returns 404 for non existent application                             0.43s  
+  ✓ staff can list all applications                                      0.65s  
+  ✓ staff can filter applications by student                             0.45s  
+  ✓ student cannot filter by student id                                  0.55s  
+
+   PASS  Tests\Feature\Api\V1\AuthenticationTest
+  ✓ api endpoints are protected by auth sanctum                          0.02s  
+  ✓ a user can create an api token                                       0.24s  
+  ✓ a user cannot create an api token with invalid credentials           0.22s  
+  ✓ a user can authenticate with a valid token                           0.12s  
+  ✓ a user cannot authenticate with an invalid token                     0.01s  
+
+   PASS  Tests\Feature\Api\V1\BuildingApiTest
+  ✓ can get all buildings paginated with rooms                           0.13s  
+  ✓ can create a building                                                0.13s  
+  ✓ create building fails with duplicate name                            0.12s  
+  ✓ can get a single building with rooms                                 0.12s  
+  ✓ can update a building                                                0.13s  
+  ✓ can delete a building                                                0.13s  
+  ✓ deleting a building deletes its rooms                                0.12s  
+
+   PASS  Tests\Feature\Api\V1\CourseApiTest
+  ✓ can get all courses paginated                                        0.14s  
+  ✓ can filter courses by department                                     0.12s  
+  ✓ can create a course without prerequisites                            0.12s  
+  ✓ can create a course with prerequisites                               0.12s  
+  ✓ create course validation fails                                       0.12s  
+  ✓ can get a single course                                              0.12s  
+  ✓ can update a course                                                  0.12s  
+  ✓ update can remove prerequisites                                      0.13s  
+  ✓ can delete a course                                                  0.12s  
+
+   PASS  Tests\Feature\Api\V1\CourseImportApiTest
+  ✓ unauthenticated user cannot import courses                           0.02s  
+  ✓ user without courses manage permission cannot import courses         0.12s  
+  ✓ admin user can import courses                                        0.12s  
+  ✓ validates required file field                                        0.12s  
+  ✓ validates file type                                                  0.12s  
+  ✓ validates file size                                                  0.12s  
+  ✓ stores file in correct location                                      0.12s  
+  ✓ includes import metadata in response                                 0.12s  
+  ✓ dispatches job with correct parameters                               0.13s  
+  ✓ accepts valid csv mime types                                         0.12s  
+  ✓ throttling is applied                                                0.13s  
+
+   PASS  Tests\Feature\Api\V1\CourseSectionApiTest
+  ✓ can get all course sections paginated                                1.71s  
+  ✓ can filter course sections                                           0.65s  
+  ✓ can create a course section                                          0.23s  
+  ✓ can get a single course section                                      0.23s  
+  ✓ can update a course section                                          0.23s  
+  ✓ can delete a course section                                          0.23s  
+
+   PASS  Tests\Feature\Api\V1\DepartmentApiTest
+  ✓ can get a paginated list of departments                              0.13s  
+  ✓ can filter departments by faculty id                                 0.12s  
+  ✓ can get a single department                                          0.12s  
+  ✓ can create a new department                                          0.12s  
+  ✓ can update a department                                              0.12s  
+  ✓ can delete a department                                              0.12s  
+
+   PASS  Tests\Feature\Api\V1\EnrollmentApiTest
+  ✓ it can list enrollments with pagination                              1.06s  
+  ✓ it can create enrollment with available capacity                     0.55s  
+  ✓ it automatically waitlists when course section is full               0.66s  
+  ✓ it prevents duplicate enrollments                                    0.54s  
+  ✓ it can show single enrollment with relationships                     0.54s  
+  ✓ it can update enrollment status                                      0.55s  
+  ✓ it validates status transitions                                      0.54s  
+  ✓ it validates grade format                                            0.54s  
+  ✓ it can withdraw enrollment                                           0.55s  
+  ✓ it can complete enrollment with grade                                0.55s  
+  ✓ it can filter enrollments by student                                 0.65s  
+  ✓ it can get enrollments by student                                    0.76s  
+  ✓ it can get enrollments by course section                             1.06s  
+  ✓ it promotes from waitlist when spot opens                            0.65s  
+  ✓ it validates required fields for enrollment creation                 0.54s  
+  ✓ it validates student exists                                          0.55s  
+  ✓ it validates course section exists                                   0.54s  
+
+   PASS  Tests\Feature\Api\V1\EnrollmentSwapApiTest
+  ✓ it can swap enrollments successfully                                 0.36s  
+  ✓ it waitlists student when target section is full                     0.46s  
+  ✓ it fails when add drop deadline has passed                           0.34s  
+  ✓ it fails when target term deadline has passed                        0.34s  
+  ✓ it fails when user does not own enrollment                           0.55s  
+  ✓ it validates required fields                                         0.34s  
+  ✓ it validates enrollment exists                                       0.35s  
+  ✓ it validates course section exists                                   0.34s  
+  ✓ it prevents swapping to same course section                          0.34s  
+  ✓ it prevents swapping completed enrollments                           0.34s  
+  ✓ it prevents swapping withdrawn enrollments                           0.35s  
+  ✓ it rolls back transaction when new enrollment fails                  0.34s  
+  ✓ it requires authentication                                           0.34s  
+
+   PASS  Tests\Feature\Api\V1\FacultyApiTest
+  ✓ can get a paginated list of faculties                                0.13s  
+  ✓ can get a single faculty                                             0.12s  
+  ✓ returns 404 if faculty not found                                     0.12s  
+  ✓ can create a new faculty                                             0.12s  
+  ✓ create faculty requires a name                                       0.12s  
+  ✓ can update a faculty                                                 0.12s  
+  ✓ can delete a faculty                                                 0.12s  
+
+   PASS  Tests\Feature\Api\V1\GradeImportApiTest
+  ✓ unauthenticated users cannot upload grades                           0.13s  
+  ✓ only assigned instructor can upload grades                           0.23s  
+  ✓ admin can upload grades for any section                              0.23s  
+  ✓ users without grades upload permission cannot upload                 0.12s  
+  ✓ it validates file upload requirements                                0.13s  
+  ✓ it accepts valid csv file                                            0.13s  
+  ✓ it dispatches grade import job                                       0.13s  
+  ✓ it stores file in correct location                                   0.13s  
+  ✓ it returns 404 for nonexistent course section                        0.12s  
+  ✓ it includes course information in response                           0.13s  
+
+   FAIL  Tests\Feature\Api\V1\NotificationTest
+  ✓ notification is created when application status is updated           0.13s  
+  ✓ notification is not created when status does not change              0.13s  
+  ✓ can list unread notifications                                        0.14s  
+  ✓ can mark notification as read                                        0.13s  
+  ✓ cannot mark nonexistent notification as read                         0.13s  
+  ✓ user cannot access another users notifications                       0.24s  
+  ✓ notifications require authentication                                 0.13s  
+  ⨯ notification contains correct data                                   0.14s  
+  ✓ only unread notifications are returned                               0.13s  
+
+   PASS  Tests\Feature\Api\V1\PasswordResetApiTest
+  ✓ it can send password reset link for valid email                      0.33s  
+  ✓ it returns error for nonexistent email                               0.23s  
+  ✓ it validates email format for forgot password                        0.05s  
+  ✓ it requires email for forgot password                                0.02s  
+  ✓ it can reset password with valid token                               0.63s  
+  ✓ it fails with invalid token                                          0.32s  
+  ✓ it fails with expired token                                          0.45s  
+  ✓ it validates required fields for reset password                      0.03s  
+  ✓ it validates email format for reset password                         0.02s  
+  ✓ it validates password minimum length                                 0.01s  
+  ✓ it validates password confirmation matches                           0.01s  
+  ✓ it fails reset for nonexistent user                                  0.22s  
+  ✓ it can complete full password reset flow                             0.87s  
+  ✓ it respects rate limiting on forgot password                         2.41s  
+  ✓ it respects rate limiting on reset password                          2.34s  
+
+   PASS  Tests\Feature\Api\V1\PermissionApiTest
+  ✓ unauthenticated user cannot access permissions index                 0.36s  
+  ✓ unauthenticated user cannot access permission show                   0.33s  
+  ✓ admin can view permissions index                                     0.33s  
+  ✓ staff can view permissions index                                     0.33s  
+  ✓ student cannot view permissions index                                0.33s  
+  ✓ admin can view specific permission                                   0.32s  
+  ✓ staff can view specific permission                                   0.32s  
+  ✓ student cannot view specific permission                              0.33s  
+  ✓ permissions index with roles included                                0.33s  
+  ✓ permission show with roles included                                  0.33s  
+  ✓ permission show returns 404 for nonexistent permission               0.33s  
+  ✓ permissions index supports pagination                                0.33s  
+  ✓ permissions are ordered by name                                      0.32s  
+
+   PASS  Tests\Feature\Api\V1\ProgramApiTest
+  ✓ can get a paginated list of programs                                 0.14s  
+  ✓ can filter programs by department id                                 0.12s  
+  ✓ can get a single program                                             0.12s  
+  ✓ can create a new program                                             0.12s  
+  ✓ can update a program                                                 0.13s  
+  ✓ can delete a program                                                 0.12s  
+
+   PASS  Tests\Feature\Api\V1\ProgramChoiceApiTest
+  ✓ unauthenticated user cannot access program choices                   0.45s  
+  ✓ admin can list all program choices for any application               0.45s  
+  ✓ student can only view program choices for their own application      0.46s  
+  ✓ program choices are ordered by preference                            0.45s  
+  ✓ student can create program choice for their own application          0.45s  
+  ✓ student cannot create program choice for another students applicati… 0.45s  
+  ✓ admin can create program choice for any application                  0.44s  
+  ✓ validation fails for missing required fields                         0.45s  
+  ✓ validation fails for non existent program                            0.46s  
+  ✓ validation fails for duplicate preference order                      0.45s  
+  ✓ can view specific program choice                                     0.45s  
+  ✓ student cannot view other students program choice                    0.44s  
+  ✓ student can update their own draft program choice                    0.45s  
+  ✓ student cannot update program choice for submitted application       0.45s  
+  ✓ student cannot update status field                                   0.52s  
+  ✓ admin can update any program choice including status                 0.45s  
+  ✓ validation fails for duplicate preference order in update            0.45s  
+  ✓ student can delete their own draft program choice                    0.46s  
+  ✓ student cannot delete program choice from submitted application      0.45s  
+  ✓ admin can delete any program choice                                  0.45s  
+  ✓ returns 404 for non existent program choice                          0.45s  
+  ✓ staff can list program choices for any application                   0.45s  
+  ✓ staff can update program choice status                               0.45s  
+
+   PASS  Tests\Feature\Api\V1\RoleApiTest
+  ✓ unauthenticated user cannot access roles index                       0.34s  
+  ✓ unauthenticated user cannot access role show                         0.33s  
+  ✓ admin can view roles index                                           0.35s  
+  ✓ staff can view roles index                                           0.34s  
+  ✓ student cannot view roles index                                      0.32s  
+  ✓ admin can view specific role                                         0.33s  
+  ✓ staff can view specific role                                         0.32s  
+  ✓ student cannot view specific role                                    0.33s  
+  ✓ roles index with permissions included                                0.33s  
+  ✓ role show with permissions included                                  0.33s  
+  ✓ role show returns 404 for nonexistent role                           0.33s  
+  ✓ roles index supports pagination                                      0.32s  
+  ✓ roles are ordered by name                                            0.32s  
+
+   PASS  Tests\Feature\Api\V1\RoleManagementApiTest
+  ✓ non admin user cannot access role endpoints                          0.16s  
+  ✓ admin user can list roles                                            0.14s  
+  ✓ admin user can create role                                           0.14s  
+  ✓ admin user can view specific role                                    0.14s  
+  ✓ admin user can view role with permissions                            0.14s  
+  ✓ admin user can update role                                           0.14s  
+  ✓ admin user can delete role                                           0.14s  
+  ✓ admin user can sync permissions to role                              0.14s  
+  ✓ role name must be unique                                             0.15s  
+  ✓ role name is required                                                0.14s  
+  ✓ sync permissions requires valid permission ids                       0.14s  
+  ✓ sync permissions requires permissions array                          0.14s  
+  ✓ user with roles manage permission gains access                       0.14s  
+
+   PASS  Tests\Feature\Api\V1\RoomApiTest
+  ✓ can get all rooms paginated                                          0.13s  
+  ✓ can filter rooms by building                                         0.12s  
+  ✓ can create a room                                                    0.12s  
+  ✓ create room fails with duplicate number in same building             0.12s  
+  ✓ can create room with same number in different building               0.12s  
+  ✓ can get a single room                                                0.12s  
+  ✓ can update a room                                                    0.12s  
+  ✓ can delete a room                                                    0.12s  
+
+   PASS  Tests\Feature\Api\V1\StaffApiTest
+  ✓ can get all staff paginated                                          1.68s  
+  ✓ can filter staff by department                                       0.63s  
+  ✓ can create a staff member                                            0.34s  
+  ✓ create staff validation fails                                        0.12s  
+  ✓ can get a single staff member                                        0.22s  
+  ✓ can update a staff member                                            0.23s  
+  ✓ can delete a staff member                                            0.25s  
+
+   PASS  Tests\Feature\Api\V1\StudentApiTest
+  ✓ unauthenticated user cannot access student endpoints                 0.46s  
+  ✓ admin can view all students                                          0.43s  
+  ✓ staff can view all students                                          0.43s  
+  ✓ student can only view their own record from index                    0.43s  
+  ✓ student can view their own record from show                          0.43s  
+  ✓ student cannot view another students record                          0.43s  
+  ✓ student index can include user data                                  0.44s  
+  ✓ student show can include user data                                   0.43s  
+  ✓ admin can create student                                             0.54s  
+  ✓ admin can update student                                             0.43s  
+  ✓ admin can delete student                                             0.43s  
+  ✓ store requires validation                                            0.44s  
+
+   PASS  Tests\Feature\Api\V1\TermApiTest
+  ✓ can get all terms paginated                                          0.13s  
+  ✓ can filter terms by academic year                                    0.12s  
+  ✓ can create a term                                                    0.12s  
+  ✓ create term fails with duplicate year and semester                   0.12s  
+  ✓ can get a single term                                                0.12s  
+  ✓ can update a term                                                    0.12s  
+  ✓ can delete a term                                                    0.12s  

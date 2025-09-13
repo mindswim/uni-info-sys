@@ -20,6 +20,9 @@ use App\Http\Controllers\Api\V1\CourseImportController;
 use App\Http\Controllers\Api\V1\GradeImportController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 
+// Load demo routes
+require __DIR__.'/demo.php';
+
 /**
  * @OA\Get(
  *     path="/api/v1/health",

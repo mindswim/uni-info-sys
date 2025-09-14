@@ -22,7 +22,9 @@ import {
   User,
   LogOut,
   ChevronUp,
-  PanelLeft
+  PanelLeft,
+  Database,
+  Grid3X3
 } from "lucide-react"
 import Link from "next/link"
 
@@ -49,7 +51,7 @@ const navigationItems = {
     {
       title: "Academic",
       items: [
-        { title: "Course Catalog", url: "/catalog", icon: BookOpen },
+        { title: "Course Catalog", url: "/course-catalog", icon: BookOpen },
         { title: "Enrollment", url: "/enrollment", icon: ClipboardCheck },
         { title: "Academic Records", url: "/records", icon: FileText },
         { title: "Transcripts", url: "/transcripts", icon: FileText }
@@ -107,9 +109,9 @@ const navigationItems = {
       ]
     },
     {
-      title: "Student Management",
+      title: "Student Management", 
       items: [
-        { title: "All Students", url: "/students", icon: Users },
+        { title: "Students", url: "/students", icon: Users },
         { title: "Admissions", url: "/admissions", icon: ClipboardCheck },
         { title: "Enrollments", url: "/enrollments", icon: BookOpen },
         { title: "Academic Records", url: "/academic-records", icon: FileText }
@@ -121,7 +123,8 @@ const navigationItems = {
         { title: "Faculties", url: "/faculties", icon: Building },
         { title: "Departments", url: "/departments", icon: Building },
         { title: "Programs", url: "/programs", icon: GraduationCap },
-        { title: "Courses", url: "/courses", icon: BookOpen }
+        { title: "Courses", url: "/courses", icon: BookOpen },
+        { title: "Course Catalog", url: "/course-catalog", icon: BookOpen }
       ]
     },
     {
@@ -135,6 +138,8 @@ const navigationItems = {
     {
       title: "System",
       items: [
+        { title: "System Overview", url: "/system", icon: Grid3X3 },
+        { title: "Data Explorer", url: "/data-explorer", icon: Database },
         { title: "User Management", url: "/users", icon: Users },
         { title: "Roles & Permissions", url: "/roles", icon: Settings },
         { title: "System Settings", url: "/settings", icon: Settings },

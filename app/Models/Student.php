@@ -111,4 +111,50 @@ class Student extends Model implements Auditable
     {
         return $this->calculateGPA();
     }
+
+    /**
+     * Get academic standing based on GPA and credit hours
+     * 
+     * @return array
+     */
+    public function getAcademicStanding(): array
+    {
+        $service = app(\App\Services\StudentService::class);
+        return $service->getAcademicStanding($this);
+    }
+
+    /**
+     * Get total completed credit hours
+     *
+     * @return int
+     */
+    public function getTotalCompletedCredits(): int
+    {
+        $service = app(\App\Services\StudentService::class);
+        return $service->getTotalCompletedCredits($this);
+    }
+
+    /**
+     * Check degree progress for a specific program
+     *
+     * @param int $programId
+     * @return array
+     */
+    public function checkDegreeProgress(int $programId): array
+    {
+        $service = app(\App\Services\StudentService::class);
+        return $service->checkDegreeProgress($this, $programId);
+    }
+
+    /**
+     * Validate prerequisites for a course
+     *
+     * @param \App\Models\Course $course
+     * @return array
+     */
+    public function validatePrerequisites(\App\Models\Course $course): array
+    {
+        $service = app(\App\Services\StudentService::class);
+        return $service->validatePrerequisites($this, $course);
+    }
 }

@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\StudentController;
+use App\Http\Controllers\Api\V1\StudentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
@@ -197,6 +197,157 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
 // Prometheus metrics endpoint (unauthenticated for monitoring systems)
 Route::get('/metrics', [\App\Http\Controllers\Api\V1\MetricsController::class, 'index'])
     ->middleware('throttle:60,1'); // Allow 60 requests per minute for metrics scraping
+
+// TEMPORARY: Demo enrollment endpoints for frontend testing (REMOVE BEFORE PRODUCTION!)
+Route::prefix('demo')->middleware('throttle:60,1')->group(function () {
+    Route::post('/enrollments', function(Request $request) {
+        // Simulate enrollment success/failure based on section capacity
+        $studentId = $request->input('student_id', 1);
+        $sectionId = $request->input('course_section_id');
+        
+        // Get current enrollment count for the section
+        $currentEnrollments = DB::table('enrollments')
+            ->where('course_section_id', $sectionId)
+            ->where('status', 'enrolled')
+            ->count();
+            
+        // Get section capacity
+        $section = DB::table('course_sections')->find($sectionId);
+        if (!$section) {
+            return response()->json(['message' => 'Course section not found'], 404);
+        }
+        
+        // Check if student is already enrolled
+        $existingEnrollment = DB::table('enrollments')
+            ->where('student_id', $studentId)
+            ->where('course_section_id', $sectionId)
+            ->whereNull('deleted_at')
+            ->first();
+            
+        if ($existingEnrollment) {
+            return response()->json(['message' => 'Student is already enrolled in this section'], 422);
+        }
+        
+        $status = $currentEnrollments >= $section->capacity ? 'waitlisted' : 'enrolled';
+        
+        // Create enrollment record
+        $enrollmentId = DB::table('enrollments')->insertGetId([
+            'student_id' => $studentId,
+            'course_section_id' => $sectionId,
+            'enrollment_date' => now()->toDateString(),
+            'status' => $status,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+        
+        $message = $status === 'waitlisted' 
+            ? 'Student has been added to the waitlist for this course section.'
+            : 'Student has been successfully enrolled in the course section.';
+            
+        return response()->json([
+            'message' => $message,
+            'data' => [
+                'id' => $enrollmentId,
+                'student_id' => $studentId,
+                'course_section_id' => $sectionId,
+                'status' => $status,
+                'enrollment_date' => now()->toDateString()
+            ]
+        ], 201);
+    });
+    
+    Route::post('/enrollments/{enrollmentId}/withdraw', function($enrollmentId) {
+        $enrollment = DB::table('enrollments')->find($enrollmentId);
+        if (!$enrollment) {
+            return response()->json(['message' => 'Enrollment not found'], 404);
+        }
+        
+        if ($enrollment->status === 'withdrawn') {
+            return response()->json(['message' => 'Enrollment is already withdrawn'], 422);
+        }
+        
+        DB::table('enrollments')
+            ->where('id', $enrollmentId)
+            ->update([
+                'status' => 'withdrawn',
+                'updated_at' => now()
+            ]);
+            
+        return response()->json(['message' => 'Student has been withdrawn from the course section.']);
+    });
+    
+    Route::get('/students/{studentId}/enrollments', function($studentId) {
+        $enrollments = DB::table('enrollments')
+            ->where('student_id', $studentId)
+            ->whereNull('deleted_at')
+            ->pluck('course_section_id')
+            ->toArray();
+            
+        return response()->json([
+            'enrollments' => $enrollments,
+            'stats' => ['total_enrollments' => count($enrollments)]
+        ]);
+    });
+    
+    // Pipeline analytics endpoint
+    Route::get('/pipeline/analytics', function() {
+        // Get application statistics
+        $totalApplications = DB::table('admission_applications')->count();
+        $acceptedApplications = DB::table('admission_applications')->where('status', 'accepted')->count();
+        
+        // Get enrollment statistics 
+        $totalEnrollments = DB::table('enrollments')->where('status', 'enrolled')->count();
+        $uniqueEnrolledStudents = DB::table('enrollments')
+            ->where('status', 'enrolled')
+            ->distinct('student_id')
+            ->count();
+            
+        // Get student and course statistics
+        $totalStudents = DB::table('students')->count();
+        $totalCourseSections = DB::table('course_sections')->count();
+        
+        // Calculate conversion rates
+        $applicationToAcceptanceRate = $totalApplications > 0 ? ($acceptedApplications / $totalApplications) * 100 : 0;
+        $acceptanceToEnrollmentRate = $acceptedApplications > 0 ? ($uniqueEnrolledStudents / $acceptedApplications) * 100 : 0;
+        $overallSuccessRate = $totalApplications > 0 ? ($uniqueEnrolledStudents / $totalApplications) * 100 : 0;
+        
+        // Get recent pipeline activity (students with applications and enrollments)
+        $pipelineActivity = DB::table('students')
+            ->join('users', 'students.user_id', '=', 'users.id')
+            ->leftJoin('admission_applications', 'admission_applications.student_id', '=', 'students.id')
+            ->leftJoin('enrollments', 'enrollments.student_id', '=', 'students.id')
+            ->select([
+                'students.id',
+                'users.name',
+                'users.email',
+                'admission_applications.status as application_status',
+                'admission_applications.application_date',
+                DB::raw('COUNT(CASE WHEN enrollments.status = "enrolled" THEN 1 END) as current_enrollments')
+            ])
+            ->whereNotNull('admission_applications.id')
+            ->groupBy('students.id', 'users.name', 'users.email', 'admission_applications.status', 'admission_applications.application_date')
+            ->orderBy('admission_applications.application_date', 'desc')
+            ->limit(10)
+            ->get();
+            
+        return response()->json([
+            'stats' => [
+                'total_applications' => $totalApplications,
+                'accepted_applications' => $acceptedApplications,
+                'enrolled_students' => $uniqueEnrolledStudents,
+                'total_enrollments' => $totalEnrollments,
+                'total_students' => $totalStudents,
+                'course_sections' => $totalCourseSections
+            ],
+            'conversion_rates' => [
+                'application_to_acceptance' => round($applicationToAcceptanceRate, 2),
+                'acceptance_to_enrollment' => round($acceptanceToEnrollmentRate, 2),
+                'overall_success_rate' => round($overallSuccessRate, 2)
+            ],
+            'recent_activity' => $pipelineActivity
+        ]);
+    });
+});
 
 // TEMPORARY: Data viewer for development (REMOVE BEFORE PRODUCTION!)
 Route::prefix('data-viewer')->middleware('throttle:60,1')->group(function () {

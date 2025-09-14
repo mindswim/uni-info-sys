@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { AppShell } from "@/components/layout/app-shell"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -10,7 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search, Clock, Users, MapPin, User, BookOpen, AlertCircle, CheckCircle, XCircle } from "lucide-react"
+import { Search, Clock, Users, MapPin, User, BookOpen, AlertCircle, CheckCircle, XCircle, Loader2 } from "lucide-react"
+import { CourseAPI } from "@/lib/real-api"
+import type { CourseSection } from "@/lib/mock-api"
 
 const mockUser = {
   name: "Maria Rodriguez",
@@ -24,115 +26,16 @@ const breadcrumbs = [
   { label: "Course Catalog" }
 ]
 
-// Mock course sections with enrollment data
-const courseSections = [
-  {
-    id: 1,
-    course: {
-      id: 1,
-      code: "CS101",
-      name: "Introduction to Programming",
-      credits: 3,
-      level: "undergraduate",
-      description: "Basic programming concepts using Python. Learn variables, control structures, functions, and object-oriented programming fundamentals.",
-      prerequisites: [],
-      department: { name: "Computer Science", code: "CS" }
-    },
-    section_number: "001",
-    term: { name: "Fall 2024", code: "F2024" },
-    instructor: { name: "Prof. Sarah Kim", email: "sarah.kim@demo.com" },
-    room: { room_number: "ENG101", building: { name: "Engineering Complex" } },
-    schedule: "MWF 09:00-10:00",
-    max_enrollment: 30,
-    current_enrollment: 25,
-    waitlist_count: 0,
-    status: "open",
-    enrollment_status: null // null = not enrolled, "enrolled", "waitlisted", "blocked"
-  },
-  {
-    id: 2,
-    course: {
-      id: 1,
-      code: "CS101",
-      name: "Introduction to Programming",
-      credits: 3,
-      level: "undergraduate", 
-      description: "Basic programming concepts using Python. Learn variables, control structures, functions, and object-oriented programming fundamentals.",
-      prerequisites: [],
-      department: { name: "Computer Science", code: "CS" }
-    },
-    section_number: "002",
-    term: { name: "Fall 2024", code: "F2024" },
-    instructor: { name: "Prof. Sarah Kim", email: "sarah.kim@demo.com" },
-    room: { room_number: "ENG205", building: { name: "Engineering Complex" } },
-    schedule: "TT 14:00-15:30",
-    max_enrollment: 30,
-    current_enrollment: 30,
-    waitlist_count: 5,
-    status: "full",
-    enrollment_status: null
-  },
-  {
-    id: 3,
-    course: {
-      id: 2,
-      code: "CS201",
-      name: "Data Structures",
-      credits: 3,
-      level: "undergraduate",
-      description: "Advanced data structures including linked lists, stacks, queues, trees, and hash tables. Algorithm analysis and implementation in Java.",
-      prerequisites: ["CS101"],
-      department: { name: "Computer Science", code: "CS" }
-    },
-    section_number: "001",
-    term: { name: "Fall 2024", code: "F2024" },
-    instructor: { name: "Prof. Sarah Kim", email: "sarah.kim@demo.com" },
-    room: { room_number: "SCI301", building: { name: "Science Center" } },
-    schedule: "MWF 11:00-12:00",
-    max_enrollment: 25,
-    current_enrollment: 18,
-    waitlist_count: 0,
-    status: "open",
-    enrollment_status: "blocked" // Student hasn't taken CS101 yet
-  },
-  {
-    id: 4,
-    course: {
-      id: 3,
-      code: "MATH101",
-      name: "Calculus I",
-      credits: 4,
-      level: "undergraduate",
-      description: "Differential calculus including limits, derivatives, and applications. Introduction to integral calculus.",
-      prerequisites: [],
-      department: { name: "Mathematics", code: "MATH" }
-    },
-    section_number: "001",
-    term: { name: "Fall 2024", code: "F2024" },
-    instructor: { name: "Prof. John Davis", email: "john.davis@demo.com" },
-    room: { room_number: "SCI201", building: { name: "Science Center" } },
-    schedule: "MTWTF 10:00-11:00",
-    max_enrollment: 35,
-    current_enrollment: 32,
-    waitlist_count: 2,
-    status: "open",
-    enrollment_status: "enrolled"
-  }
-]
 
-// Mock student's current enrollments to check prerequisites
-const studentCompletedCourses = ["MATH101"] // Maria has completed Calculus I
-const studentCurrentEnrollments = [4] // Currently enrolled in section 4 (MATH101)
-
-function getEnrollmentStatus(section: any) {
+function getEnrollmentStatus(section: CourseSection, currentEnrollments: number[]) {
   // Check if already enrolled
-  if (studentCurrentEnrollments.includes(section.id)) {
+  if (currentEnrollments.includes(section.id)) {
     return { status: "enrolled", message: "You are enrolled in this section" }
   }
 
-  // Check prerequisites
+  // Check prerequisites (simplified for now - would need real academic record check)
   const missingPrereqs = section.course.prerequisites.filter(
-    (prereq: string) => !studentCompletedCourses.includes(prereq)
+    (prereq: string) => !['MATH101'].includes(prereq) // Mock completed courses
   )
   
   if (missingPrereqs.length > 0) {
@@ -153,8 +56,8 @@ function getEnrollmentStatus(section: any) {
   return { status: "available", message: "Available for enrollment" }
 }
 
-function getStatusBadge(section: any) {
-  const enrollmentStatus = getEnrollmentStatus(section)
+function getStatusBadge(section: CourseSection, currentEnrollments: number[]) {
+  const enrollmentStatus = getEnrollmentStatus(section, currentEnrollments)
   
   const variants = {
     enrolled: { variant: "default", icon: CheckCircle, text: "Enrolled" },
@@ -174,16 +77,23 @@ function getStatusBadge(section: any) {
   )
 }
 
-function EnrollmentDialog({ section, onEnroll }: { section: any, onEnroll: (sectionId: number, action: string) => void }) {
-  const enrollmentStatus = getEnrollmentStatus(section)
+function EnrollmentDialog({ section, onEnroll, currentEnrollments }: { 
+  section: CourseSection, 
+  onEnroll: (sectionId: number, action: string) => Promise<void>,
+  currentEnrollments: number[]
+}) {
+  const enrollmentStatus = getEnrollmentStatus(section, currentEnrollments)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleEnrollment = async (action: "enroll" | "waitlist" | "drop") => {
     setIsLoading(true)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    onEnroll(section.id, action)
-    setIsLoading(false)
+    try {
+      await onEnroll(section.id, action)
+    } catch (error) {
+      console.error('Enrollment action failed:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -282,53 +192,95 @@ function EnrollmentDialog({ section, onEnroll }: { section: any, onEnroll: (sect
 }
 
 export default function CourseCatalogPage() {
+  const [courseSections, setCourseSections] = useState<CourseSection[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedDepartment, setSelectedDepartment] = useState("all")
   const [selectedLevel, setSelectedLevel] = useState("all")
   const [enrollmentMessage, setEnrollmentMessage] = useState<{type: "success" | "error", message: string} | null>(null)
+  const [studentEnrollments, setStudentEnrollments] = useState<number[]>([])
+
+  // Load course sections from real API
+  useEffect(() => {
+    loadCourseSections()
+    loadStudentData()
+  }, [])
+
+  const loadCourseSections = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await CourseAPI.getCourseSections({
+        search: searchQuery,
+        department: selectedDepartment !== "all" ? selectedDepartment : undefined,
+        level: selectedLevel !== "all" ? selectedLevel : undefined
+      })
+      setCourseSections(response.data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load course sections')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadStudentData = async () => {
+    try {
+      const enrollmentData = await CourseAPI.getStudentEnrollments(1) // Maria's ID
+      setStudentEnrollments(enrollmentData.enrollments)
+    } catch (err) {
+      console.warn('Failed to load student enrollment data:', err)
+    }
+  }
+
+  // Reload when filters change
+  useEffect(() => {
+    if (!loading) {
+      loadCourseSections()
+    }
+  }, [searchQuery, selectedDepartment, selectedLevel])
 
   const departments = [...new Set(courseSections.map(s => s.course.department.code))]
-  
-  const filteredSections = courseSections.filter(section => {
-    const matchesSearch = searchQuery === "" || 
-      section.course.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      section.course.name.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    const matchesDepartment = selectedDepartment === "all" || 
-      section.course.department.code === selectedDepartment
-    
-    const matchesLevel = selectedLevel === "all" || 
-      section.course.level === selectedLevel
+  const filteredSections = courseSections
 
-    return matchesSearch && matchesDepartment && matchesLevel
-  })
-
-  const handleEnrollment = (sectionId: number, action: string) => {
+  const handleEnrollment = async (sectionId: number, action: string) => {
     const section = courseSections.find(s => s.id === sectionId)
     if (!section) return
 
-    if (action === "enroll") {
+    try {
+      let result
+      if (action === "enroll") {
+        result = await CourseAPI.enrollInSection(sectionId)
+        setEnrollmentMessage({
+          type: "success",
+          message: result.message
+        })
+        // Update local state
+        setStudentEnrollments(prev => [...prev, sectionId])
+      } else if (action === "waitlist") {
+        result = await CourseAPI.joinWaitlist(sectionId)
+        setEnrollmentMessage({
+          type: "success", 
+          message: result.message
+        })
+      } else if (action === "drop") {
+        result = await CourseAPI.dropFromSection(sectionId)
+        setEnrollmentMessage({
+          type: "success",
+          message: result.message
+        })
+        // Update local state
+        setStudentEnrollments(prev => prev.filter(id => id !== sectionId))
+      }
+
+      // Reload course sections to get updated capacity/waitlist counts
+      await loadCourseSections()
+
+    } catch (error) {
       setEnrollmentMessage({
-        type: "success",
-        message: `Successfully enrolled in ${section.course.code} - Section ${section.section_number}`
+        type: "error",
+        message: error instanceof Error ? error.message : "An error occurred. Please try again."
       })
-      // Update enrollment status in real app
-      section.current_enrollment += 1
-      studentCurrentEnrollments.push(sectionId)
-    } else if (action === "waitlist") {
-      setEnrollmentMessage({
-        type: "success", 
-        message: `Added to waitlist for ${section.course.code} - Section ${section.section_number}`
-      })
-      section.waitlist_count += 1
-    } else if (action === "drop") {
-      setEnrollmentMessage({
-        type: "success",
-        message: `Dropped from ${section.course.code} - Section ${section.section_number}`
-      })
-      section.current_enrollment -= 1
-      const index = studentCurrentEnrollments.indexOf(sectionId)
-      if (index > -1) studentCurrentEnrollments.splice(index, 1)
     }
 
     // Clear message after 5 seconds
@@ -390,79 +342,93 @@ export default function CourseCatalogPage() {
 
         {/* Course Sections */}
         <div className="space-y-4">
-          {filteredSections.map((section) => {
-            const enrollmentStatus = getEnrollmentStatus(section)
-            
-            return (
-              <Card key={`${section.course.id}-${section.id}`} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">
-                        {section.course.code} - {section.course.name}
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        Section {section.section_number} • {section.course.credits} credits • {section.course.department.name}
-                      </p>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-muted-foreground">Loading courses...</span>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2 text-red-700">Error Loading Courses</h3>
+              <p className="text-muted-foreground mb-4">{error}</p>
+              <Button onClick={loadCourseSections} variant="outline">
+                Try Again
+              </Button>
+            </div>
+          ) : filteredSections.length === 0 ? (
+            <div className="text-center py-12">
+              <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No courses found</h3>
+              <p className="text-muted-foreground">Try adjusting your search criteria</p>
+            </div>
+          ) : (
+            filteredSections.map((section) => {
+              const enrollmentStatus = getEnrollmentStatus(section, studentEnrollments)
+              
+              return (
+                <Card key={`${section.course.id}-${section.id}`} className="hover:shadow-lg transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="text-lg">
+                          {section.course.code} - {section.course.name}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          Section {section.section_number} • {section.course.credits} credits • {section.course.department.name}
+                        </p>
+                      </div>
+                      {getStatusBadge(section, studentEnrollments)}
                     </div>
-                    {getStatusBadge(section)}
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="space-y-4">
-                  <p className="text-sm">{section.course.description}</p>
+                  </CardHeader>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-muted-foreground" />
-                      <span>{section.instructor.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-muted-foreground" />
-                      <span>{section.schedule}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-muted-foreground" />
-                      <span>{section.room.building.name} {section.room.room_number}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-muted-foreground" />
-                      <span>
-                        {section.current_enrollment}/{section.max_enrollment}
-                        {section.waitlist_count > 0 && ` (+${section.waitlist_count} waitlisted)`}
-                      </span>
-                    </div>
-                  </div>
-
-                  {section.course.prerequisites.length > 0 && (
-                    <div>
-                      <span className="text-sm font-medium">Prerequisites: </span>
-                      <div className="flex gap-1 mt-1">
-                        {section.course.prerequisites.map((prereq) => (
-                          <Badge key={prereq} variant="outline" className="text-xs">
-                            {prereq}
-                          </Badge>
-                        ))}
+                  <CardContent className="space-y-4">
+                    <p className="text-sm">{section.course.description}</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 text-muted-foreground" />
+                        <span>{section.instructor.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-muted-foreground" />
+                        <span>{section.schedule}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-muted-foreground" />
+                        <span>{section.room.building.name} {section.room.room_number}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-muted-foreground" />
+                        <span>
+                          {section.current_enrollment}/{section.max_enrollment}
+                          {section.waitlist_count > 0 && ` (+${section.waitlist_count} waitlisted)`}
+                        </span>
                       </div>
                     </div>
-                  )}
 
-                  <div className="flex justify-end">
-                    <EnrollmentDialog section={section} onEnroll={handleEnrollment} />
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
+                    {section.course.prerequisites.length > 0 && (
+                      <div>
+                        <span className="text-sm font-medium">Prerequisites: </span>
+                        <div className="flex gap-1 mt-1">
+                          {section.course.prerequisites.map((prereq) => (
+                            <Badge key={prereq} variant="outline" className="text-xs">
+                              {prereq}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex justify-end">
+                      <EnrollmentDialog section={section} onEnroll={handleEnrollment} currentEnrollments={studentEnrollments} />
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })
+          )}
         </div>
-
-        {filteredSections.length === 0 && (
-          <div className="text-center py-12">
-            <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No courses found</h3>
-            <p className="text-muted-foreground">Try adjusting your search criteria</p>
-          </div>
-        )}
       </div>
     </AppShell>
   )

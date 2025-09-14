@@ -24,7 +24,8 @@ import {
   ChevronUp,
   PanelLeft,
   Database,
-  Grid3X3
+  Grid3X3,
+  GitBranch
 } from "lucide-react"
 import Link from "next/link"
 
@@ -113,6 +114,7 @@ const navigationItems = {
       items: [
         { title: "Students", url: "/students", icon: Users },
         { title: "Admissions", url: "/admissions", icon: ClipboardCheck },
+        { title: "Application Pipeline", url: "/pipeline", icon: GitBranch },
         { title: "Enrollments", url: "/enrollments", icon: BookOpen },
         { title: "Academic Records", url: "/academic-records", icon: FileText }
       ]

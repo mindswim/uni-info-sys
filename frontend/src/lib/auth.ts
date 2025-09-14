@@ -1,5 +1,5 @@
 // Authentication service for Laravel Sanctum integration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8001/api/v1'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8002/api/v1'
 
 export interface User {
   id: number
@@ -148,7 +148,7 @@ class AuthService {
     return roles.some(role => this.hasRole(role))
   }
 
-  // Create authenticated API request helper
+  // Create authenticated API request helper with automatic token validation
   async apiRequest(endpoint: string, options: RequestInit = {}): Promise<Response> {
     if (!this.token) {
       throw new Error('No authentication token available')
@@ -156,7 +156,7 @@ class AuthService {
 
     const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`
     
-    return fetch(url, {
+    const response = await fetch(url, {
       ...options,
       headers: {
         'Authorization': `Bearer ${this.token}`,
@@ -165,6 +165,38 @@ class AuthService {
         ...options.headers,
       },
     })
+
+    // Handle token expiry
+    if (response.status === 401 || response.status === 419) {
+      // Token is invalid/expired, clear auth state
+      this.token = null
+      this.user = null
+      
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token')
+        localStorage.removeItem('auth_user')
+        // Redirect to login if we're not already there
+        if (!window.location.pathname.includes('/auth/login')) {
+          window.location.href = '/auth/login'
+        }
+      }
+      throw new Error('Session expired. Please log in again.')
+    }
+
+    return response
+  }
+
+  // Session validation
+  async validateSession(): Promise<boolean> {
+    if (!this.token) return false
+    
+    try {
+      await this.getCurrentUser()
+      return true
+    } catch (error) {
+      console.warn('Session validation failed:', error)
+      return false
+    }
   }
 }
 

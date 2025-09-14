@@ -1,22 +1,59 @@
+'use client'
+
 import { AppShell } from "@/components/layout/app-shell"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Users, BookOpen, FileText, TrendingUp } from "lucide-react"
+import { useState, useEffect } from "react"
+import UniversityAPI from "@/lib/university-api"
 
-const mockUser = {
-  name: "Dr. Elizabeth Harper",
-  email: "admin@demo.com", 
-  role: "Administrator",
-  avatar: "/avatars/admin.jpg"
-}
 
 const breadcrumbs = [
   { label: "Dashboard" }
 ]
 
+interface SystemStats {
+  students: number
+  staff: number
+  courses: number
+  enrollments: number
+  applications: number
+  faculties: number
+  departments: number
+  programs: number
+}
+
 export default function Home() {
+  const [stats, setStats] = useState<SystemStats>({
+    students: 0,
+    staff: 0,
+    courses: 0,
+    enrollments: 0,
+    applications: 0,
+    faculties: 0,
+    departments: 0,
+    programs: 0
+  })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        setLoading(true)
+        const systemStats = await UniversityAPI.getSystemStats()
+        setStats(systemStats)
+      } catch (error) {
+        console.error('Failed to fetch system stats:', error)
+        // Keep default values on error
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStats()
+  }, [])
   return (
-    <AppShell user={mockUser} breadcrumbs={breadcrumbs}>
+    <AppShell breadcrumbs={breadcrumbs}>
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         <div className="flex items-center justify-between space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
@@ -30,9 +67,11 @@ export default function Home() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">2,847</div>
+              <div className="text-2xl font-bold">
+                {loading ? '...' : stats.students.toLocaleString()}
+              </div>
               <p className="text-xs text-muted-foreground">
-                +12% from last month
+                Active students enrolled
               </p>
             </CardContent>
           </Card>
@@ -43,9 +82,11 @@ export default function Home() {
               <BookOpen className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">127</div>
+              <div className="text-2xl font-bold">
+                {loading ? '...' : stats.courses.toLocaleString()}
+              </div>
               <p className="text-xs text-muted-foreground">
-                +3 new this semester
+                Courses in catalog
               </p>
             </CardContent>
           </Card>
@@ -56,22 +97,26 @@ export default function Home() {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1,203</div>
+              <div className="text-2xl font-bold">
+                {loading ? '...' : stats.applications.toLocaleString()}
+              </div>
               <p className="text-xs text-muted-foreground">
-                +23% from last year
+                Admission applications
               </p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Enrollment Rate</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Enrollments</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">89.2%</div>
+              <div className="text-2xl font-bold">
+                {loading ? '...' : stats.enrollments.toLocaleString()}
+              </div>
               <p className="text-xs text-muted-foreground">
-                +2.1% from last year
+                Active enrollments
               </p>
             </CardContent>
           </Card>

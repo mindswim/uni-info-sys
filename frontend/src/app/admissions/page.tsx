@@ -1,326 +1,57 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { AppShell } from "@/components/layout/app-shell"
-import { ApplicationsTable } from "@/components/data-table/applications-table"
-import { AdmissionApplication, TableData } from "@/types/university"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Progress } from "@/components/ui/progress"
+import { 
+  FileText, 
+  Clock, 
+  CheckCircle, 
+  XCircle, 
+  AlertCircle, 
+  User, 
+  Plus,
+  Search,
+  Filter,
+  Calendar,
+  GraduationCap,
+  Mail,
+  Phone,
+  MapPin,
+  Upload,
+  Eye,
+  Edit,
+  Trash2,
+  RefreshCw
+} from "lucide-react"
+import UniversityAPI, { AdmissionApplication, Program, Student } from "@/lib/university-api"
 
-// Mock data for admission applications
-const mockApplications: AdmissionApplication[] = [
-  {
-    id: 1,
-    application_number: "APP2024001",
-    first_name: "Emily",
-    last_name: "Johnson",
-    email: "emily.johnson@email.com",
-    phone: "+1-555-0234",
-    date_of_birth: "2005-06-15",
-    address: "456 Elm Street",
-    city: "Portland",
-    state: "OR",
-    postal_code: "97201",
-    country: "USA",
-    status: "under_review",
-    submitted_at: "2024-02-01T14:30:00Z",
-    decision_date: null,
-    decision_notes: null,
-    high_school_name: "Portland High School",
-    graduation_year: 2023,
-    gpa: 3.85,
-    sat_score: 1420,
-    act_score: null,
-    gre_score: null,
-    created_at: "2024-02-01T14:30:00Z",
-    updated_at: "2024-02-10T09:15:00Z",
-    program_choices: [
-      {
-        id: 1,
-        application_id: 1,
-        program_id: 1,
-        preference_order: 1,
-        created_at: "2024-02-01T14:30:00Z",
-        updated_at: "2024-02-01T14:30:00Z",
-        program: {
-          id: 1,
-          name: "Computer Science",
-          degree_type: "bachelor",
-          department_id: 1,
-          created_at: "2024-01-15T10:30:00Z",
-          updated_at: "2024-01-15T10:30:00Z"
-        }
-      },
-      {
-        id: 2,
-        application_id: 1,
-        program_id: 2,
-        preference_order: 2,
-        created_at: "2024-02-01T14:30:00Z",
-        updated_at: "2024-02-01T14:30:00Z",
-        program: {
-          id: 2,
-          name: "Data Science",
-          degree_type: "bachelor",
-          department_id: 1,
-          created_at: "2024-01-15T10:30:00Z",
-          updated_at: "2024-01-15T10:30:00Z"
-        }
-      }
-    ],
-    documents: [
-      {
-        id: 1,
-        application_id: 1,
-        type: "transcript",
-        file_name: "emily_transcript.pdf",
-        file_path: "/documents/transcripts/emily_transcript.pdf",
-        uploaded_at: "2024-02-01T14:35:00Z",
-        verified: true,
-        created_at: "2024-02-01T14:35:00Z",
-        updated_at: "2024-02-01T14:35:00Z"
-      },
-      {
-        id: 2,
-        application_id: 1,
-        type: "personal_statement",
-        file_name: "emily_essay.pdf",
-        file_path: "/documents/essays/emily_essay.pdf",
-        uploaded_at: "2024-02-01T14:40:00Z",
-        verified: true,
-        created_at: "2024-02-01T14:40:00Z",
-        updated_at: "2024-02-01T14:40:00Z"
-      }
-    ]
-  },
-  {
-    id: 2,
-    application_number: "APP2024002",
-    first_name: "Michael",
-    last_name: "Chen",
-    email: "michael.chen@email.com",
-    phone: "+1-555-0235",
-    date_of_birth: "2005-09-22",
-    address: "789 Oak Avenue",
-    city: "San Francisco",
-    state: "CA",
-    postal_code: "94102",
-    country: "USA",
-    status: "accepted",
-    submitted_at: "2024-01-15T10:00:00Z",
-    decision_date: "2024-02-15T16:30:00Z",
-    decision_notes: "Excellent academic record and strong test scores.",
-    high_school_name: "San Francisco Academy",
-    graduation_year: 2023,
-    gpa: 3.92,
-    sat_score: 1520,
-    act_score: 34,
-    gre_score: null,
-    created_at: "2024-01-15T10:00:00Z",
-    updated_at: "2024-02-15T16:30:00Z",
-    program_choices: [
-      {
-        id: 3,
-        application_id: 2,
-        program_id: 3,
-        preference_order: 1,
-        created_at: "2024-01-15T10:00:00Z",
-        updated_at: "2024-01-15T10:00:00Z",
-        program: {
-          id: 3,
-          name: "Engineering",
-          degree_type: "bachelor",
-          department_id: 2,
-          created_at: "2024-01-15T10:30:00Z",
-          updated_at: "2024-01-15T10:30:00Z"
-        }
-      }
-    ],
-    documents: [
-      {
-        id: 3,
-        application_id: 2,
-        type: "transcript",
-        file_name: "michael_transcript.pdf",
-        file_path: "/documents/transcripts/michael_transcript.pdf",
-        uploaded_at: "2024-01-15T10:05:00Z",
-        verified: true,
-        created_at: "2024-01-15T10:05:00Z",
-        updated_at: "2024-01-15T10:05:00Z"
-      },
-      {
-        id: 4,
-        application_id: 2,
-        type: "personal_statement",
-        file_name: "michael_essay.pdf",
-        file_path: "/documents/essays/michael_essay.pdf",
-        uploaded_at: "2024-01-15T10:10:00Z",
-        verified: true,
-        created_at: "2024-01-15T10:10:00Z",
-        updated_at: "2024-01-15T10:10:00Z"
-      },
-      {
-        id: 5,
-        application_id: 2,
-        type: "letters_of_recommendation",
-        file_name: "michael_recommendations.pdf",
-        file_path: "/documents/recommendations/michael_recommendations.pdf",
-        uploaded_at: "2024-01-15T10:15:00Z",
-        verified: true,
-        created_at: "2024-01-15T10:15:00Z",
-        updated_at: "2024-01-15T10:15:00Z"
-      }
-    ]
-  },
-  {
-    id: 3,
-    application_number: "APP2024003",
-    first_name: "Sarah",
-    last_name: "Williams",
-    email: "sarah.williams@email.com",
-    phone: "+1-555-0236",
-    date_of_birth: "2004-12-03",
-    address: "321 Pine Road",
-    city: "Seattle",
-    state: "WA",
-    postal_code: "98101",
-    country: "USA",
-    status: "rejected",
-    submitted_at: "2024-02-05T09:15:00Z",
-    decision_date: "2024-02-20T11:45:00Z",
-    decision_notes: "Application incomplete - missing required documents.",
-    high_school_name: "Seattle Central High",
-    graduation_year: 2023,
-    gpa: 2.95,
-    sat_score: 1180,
-    act_score: null,
-    gre_score: null,
-    created_at: "2024-02-05T09:15:00Z",
-    updated_at: "2024-02-20T11:45:00Z",
-    program_choices: [
-      {
-        id: 4,
-        application_id: 3,
-        program_id: 4,
-        preference_order: 1,
-        created_at: "2024-02-05T09:15:00Z",
-        updated_at: "2024-02-05T09:15:00Z",
-        program: {
-          id: 4,
-          name: "Business Administration",
-          degree_type: "bachelor",
-          department_id: 3,
-          created_at: "2024-01-15T10:30:00Z",
-          updated_at: "2024-01-15T10:30:00Z"
-        }
-      }
-    ],
-    documents: [
-      {
-        id: 6,
-        application_id: 3,
-        type: "transcript",
-        file_name: "sarah_transcript.pdf",
-        file_path: "/documents/transcripts/sarah_transcript.pdf",
-        uploaded_at: "2024-02-05T09:20:00Z",
-        verified: false,
-        created_at: "2024-02-05T09:20:00Z",
-        updated_at: "2024-02-05T09:20:00Z"
-      }
-    ]
-  },
-  {
-    id: 4,
-    application_number: "APP2024004",
-    first_name: "Alex",
-    last_name: "Rodriguez",
-    email: "alex.rodriguez@email.com",
-    phone: "+1-555-0237",
-    date_of_birth: "2000-03-18",
-    address: "654 Maple Drive",
-    city: "Austin",
-    state: "TX",
-    postal_code: "73301",
-    country: "USA",
-    status: "pending",
-    submitted_at: "2024-02-25T16:45:00Z",
-    decision_date: null,
-    decision_notes: null,
-    high_school_name: "Austin Community College",
-    graduation_year: 2018,
-    gpa: 3.67,
-    sat_score: null,
-    act_score: null,
-    gre_score: 325,
-    created_at: "2024-02-25T16:45:00Z",
-    updated_at: "2024-02-25T16:45:00Z",
-    program_choices: [
-      {
-        id: 5,
-        application_id: 4,
-        program_id: 5,
-        preference_order: 1,
-        created_at: "2024-02-25T16:45:00Z",
-        updated_at: "2024-02-25T16:45:00Z",
-        program: {
-          id: 5,
-          name: "Master of Computer Science",
-          degree_type: "master",
-          department_id: 1,
-          created_at: "2024-01-15T10:30:00Z",
-          updated_at: "2024-01-15T10:30:00Z"
-        }
-      }
-    ],
-    documents: [
-      {
-        id: 7,
-        application_id: 4,
-        type: "transcript",
-        file_name: "alex_transcript.pdf",
-        file_path: "/documents/transcripts/alex_transcript.pdf",
-        uploaded_at: "2024-02-25T16:50:00Z",
-        verified: true,
-        created_at: "2024-02-25T16:50:00Z",
-        updated_at: "2024-02-25T16:50:00Z"
-      },
-      {
-        id: 8,
-        application_id: 4,
-        type: "personal_statement",
-        file_name: "alex_statement.pdf",
-        file_path: "/documents/statements/alex_statement.pdf",
-        uploaded_at: "2024-02-25T16:55:00Z",
-        verified: true,
-        created_at: "2024-02-25T16:55:00Z",
-        updated_at: "2024-02-25T16:55:00Z"
-      },
-      {
-        id: 9,
-        application_id: 4,
-        type: "letters_of_recommendation",
-        file_name: "alex_recommendations.pdf",
-        file_path: "/documents/recommendations/alex_recommendations.pdf",
-        uploaded_at: "2024-02-25T17:00:00Z",
-        verified: true,
-        created_at: "2024-02-25T17:00:00Z",
-        updated_at: "2024-02-25T17:00:00Z"
-      }
-    ]
-  }
-]
-
-const mockTableData: TableData<AdmissionApplication> = {
-  data: mockApplications,
-  total: 4,
-  page: 1,
-  per_page: 25,
-  last_page: 1
+const statusColors = {
+  pending: { color: "bg-yellow-500", textColor: "text-yellow-700", bgColor: "bg-yellow-50" },
+  under_review: { color: "bg-blue-500", textColor: "text-blue-700", bgColor: "bg-blue-50" },
+  accepted: { color: "bg-green-500", textColor: "text-green-700", bgColor: "bg-green-50" },
+  rejected: { color: "bg-red-500", textColor: "text-red-700", bgColor: "bg-red-50" },
+  withdrawn: { color: "bg-gray-500", textColor: "text-gray-700", bgColor: "bg-gray-50" }
 }
 
-const mockUser = {
-  name: "Dr. Elizabeth Harper",
-  email: "admin@demo.com", 
-  role: "Administrator",
-  avatar: "/avatars/admin.jpg"
+interface ApplicationStats {
+  total: number
+  pending: number
+  under_review: number
+  accepted: number
+  rejected: number
+  acceptance_rate: number
 }
+
 
 const breadcrumbs = [
   { label: "Dashboard", href: "/" },
@@ -328,33 +59,460 @@ const breadcrumbs = [
 ]
 
 export default function AdmissionsPage() {
-  const handleApplicationSelect = (application: AdmissionApplication) => {
-    console.log("Selected application:", application.application_number)
+  const [applications, setApplications] = useState<AdmissionApplication[]>([])
+  const [filteredApplications, setFilteredApplications] = useState<AdmissionApplication[]>([])
+  const [programs, setPrograms] = useState<Program[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [programFilter, setProgramFilter] = useState("all")
+  const [selectedApplication, setSelectedApplication] = useState<AdmissionApplication | null>(null)
+  const [stats, setStats] = useState<ApplicationStats>({
+    total: 0,
+    pending: 0,
+    under_review: 0,
+    accepted: 0,
+    rejected: 0,
+    acceptance_rate: 0
+  })
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  useEffect(() => {
+    filterApplications()
+  }, [applications, searchTerm, statusFilter, programFilter])
+
+  const loadData = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Load applications
+      const appResponse = await UniversityAPI.getAdmissionApplications({
+        per_page: 100
+      })
+      setApplications(appResponse.data)
+
+      // Load programs for filtering
+      const progResponse = await UniversityAPI.getPrograms()
+      setPrograms(progResponse.data)
+
+      // Calculate stats
+      calculateStats(appResponse.data)
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load admission data')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleApplicationView = (application: AdmissionApplication) => {
-    console.log("View application:", application.application_number)
+  const calculateStats = (apps: AdmissionApplication[]) => {
+    const total = apps.length
+    const pending = apps.filter(app => app.status === 'pending').length
+    const under_review = apps.filter(app => app.status === 'under_review').length
+    const accepted = apps.filter(app => app.status === 'accepted').length
+    const rejected = apps.filter(app => app.status === 'rejected').length
+    const acceptance_rate = total > 0 ? Math.round((accepted / (accepted + rejected)) * 100) : 0
+
+    setStats({
+      total,
+      pending,
+      under_review,
+      accepted,
+      rejected,
+      acceptance_rate
+    })
   }
 
-  const handleApplicationEdit = (application: AdmissionApplication) => {
-    console.log("Edit application:", application.application_number)
+  const filterApplications = () => {
+    let filtered = applications
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(app =>
+        app.student.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        app.student.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        app.student.student_number.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }
+
+    // Status filter
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(app => app.status === statusFilter)
+    }
+
+    // Program filter (via program_choices)
+    if (programFilter !== "all") {
+      filtered = filtered.filter(app =>
+        app.program_choices?.some(choice => choice.program_id === parseInt(programFilter))
+      )
+    }
+
+    setFilteredApplications(filtered)
   }
 
-  const handleApplicationDelete = (application: AdmissionApplication) => {
-    console.log("Delete application:", application.application_number)
+  const getStatusBadge = (status: string) => {
+    const config = statusColors[status as keyof typeof statusColors] || statusColors.pending
+    return (
+      <Badge variant="outline" className={`${config.textColor} border-current`}>
+        {status.replace('_', ' ')}
+      </Badge>
+    )
+  }
+
+  const getApplicationProgress = (app: AdmissionApplication) => {
+    const stages = ['pending', 'under_review', 'accepted']
+    const currentIndex = stages.indexOf(app.status)
+    return currentIndex >= 0 ? ((currentIndex + 1) / stages.length) * 100 : 0
+  }
+
+  const handleStatusUpdate = async (applicationId: number, newStatus: string) => {
+    // This would be implemented with a real API endpoint
+    console.log(`Updating application ${applicationId} to status: ${newStatus}`)
+    // For demo purposes, we'll just update locally
+    setApplications(prev =>
+      prev.map(app =>
+        app.id === applicationId
+          ? { ...app, status: newStatus as any, decision_date: new Date().toISOString() }
+          : app
+      )
+    )
   }
 
   return (
-    <AppShell user={mockUser} breadcrumbs={breadcrumbs}>
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-        <ApplicationsTable
-          data={mockTableData}
-          loading={false}
-          onApplicationSelect={handleApplicationSelect}
-          onApplicationView={handleApplicationView}
-          onApplicationEdit={handleApplicationEdit}
-          onApplicationDelete={handleApplicationDelete}
-        />
+    <AppShell breadcrumbs={breadcrumbs}>
+      <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Admission Applications</h1>
+            <p className="text-muted-foreground">
+              Manage and review student admission applications
+            </p>
+          </div>
+          <Button className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            New Application
+          </Button>
+        </div>
+
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.total}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pending</CardTitle>
+              <Clock className="h-4 w-4 text-yellow-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Under Review</CardTitle>
+              <AlertCircle className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">{stats.under_review}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Accepted</CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{stats.accepted}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+              <XCircle className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">{stats.rejected}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Acceptance Rate</CardTitle>
+              <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{stats.acceptance_rate}%</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, email, or student number..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-48">
+                  <Filter className="mr-2 h-4 w-4" />
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="under_review">Under Review</SelectItem>
+                  <SelectItem value="accepted">Accepted</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                  <SelectItem value="withdrawn">Withdrawn</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={programFilter} onValueChange={setProgramFilter}>
+                <SelectTrigger className="w-48">
+                  <GraduationCap className="mr-2 h-4 w-4" />
+                  <SelectValue placeholder="Program" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Programs</SelectItem>
+                  {programs.slice(0, 10).map(program => (
+                    <SelectItem key={program.id} value={program.id.toString()}>
+                      {program.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Button variant="outline" onClick={loadData} className="flex items-center gap-2">
+                <RefreshCw className="h-4 w-4" />
+                Refresh
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Applications List */}
+        <div className="space-y-4">
+          {loading ? (
+            <Card>
+              <CardContent className="flex items-center justify-center py-12">
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                  <span className="text-muted-foreground">Loading applications...</span>
+                </div>
+              </CardContent>
+            </Card>
+          ) : error ? (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : filteredApplications.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No applications found</h3>
+                <p className="text-muted-foreground">Try adjusting your search criteria</p>
+              </CardContent>
+            </Card>
+          ) : (
+            filteredApplications.map((application) => (
+              <Card key={application.id} className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-start space-x-4">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                        {application.student.user.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold">{application.student.user.name}</h3>
+                        <p className="text-sm text-muted-foreground">{application.student.user.email}</p>
+                        <p className="text-sm text-muted-foreground">ID: {application.student.student_number}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      {getStatusBadge(application.status)}
+                      
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl">
+                          <DialogHeader>
+                            <DialogTitle>Application Details - {application.student.user.name}</DialogTitle>
+                            <DialogDescription>
+                              Application #{application.id} submitted on {new Date(application.application_date).toLocaleDateString()}
+                            </DialogDescription>
+                          </DialogHeader>
+                          
+                          <Tabs defaultValue="details" className="w-full">
+                            <TabsList>
+                              <TabsTrigger value="details">Details</TabsTrigger>
+                              <TabsTrigger value="programs">Program Choices</TabsTrigger>
+                              <TabsTrigger value="documents">Documents</TabsTrigger>
+                              <TabsTrigger value="status">Status & Actions</TabsTrigger>
+                            </TabsList>
+                            
+                            <TabsContent value="details" className="space-y-4">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <Label className="text-sm font-medium">Application Date</Label>
+                                  <p className="text-sm text-muted-foreground">
+                                    {new Date(application.application_date).toLocaleDateString()}
+                                  </p>
+                                </div>
+                                <div>
+                                  <Label className="text-sm font-medium">Current Status</Label>
+                                  <div className="mt-1">
+                                    {getStatusBadge(application.status)}
+                                  </div>
+                                </div>
+                                <div>
+                                  <Label className="text-sm font-medium">Student Number</Label>
+                                  <p className="text-sm text-muted-foreground">{application.student.student_number}</p>
+                                </div>
+                                <div>
+                                  <Label className="text-sm font-medium">Email</Label>
+                                  <p className="text-sm text-muted-foreground">{application.student.user.email}</p>
+                                </div>
+                                {application.decision_date && (
+                                  <div>
+                                    <Label className="text-sm font-medium">Decision Date</Label>
+                                    <p className="text-sm text-muted-foreground">
+                                      {new Date(application.decision_date).toLocaleDateString()}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {application.comments && (
+                                <div>
+                                  <Label className="text-sm font-medium">Comments</Label>
+                                  <p className="text-sm text-muted-foreground mt-1">{application.comments}</p>
+                                </div>
+                              )}
+                            </TabsContent>
+                            
+                            <TabsContent value="programs" className="space-y-4">
+                              {application.program_choices?.map((choice, index) => (
+                                <div key={choice.id} className="border rounded p-3">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <h4 className="font-medium">Priority #{choice.priority}</h4>
+                                      <p className="text-sm text-muted-foreground">{choice.program.name}</p>
+                                      <p className="text-xs text-muted-foreground">
+                                        {choice.program.department.name} • {choice.program.degree_type}
+                                      </p>
+                                    </div>
+                                    <Badge variant="outline">{choice.program.degree_type}</Badge>
+                                  </div>
+                                </div>
+                              )) || (
+                                <p className="text-sm text-muted-foreground">No program choices recorded</p>
+                              )}
+                            </TabsContent>
+                            
+                            <TabsContent value="documents">
+                              <div className="text-sm text-muted-foreground">
+                                Document management would be implemented here
+                              </div>
+                            </TabsContent>
+                            
+                            <TabsContent value="status" className="space-y-4">
+                              <div>
+                                <Label className="text-sm font-medium">Update Status</Label>
+                                <div className="flex items-center space-x-2 mt-2">
+                                  <Select 
+                                    value={application.status} 
+                                    onValueChange={(newStatus) => handleStatusUpdate(application.id, newStatus)}
+                                  >
+                                    <SelectTrigger className="w-48">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="pending">Pending</SelectItem>
+                                      <SelectItem value="under_review">Under Review</SelectItem>
+                                      <SelectItem value="accepted">Accepted</SelectItem>
+                                      <SelectItem value="rejected">Rejected</SelectItem>
+                                      <SelectItem value="withdrawn">Withdrawn</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <Button size="sm">Update</Button>
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <Label className="text-sm font-medium">Progress</Label>
+                                <Progress value={getApplicationProgress(application)} className="mt-2" />
+                              </div>
+                            </TabsContent>
+                          </Tabs>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <strong>Applied:</strong> {new Date(application.application_date).toLocaleDateString()}
+                    </div>
+                    <div>
+                      <strong>Programs:</strong> {application.program_choices?.length || 0} selected
+                    </div>
+                    {application.decision_date && (
+                      <div>
+                        <strong>Decision:</strong> {new Date(application.decision_date).toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {application.program_choices && application.program_choices.length > 0 && (
+                    <div className="mt-3">
+                      <div className="flex gap-2">
+                        {application.program_choices.slice(0, 2).map(choice => (
+                          <Badge key={choice.id} variant="secondary" className="text-xs">
+                            {choice.program.name}
+                          </Badge>
+                        ))}
+                        {application.program_choices.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{application.program_choices.length - 2} more
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
       </div>
     </AppShell>
   )

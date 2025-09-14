@@ -11,15 +11,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search, Clock, Users, MapPin, User, BookOpen, AlertCircle, CheckCircle, XCircle, Loader2 } from "lucide-react"
-import { CourseAPI } from "@/lib/real-api"
-import type { CourseSection } from "@/lib/mock-api"
+import UniversityAPI, { CourseSection, Enrollment } from "@/lib/university-api"
 
-const mockUser = {
-  name: "Maria Rodriguez",
-  email: "maria@demo.com", 
-  role: "Student",
-  avatar: "/avatars/student.jpg"
-}
 
 const breadcrumbs = [
   { label: "Dashboard", href: "/" },
@@ -34,8 +27,9 @@ function getEnrollmentStatus(section: CourseSection, currentEnrollments: number[
   }
 
   // Check prerequisites (simplified for now - would need real academic record check)
-  const missingPrereqs = section.course.prerequisites.filter(
-    (prereq: string) => !['MATH101'].includes(prereq) // Mock completed courses
+  const prerequisites = section.course.prerequisites?.split(',').map(p => p.trim()) || []
+  const missingPrereqs = prerequisites.filter(
+    (prereq: string) => prereq && !['MATH101'].includes(prereq) // Mock completed courses
   )
   
   if (missingPrereqs.length > 0) {
@@ -45,11 +39,12 @@ function getEnrollmentStatus(section: CourseSection, currentEnrollments: number[
     }
   }
 
-  // Check capacity
-  if (section.current_enrollment >= section.max_enrollment) {
+  // Check capacity - use enrollments count
+  const currentEnrollmentCount = section.enrollments?.length || 0
+  if (currentEnrollmentCount >= section.capacity) {
     return { 
       status: "waitlist", 
-      message: `Section full. Join waitlist (${section.waitlist_count} students waiting)` 
+      message: `Section full. Join waitlist` 
     }
   }
 
@@ -106,7 +101,7 @@ function EnrollmentDialog({ section, onEnroll, currentEnrollments }: {
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            {section.course.code} - {section.course.name}
+            {section.course.course_code} - {section.course.title}
           </DialogTitle>
           <DialogDescription>
             Section {section.section_number} • {section.course.credits} credits
@@ -116,17 +111,16 @@ function EnrollmentDialog({ section, onEnroll, currentEnrollments }: {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <strong>Instructor:</strong> {section.instructor.name}
+              <strong>Instructor:</strong> {section.instructor.user.name}
             </div>
             <div>
-              <strong>Schedule:</strong> {section.schedule}
+              <strong>Schedule:</strong> {section.schedule_days.join('')} {section.start_time}-{section.end_time}
             </div>
             <div>
-              <strong>Location:</strong> {section.room.building.name} {section.room.room_number}
+              <strong>Location:</strong> {section.room?.building?.name || 'TBD'} {section.room?.room_number || ''}
             </div>
             <div>
-              <strong>Enrollment:</strong> {section.current_enrollment}/{section.max_enrollment}
-              {section.waitlist_count > 0 && ` (${section.waitlist_count} waitlisted)`}
+              <strong>Enrollment:</strong> {section.enrollments?.length || 0}/{section.capacity}
             </div>
           </div>
 
@@ -135,14 +129,16 @@ function EnrollmentDialog({ section, onEnroll, currentEnrollments }: {
             <p className="text-sm text-muted-foreground mt-1">{section.course.description}</p>
           </div>
 
-          {section.course.prerequisites.length > 0 && (
+          {section.course.prerequisites && (
             <div>
               <strong>Prerequisites:</strong>
               <div className="flex gap-1 mt-1">
-                {section.course.prerequisites.map((prereq: string) => (
-                  <Badge key={prereq} variant="outline" className="text-xs">
-                    {prereq}
-                  </Badge>
+                {section.course.prerequisites.split(',').map((prereq: string, index: number) => (
+                  prereq.trim() && (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {prereq.trim()}
+                    </Badge>
+                  )
                 ))}
               </div>
             </div>
@@ -211,10 +207,9 @@ export default function CourseCatalogPage() {
     try {
       setLoading(true)
       setError(null)
-      const response = await CourseAPI.getCourseSections({
-        search: searchQuery,
-        department: selectedDepartment !== "all" ? selectedDepartment : undefined,
-        level: selectedLevel !== "all" ? selectedLevel : undefined
+      const response = await UniversityAPI.getCourseSections({
+        page: 1,
+        per_page: 50
       })
       setCourseSections(response.data)
     } catch (err) {
@@ -226,8 +221,11 @@ export default function CourseCatalogPage() {
 
   const loadStudentData = async () => {
     try {
-      const enrollmentData = await CourseAPI.getStudentEnrollments(1) // Maria's ID
-      setStudentEnrollments(enrollmentData.enrollments)
+      const enrollmentResponse = await UniversityAPI.getEnrollments({
+        student_id: 1, // Maria's ID
+        status: 'enrolled'
+      })
+      setStudentEnrollments(enrollmentResponse.data.map(e => e.course_section_id))
     } catch (err) {
       console.warn('Failed to load student enrollment data:', err)
     }
@@ -240,37 +238,60 @@ export default function CourseCatalogPage() {
     }
   }, [searchQuery, selectedDepartment, selectedLevel])
 
-  const departments = [...new Set(courseSections.map(s => s.course.department.code))]
-  const filteredSections = courseSections
+  const departments = [...new Set(courseSections.map(s => s.course.program?.department?.abbreviation || 'UNKNOWN'))]
+  
+  // Apply client-side filtering
+  const filteredSections = courseSections.filter(section => {
+    const matchesSearch = !searchQuery || 
+      section.course.course_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      section.course.title.toLowerCase().includes(searchQuery.toLowerCase())
+    
+    const matchesDepartment = selectedDepartment === 'all' || 
+      section.course.program?.department?.abbreviation === selectedDepartment
+    
+    const matchesLevel = selectedLevel === 'all' || 
+      (section.course.course_code.match(/\d/)?.[0] ? 
+        (parseInt(section.course.course_code.match(/\d/)[0]) >= 5 ? 'graduate' : 'undergraduate') === selectedLevel :
+        true)
+    
+    return matchesSearch && matchesDepartment && matchesLevel
+  })
 
   const handleEnrollment = async (sectionId: number, action: string) => {
     const section = courseSections.find(s => s.id === sectionId)
     if (!section) return
 
     try {
-      let result
-      if (action === "enroll") {
-        result = await CourseAPI.enrollInSection(sectionId)
+      if (action === "enroll" || action === "waitlist") {
+        const enrollment = await UniversityAPI.createEnrollment({
+          student_id: 1, // Maria's ID
+          course_section_id: sectionId,
+          enrollment_date: new Date().toISOString().split('T')[0]
+        })
         setEnrollmentMessage({
           type: "success",
-          message: result.message
+          message: enrollment.status === "waitlisted" 
+            ? "Added to waitlist successfully"
+            : "Enrolled successfully"
         })
         // Update local state
         setStudentEnrollments(prev => [...prev, sectionId])
-      } else if (action === "waitlist") {
-        result = await CourseAPI.joinWaitlist(sectionId)
-        setEnrollmentMessage({
-          type: "success", 
-          message: result.message
-        })
       } else if (action === "drop") {
-        result = await CourseAPI.dropFromSection(sectionId)
-        setEnrollmentMessage({
-          type: "success",
-          message: result.message
+        // Find the enrollment to withdraw
+        const enrollmentResponse = await UniversityAPI.getEnrollments({
+          student_id: 1,
+          course_section_id: sectionId
         })
-        // Update local state
-        setStudentEnrollments(prev => prev.filter(id => id !== sectionId))
+        
+        if (enrollmentResponse.data.length > 0) {
+          await UniversityAPI.withdrawEnrollment(enrollmentResponse.data[0].id)
+          setEnrollmentMessage({
+            type: "success",
+            message: "Successfully dropped from course"
+          })
+          // Update local state
+          setStudentEnrollments(prev => prev.filter(id => id !== sectionId))
+        }
       }
 
       // Reload course sections to get updated capacity/waitlist counts
@@ -288,7 +309,7 @@ export default function CourseCatalogPage() {
   }
 
   return (
-    <AppShell user={mockUser} breadcrumbs={breadcrumbs}>
+    <AppShell breadcrumbs={breadcrumbs}>
       <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
         <div className="flex items-center justify-between">
           <div>
@@ -372,10 +393,10 @@ export default function CourseCatalogPage() {
                     <div className="flex items-start justify-between">
                       <div>
                         <CardTitle className="text-lg">
-                          {section.course.code} - {section.course.name}
+                          {section.course.course_code} - {section.course.title}
                         </CardTitle>
                         <p className="text-sm text-muted-foreground">
-                          Section {section.section_number} • {section.course.credits} credits • {section.course.department.name}
+                          Section {section.section_number} • {section.course.credits} credits • {section.course.program?.department?.name || 'Unknown Dept'}
                         </p>
                       </div>
                       {getStatusBadge(section, studentEnrollments)}
@@ -388,33 +409,34 @@ export default function CourseCatalogPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                       <div className="flex items-center gap-2">
                         <User className="w-4 h-4 text-muted-foreground" />
-                        <span>{section.instructor.name}</span>
+                        <span>{section.instructor.user.name}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-muted-foreground" />
-                        <span>{section.schedule}</span>
+                        <span>{section.schedule_days.join('')} {section.start_time}-{section.end_time}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-muted-foreground" />
-                        <span>{section.room.building.name} {section.room.room_number}</span>
+                        <span>{section.room?.building?.name || 'TBD'} {section.room?.room_number || ''}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Users className="w-4 h-4 text-muted-foreground" />
                         <span>
-                          {section.current_enrollment}/{section.max_enrollment}
-                          {section.waitlist_count > 0 && ` (+${section.waitlist_count} waitlisted)`}
+                          {section.enrollments?.length || 0}/{section.capacity}
                         </span>
                       </div>
                     </div>
 
-                    {section.course.prerequisites.length > 0 && (
+                    {section.course.prerequisites && (
                       <div>
                         <span className="text-sm font-medium">Prerequisites: </span>
                         <div className="flex gap-1 mt-1">
-                          {section.course.prerequisites.map((prereq) => (
-                            <Badge key={prereq} variant="outline" className="text-xs">
-                              {prereq}
-                            </Badge>
+                          {section.course.prerequisites.split(',').map((prereq, index) => (
+                            prereq.trim() && (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {prereq.trim()}
+                              </Badge>
+                            )
                           ))}
                         </div>
                       </div>

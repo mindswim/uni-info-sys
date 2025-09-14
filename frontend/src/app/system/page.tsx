@@ -6,12 +6,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
-const mockUser = {
-  name: "Dr. Elizabeth Harper",
-  email: "admin@demo.com", 
-  role: "Administrator",
-  avatar: "/avatars/admin.jpg"
-}
 
 const breadcrumbs = [
   { label: "Dashboard", href: "/" },
@@ -242,7 +236,7 @@ export default function SystemOverviewPage() {
   )
 
   return (
-    <AppShell user={mockUser} breadcrumbs={breadcrumbs}>
+    <AppShell breadcrumbs={breadcrumbs}>
       <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
         {/* Header */}
         <div className="flex items-center justify-between">

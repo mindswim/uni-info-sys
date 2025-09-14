@@ -9,12 +9,6 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import Link from "next/link"
 import { ChevronRight, ExternalLink, Eye } from "lucide-react"
 
-const mockUser = {
-  name: "Dr. Elizabeth Harper",
-  email: "admin@demo.com", 
-  role: "Administrator",
-  avatar: "/avatars/admin.jpg"
-}
 
 const breadcrumbs = [
   { label: "Dashboard", href: "/" },
@@ -238,7 +232,7 @@ export default function DataExplorerPage() {
   const totalRecords = Object.values(allTableData).reduce((sum, data) => sum + data.length, 0)
 
   return (
-    <AppShell user={mockUser} breadcrumbs={breadcrumbs}>
+    <AppShell breadcrumbs={breadcrumbs}>
       <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
         {/* Header */}
         <div className="flex items-center justify-between">

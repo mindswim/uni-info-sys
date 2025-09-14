@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import { Bell, Search, Settings, User, LogOut, Moon, Sun, GraduationCap } from "lucide-react"
+import { Bell, Search, Settings, User, LogOut, Moon, Sun, GraduationCap, PanelLeft } from "lucide-react"
 import { useState } from "react"
 import { useTheme } from "@/components/providers/theme-provider"
 
@@ -22,14 +22,27 @@ interface AppHeaderProps {
     label: string
     href?: string
   }>
+  sidebarCollapsed?: boolean
+  onSidebarToggle?: () => void
 }
 
-export function AppHeader({ user, breadcrumbs = [] }: AppHeaderProps) {
+export function AppHeader({ user, breadcrumbs = [], sidebarCollapsed, onSidebarToggle }: AppHeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false)
   const { setTheme } = useTheme()
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-2 px-4">
+    <header className="flex h-16 shrink-0 items-center gap-2 px-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      {/* Mobile menu button - only show if we have toggle function */}
+      {onSidebarToggle && (
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={onSidebarToggle}
+          className="md:hidden"
+        >
+          <PanelLeft className="h-4 w-4" />
+        </Button>
+      )}
       {breadcrumbs.length > 0 && (
         <Breadcrumb>
           <BreadcrumbList>

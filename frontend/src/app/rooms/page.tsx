@@ -203,12 +203,6 @@ const mockTableData: TableData<Room> = {
   last_page: 1
 }
 
-const mockUser = {
-  name: "Dr. Elizabeth Harper",
-  email: "admin@demo.com", 
-  role: "Administrator",
-  avatar: "/avatars/admin.jpg"
-}
 
 const breadcrumbs = [
   { label: "Dashboard", href: "/" },
@@ -233,7 +227,7 @@ export default function RoomsPage() {
   }
 
   return (
-    <AppShell user={mockUser} breadcrumbs={breadcrumbs}>
+    <AppShell breadcrumbs={breadcrumbs}>
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         <RoomsTable
           data={mockTableData}

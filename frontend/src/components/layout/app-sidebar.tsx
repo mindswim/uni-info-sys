@@ -1,6 +1,6 @@
 "use client"
 
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger } from "@/components/ui/sidebar"
+import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -25,17 +25,16 @@ import {
   PanelLeft,
   Database,
   Grid3X3,
-  GitBranch
+  GitBranch,
+  Play
 } from "lucide-react"
 import Link from "next/link"
+import { useAuth } from "@/components/auth/auth-provider"
+import { PersonaSwitcher } from "@/components/demo/persona-switcher"
 
 interface AppSidebarProps {
-  user?: {
-    name: string
-    email: string
-    role: string
-    avatar?: string
-  }
+  collapsed: boolean
+  onToggle: () => void
 }
 
 const navigationItems = {
@@ -105,7 +104,8 @@ const navigationItems = {
     {
       title: "Dashboard",
       items: [
-        { title: "Overview", url: "/dashboard", icon: Home },
+        { title: "Overview", url: "/", icon: Home },
+        { title: "Interactive Demo", url: "/demo", icon: Play },
         { title: "Analytics", url: "/analytics", icon: BarChart3 }
       ]
     },
@@ -151,129 +151,132 @@ const navigationItems = {
   ]
 }
 
-export function AppSidebar({ user }: AppSidebarProps) {
-  const userRole = user?.role?.toLowerCase() || 'student'
+export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
+  const { user, logout } = useAuth()
+  const userRole = user?.roles[0]?.toLowerCase() || 'student'
   const roleNavigation = navigationItems[userRole as keyof typeof navigationItems] || navigationItems.student
 
   return (
-    <Sidebar collapsible="icon" className="w-[280px]">
-      <SidebarHeader className="h-16 border-b border-sidebar-border">
-        <div className="flex items-center justify-between px-4 relative">
-          <Link href="/" className="flex items-center space-x-2 min-w-0">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0">
-              <GraduationCap className="h-4 w-4" />
-            </div>
-            <span className="font-bold truncate group-data-[collapsible=icon]:hidden">
+    <div className="h-full flex flex-col">
+      {/* Header */}
+      <div className="h-16 border-b border-border px-4 flex items-center justify-between">
+        <Link href="/" className="flex items-center space-x-2 min-w-0 overflow-hidden">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0">
+            <GraduationCap className="h-4 w-4" />
+          </div>
+          {!collapsed && (
+            <span className="font-bold text-foreground whitespace-nowrap">
               UniSys
             </span>
-          </Link>
-          <SidebarTrigger className="ml-auto group-data-[collapsible=icon]:hidden" />
-          
-          {/* ChatGPT-style collapsed trigger */}
-          <div className="hidden group-data-[collapsible=icon]:flex items-center justify-center absolute inset-0 left-0 right-0">
-            <SidebarTrigger className="relative group hover:bg-sidebar-accent rounded-md p-2 transition-colors">
-              <div className="relative w-6 h-6 flex items-center justify-center">
-                <GraduationCap className="h-4 w-4 group-hover:opacity-0 transition-opacity duration-200" />
-                <PanelLeft className="h-4 w-4 absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center" />
-              </div>
-            </SidebarTrigger>
+          )}
+        </Link>
+        
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={onToggle}
+          className="h-8 w-8 shrink-0 group"
+        >
+          <div className="relative w-4 h-4">
+            <GraduationCap className={`h-4 w-4 transition-opacity duration-200 ${collapsed ? 'group-hover:opacity-0' : 'opacity-100'}`} />
+            <PanelLeft className={`h-4 w-4 absolute inset-0 transition-all duration-200 ${
+              collapsed 
+                ? 'rotate-180 opacity-0 group-hover:opacity-100' 
+                : 'opacity-100'
+            }`} />
           </div>
-        </div>
-      </SidebarHeader>
+        </Button>
+      </div>
       
-      <SidebarContent>
+      {/* Navigation */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {roleNavigation.map((group) => (
-          <SidebarGroup key={group.title}>
-            <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <Link href={item.url}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
-      </SidebarContent>
-
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+          <div key={group.title}>
+            {!collapsed && (
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                {group.title}
+              </h3>
+            )}
+            <nav className="space-y-1">
+              {group.items.map((item) => (
+                <Link
+                  key={item.title}
+                  href={item.url}
+                  className="flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                 >
-                  <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={user?.avatar} alt={user?.name} />
-                    <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
-                      {user?.name?.split(' ').map(n => n[0]).join('') || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{user?.name || 'Guest User'}</span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      {user?.email || 'guest@example.com'}
-                    </span>
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  {!collapsed && <span>{item.title}</span>}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        ))}
+      </div>
+
+      {/* User Footer */}
+      <div className="border-t border-border p-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className={`w-full justify-start p-2 h-auto hover:bg-accent ${collapsed ? 'px-0' : ''}`}
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={user?.avatar} alt={user?.name} />
+                <AvatarFallback className="bg-primary text-primary-foreground">
+                  {user?.name?.split(' ').map(n => n[0]).join('') || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              {!collapsed && (
+                <div className="ml-3 text-left flex-1">
+                  <div className="text-sm font-medium">{user?.name || 'Guest User'}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {user?.email || 'guest@example.com'}
                   </div>
-                  <ChevronUp className="ml-auto size-4" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                side="bottom"
-                align="end"
-                sideOffset={4}
-              >
-                <DropdownMenuLabel className="p-0 font-normal">
-                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                    <Avatar className="h-8 w-8 rounded-lg">
-                      <AvatarImage src={user?.avatar} alt={user?.name} />
-                      <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
-                        {user?.name?.split(' ').map(n => n[0]).join('') || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">{user?.name || 'Guest User'}</span>
-                      <span className="truncate text-xs text-muted-foreground">
-                        {user?.email || 'guest@example.com'}
-                      </span>
-                      {user?.role && (
-                        <Badge variant="secondary" className="w-fit text-xs mt-1">
-                          {user.role}
-                        </Badge>
-                      )}
-                    </div>
+                </div>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>
+              <div className="flex items-center space-x-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user?.avatar} alt={user?.name} />
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    {user?.name?.split(' ').map(n => n[0]).join('') || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <div className="text-sm font-medium">{user?.name || 'Guest User'}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {user?.email || 'guest@example.com'}
                   </div>
-                </DropdownMenuLabel>
+                </div>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <User className="mr-2 h-4 w-4" />
+              Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </DropdownMenuItem>
+            {user?.roles.includes('admin') && (
+              <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-red-600">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-      <SidebarRail />
-    </Sidebar>
+                <PersonaSwitcher variant="menu-item" />
+              </>
+            )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-red-600" onClick={() => logout()}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
   )
 }

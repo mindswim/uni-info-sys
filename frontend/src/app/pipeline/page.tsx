@@ -22,12 +22,6 @@ import {
   TrendingUp 
 } from "lucide-react"
 
-const mockUser = {
-  name: "Dr. Elizabeth Harper",
-  email: "admin@demo.com", 
-  role: "Administrator",
-  avatar: "/avatars/admin.jpg"
-}
 
 const breadcrumbs = [
   { label: "Dashboard", href: "/" },
@@ -143,7 +137,7 @@ export default function PipelinePage() {
 
   if (loading) {
     return (
-      <AppShell user={mockUser} breadcrumbs={breadcrumbs}>
+      <AppShell breadcrumbs={breadcrumbs}>
         <div className="flex items-center justify-center min-h-[400px]">
           <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
           <span className="ml-2 text-muted-foreground">Loading application pipeline...</span>
@@ -154,7 +148,7 @@ export default function PipelinePage() {
 
   if (error) {
     return (
-      <AppShell user={mockUser} breadcrumbs={breadcrumbs}>
+      <AppShell breadcrumbs={breadcrumbs}>
         <div className="text-center py-12">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2 text-red-700">Error Loading Pipeline</h3>
@@ -168,7 +162,7 @@ export default function PipelinePage() {
   }
 
   return (
-    <AppShell user={mockUser} breadcrumbs={breadcrumbs}>
+    <AppShell breadcrumbs={breadcrumbs}>
       <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
         <div className="flex items-center justify-between">
           <div>

@@ -9,7 +9,7 @@
         "darkaonline/l5-swagger": "^9.0",
         "inertiajs/inertia-laravel": "^1.0",
         "laravel/framework": "^11.9",
-        "laravel/sanctum": "^4.1",
+        "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "owen-it/laravel-auditing": "^14.0",
         "promphp/prometheus_client_php": "^2.14",

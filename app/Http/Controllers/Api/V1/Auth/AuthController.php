@@ -67,6 +67,82 @@ class AuthController extends Controller
             ]);
         }
 
-        return response()->json(['token' => $user->createToken($request->device_name)->plainTextToken]);
+        // Load user relationships
+        $user->load(['student', 'staff', 'roles.permissions']);
+
+        $token = $user->createToken($request->device_name)->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'roles' => $user->roles->pluck('name'),
+                'student_id' => $user->student?->id,
+                'staff_id' => $user->staff?->id,
+            ]
+        ]);
+    }
+
+    #[OA\Post(
+        path: "/api/v1/auth/logout",
+        summary: "Logout and revoke current token",
+        description: "Revoke the current authentication token.",
+        tags: ["Authentication"],
+        security: [["sanctum" => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Successfully logged out.",
+                content: new OA\JsonContent(
+                    properties: [new OA\Property(property: "message", type: "string")]
+                )
+            ),
+        ]
+    )]
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json(['message' => 'Successfully logged out']);
+    }
+
+    #[OA\Get(
+        path: "/api/v1/auth/user",
+        summary: "Get current user information",
+        description: "Get the authenticated user's profile information.",
+        tags: ["Authentication"],
+        security: [["sanctum" => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "User information retrieved.",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "id", type: "integer"),
+                        new OA\Property(property: "name", type: "string"),
+                        new OA\Property(property: "email", type: "string"),
+                        new OA\Property(property: "roles", type: "array"),
+                        new OA\Property(property: "student_id", type: "integer"),
+                        new OA\Property(property: "staff_id", type: "integer"),
+                    ]
+                )
+            ),
+        ]
+    )]
+    public function user(Request $request)
+    {
+        $user = $request->user();
+        $user->load(['student', 'staff', 'roles.permissions']);
+
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'roles' => $user->roles->pluck('name'),
+            'student_id' => $user->student?->id,
+            'staff_id' => $user->staff?->id,
+        ]);
     }
 }

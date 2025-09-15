@@ -46,6 +46,14 @@ class AddSecurityHeaders
         // This can be customized based on specific application needs
         $response->headers->set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'");
 
+        // Add CORS headers for frontend development
+        if (app()->environment(['local', 'development'])) {
+            $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3002');
+            $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+            $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+            $response->headers->set('Access-Control-Allow-Credentials', 'true');
+        }
+
         return $response;
     }
 }

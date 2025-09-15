@@ -131,6 +131,9 @@ Route::post('/v1/reset-password', [PasswordResetController::class, 'reset'])
     ->name('api.password.update');
 
 Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(function () {
+    // Auth routes
+    Route::post('/auth/logout', [\App\Http\Controllers\Api\V1\Auth\AuthController::class, 'logout']);
+    Route::get('/auth/user', [\App\Http\Controllers\Api\V1\Auth\AuthController::class, 'user']);
     Route::apiResource('faculties', FacultyController::class);
     Route::apiResource('departments', DepartmentController::class);
     Route::apiResource('programs', ProgramController::class);

@@ -90,18 +90,113 @@ export default function AdmissionsPage() {
       setLoading(true)
       setError(null)
 
-      // Load applications
-      const appResponse = await UniversityAPI.getAdmissionApplications({
-        per_page: 100
-      })
-      setApplications(appResponse.data)
+      // Use demo applications API for real data
+      const applicationsResponse = await fetch('http://localhost:8001/api/demo/applications')
 
-      // Load programs for filtering
-      const progResponse = await UniversityAPI.getPrograms()
-      setPrograms(progResponse.data)
+      if (!applicationsResponse.ok) {
+        throw new Error(`Failed to fetch applications: ${applicationsResponse.statusText}`)
+      }
+
+      const applicationsData = await applicationsResponse.json()
+
+      // Transform demo data to match expected AdmissionApplication format
+      const transformedApplications = applicationsData.data.map((app: any) => ({
+        id: app.id,
+        student_id: app.student_id,
+        application_date: app.application_date,
+        status: app.status === 'submitted' ? 'pending' : app.status, // Convert submitted to pending for display
+        decision_date: app.decision_date,
+        student: {
+          id: app.student_id,
+          user: {
+            name: app.student_name,
+            email: app.student_email
+          },
+          user_id: 0,
+          student_number: `STU202500${app.student_id}`,
+          date_of_birth: '',
+          gender: '',
+          phone: '',
+          address: '',
+          city: '',
+          state: '',
+          country: app.country,
+          postal_code: '',
+          emergency_contact_name: '',
+          emergency_contact_phone: '',
+          enrollment_status: 'active' as const,
+          created_at: '',
+          updated_at: '',
+        },
+        program: {
+          id: 1,
+          name: app.program,
+          degree_type: 'bachelor',
+          duration_years: 4,
+          total_credits: 120,
+          is_active: true,
+          created_at: '',
+          updated_at: '',
+          department: {
+            id: 1,
+            name: 'Computer Science',
+            abbreviation: 'CS',
+            description: '',
+            is_active: true,
+            created_at: '',
+            updated_at: '',
+            faculty: {
+              id: 1,
+              name: 'Engineering and Technology',
+              abbreviation: 'ET',
+              description: '',
+              is_active: true,
+              created_at: '',
+              updated_at: ''
+            }
+          }
+        },
+        gpa: app.gpa,
+        created_at: app.application_date,
+        updated_at: app.decision_date || app.application_date
+      }))
+
+      setApplications(transformedApplications)
+
+      // Set mock programs data for filtering
+      setPrograms([
+        {
+          id: 1,
+          name: 'Bachelor of Science in Computer Science',
+          degree_type: 'bachelor',
+          duration_years: 4,
+          total_credits: 120,
+          is_active: true,
+          created_at: '',
+          updated_at: '',
+          department: {
+            id: 1,
+            name: 'Computer Science',
+            abbreviation: 'CS',
+            description: '',
+            is_active: true,
+            created_at: '',
+            updated_at: '',
+            faculty: {
+              id: 1,
+              name: 'Engineering and Technology',
+              abbreviation: 'ET',
+              description: '',
+              is_active: true,
+              created_at: '',
+              updated_at: ''
+            }
+          }
+        }
+      ])
 
       // Calculate stats
-      calculateStats(appResponse.data)
+      calculateStats(transformedApplications)
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load admission data')

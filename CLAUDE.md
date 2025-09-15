@@ -241,3 +241,4 @@ QUEUE_CONNECTION=database
 - SQL injection protection via Eloquent ORM
 - XSS protection via proper data sanitization
 - CSRF protection for authenticated requests
+- never mention claude/athropic/attribution in commit

@@ -18,10 +18,35 @@ class Student extends Model implements Auditable
         'date_of_birth', 'gender', 'nationality', 'address',
         'city', 'state', 'postal_code', 'country', 'phone',
         'emergency_contact_name', 'emergency_contact_phone',
+        // Academic Performance
+        'gpa', 'semester_gpa',
+        // Academic Standing
+        'class_standing', 'enrollment_status', 'academic_status',
+        // Program Information
+        'major_program_id', 'minor_program_id',
+        // Academic Timeline
+        'admission_date', 'expected_graduation_date', 'total_credits_earned', 'credits_in_progress',
+        // Financial Information
+        'financial_hold', 'receives_financial_aid',
+        // Academic History
+        'high_school', 'high_school_graduation_year', 'sat_score', 'act_score',
+        // Contact Enhancement
+        'preferred_name', 'pronouns', 'parent_guardian_name', 'parent_guardian_phone',
     ];
 
     protected $casts = [
         'date_of_birth' => 'date',
+        'admission_date' => 'date',
+        'expected_graduation_date' => 'date',
+        'gpa' => 'decimal:2',
+        'semester_gpa' => 'decimal:2',
+        'financial_hold' => 'boolean',
+        'receives_financial_aid' => 'boolean',
+        'total_credits_earned' => 'integer',
+        'credits_in_progress' => 'integer',
+        'sat_score' => 'integer',
+        'act_score' => 'integer',
+        'high_school_graduation_year' => 'integer',
     ];
 
     public function user()
@@ -60,6 +85,48 @@ class Student extends Model implements Auditable
     public function enrollments()
     {
         return $this->hasMany(Enrollment::class);
+    }
+
+    public function majorProgram()
+    {
+        return $this->belongsTo(Program::class, 'major_program_id');
+    }
+
+    public function minorProgram()
+    {
+        return $this->belongsTo(Program::class, 'minor_program_id');
+    }
+
+    // Academic Status Helper Methods
+    public function isInGoodStanding()
+    {
+        return $this->academic_status === 'good_standing';
+    }
+
+    public function calculateClassStanding()
+    {
+        $credits = $this->total_credits_earned;
+
+        if ($credits >= 90) return 'senior';
+        if ($credits >= 60) return 'junior';
+        if ($credits >= 30) return 'sophomore';
+        return 'freshman';
+    }
+
+    public function isFullTime()
+    {
+        return $this->enrollment_status === 'full_time';
+    }
+
+    public function getAcademicStatusColorAttribute()
+    {
+        return match($this->academic_status) {
+            'good_standing' => 'green',
+            'academic_warning' => 'yellow',
+            'academic_probation' => 'orange',
+            'academic_suspension' => 'red',
+            default => 'gray'
+        };
     }
 
     /**

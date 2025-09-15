@@ -12,45 +12,81 @@ const breadcrumbs = [
   { label: "Dashboard" }
 ]
 
-interface SystemStats {
-  students: number
-  staff: number
-  courses: number
-  enrollments: number
-  applications: number
-  faculties: number
+interface DashboardStats {
+  total_students: number
+  active_courses: number
+  pending_applications: number
+  total_enrollments: number
   departments: number
-  programs: number
+  pending_grades: number
+  active_staff: number
+  available_reports: number
+}
+
+interface RecentActivity {
+  type: string
+  message: string
+  timestamp: string
+}
+
+interface TermInfo {
+  name: string
+  start_date: string
+  end_date: string
+  add_drop_deadline: string
+}
+
+interface DashboardData {
+  stats: DashboardStats
+  recent_activity: RecentActivity[]
+  current_term: TermInfo
 }
 
 export default function Home() {
-  const [stats, setStats] = useState<SystemStats>({
-    students: 0,
-    staff: 0,
-    courses: 0,
-    enrollments: 0,
-    applications: 0,
-    faculties: 0,
-    departments: 0,
-    programs: 0
+  const [dashboardData, setDashboardData] = useState<DashboardData>({
+    stats: {
+      total_students: 0,
+      active_courses: 0,
+      pending_applications: 0,
+      total_enrollments: 0,
+      departments: 0,
+      pending_grades: 0,
+      active_staff: 0,
+      available_reports: 0
+    },
+    recent_activity: [],
+    current_term: {
+      name: '',
+      start_date: '',
+      end_date: '',
+      add_drop_deadline: ''
+    }
   })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function fetchStats() {
+    async function fetchDashboardData() {
       try {
         setLoading(true)
-        const systemStats = await UniversityAPI.getSystemStats()
-        setStats(systemStats)
+
+        // Use the real demo dashboard API
+        const response = await fetch('http://localhost:8001/api/demo/dashboard')
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch dashboard data: ${response.statusText}`)
+        }
+
+        const data = await response.json()
+        setDashboardData(data)
       } catch (error) {
-        console.error('Failed to fetch system stats:', error)
+        console.error('Failed to fetch dashboard data:', error)
         // Keep default values on error
       } finally {
         setLoading(false)
       }
     }
 
-    fetchStats()
+    fetchDashboardData()
   }, [])
   return (
     <AppShell breadcrumbs={breadcrumbs}>
@@ -68,14 +104,14 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {loading ? '...' : stats.students.toLocaleString()}
+                {loading ? '...' : dashboardData.stats.total_students.toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">
                 Active students enrolled
               </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Active Courses</CardTitle>
@@ -83,29 +119,29 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {loading ? '...' : stats.courses.toLocaleString()}
+                {loading ? '...' : dashboardData.stats.active_courses.toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">
                 Courses in catalog
               </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Applications</CardTitle>
+              <CardTitle className="text-sm font-medium">Pending Applications</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {loading ? '...' : stats.applications.toLocaleString()}
+                {loading ? '...' : dashboardData.stats.pending_applications.toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">
-                Admission applications
+                Requiring review
               </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Enrollments</CardTitle>
@@ -113,7 +149,7 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {loading ? '...' : stats.enrollments.toLocaleString()}
+                {loading ? '...' : dashboardData.stats.total_enrollments.toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">
                 Active enrollments
@@ -126,33 +162,47 @@ export default function Home() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Applications</CardTitle>
+              <CardTitle>Recent Activity</CardTitle>
               <CardDescription>
-                Latest student applications requiring review
+                Latest system activity and updates
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">Maria Rodriguez</p>
-                  <p className="text-xs text-muted-foreground">Computer Science</p>
-                </div>
-                <Badge variant="secondary">Pending</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">David Park</p>
-                  <p className="text-xs text-muted-foreground">Engineering</p>
-                </div>
-                <Badge variant="outline">Under Review</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">Sophie Turner</p>
-                  <p className="text-xs text-muted-foreground">Business</p>
-                </div>
-                <Badge variant="secondary">Waitlist</Badge>
-              </div>
+              {loading ? (
+                <>
+                  <div className="animate-pulse">
+                    <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded"></div>
+                  </div>
+                  <div className="animate-pulse">
+                    <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded"></div>
+                  </div>
+                  <div className="animate-pulse">
+                    <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded"></div>
+                  </div>
+                </>
+              ) : (
+                dashboardData.recent_activity.map((activity, index) => (
+                  <div key={index} className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{activity.message}</p>
+                      <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
+                    </div>
+                    <Badge
+                      variant={
+                        activity.type.includes('application') ? 'default' :
+                        activity.type.includes('enrollment') ? 'secondary' :
+                        'outline'
+                      }
+                      className="ml-2 text-xs"
+                    >
+                      {activity.type.replace('_', ' ')}
+                    </Badge>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
 
@@ -190,24 +240,49 @@ export default function Home() {
 
           <Card>
             <CardHeader>
-              <CardTitle>System Status</CardTitle>
+              <CardTitle>Current Term</CardTitle>
               <CardDescription>
-                University management system overview
+                Academic term information and deadlines
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium">Database</p>
-                <Badge className="bg-green-600">Healthy</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium">API Services</p>
-                <Badge className="bg-green-600">Online</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium">Backup Status</p>
-                <Badge className="bg-green-600">Current</Badge>
-              </div>
+              {loading ? (
+                <>
+                  <div className="animate-pulse">
+                    <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded"></div>
+                  </div>
+                  <div className="animate-pulse">
+                    <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded"></div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">Term</p>
+                    <Badge className="bg-blue-600">{dashboardData.current_term.name}</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">Start Date</p>
+                    <span className="text-sm text-muted-foreground">
+                      {new Date(dashboardData.current_term.start_date).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">End Date</p>
+                    <span className="text-sm text-muted-foreground">
+                      {new Date(dashboardData.current_term.end_date).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">Add/Drop Deadline</p>
+                    <Badge variant="outline">
+                      {new Date(dashboardData.current_term.add_drop_deadline).toLocaleDateString()}
+                    </Badge>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>

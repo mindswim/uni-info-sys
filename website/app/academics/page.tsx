@@ -122,8 +122,8 @@ export default function AcademicsPage() {
       {/* Popular Programs */}
       <section className="py-16">
         <div className="container">
-          <h2 className="text-3xl font-bold mb-8">Popular Programs</h2>
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl">
+          <h2 className="text-3xl font-bold mb-8 text-center">Popular Programs</h2>
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Undergraduate Programs</CardTitle>
@@ -190,8 +190,8 @@ export default function AcademicsPage() {
       {/* Academic Excellence */}
       <section className="bg-slate-50 py-16">
         <div className="container">
-          <h2 className="text-3xl font-bold mb-8">Academic Excellence</h2>
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl">
+          <h2 className="text-3xl font-bold mb-8 text-center">Academic Excellence</h2>
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Honors Program</CardTitle>
@@ -237,8 +237,8 @@ export default function AcademicsPage() {
       {/* Academic Calendar Preview */}
       <section className="py-16">
         <div className="container">
-          <h2 className="text-3xl font-bold mb-8">Academic Calendar 2024-2025</h2>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl">
+          <h2 className="text-3xl font-bold mb-8 text-center">Academic Calendar 2024-2025</h2>
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Fall 2024</CardTitle>

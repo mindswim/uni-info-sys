@@ -14,67 +14,32 @@ import { cn } from "@/lib/utils"
 
 const academics = [
   {
+    title: "Academics Overview",
+    href: "/academics",
+    description: "Explore all academic opportunities"
+  },
+  {
     title: "Faculties & Schools",
     href: "/academics/faculties",
-    description: "Explore our seven academic divisions"
-  },
-  {
-    title: "Departments",
-    href: "/academics/departments",
-    description: "Academic departments and programs"
-  },
-  {
-    title: "Undergraduate Programs",
-    href: "/academics/undergraduate",
-    description: "Bachelor's degree programs"
-  },
-  {
-    title: "Graduate Programs",
-    href: "/academics/graduate",
-    description: "Master's and doctoral programs"
-  },
-  {
-    title: "Course Catalog",
-    href: "/academics/courses",
-    description: "Browse all available courses"
-  },
-  {
-    title: "Academic Calendar",
-    href: "/academics/calendar",
-    description: "Important academic dates"
+    description: "Our six academic divisions"
   },
 ]
 
 const admissions = [
+  {
+    title: "Admissions Overview",
+    href: "/admissions",
+    description: "Start your journey to Mindswim"
+  },
   {
     title: "How to Apply",
     href: "/admissions/apply",
     description: "Application process and requirements"
   },
   {
-    title: "Undergraduate Admissions",
-    href: "/admissions/undergraduate",
-    description: "First-year and transfer students"
-  },
-  {
-    title: "Graduate Admissions",
-    href: "/admissions/graduate",
-    description: "Advanced degree programs"
-  },
-  {
-    title: "International Students",
-    href: "/admissions/international",
-    description: "Resources for international applicants"
-  },
-  {
     title: "Financial Aid",
     href: "/admissions/financial-aid",
     description: "Scholarships and funding options"
-  },
-  {
-    title: "Visit Campus",
-    href: "/admissions/visit",
-    description: "Tours and information sessions"
   },
 ]
 
@@ -98,9 +63,13 @@ export function Header() {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger>Academics</NavigationMenuTrigger>
+              <NavigationMenuTrigger asChild>
+                <Link href="/academics" className="data-[state=open]:bg-accent data-[state=open]:text-accent-foreground">
+                  Academics
+                </Link>
+              </NavigationMenuTrigger>
               <NavigationMenuContent>
-                <ul className="grid gap-3 p-6 md:w-[500px] md:grid-cols-2">
+                <ul className="grid gap-3 p-6 md:w-[400px] md:grid-cols-1">
                   {academics.map((item) => (
                     <ListItem
                       key={item.title}
@@ -115,9 +84,13 @@ export function Header() {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger>Admissions</NavigationMenuTrigger>
+              <NavigationMenuTrigger asChild>
+                <Link href="/admissions" className="data-[state=open]:bg-accent data-[state=open]:text-accent-foreground">
+                  Admissions
+                </Link>
+              </NavigationMenuTrigger>
               <NavigationMenuContent>
-                <ul className="grid gap-3 p-6 md:w-[500px] md:grid-cols-2">
+                <ul className="grid gap-3 p-6 md:w-[400px] md:grid-cols-1">
                   {admissions.map((item) => (
                     <ListItem
                       key={item.title}
@@ -132,11 +105,21 @@ export function Header() {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link href="/campus-life" className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+              <NavigationMenuTrigger asChild>
+                <Link href="/campus-life" className="data-[state=open]:bg-accent data-[state=open]:text-accent-foreground">
                   Campus Life
                 </Link>
-              </NavigationMenuLink>
+              </NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid gap-3 p-6 md:w-[400px] md:grid-cols-1">
+                  <ListItem
+                    title="Campus Life Overview"
+                    href="/campus-life"
+                  >
+                    Experience vibrant campus life at Mindswim
+                  </ListItem>
+                </ul>
+              </NavigationMenuContent>
             </NavigationMenuItem>
 
             <NavigationMenuItem>

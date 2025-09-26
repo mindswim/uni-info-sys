@@ -184,7 +184,7 @@ export default function DepartmentDetailPage() {
     return <div className="flex items-center justify-center min-h-screen">Loading department...</div>
   }
 
-  if (!department) {
+  if (!department || !department.department) {
     return <div className="flex items-center justify-center min-h-screen">Department not found</div>
   }
 

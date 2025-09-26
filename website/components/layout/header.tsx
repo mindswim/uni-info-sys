@@ -88,10 +88,8 @@ export function Header() {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger asChild>
-                <Link href="/academics" className="data-[state=open]:bg-accent data-[state=open]:text-accent-foreground">
-                  Academics
-                </Link>
+              <NavigationMenuTrigger onClick={() => window.location.href = '/academics'}>
+                Academics
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid gap-3 p-6 md:w-[400px] md:grid-cols-1">
@@ -109,10 +107,8 @@ export function Header() {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger asChild>
-                <Link href="/admissions" className="data-[state=open]:bg-accent data-[state=open]:text-accent-foreground">
-                  Admissions
-                </Link>
+              <NavigationMenuTrigger onClick={() => window.location.href = '/admissions'}>
+                Admissions
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid gap-3 p-6 md:w-[400px] md:grid-cols-1">
@@ -130,10 +126,8 @@ export function Header() {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger asChild>
-                <Link href="/campus-life" className="data-[state=open]:bg-accent data-[state=open]:text-accent-foreground">
-                  Campus Life
-                </Link>
+              <NavigationMenuTrigger onClick={() => window.location.href = '/campus-life'}>
+                Campus Life
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid gap-3 p-6 md:w-[400px] md:grid-cols-1">

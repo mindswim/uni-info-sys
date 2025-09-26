@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { API_CONFIG, apiRequest } from '@/config/api'
+import { AppShell } from '@/components/layout/app-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -221,17 +222,23 @@ export default function SchedulePage() {
   // Get upcoming events
   const upcomingEvents = events.slice(0, 5)
 
+  const breadcrumbs = [
+    { label: 'Dashboard', href: '/dashboard' },
+    { label: 'Schedule' }
+  ]
+
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Calendar className="h-8 w-8" />
-            Class Schedule
-          </h1>
-          <p className="text-muted-foreground">Fall 2024 Semester</p>
-        </div>
+    <AppShell breadcrumbs={breadcrumbs}>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              <Calendar className="h-8 w-8" />
+              Class Schedule
+            </h1>
+            <p className="text-muted-foreground">Fall 2024 Semester</p>
+          </div>
         <div className="flex items-center gap-2">
           <Select value={viewType} onValueChange={(v: any) => setViewType(v)}>
             <SelectTrigger className="w-32">
@@ -553,6 +560,7 @@ export default function SchedulePage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </AppShell>
   )
 }

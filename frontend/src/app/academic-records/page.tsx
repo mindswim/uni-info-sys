@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { API_CONFIG, apiRequest } from '@/config/api'
+import { AppShell } from '@/components/layout/app-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -230,28 +231,34 @@ export default function AcademicRecordsPage() {
     return termA === 'Spring' ? 1 : -1
   })
 
+  const breadcrumbs = [
+    { label: 'Dashboard', href: '/dashboard' },
+    { label: 'Academic Records' }
+  ]
+
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <GraduationCap className="h-8 w-8" />
-            Academic Records
-          </h1>
-          <p className="text-muted-foreground">Complete academic history and degree progress</p>
+    <AppShell breadcrumbs={breadcrumbs}>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              <GraduationCap className="h-8 w-8" />
+              Academic Records
+            </h1>
+            <p className="text-muted-foreground">Complete academic history and degree progress</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              Download Records
+            </Button>
+            <Button className="gap-2">
+              <FileText className="h-4 w-4" />
+              View Transcript
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Download Records
-          </Button>
-          <Button className="gap-2">
-            <FileText className="h-4 w-4" />
-            View Transcript
-          </Button>
-        </div>
-      </div>
 
       {/* Academic Summary */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -527,6 +534,7 @@ export default function AcademicRecordsPage() {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </AppShell>
   )
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
+import { AppShell } from '@/components/layout/app-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -328,19 +329,25 @@ export default function StudentsPage() {
     )
   }
 
+  const breadcrumbs = [
+    { label: 'Dashboard', href: '/dashboard' },
+    { label: 'Students' }
+  ]
+
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Users className="h-8 w-8" />
-            Student Management
-          </h1>
-          <p className="text-muted-foreground">
-            Manage student records, enrollment status, and personal information
-          </p>
-        </div>
+    <AppShell breadcrumbs={breadcrumbs}>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              <Users className="h-8 w-8" />
+              Student Management
+            </h1>
+            <p className="text-muted-foreground">
+              Manage student records, enrollment status, and personal information
+            </p>
+          </div>
         <Button onClick={() => setShowCreateDialog(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Add Student
@@ -910,6 +917,7 @@ export default function StudentsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </AppShell>
   )
 }

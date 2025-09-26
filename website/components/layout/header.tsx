@@ -14,32 +14,57 @@ import { cn } from "@/lib/utils"
 
 const academics = [
   {
-    title: "Academics Overview",
-    href: "/academics",
-    description: "Explore all academic opportunities"
-  },
-  {
     title: "Faculties & Schools",
     href: "/academics/faculties",
     description: "Our six academic divisions"
   },
+  {
+    title: "Departments",
+    href: "/academics/departments",
+    description: "Academic departments and programs"
+  },
+  {
+    title: "Programs",
+    href: "/academics/programs",
+    description: "Browse all degree programs"
+  },
+  {
+    title: "Academic Calendar",
+    href: "/academics/calendar",
+    description: "Important dates and deadlines"
+  },
 ]
 
 const admissions = [
-  {
-    title: "Admissions Overview",
-    href: "/admissions",
-    description: "Start your journey to Mindswim"
-  },
   {
     title: "How to Apply",
     href: "/admissions/apply",
     description: "Application process and requirements"
   },
   {
+    title: "Undergraduate",
+    href: "/admissions/undergraduate",
+    description: "First-year and transfer students"
+  },
+  {
+    title: "Graduate",
+    href: "/admissions/graduate",
+    description: "Master's and doctoral programs"
+  },
+  {
+    title: "International Students",
+    href: "/admissions/international",
+    description: "Resources for international applicants"
+  },
+  {
     title: "Financial Aid",
     href: "/admissions/financial-aid",
     description: "Scholarships and funding options"
+  },
+  {
+    title: "Visit Campus",
+    href: "/admissions/visit",
+    description: "Tours and information sessions"
   },
 ]
 
@@ -113,10 +138,28 @@ export function Header() {
               <NavigationMenuContent>
                 <ul className="grid gap-3 p-6 md:w-[400px] md:grid-cols-1">
                   <ListItem
-                    title="Campus Life Overview"
-                    href="/campus-life"
+                    title="Housing & Dining"
+                    href="/campus-life/housing"
                   >
-                    Experience vibrant campus life at Mindswim
+                    Residence halls and meal plans
+                  </ListItem>
+                  <ListItem
+                    title="Student Activities"
+                    href="/campus-life/activities"
+                  >
+                    Clubs, organizations, and events
+                  </ListItem>
+                  <ListItem
+                    title="Athletics & Recreation"
+                    href="/campus-life/athletics"
+                  >
+                    Sports teams and fitness facilities
+                  </ListItem>
+                  <ListItem
+                    title="Health & Wellness"
+                    href="/campus-life/health"
+                  >
+                    Medical and counseling services
                   </ListItem>
                 </ul>
               </NavigationMenuContent>

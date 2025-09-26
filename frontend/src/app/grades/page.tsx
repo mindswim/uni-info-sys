@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { API_CONFIG, apiRequest } from '@/config/api'
+import { AppShell } from '@/components/layout/app-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -275,14 +276,20 @@ export default function GradesPage() {
     return <div className="flex items-center justify-center min-h-screen">Loading grades...</div>
   }
 
+  const breadcrumbs = [
+    { label: 'Dashboard', href: '/dashboard' },
+    { label: 'Grades' }
+  ]
+
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Grade Management</h1>
-          <p className="text-muted-foreground">Manage and track student grades</p>
-        </div>
+    <AppShell breadcrumbs={breadcrumbs}>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Grade Management</h1>
+            <p className="text-muted-foreground">Manage and track student grades</p>
+          </div>
         <div className="flex items-center gap-2">
           {unsavedChanges && (
             <Alert className="w-auto">
@@ -550,6 +557,7 @@ export default function GradesPage() {
           </Card>
         </>
       )}
-    </div>
+      </div>
+    </AppShell>
   )
 }

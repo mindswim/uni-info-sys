@@ -82,7 +82,7 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Team from Grove School of Engineering takes first place in the prestigious
+                  Team from Chen School of Engineering takes first place in the prestigious
                   National Collegiate Robotics Championship.
                 </p>
               </CardContent>

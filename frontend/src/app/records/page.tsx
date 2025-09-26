@@ -1,19 +1,22 @@
 "use client"
 
-import { ComingSoonPage } from "@/components/templates/data-page-template"
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function RecordsPage() {
-  const breadcrumbs = [
-    { label: "Dashboard", href: "/" },
-    { label: "Academic", href: "/academic" },
-    { label: "Academic Records" }
-  ]
+  const router = useRouter()
+
+  useEffect(() => {
+    // Redirect to the correct academic records page
+    router.replace('/academic-records')
+  }, [router])
 
   return (
-    <ComingSoonPage
-      title="Academic Records"
-      description="Access your complete academic history, degree progress, and official transcripts"
-      breadcrumbs={breadcrumbs}
-    />
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <h2 className="text-2xl font-semibold mb-2">Redirecting...</h2>
+        <p className="text-muted-foreground">Taking you to Academic Records</p>
+      </div>
+    </div>
   )
 }

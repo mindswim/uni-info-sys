@@ -9,8 +9,8 @@ export default function AboutPage() {
         <div className="container">
           <h1 className="text-4xl font-bold mb-4">About Mindswim College</h1>
           <p className="text-xl text-slate-200 max-w-3xl">
-            Founded in 1847, Mindswim College has been at the forefront of higher education,
-            innovation, and social mobility for over 175 years.
+            Founded in 1991, Mindswim College has been at the forefront of higher education,
+            innovation, and social mobility for over 30 years.
           </p>
         </div>
       </section>
@@ -70,31 +70,31 @@ export default function AboutPage() {
           <h2 className="text-3xl font-bold mb-12 text-center">Our History</h2>
           <div className="max-w-3xl mx-auto space-y-8">
             <div className="flex gap-4">
-              <Badge className="mt-1">1847</Badge>
+              <Badge className="mt-1">1991</Badge>
               <div>
                 <h3 className="font-semibold mb-1">Foundation</h3>
                 <p className="text-muted-foreground">
-                  Established as the Free Academy, the first institution of free public higher education in the United States.
+                  Established in Washington Heights as an innovative institution focused on technology and liberal arts education.
                 </p>
               </div>
             </div>
 
             <div className="flex gap-4">
-              <Badge className="mt-1">1907</Badge>
+              <Badge className="mt-1">1998</Badge>
               <div>
-                <h3 className="font-semibold mb-1">College Status</h3>
+                <h3 className="font-semibold mb-1">Expansion</h3>
                 <p className="text-muted-foreground">
-                  Became the College of the City of New York, expanding academic programs and research.
+                  Opened the School of Engineering and expanded into STEM education and research.
                 </p>
               </div>
             </div>
 
             <div className="flex gap-4">
-              <Badge className="mt-1">1961</Badge>
+              <Badge className="mt-1">2005</Badge>
               <div>
-                <h3 className="font-semibold mb-1">University System</h3>
+                <h3 className="font-semibold mb-1">Research University</h3>
                 <p className="text-muted-foreground">
-                  Joined the newly formed State University system.
+                  Achieved R2 research classification and opened multiple research centers.
                 </p>
               </div>
             </div>

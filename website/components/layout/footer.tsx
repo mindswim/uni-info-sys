@@ -74,7 +74,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 text-center text-sm">
-          <p>160 Convent Avenue, New York, NY 10031</p>
+          <p>515 West 181st Street, Washington Heights, NY 10033</p>
           <p>Phone: (212) 650-7000</p>
         </div>
       </div>

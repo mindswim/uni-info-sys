@@ -4,9 +4,9 @@ import Link from "next/link"
 
 const faculties = [
   {
-    name: "Spitzer School of Architecture",
-    dean: "Dr. Marta Gutman",
-    founded: "1969",
+    name: "Rivera School of Architecture & Design",
+    dean: "Dr. Isabella Martinez",
+    founded: "1995",
     students: "1,000+",
     description: "A leading institution for architecture, urban design, and landscape architecture education.",
     departments: ["Architecture", "Urban Design", "Landscape Architecture", "Urban Planning"],
@@ -16,9 +16,9 @@ const faculties = [
     }
   },
   {
-    name: "Colin Powell School for Civic and Global Leadership",
-    dean: "Dr. Andrew Rich",
-    founded: "2013",
+    name: "Thompson School for Public Affairs",
+    dean: "Dr. James Thompson",
+    founded: "2008",
     students: "2,500+",
     description: "Preparing the next generation of public servants and global leaders.",
     departments: ["Political Science", "International Relations", "Economics", "Sociology", "Anthropology"],
@@ -29,8 +29,8 @@ const faculties = [
   },
   {
     name: "School of Education",
-    dean: "Dr. Tony De Jesus",
-    founded: "1921",
+    dean: "Dr. Patricia Williams",
+    founded: "1993",
     students: "1,800+",
     description: "Excellence in teacher preparation and educational leadership for over a century.",
     departments: ["Elementary Education", "Secondary Education", "Special Education", "Educational Leadership"],
@@ -40,9 +40,9 @@ const faculties = [
     }
   },
   {
-    name: "Grove School of Engineering",
-    dean: "Dr. Gilda Barabino",
-    founded: "1919",
+    name: "Chen School of Engineering & Technology",
+    dean: "Dr. Wei Chen",
+    founded: "1998",
     students: "3,200+",
     description: "A premier engineering school driving innovation in technology and research.",
     departments: ["Biomedical Engineering", "Chemical Engineering", "Civil Engineering", "Computer Science", "Electrical Engineering", "Mechanical Engineering"],
@@ -53,8 +53,8 @@ const faculties = [
   },
   {
     name: "Division of Humanities and the Arts",
-    dean: "Dr. Juan Carlos Mercado",
-    founded: "1847",
+    dean: "Dr. Robert Anderson",
+    founded: "1991",
     students: "4,500+",
     description: "The heart of liberal arts education, fostering creativity and critical thinking.",
     departments: ["English", "History", "Philosophy", "Art", "Music", "Theatre", "Modern Languages"],
@@ -65,8 +65,8 @@ const faculties = [
   },
   {
     name: "Division of Science",
-    dean: "Dr. Susan Perkins",
-    founded: "1847",
+    dean: "Dr. Emily Foster",
+    founded: "1991",
     students: "3,800+",
     description: "Advancing scientific knowledge through cutting-edge research and education.",
     departments: ["Biology", "Chemistry", "Earth Sciences", "Mathematics", "Physics", "Psychology"],

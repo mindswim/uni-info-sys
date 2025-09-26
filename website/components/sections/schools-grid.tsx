@@ -3,13 +3,13 @@ import Link from "next/link"
 
 const schools = [
   {
-    name: "Spitzer School of Architecture",
+    name: "Rivera School of Architecture & Design",
     description: "Design, urban planning, and landscape architecture",
     programs: "5 undergraduate, 7 graduate",
     href: "/academics/faculties/architecture",
   },
   {
-    name: "Colin Powell School",
+    name: "Thompson School for Public Affairs",
     description: "Public policy, international relations, and civic engagement",
     programs: "8 undergraduate, 5 graduate",
     href: "/academics/faculties/colin-powell",
@@ -21,7 +21,7 @@ const schools = [
     href: "/academics/faculties/education",
   },
   {
-    name: "Grove School of Engineering",
+    name: "Chen School of Engineering & Technology",
     description: "Engineering disciplines and computer science",
     programs: "10 undergraduate, 12 graduate",
     href: "/academics/faculties/engineering",

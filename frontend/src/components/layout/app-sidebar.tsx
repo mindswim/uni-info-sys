@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { 
-  GraduationCap, 
-  Home, 
-  Users, 
-  BookOpen, 
-  FileText, 
+import {
+  GraduationCap,
+  Home,
+  Users,
+  BookOpen,
+  FileText,
   Calendar,
   Settings,
   BarChart3,
@@ -26,7 +26,23 @@ import {
   Database,
   Grid3X3,
   GitBranch,
-  Play
+  Play,
+  DollarSign,
+  CreditCard,
+  Receipt,
+  Target,
+  AlertCircle,
+  Briefcase,
+  CheckCircle,
+  Shield,
+  TrendingUp,
+  Package,
+  Wrench,
+  Trophy,
+  Edit,
+  Car,
+  MapPin,
+  Mail
 } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/components/auth/auth-provider"
@@ -97,6 +113,171 @@ const navigationItems = {
       items: [
         { title: "Messages", url: "/messages", icon: MessageSquare },
         { title: "Announcements", url: "/announcements", icon: Bell }
+      ]
+    }
+  ],
+  advisor: [
+    {
+      title: "Dashboard",
+      items: [
+        { title: "Overview", url: "/advisor-dashboard", icon: Home },
+        { title: "My Students", url: "/my-students", icon: Users },
+        { title: "Appointments", url: "/advising-appointments", icon: Calendar },
+        { title: "Schedule", url: "/schedule", icon: Calendar }
+      ]
+    },
+    {
+      title: "Advising Tools",
+      items: [
+        { title: "Degree Planning", url: "/degree-planning", icon: Target },
+        { title: "Early Alerts", url: "/early-alerts", icon: AlertCircle },
+        { title: "Student Notes", url: "/student-notes", icon: FileText },
+        { title: "Referrals", url: "/referrals", icon: UserCheck }
+      ]
+    },
+    {
+      title: "Analytics",
+      items: [
+        { title: "Student Success", url: "/student-success", icon: TrendingUp },
+        { title: "Retention Reports", url: "/retention-reports", icon: BarChart3 },
+        { title: "Graduation Tracking", url: "/graduation-tracking", icon: GraduationCap }
+      ]
+    }
+  ],
+  bursar: [
+    {
+      title: "Dashboard",
+      items: [
+        { title: "Overview", url: "/financial-dashboard", icon: Home },
+        { title: "Student Accounts", url: "/student-accounts", icon: Users },
+        { title: "Daily Reports", url: "/daily-reports", icon: BarChart3 }
+      ]
+    },
+    {
+      title: "Billing & Payments",
+      items: [
+        { title: "Billing", url: "/billing", icon: Receipt },
+        { title: "Payments", url: "/payments", icon: CreditCard },
+        { title: "Payment Plans", url: "/payment-plans", icon: Calendar },
+        { title: "Refunds", url: "/refunds", icon: DollarSign }
+      ]
+    },
+    {
+      title: "Financial Aid",
+      items: [
+        { title: "Aid Overview", url: "/financial-aid", icon: Award },
+        { title: "Disbursements", url: "/disbursements", icon: DollarSign },
+        { title: "Scholarships", url: "/scholarships", icon: Trophy },
+        { title: "Work Study", url: "/work-study", icon: Briefcase }
+      ]
+    },
+    {
+      title: "Reports",
+      items: [
+        { title: "Accounts Receivable", url: "/accounts-receivable", icon: BarChart3 },
+        { title: "Collections", url: "/collections", icon: AlertCircle },
+        { title: "Tax Documents", url: "/tax-documents", icon: FileText }
+      ]
+    }
+  ],
+  registrar: [
+    {
+      title: "Dashboard",
+      items: [
+        { title: "Overview", url: "/registrar-dashboard", icon: Home },
+        { title: "Daily Tasks", url: "/daily-tasks", icon: ClipboardCheck },
+        { title: "Calendar", url: "/academic-calendar", icon: Calendar }
+      ]
+    },
+    {
+      title: "Records Management",
+      items: [
+        { title: "Transcript Requests", url: "/transcript-requests", icon: FileText },
+        { title: "Enrollment Verification", url: "/enrollment-verification", icon: CheckCircle },
+        { title: "Grade Changes", url: "/grade-changes", icon: Edit },
+        { title: "Degree Verification", url: "/degree-verification", icon: GraduationCap }
+      ]
+    },
+    {
+      title: "Academic Operations",
+      items: [
+        { title: "Course Scheduling", url: "/course-scheduling", icon: Calendar },
+        { title: "Room Assignment", url: "/room-assignment", icon: Building },
+        { title: "Final Exams", url: "/final-exams", icon: ClipboardCheck },
+        { title: "Graduation", url: "/graduation-clearance", icon: GraduationCap }
+      ]
+    },
+    {
+      title: "Compliance",
+      items: [
+        { title: "FERPA Management", url: "/ferpa", icon: Shield },
+        { title: "Veterans Affairs", url: "/veterans", icon: Award },
+        { title: "Athletic Eligibility", url: "/athletic-eligibility", icon: Trophy },
+        { title: "Federal Reporting", url: "/federal-reporting", icon: FileText }
+      ]
+    }
+  ],
+  dean: [
+    {
+      title: "Dashboard",
+      items: [
+        { title: "College Overview", url: "/dean-dashboard", icon: Home },
+        { title: "Strategic Initiatives", url: "/strategic-initiatives", icon: Target },
+        { title: "Analytics", url: "/college-analytics", icon: TrendingUp }
+      ]
+    },
+    {
+      title: "Academic Governance",
+      items: [
+        { title: "Department Overview", url: "/department-overview", icon: Building },
+        { title: "Faculty Management", url: "/faculty-management", icon: Users },
+        { title: "Tenure Tracking", url: "/tenure-tracking", icon: Award },
+        { title: "Curriculum Approval", url: "/curriculum-approval", icon: BookOpen }
+      ]
+    },
+    {
+      title: "Performance",
+      items: [
+        { title: "Research Metrics", url: "/research-metrics", icon: BarChart3 },
+        { title: "Grant Management", url: "/grant-management", icon: DollarSign },
+        { title: "Publications", url: "/publications", icon: FileText },
+        { title: "Accreditation", url: "/accreditation", icon: Shield }
+      ]
+    }
+  ],
+  operations: [
+    {
+      title: "Dashboard",
+      items: [
+        { title: "Campus Overview", url: "/operations-dashboard", icon: Home },
+        { title: "Work Orders", url: "/work-orders", icon: Wrench },
+        { title: "Events", url: "/event-management", icon: Calendar }
+      ]
+    },
+    {
+      title: "Facilities",
+      items: [
+        { title: "Buildings", url: "/buildings", icon: Building },
+        { title: "Rooms", url: "/rooms", icon: Grid3X3 },
+        { title: "Maintenance", url: "/maintenance", icon: Wrench },
+        { title: "Space Utilization", url: "/space-utilization", icon: BarChart3 }
+      ]
+    },
+    {
+      title: "Campus Services",
+      items: [
+        { title: "Dining Services", url: "/dining-services", icon: Package },
+        { title: "Transportation", url: "/transportation", icon: Car },
+        { title: "Parking", url: "/parking-management", icon: MapPin },
+        { title: "Mail Services", url: "/mail-services", icon: Mail }
+      ]
+    },
+    {
+      title: "Safety & Security",
+      items: [
+        { title: "Emergency Management", url: "/emergency-management", icon: AlertCircle },
+        { title: "Access Control", url: "/access-control", icon: Shield },
+        { title: "Incident Reports", url: "/incident-reports", icon: FileText }
       ]
     }
   ],

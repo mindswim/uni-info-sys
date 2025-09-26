@@ -13,7 +13,7 @@ import { Progress } from '@/components/ui/progress'
 import { Calendar } from '@/components/ui/calendar'
 import {
   Building, Users, Clock, MapPin, Wifi,
-  Monitor, Projector2, Video, Volume2, Zap,
+  Monitor, Projector, Video, Volume2, Zap,
   AlertCircle, CheckCircle, Calendar as CalendarIcon,
   Search, Filter, Settings, ChevronRight
 } from 'lucide-react'
@@ -222,7 +222,7 @@ export default function FacilitiesPage() {
       case 'lab':
         return <Monitor className="h-4 w-4" />
       case 'lecture_hall':
-        return <Projector2 className="h-4 w-4" />
+        return <Projector className="h-4 w-4" />
       case 'auditorium':
         return <Volume2 className="h-4 w-4" />
       case 'meeting_room':

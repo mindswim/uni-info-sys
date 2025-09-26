@@ -53,7 +53,7 @@ const navigationItems = {
       items: [
         { title: "Course Catalog", url: "/course-catalog", icon: BookOpen },
         { title: "Enrollment", url: "/enrollment", icon: ClipboardCheck },
-        { title: "Academic Records", url: "/records", icon: FileText },
+        { title: "Academic Records", url: "/academic-records", icon: FileText },
         { title: "Transcripts", url: "/transcripts", icon: FileText }
       ]
     },

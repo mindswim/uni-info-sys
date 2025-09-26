@@ -1,5 +1,5 @@
 // Authentication service for Laravel Sanctum integration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8002/api/v1'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost/api/v1'
 
 export interface User {
   id: number

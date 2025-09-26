@@ -91,7 +91,7 @@ export default function AdmissionsPage() {
       setError(null)
 
       // Use demo applications API for real data
-      const applicationsResponse = await fetch('http://localhost:8001/api/demo/applications')
+      const applicationsResponse = await fetch('http://localhost/api/demo/applications')
 
       if (!applicationsResponse.ok) {
         throw new Error(`Failed to fetch applications: ${applicationsResponse.statusText}`)

@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { apiService, type Student, type ApiResponse } from "@/services/api"
 import {
   Users,
   GraduationCap,
@@ -28,7 +29,8 @@ import {
   AlertCircle,
   CheckCircle,
   User,
-  Heart
+  Heart,
+  Loader2
 } from "lucide-react"
 
 const breadcrumbs = [
@@ -36,43 +38,7 @@ const breadcrumbs = [
   { label: "Enhanced Student Explorer" }
 ]
 
-interface EnhancedStudent {
-  id: number
-  student_number: string
-  first_name: string
-  last_name: string
-  preferred_name?: string
-  pronouns?: string
-  date_of_birth: string
-  gender: string
-  nationality: string
-  gpa: number
-  semester_gpa: number
-  class_standing: string
-  enrollment_status: string
-  academic_status: string
-  major_program_id?: number
-  minor_program_id?: number
-  admission_date: string
-  expected_graduation_date: string
-  total_credits_earned: number
-  credits_in_progress: number
-  financial_hold: boolean
-  receives_financial_aid: boolean
-  high_school: string
-  high_school_graduation_year: number
-  sat_score?: number
-  act_score?: number
-  address: string
-  city: string
-  state: string
-  phone: string
-  parent_guardian_name: string
-  parent_guardian_phone: string
-  emergency_contact_name: string
-  emergency_contact_phone: string
-}
-
+// Use Student interface from API service
 interface StudentStats {
   total: number
   by_class_standing: Record<string, number>
@@ -112,10 +78,11 @@ const getGPAColor = (gpa: number) => {
 }
 
 export default function EnhancedStudentsPage() {
-  const [students, setStudents] = useState<EnhancedStudent[]>([])
-  const [filteredStudents, setFilteredStudents] = useState<EnhancedStudent[]>([])
+  const [students, setStudents] = useState<Student[]>([])
+  const [filteredStudents, setFilteredStudents] = useState<Student[]>([])
   const [stats, setStats] = useState<StudentStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [classFilter, setClassFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -133,53 +100,52 @@ export default function EnhancedStudentsPage() {
   const loadEnhancedStudents = async () => {
     try {
       setLoading(true)
+      setError(null)
 
-      // Load students with enhanced fields
-      const response = await fetch('http://localhost:8001/api/data-viewer/students?limit=100')
-      const data = await response.json()
+      // Load students using the API service
+      const response = await apiService.getStudents({
+        per_page: 1000 // Get all students for analytics
+      })
 
-      const enhancedStudents: EnhancedStudent[] = data.data.map((student: any) => ({
-        ...student,
-        gpa: parseFloat(student.gpa || '0'),
-        semester_gpa: parseFloat(student.semester_gpa || '0'),
-        total_credits_earned: parseInt(student.total_credits_earned || '0'),
-        credits_in_progress: parseInt(student.credits_in_progress || '0'),
-        financial_hold: Boolean(student.financial_hold),
-        receives_financial_aid: Boolean(student.receives_financial_aid),
-        sat_score: student.sat_score ? parseInt(student.sat_score) : null,
-        act_score: student.act_score ? parseInt(student.act_score) : null,
-        high_school_graduation_year: parseInt(student.high_school_graduation_year || '2024')
-      }))
-
-      setStudents(enhancedStudents)
-      calculateStats(enhancedStudents)
+      setStudents(response.data)
+      calculateStats(response.data)
 
     } catch (error) {
       console.error('Failed to load enhanced students:', error)
+      setError('Failed to load student data. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
-  const calculateStats = (studentData: EnhancedStudent[]) => {
+  const calculateStats = (studentData: Student[]) => {
     const total = studentData.length
 
     const by_class_standing = studentData.reduce((acc, student) => {
-      acc[student.class_standing] = (acc[student.class_standing] || 0) + 1
+      if (student.class_standing) {
+        acc[student.class_standing] = (acc[student.class_standing] || 0) + 1
+      }
       return acc
     }, {} as Record<string, number>)
 
     const by_academic_status = studentData.reduce((acc, student) => {
-      acc[student.academic_status] = (acc[student.academic_status] || 0) + 1
+      if (student.academic_status) {
+        acc[student.academic_status] = (acc[student.academic_status] || 0) + 1
+      }
       return acc
     }, {} as Record<string, number>)
 
     const by_enrollment_status = studentData.reduce((acc, student) => {
-      acc[student.enrollment_status] = (acc[student.enrollment_status] || 0) + 1
+      if (student.enrollment_status) {
+        acc[student.enrollment_status] = (acc[student.enrollment_status] || 0) + 1
+      }
       return acc
     }, {} as Record<string, number>)
 
-    const avg_gpa = studentData.reduce((sum, student) => sum + student.gpa, 0) / total
+    const studentsWithGPA = studentData.filter(s => s.gpa && s.gpa > 0)
+    const avg_gpa = studentsWithGPA.length > 0
+      ? studentsWithGPA.reduce((sum, student) => sum + (student.gpa || 0), 0) / studentsWithGPA.length
+      : 0
     const financial_aid_recipients = studentData.filter(s => s.receives_financial_aid).length
     const with_test_scores = studentData.filter(s => s.sat_score || s.act_score).length
 
@@ -384,8 +350,39 @@ export default function EnhancedStudentsPage() {
               </CardContent>
             </Card>
 
+            {/* Error State */}
+            {error && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  {error}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="ml-2"
+                    onClick={loadEnhancedStudents}
+                  >
+                    Retry
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Loading State */}
+            {loading && (
+              <Card>
+                <CardContent className="py-8">
+                  <div className="flex items-center justify-center space-x-2">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                    <span>Loading enhanced student data...</span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Students Table */}
-            <Card>
+            {!loading && !error && (
+              <Card>
               <CardHeader>
                 <CardTitle>
                   Student Profiles ({filteredStudents.length.toLocaleString()})
@@ -429,14 +426,16 @@ export default function EnhancedStudentsPage() {
                         </TableCell>
                         <TableCell>
                           <div className="space-y-1">
-                            <Badge className={getClassStandingColor(student.class_standing)}>
-                              {student.class_standing}
-                            </Badge>
-                            <div>
-                              <Badge className={getAcademicStatusColor(student.academic_status)} variant="outline">
-                                {student.academic_status.replace('_', ' ')}
+                            {student.class_standing && (
+                              <Badge className={getClassStandingColor(student.class_standing)}>
+                                {student.class_standing}
                               </Badge>
-                            </div>
+                            )}
+                            {student.academic_status && (
+                              <Badge className={getAcademicStatusColor(student.academic_status)} variant="outline">
+                                {student.academic_status?.split('_').join(' ')}
+                              </Badge>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -556,7 +555,7 @@ export default function EnhancedStudentsPage() {
                     return (
                       <div key={status} className="space-y-2 mb-4">
                         <div className="flex justify-between text-sm">
-                          <span className="capitalize">{status.replace('_', ' ')}</span>
+                          <span className="capitalize">{status.split('_').join(' ')}</span>
                           <span>{count} ({percentage.toFixed(1)}%)</span>
                         </div>
                         <Progress value={percentage} className="h-2" />

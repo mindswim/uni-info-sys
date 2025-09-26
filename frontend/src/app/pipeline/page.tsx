@@ -63,7 +63,7 @@ export default function PipelinePage() {
       setError(null)
 
       // Fetch pipeline analytics from the real API
-      const analyticsResponse = await fetch('http://localhost:8001/api/demo/pipeline/analytics')
+      const analyticsResponse = await fetch('http://localhost/api/demo/pipeline/analytics')
       if (!analyticsResponse.ok) {
         throw new Error('Failed to fetch pipeline analytics')
       }

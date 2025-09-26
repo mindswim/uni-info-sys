@@ -6,7 +6,7 @@
     },
     "playwright": {
       "command": "npx",
-      "args": ["-y", "@mcp-get-community/playwright"],
+      "args": ["-y", "@playwright/mcp"],
       "env": {
         "SCREENSHOTS_DIR": "/Users/juan/dev/archive/student-admissions-system/university-admissions/.playwright-mcp"
       }

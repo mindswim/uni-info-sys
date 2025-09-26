@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { DataPageTemplate } from "@/components/templates/data-page-template"
+import { apiService } from "@/services/api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -38,7 +39,8 @@ import {
   User,
   Paperclip,
   Send,
-  CalendarDays
+  CalendarDays,
+  Loader2
 } from "lucide-react"
 
 interface Assignment {
@@ -85,6 +87,8 @@ interface Submission {
 export default function AssignmentsPage() {
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [submissions, setSubmissions] = useState<Submission[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedCourse, setSelectedCourse] = useState<string>("all")
   const [filterStatus, setFilterStatus] = useState<string>("all")
   const [searchQuery, setSearchQuery] = useState("")
@@ -92,97 +96,119 @@ export default function AssignmentsPage() {
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
 
-  // Mock data
   useEffect(() => {
-    const mockAssignments: Assignment[] = [
-      {
-        id: 1,
-        title: "Machine Learning Project - Neural Networks",
-        description: "Implement a neural network from scratch to classify handwritten digits using the MNIST dataset.",
-        course: { id: 1, code: "CS350", name: "Introduction to AI", section: "A" },
-        instructor: "Dr. Sarah Johnson",
-        type: "project",
-        totalPoints: 100,
-        dueDate: "2024-12-20T23:59:59Z",
-        assignedDate: "2024-12-01T09:00:00Z",
-        status: "published",
-        submissions: 28,
-        totalStudents: 32,
-        instructions: "Create a neural network implementation with proper documentation and testing.",
-        attachments: [
-          { name: "project_requirements.pdf", size: "2.3 MB", type: "pdf" },
-          { name: "mnist_dataset.zip", size: "15.2 MB", type: "zip" }
-        ],
-        allowLateSubmissions: true,
-        latePenalty: 10
-      },
-      {
-        id: 2,
-        title: "Algorithm Analysis Report",
-        description: "Analyze the time complexity of various sorting algorithms and provide empirical testing results.",
-        course: { id: 2, code: "CS250", name: "Data Structures", section: "B" },
-        instructor: "Prof. Michael Chen",
-        type: "homework",
-        totalPoints: 50,
-        dueDate: "2024-12-18T23:59:59Z",
-        assignedDate: "2024-12-05T10:00:00Z",
-        status: "published",
-        submissions: 25,
-        totalStudents: 28,
-        instructions: "Compare bubble sort, merge sort, and quicksort with both theoretical and practical analysis.",
-        allowLateSubmissions: false
-      },
-      {
-        id: 3,
-        title: "Programming Lab 8 - Recursion",
-        description: "Complete recursive programming exercises focusing on tree traversal and dynamic programming.",
-        course: { id: 3, code: "CS101", name: "Intro Programming", section: "C" },
-        instructor: "Dr. Emily Watson",
-        type: "lab",
-        totalPoints: 25,
-        dueDate: "2024-12-15T23:59:59Z",
-        assignedDate: "2024-12-08T09:00:00Z",
-        status: "published",
-        submissions: 42,
-        totalStudents: 45,
-        allowLateSubmissions: true,
-        latePenalty: 5
-      },
-      {
-        id: 4,
-        title: "Final Exam Review Assignment",
-        description: "Practice problems covering all topics from the semester to prepare for the final examination.",
-        course: { id: 1, code: "CS350", name: "Introduction to AI", section: "A" },
-        instructor: "Dr. Sarah Johnson",
-        type: "homework",
-        totalPoints: 30,
-        dueDate: "2024-12-16T23:59:59Z",
-        assignedDate: "2024-12-10T09:00:00Z",
-        status: "published",
-        submissions: 30,
-        totalStudents: 32,
-        allowLateSubmissions: false
-      },
-      {
-        id: 5,
-        title: "Database Design Project",
-        description: "Design and implement a relational database for a library management system.",
-        course: { id: 4, code: "CS300", name: "Database Systems", section: "A" },
-        instructor: "Prof. David Kim",
-        type: "project",
-        totalPoints: 80,
-        dueDate: "2024-12-22T23:59:59Z",
-        assignedDate: "2024-11-25T09:00:00Z",
-        status: "graded",
-        submissions: 24,
-        totalStudents: 26,
-        allowLateSubmissions: true,
-        latePenalty: 15
-      }
-    ]
-
-    setAssignments(mockAssignments)
+    loadAssignments()
   }, [])
+
+  const loadAssignments = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Load assignments from API
+      const assignmentsResponse = await apiService.getAssignments()
+      setAssignments(assignmentsResponse.data)
+    } catch (error) {
+      console.error('Failed to load assignments:', error)
+      setError('Failed to load assignments. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Fallback mock data for development
+  useEffect(() => {
+    if (assignments.length === 0 && !loading && !error) {
+      const mockAssignments: Assignment[] = [
+        {
+          id: 1,
+          title: "Machine Learning Project - Neural Networks",
+          description: "Implement a neural network from scratch to classify handwritten digits using the MNIST dataset.",
+          course: { id: 1, code: "CS350", name: "Introduction to AI", section: "A" },
+          instructor: "Dr. Sarah Johnson",
+          type: "project",
+          totalPoints: 100,
+          dueDate: "2024-12-20T23:59:59Z",
+          assignedDate: "2024-12-01T09:00:00Z",
+          status: "published",
+          submissions: 28,
+          totalStudents: 32,
+          instructions: "Create a neural network implementation with proper documentation and testing.",
+          attachments: [
+            { name: "project_requirements.pdf", size: "2.3 MB", type: "pdf" },
+            { name: "mnist_dataset.zip", size: "15.2 MB", type: "zip" }
+          ],
+          allowLateSubmissions: true,
+          latePenalty: 10
+        },
+        {
+          id: 2,
+          title: "Algorithm Analysis Report",
+          description: "Analyze the time complexity of various sorting algorithms and provide empirical testing results.",
+          course: { id: 2, code: "CS250", name: "Data Structures", section: "B" },
+          instructor: "Prof. Michael Chen",
+          type: "homework",
+          totalPoints: 50,
+          dueDate: "2024-12-18T23:59:59Z",
+          assignedDate: "2024-12-05T10:00:00Z",
+          status: "published",
+          submissions: 25,
+          totalStudents: 28,
+          instructions: "Compare bubble sort, merge sort, and quicksort with both theoretical and practical analysis.",
+          allowLateSubmissions: false
+        },
+        {
+          id: 3,
+          title: "Programming Lab 8 - Recursion",
+          description: "Complete recursive programming exercises focusing on tree traversal and dynamic programming.",
+          course: { id: 3, code: "CS101", name: "Intro Programming", section: "C" },
+          instructor: "Dr. Emily Watson",
+          type: "lab",
+          totalPoints: 25,
+          dueDate: "2024-12-15T23:59:59Z",
+          assignedDate: "2024-12-08T09:00:00Z",
+          status: "published",
+          submissions: 42,
+          totalStudents: 45,
+          allowLateSubmissions: true,
+          latePenalty: 5
+        },
+        {
+          id: 4,
+          title: "Final Exam Review Assignment",
+          description: "Practice problems covering all topics from the semester to prepare for the final examination.",
+          course: { id: 1, code: "CS350", name: "Introduction to AI", section: "A" },
+          instructor: "Dr. Sarah Johnson",
+          type: "homework",
+          totalPoints: 30,
+          dueDate: "2024-12-16T23:59:59Z",
+          assignedDate: "2024-12-10T09:00:00Z",
+          status: "published",
+          submissions: 30,
+          totalStudents: 32,
+          allowLateSubmissions: false
+        },
+        {
+          id: 5,
+          title: "Database Design Project",
+          description: "Design and implement a relational database for a library management system.",
+          course: { id: 4, code: "CS300", name: "Database Systems", section: "A" },
+          instructor: "Prof. David Kim",
+          type: "project",
+          totalPoints: 80,
+          dueDate: "2024-12-22T23:59:59Z",
+          assignedDate: "2024-11-25T09:00:00Z",
+          status: "graded",
+          submissions: 24,
+          totalStudents: 26,
+          allowLateSubmissions: true,
+          latePenalty: 15
+        }
+      ]
+
+      setAssignments(mockAssignments)
+    }
+  }, [assignments.length, loading, error])
 
   const stats = [
     {
@@ -296,6 +322,27 @@ export default function AssignmentsPage() {
       status: "submitted"
     }
   ]
+
+  // Loading state
+  if (loading) {
+    return (
+      <DataPageTemplate
+        title="Assignment Management"
+        description="Create, distribute, and manage course assignments with automated grading and feedback systems"
+        stats={stats}
+        breadcrumbs={breadcrumbs}
+      >
+        <Card>
+          <CardContent className="py-8">
+            <div className="flex items-center justify-center space-x-2">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <span>Loading assignments...</span>
+            </div>
+          </CardContent>
+        </Card>
+      </DataPageTemplate>
+    )
+  }
 
   return (
     <DataPageTemplate
@@ -429,6 +476,24 @@ export default function AssignmentsPage() {
         </div>
 
         <TabsContent value="assignments" className="space-y-6">
+          {/* Error State */}
+          {error && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                {error}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="ml-2"
+                  onClick={loadAssignments}
+                >
+                  Retry
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Filters */}
           <Card>
             <CardContent className="pt-6">

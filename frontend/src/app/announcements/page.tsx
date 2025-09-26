@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { DataPageTemplate } from "@/components/templates/data-page-template"
+import { apiService } from "@/services/api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -31,7 +32,8 @@ import {
   Send,
   Globe,
   User,
-  GraduationCap
+  GraduationCap,
+  Loader2
 } from "lucide-react"
 
 interface Announcement {
@@ -53,6 +55,8 @@ interface Announcement {
 
 export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [filterCategory, setFilterCategory] = useState("all")
   const [filterAudience, setFilterAudience] = useState("all")
@@ -60,9 +64,28 @@ export default function AnnouncementsPage() {
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
 
-  // Mock data - this would come from API
   useEffect(() => {
-    const mockAnnouncements: Announcement[] = [
+    loadAnnouncements()
+  }, [])
+
+  const loadAnnouncements = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await apiService.getAnnouncements()
+      setAnnouncements(response.data)
+    } catch (error) {
+      console.error('Failed to load announcements:', error)
+      setError('Failed to load announcements. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Fallback mock data for development
+  useEffect(() => {
+    if (announcements.length === 0 && !loading && !error) {
+      const mockAnnouncements: Announcement[] = [
       {
         id: 1,
         title: "Fall 2024 Final Exam Schedule Released",
@@ -151,9 +174,10 @@ export default function AnnouncementsPage() {
         readBy: 89,
         totalAudience: 234
       }
-    ]
-    setAnnouncements(mockAnnouncements)
-  }, [])
+      ]
+      setAnnouncements(mockAnnouncements)
+    }
+  }, [announcements.length, loading, error])
 
   const stats = [
     {
@@ -383,8 +407,38 @@ export default function AnnouncementsPage() {
             </CardContent>
           </Card>
 
+          {/* Error State */}
+          {error && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                {error}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="ml-2"
+                  onClick={loadAnnouncements}
+                >
+                  Retry
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Loading State */}
+          {loading && (
+            <Card>
+              <CardContent className="py-8">
+                <div className="flex items-center justify-center space-x-2">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <span>Loading announcements...</span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Pinned Announcements */}
-          {filteredAnnouncements.filter(a => a.isPinned).length > 0 && (
+          {!loading && !error && filteredAnnouncements.filter(a => a.isPinned).length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -425,95 +479,97 @@ export default function AnnouncementsPage() {
           )}
 
           {/* Regular Announcements */}
-          <div className="space-y-4">
-            {filteredAnnouncements.filter(a => !a.isPinned).map((announcement) => (
-              <Card key={announcement.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="pt-6">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-3 flex-1">
-                      <div className="flex items-center gap-2">
-                        {getPriorityIcon(announcement.priority)}
-                        <h3 className="font-semibold text-lg">{announcement.title}</h3>
-                        <Badge className={getCategoryColor(announcement.category)}>
-                          {announcement.category}
-                        </Badge>
-                      </div>
-
-                      <p className="text-muted-foreground">
-                        {announcement.content.length > 200
-                          ? `${announcement.content.substring(0, 200)}...`
-                          : announcement.content
-                        }
-                      </p>
-
-                      <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <User className="h-4 w-4" />
-                          <span>{announcement.author}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          <span>{formatDate(announcement.publishedAt)}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {getAudienceIcon(announcement.audience)}
-                          <span className="capitalize">{announcement.audience}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Eye className="h-4 w-4" />
-                          <span>
-                            {announcement.readBy} / {announcement.totalAudience}
-                            ({calculateReadPercentage(announcement.readBy, announcement.totalAudience)}%)
-                          </span>
-                        </div>
-                      </div>
-
-                      {announcement.attachments && announcement.attachments.length > 0 && (
+          {!loading && !error && (
+            <div className="space-y-4">
+              {filteredAnnouncements.filter(a => !a.isPinned).map((announcement) => (
+                <Card key={announcement.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-3 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">Attachments:</span>
-                          {announcement.attachments.map((attachment, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {attachment.name} ({attachment.size})
-                            </Badge>
-                          ))}
+                          {getPriorityIcon(announcement.priority)}
+                          <h3 className="font-semibold text-lg">{announcement.title}</h3>
+                          <Badge className={getCategoryColor(announcement.category)}>
+                            {announcement.category}
+                          </Badge>
                         </div>
-                      )}
-                    </div>
 
-                    <div className="flex items-center gap-2 ml-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedAnnouncement(announcement)
-                          setIsViewDialogOpen(true)
-                        }}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                        <p className="text-muted-foreground">
+                          {announcement.content.length > 200
+                            ? `${announcement.content.substring(0, 200)}...`
+                            : announcement.content
+                          }
+                        </p>
 
-          {filteredAnnouncements.length === 0 && (
-            <Card>
-              <CardContent className="pt-12 pb-12">
-                <div className="text-center text-muted-foreground">
-                  <Megaphone className="h-12 w-12 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No announcements found</h3>
-                  <p>Try adjusting your search criteria or create a new announcement</p>
-                </div>
-              </CardContent>
-            </Card>
+                        <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <User className="h-4 w-4" />
+                            <span>{announcement.author}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            <span>{formatDate(announcement.publishedAt)}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {getAudienceIcon(announcement.audience)}
+                            <span className="capitalize">{announcement.audience}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Eye className="h-4 w-4" />
+                            <span>
+                              {announcement.readBy} / {announcement.totalAudience}
+                              ({calculateReadPercentage(announcement.readBy, announcement.totalAudience)}%)
+                            </span>
+                          </div>
+                        </div>
+
+                        {announcement.attachments && announcement.attachments.length > 0 && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-muted-foreground">Attachments:</span>
+                            {announcement.attachments.map((attachment, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {attachment.name} ({attachment.size})
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2 ml-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedAnnouncement(announcement)
+                            setIsViewDialogOpen(true)
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+
+              {filteredAnnouncements.length === 0 && (
+                <Card>
+                  <CardContent className="pt-12 pb-12">
+                    <div className="text-center text-muted-foreground">
+                      <Megaphone className="h-12 w-12 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No announcements found</h3>
+                      <p>Try adjusting your search criteria or create a new announcement</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           )}
         </TabsContent>
 

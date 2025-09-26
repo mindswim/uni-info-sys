@@ -1,9 +1,9 @@
 // Real Laravel API integration
 import { CourseSection, Enrollment, Student } from './mock-api'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8001/api/v1'
-const DEMO_API_URL = 'http://localhost:8001/api/demo' // Temporary demo endpoints without auth
-const DATA_VIEWER_URL = 'http://localhost:8001/api/data-viewer'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost/api/v1'
+const DEMO_API_URL = 'http://localhost/api/demo' // Temporary demo endpoints without auth
+const DATA_VIEWER_URL = 'http://localhost/api/data-viewer'
 
 // Utility to simulate API delay for consistent UX
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))

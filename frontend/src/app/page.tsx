@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Users, BookOpen, FileText, TrendingUp } from "lucide-react"
 import { useState, useEffect } from "react"
 import UniversityAPI from "@/lib/university-api"
+import { API_CONFIG } from "@/config/api"
 
 
 const breadcrumbs = [
@@ -70,7 +71,7 @@ export default function Home() {
         setLoading(true)
 
         // Use the real demo dashboard API
-        const response = await fetch('http://localhost:8001/api/demo/dashboard')
+        const response = await fetch(API_CONFIG.DEMO.DASHBOARD)
 
         if (!response.ok) {
           throw new Error(`Failed to fetch dashboard data: ${response.statusText}`)

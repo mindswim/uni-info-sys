@@ -1,8 +1,8 @@
 // Comprehensive University Management API Service
 import authService from './auth'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8002/api/v1'
-const DATA_VIEWER_URL = 'http://localhost:8002/api/data-viewer'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost/api/v1'
+const DATA_VIEWER_URL = 'http://localhost/api/data-viewer'
 
 // Utility to simulate API delay for consistent UX
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))

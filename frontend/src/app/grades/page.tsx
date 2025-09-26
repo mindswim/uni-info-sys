@@ -59,12 +59,12 @@ export default function GradesPage() {
       const studentId = 3
 
       // Get student info
-      const studentsResponse = await fetch('http://localhost:8001/api/demo/students')
+      const studentsResponse = await fetch('http://localhost/api/demo/students')
       const studentsData = await studentsResponse.json()
       const sophie = studentsData.data.find((s: StudentData) => s.id === studentId)
 
       // Get enrollments
-      const enrollmentsResponse = await fetch('http://localhost:8001/api/demo/enrollments')
+      const enrollmentsResponse = await fetch('http://localhost/api/demo/enrollments')
       const enrollmentsData = await enrollmentsResponse.json()
       const sophieEnrollments = enrollmentsData.data.filter((e: Enrollment) => e.student_id === studentId)
 

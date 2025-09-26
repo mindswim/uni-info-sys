@@ -69,7 +69,7 @@ export default function SystemOverviewPage() {
 
       const responses = await Promise.all(
         endpoints.map(endpoint =>
-          fetch(`http://localhost:8001/api/data-viewer/${endpoint}`)
+          fetch(`http://localhost/api/data-viewer/${endpoint}`)
             .then(res => res.json())
             .catch(() => ({ stats: {} }))
         )

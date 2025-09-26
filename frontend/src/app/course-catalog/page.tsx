@@ -209,7 +209,7 @@ export default function CourseCatalogPage() {
       setError(null)
       
       // Use demo endpoint for now since authentication isn't set up
-      const response = await fetch('http://localhost:8001/api/demo/courses')
+      const response = await fetch('http://localhost/api/demo/courses')
       
       if (!response.ok) {
         throw new Error(`Failed to fetch courses: ${response.statusText}`)

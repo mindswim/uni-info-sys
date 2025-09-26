@@ -1,4 +1,4 @@
-# University Management System - Core Workflows
+p# University Management System - Core Workflows
 
 ## Overview
 This document outlines the essential workflows that form the foundation of a complete university management system. These workflows represent the critical business processes that must work seamlessly to operate a university.

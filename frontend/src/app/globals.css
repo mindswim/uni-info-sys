@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Import design system files */
+@import '../styles/design-tokens.css';
+@import '../styles/themes.css';
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -25,6 +29,7 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -37,6 +42,55 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* Success colors */
+  --color-success-50: rgb(240 253 244);
+  --color-success-100: rgb(220 252 231);
+  --color-success-200: rgb(187 247 208);
+  --color-success-300: rgb(134 239 172);
+  --color-success-400: rgb(74 222 128);
+  --color-success-500: rgb(34 197 94);
+  --color-success-600: rgb(22 163 74);
+  --color-success-700: rgb(21 128 61);
+  --color-success-800: rgb(22 101 52);
+  --color-success-900: rgb(20 83 45);
+
+  /* Warning colors */
+  --color-warning-50: rgb(255 251 235);
+  --color-warning-100: rgb(254 243 199);
+  --color-warning-200: rgb(253 230 138);
+  --color-warning-300: rgb(252 211 77);
+  --color-warning-400: rgb(251 191 36);
+  --color-warning-500: rgb(245 158 11);
+  --color-warning-600: rgb(217 119 6);
+  --color-warning-700: rgb(180 83 9);
+  --color-warning-800: rgb(146 64 14);
+  --color-warning-900: rgb(120 53 15);
+
+  /* Danger colors */
+  --color-danger-50: rgb(254 242 242);
+  --color-danger-100: rgb(254 226 226);
+  --color-danger-200: rgb(254 202 202);
+  --color-danger-300: rgb(252 165 165);
+  --color-danger-400: rgb(248 113 113);
+  --color-danger-500: rgb(239 68 68);
+  --color-danger-600: rgb(220 38 38);
+  --color-danger-700: rgb(185 28 28);
+  --color-danger-800: rgb(153 27 27);
+  --color-danger-900: rgb(127 29 29);
+
+  /* Info colors */
+  --color-info-50: rgb(240 249 255);
+  --color-info-100: rgb(224 242 254);
+  --color-info-200: rgb(186 230 253);
+  --color-info-300: rgb(125 211 252);
+  --color-info-400: rgb(56 189 248);
+  --color-info-500: rgb(14 165 233);
+  --color-info-600: rgb(2 132 199);
+  --color-info-700: rgb(3 105 161);
+  --color-info-800: rgb(7 89 133);
+  --color-info-900: rgb(12 74 110);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -44,7 +98,7 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.625rem; /* Default radius, can be overridden by themes */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -60,6 +114,7 @@
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -94,6 +149,7 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
@@ -118,5 +174,50 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-size: var(--font-size-base, 1rem);
+    line-height: var(--line-height-normal, 1.5);
+  }
+
+  /* Apply theme spacing to common elements */
+  .p-4 { padding: var(--spacing-4, 1rem); }
+  .p-6 { padding: var(--spacing-6, 1.5rem); }
+  .p-8 { padding: var(--spacing-8, 2rem); }
+  .gap-4 { gap: var(--spacing-4, 1rem); }
+  .gap-6 { gap: var(--spacing-6, 1.5rem); }
+  .space-y-4 > * + * { margin-top: var(--spacing-4, 1rem); }
+  .space-y-6 > * + * { margin-top: var(--spacing-6, 1.5rem); }
+
+  /* Apply theme typography */
+  h1 {
+    font-size: var(--font-size-4xl, 2.25rem);
+    line-height: var(--line-height-tight, 1.25);
+  }
+  h2 {
+    font-size: var(--font-size-3xl, 1.875rem);
+    line-height: var(--line-height-tight, 1.25);
+  }
+  h3 {
+    font-size: var(--font-size-2xl, 1.5rem);
+    line-height: var(--line-height-snug, 1.375);
+  }
+  h4 {
+    font-size: var(--font-size-xl, 1.25rem);
+    line-height: var(--line-height-snug, 1.375);
+  }
+
+  /* Apply theme radius to cards and buttons */
+  .rounded-md { border-radius: var(--radius, 0.5rem); }
+  .rounded-lg { border-radius: var(--radius-lg, var(--radius, 0.5rem)); }
+  .rounded-xl { border-radius: var(--radius-xl, calc(var(--radius, 0.5rem) + 4px)); }
+
+  /* Apply theme shadows */
+  .shadow-sm { box-shadow: var(--shadow-sm); }
+  .shadow-md { box-shadow: var(--shadow-md); }
+  .shadow-lg { box-shadow: var(--shadow-lg); }
+  .shadow-xl { box-shadow: var(--shadow-xl); }
+
+  /* Apply theme transitions */
+  * {
+    transition-duration: var(--duration-200, 200ms);
   }
 }

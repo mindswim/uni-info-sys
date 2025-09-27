@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import { Search, Settings, User, LogOut, Moon, Sun, PanelLeft } from "lucide-react"
-import { useTheme } from "@/components/providers/theme-provider"
+import { ThemeSwitcher } from "@/components/theme-switcher"
 import { GlobalSearch } from "@/components/global-search"
 import { NotificationsPanel } from "@/components/notifications-panel"
 
@@ -26,7 +26,6 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ user, breadcrumbs = [], sidebarCollapsed, onSidebarToggle }: AppHeaderProps) {
-  const { setTheme } = useTheme()
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 px-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -75,6 +74,8 @@ export function AppHeader({ user, breadcrumbs = [], sidebarCollapsed, onSidebarT
 
         <NotificationsPanel />
 
+        <ThemeSwitcher />
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -106,18 +107,6 @@ export function AppHeader({ user, breadcrumbs = [], sidebarCollapsed, onSidebarT
             <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("light")}>
-              <Sun className="mr-2 h-4 w-4" />
-              <span>Light</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("dark")}>
-              <Moon className="mr-2 h-4 w-4" />
-              <span>Dark</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("system")}>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>System</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-red-600">

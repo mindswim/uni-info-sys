@@ -534,7 +534,6 @@ export default function AcademicRecordsPage() {
           </div>
         </TabsContent>
       </Tabs>
-      </div>
     </AppShell>
   )
 }

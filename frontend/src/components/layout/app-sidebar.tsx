@@ -42,7 +42,8 @@ import {
   Edit,
   Car,
   MapPin,
-  Mail
+  Mail,
+  Edit2
 } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/components/auth/auth-provider"

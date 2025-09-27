@@ -2,14 +2,13 @@
 
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import { Bell, Search, Settings, User, LogOut, Moon, Sun, GraduationCap, PanelLeft } from "lucide-react"
-import { useState } from "react"
+import { Search, Settings, User, LogOut, Moon, Sun, PanelLeft } from "lucide-react"
 import { useTheme } from "@/components/providers/theme-provider"
+import { GlobalSearch } from "@/components/global-search"
+import { NotificationsPanel } from "@/components/notifications-panel"
 
 interface AppHeaderProps {
   user?: {
@@ -27,7 +26,6 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ user, breadcrumbs = [], sidebarCollapsed, onSidebarToggle }: AppHeaderProps) {
-  const [searchOpen, setSearchOpen] = useState(false)
   const { setTheme } = useTheme()
 
   return (
@@ -67,58 +65,15 @@ export function AppHeader({ user, breadcrumbs = [], sidebarCollapsed, onSidebarT
       <div className="flex-1" />
 
       <div className="flex items-center space-x-2">
-        <Popover open={searchOpen} onOpenChange={setSearchOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="hidden md:flex">
-              <Search className="h-4 w-4 mr-2" />
-              Search...
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-96 p-0" align="end">
-            <Command>
-              <CommandInput placeholder="Search students, courses, applications..." />
-              <CommandList>
-                <CommandEmpty>No results found.</CommandEmpty>
-                <CommandGroup heading="Recent">
-                  <CommandItem>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Maria Rodriguez</span>
-                  </CommandItem>
-                  <CommandItem>
-                    <GraduationCap className="mr-2 h-4 w-4" />
-                    <span>CS350 - Introduction to AI</span>
-                  </CommandItem>
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+        <div className="hidden md:block w-64">
+          <GlobalSearch />
+        </div>
 
         <Button variant="ghost" size="icon" className="md:hidden">
           <Search className="h-4 w-4" />
         </Button>
 
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-4 w-4" />
-              <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center">
-                3
-              </Badge>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80" align="end">
-            <div className="space-y-4">
-              <h4 className="font-medium">Notifications</h4>
-              <div className="space-y-2">
-                <div className="rounded-lg border p-3">
-                  <p className="text-sm font-medium">New Application</p>
-                  <p className="text-xs text-muted-foreground">Maria Rodriguez submitted an application</p>
-                </div>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+        <NotificationsPanel />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

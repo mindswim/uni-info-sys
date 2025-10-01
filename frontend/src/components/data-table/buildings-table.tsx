@@ -61,7 +61,7 @@ export function BuildingsTable({
       }
     },
     {
-      key: 'room_types',
+      key: 'address',
       title: 'Room Types',
       render: (_, row) => {
         const rooms = row.rooms || []
@@ -83,7 +83,7 @@ export function BuildingsTable({
       }
     },
     {
-      key: 'total_capacity',
+      key: 'created_at',
       title: 'Total Capacity',
       render: (_, row) => {
         const rooms = row.rooms || []
@@ -96,7 +96,7 @@ export function BuildingsTable({
       }
     },
     {
-      key: 'active_sections',
+      key: 'updated_at',
       title: 'Active Sections',
       render: (_, row) => {
         // Mock active section count - would come from API in real app

@@ -83,7 +83,7 @@ export function AcademicRecordsTable({
       )
     },
     {
-      key: 'gpa_info',
+      key: 'gpa',
       title: 'GPA',
       sortable: true,
       render: (_, row) => (
@@ -132,7 +132,7 @@ export function AcademicRecordsTable({
       )
     },
     {
-      key: 'academic_standing',
+      key: 'is_verified',
       title: 'Standing',
       render: (_, row) => {
         const percentage = (row.gpa / row.max_gpa) * 100

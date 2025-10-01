@@ -1,34 +1,103 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AppShell } from "@/components/layout/app-shell"
 import { CourseRegistrationWizard } from "@/components/registration/course-registration-wizard"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Calendar, Clock, AlertCircle, BookOpen } from 'lucide-react'
+import { studentService, enrollmentService } from '@/services'
 
 const breadcrumbs = [
   { label: 'Home', href: '/' },
   { label: 'Registration', href: '/registration' }
 ]
 
-// Mock data for registration periods
-const registrationPeriods = {
-  current: {
-    term: 'Spring 2025',
-    status: 'open',
-    startDate: '2024-11-15',
-    endDate: '2025-01-15',
-    appointmentTime: '2024-11-16 10:00 AM',
-    creditsAllowed: 18,
-    creditsEnrolled: 0
-  }
+interface RegistrationPeriod {
+  term: string
+  status: string
+  startDate: string
+  endDate: string
+  appointmentTime: string
+  creditsAllowed: number
+  creditsEnrolled: number
 }
 
 export default function RegistrationPage() {
   const [showWizard, setShowWizard] = useState(false)
-  const period = registrationPeriods.current
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [period, setPeriod] = useState<RegistrationPeriod | null>(null)
+
+  useEffect(() => {
+    const loadRegistrationInfo = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const [student, enrollments] = await Promise.all([
+          studentService.getCurrentProfile(),
+          enrollmentService.getCurrentEnrollments()
+        ])
+
+        const enrolledCredits = enrollments
+          .filter(e => e.status === 'enrolled')
+          .reduce((sum, e) => sum + (e.course_section?.course?.credits || 0), 0)
+
+        setPeriod({
+          term: student.current_term?.name || 'Current Term',
+          status: 'open',
+          startDate: student.current_term?.start_date || '',
+          endDate: student.current_term?.end_date || '',
+          appointmentTime: student.registration_appointment_time || 'Available now',
+          creditsAllowed: student.max_credit_load || 18,
+          creditsEnrolled: enrolledCredits
+        })
+      } catch (err) {
+        console.error('Failed to load registration info:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load registration information')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadRegistrationInfo()
+  }, [])
+
+  if (loading) {
+    return (
+      <AppShell breadcrumbs={breadcrumbs}>
+        <div className="container mx-auto py-6">
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div className="animate-pulse space-y-6">
+              <div className="h-20 bg-muted rounded-lg" />
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="h-32 bg-muted rounded-lg" />
+                <div className="h-32 bg-muted rounded-lg" />
+                <div className="h-32 bg-muted rounded-lg" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </AppShell>
+    )
+  }
+
+  if (error) {
+    return (
+      <AppShell breadcrumbs={breadcrumbs}>
+        <div className="container mx-auto py-6">
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </div>
+      </AppShell>
+    )
+  }
+
+  if (!period) return null
 
   return (
     <AppShell breadcrumbs={breadcrumbs}>

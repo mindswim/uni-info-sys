@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '@/components/auth/auth-provider'
+import { useAuth } from '@/contexts/auth-context'
 import { AppShell } from '@/components/layout/app-shell'
+import { studentService } from '@/services'
+import type { Student } from '@/types/api-types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -55,34 +57,34 @@ interface StudentProfile {
   }
 }
 
-// Mock data generator
-const generateMockProfile = (): StudentProfile => ({
-  id: 1,
-  student_id: 'STU2024001',
-  name: 'David Park',
-  email: 'david.park@university.edu',
-  phone: '+1 (555) 123-4567',
-  date_of_birth: '2002-03-15',
-  gender: 'Male',
-  address: '123 Campus Drive, Apt 4B',
-  city: 'University City',
-  country: 'United States',
-  postal_code: '12345',
-  program: 'Bachelor of Science in Computer Science',
-  department: 'Computer Science',
-  faculty: 'Faculty of Science',
-  year_of_study: 2,
-  gpa: 3.75,
-  credits_earned: 60,
-  credits_required: 120,
-  enrollment_date: '2022-09-01',
-  expected_graduation: '2026-06-01',
-  status: 'active',
+// Transform API Student to StudentProfile format
+const transformStudentToProfile = (student: Student): StudentProfile => ({
+  id: student.id,
+  student_id: student.student_number,
+  name: `${student.first_name} ${student.last_name}`,
+  email: student.email,
+  phone: student.phone_number || '',
+  date_of_birth: student.date_of_birth || '',
+  gender: student.gender || '',
+  address: student.address || '',
+  city: student.city || '',
+  country: student.country || '',
+  postal_code: student.postal_code || '',
+  program: student.program?.name || '',
+  department: student.program?.department?.name || '',
+  faculty: student.program?.department?.faculty?.name || '',
+  year_of_study: student.year_of_study || 1,
+  gpa: student.gpa || 0,
+  credits_earned: student.total_credits_earned || 0,
+  credits_required: student.program?.total_credits || 120,
+  enrollment_date: student.admission_date || '',
+  expected_graduation: student.expected_graduation_date || '',
+  status: student.enrollment_status as 'active' | 'inactive' | 'graduated' | 'suspended',
   emergency_contact: {
-    name: 'Sarah Park',
-    relationship: 'Mother',
-    phone: '+1 (555) 987-6543',
-    email: 'sarah.park@email.com'
+    name: student.emergency_contact_name || '',
+    relationship: student.emergency_contact_relationship || '',
+    phone: student.emergency_contact_phone || '',
+    email: student.emergency_contact_email || ''
   }
 })
 
@@ -90,32 +92,56 @@ export default function ProfilePage() {
   const { user } = useAuth()
   const [profile, setProfile] = useState<StudentProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
   const [editedProfile, setEditedProfile] = useState<StudentProfile | null>(null)
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
   useEffect(() => {
-    // Simulate loading profile
-    setTimeout(() => {
-      const mockProfile = generateMockProfile()
-      if (user) {
-        mockProfile.name = user.name
-        mockProfile.email = user.email
+    const loadProfile = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const studentData = await studentService.getCurrentProfile()
+        const transformedProfile = transformStudentToProfile(studentData)
+        setProfile(transformedProfile)
+        setEditedProfile(transformedProfile)
+      } catch (err) {
+        console.error('Failed to load profile:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load profile')
+      } finally {
+        setLoading(false)
       }
-      setProfile(mockProfile)
-      setEditedProfile(mockProfile)
-      setLoading(false)
-    }, 500)
-  }, [user])
+    }
 
-  const handleSave = () => {
+    loadProfile()
+  }, [])
+
+  const handleSave = async () => {
+    if (!editedProfile) return
+
     setSaveStatus('saving')
-    setTimeout(() => {
+    try {
+      await studentService.updateCurrentProfile({
+        phone_number: editedProfile.phone,
+        address: editedProfile.address,
+        city: editedProfile.city,
+        country: editedProfile.country,
+        postal_code: editedProfile.postal_code,
+        emergency_contact_name: editedProfile.emergency_contact.name,
+        emergency_contact_relationship: editedProfile.emergency_contact.relationship,
+        emergency_contact_phone: editedProfile.emergency_contact.phone,
+        emergency_contact_email: editedProfile.emergency_contact.email
+      })
       setProfile(editedProfile)
       setEditing(false)
       setSaveStatus('saved')
       setTimeout(() => setSaveStatus('idle'), 2000)
-    }, 1000)
+    } catch (err) {
+      console.error('Failed to save profile:', err)
+      setSaveStatus('error')
+      setTimeout(() => setSaveStatus('idle'), 3000)
+    }
   }
 
   const handleCancel = () => {
@@ -134,6 +160,19 @@ export default function ProfilePage() {
               <div className="h-64 bg-muted rounded-lg" />
             </div>
           </div>
+        </div>
+      </AppShell>
+    )
+  }
+
+  if (error) {
+    return (
+      <AppShell breadcrumbs={breadcrumbs}>
+        <div className="container mx-auto py-6">
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         </div>
       </AppShell>
     )

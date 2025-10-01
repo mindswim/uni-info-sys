@@ -58,7 +58,43 @@ const navigationItems = {
     {
       title: "Dashboard",
       items: [
-        { title: "Student Portal", url: "/student", icon: Home },
+        { title: "Overview", url: "/student", icon: Home }
+      ]
+    },
+    {
+      title: "Academic",
+      items: [
+        { title: "Academic Records", url: "/student/academic-records", icon: Award },
+        { title: "Schedule", url: "/student/schedule", icon: Calendar },
+        { title: "Grades", url: "/student/grades", icon: Award },
+        { title: "Transcripts", url: "/student/transcripts", icon: FileText }
+      ]
+    },
+    {
+      title: "Courses",
+      items: [
+        { title: "Enrollments", url: "/student/enrollments", icon: BookOpen },
+        { title: "Registration", url: "/student/registration", icon: ClipboardCheck }
+      ]
+    },
+    {
+      title: "Financial",
+      items: [
+        { title: "Payments", url: "/student/payments", icon: CreditCard },
+        { title: "Meal Plans", url: "/student/meal-plans", icon: Receipt }
+      ]
+    },
+    {
+      title: "Campus Life",
+      items: [
+        { title: "Housing", url: "/student/housing", icon: Building },
+        { title: "Career Services", url: "/student/career", icon: Briefcase }
+      ]
+    },
+    {
+      title: "Other",
+      items: [
+        { title: "Assignments", url: "/student/assignments", icon: ClipboardCheck },
         { title: "Messages", url: "/messages", icon: MessageSquare },
         { title: "Profile", url: "/profile", icon: User }
       ]
@@ -68,7 +104,39 @@ const navigationItems = {
     {
       title: "Dashboard",
       items: [
-        { title: "Faculty Portal", url: "/faculty", icon: Home },
+        { title: "Overview", url: "/faculty", icon: Home }
+      ]
+    },
+    {
+      title: "Students",
+      items: [
+        { title: "My Students", url: "/faculty/students", icon: Users }
+      ]
+    },
+    {
+      title: "Teaching",
+      items: [
+        { title: "Sections", url: "/faculty/sections", icon: BookOpen },
+        { title: "Course Management", url: "/faculty/courses", icon: Settings },
+        { title: "Attendance", url: "/faculty/attendance", icon: ClipboardCheck }
+      ]
+    },
+    {
+      title: "Grading",
+      items: [
+        { title: "Grades", url: "/faculty/grades", icon: Award }
+      ]
+    },
+    {
+      title: "Advising",
+      items: [
+        { title: "Advising", url: "/faculty/advising", icon: MessageSquare },
+        { title: "Appointments", url: "/faculty/appointments", icon: Calendar }
+      ]
+    },
+    {
+      title: "Other",
+      items: [
         { title: "Messages", url: "/messages", icon: MessageSquare },
         { title: "Profile", url: "/profile", icon: User }
       ]
@@ -78,8 +146,40 @@ const navigationItems = {
     {
       title: "Dashboard",
       items: [
-        { title: "Admin Portal", url: "/admin", icon: Home },
-        { title: "Legacy Students Page", url: "/students", icon: Users },
+        { title: "Overview", url: "/admin", icon: Home }
+      ]
+    },
+    {
+      title: "Users",
+      items: [
+        { title: "Students", url: "/admin/students", icon: Users },
+        { title: "Faculty", url: "/admin/faculty", icon: UserCheck },
+        { title: "Staff", url: "/admin/staff", icon: Shield }
+      ]
+    },
+    {
+      title: "Admissions",
+      items: [
+        { title: "Applications", url: "/admin/admissions", icon: FileText }
+      ]
+    },
+    {
+      title: "Alumni",
+      items: [
+        { title: "Alumni Records", url: "/admin/alumni", icon: GraduationCap }
+      ]
+    },
+    {
+      title: "Reports",
+      items: [
+        { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
+        { title: "Reports", url: "/admin/reports", icon: FileText }
+      ]
+    },
+    {
+      title: "System",
+      items: [
+        { title: "Settings", url: "/admin/settings", icon: Settings },
         { title: "Messages", url: "/messages", icon: MessageSquare },
         { title: "Profile", url: "/profile", icon: User }
       ]

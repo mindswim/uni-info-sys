@@ -1,104 +1,200 @@
 "use client"
 
 import { AppShell } from '@/components/layout/app-shell'
-import { DashboardLayout } from '@/components/layouts'
-import { GraduationCap, Calendar, BookOpen, FileText, CreditCard, Home, Briefcase, ClipboardList, Award, Clock } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { AcademicRecordsTab } from '@/components/student/academic-records-tab'
-import { ScheduleTab } from '@/components/student/schedule-tab'
-import { EnrollmentsTab } from '@/components/student/enrollments-tab'
-import { RegistrationTab } from '@/components/student/registration-tab'
-import { AssignmentsTab } from '@/components/student/assignments-tab'
-import { GradesTab } from '@/components/student/grades-tab'
-import { TranscriptsTab } from '@/components/student/transcripts-tab'
-import { PaymentsTab } from '@/components/student/payments-tab'
-import { MealPlansTab } from '@/components/student/meal-plans-tab'
-import { HousingTab } from '@/components/student/housing-tab'
-import { CareerTab } from '@/components/student/career-tab'
+import { Award, BookOpen, Calendar, TrendingUp } from 'lucide-react'
+import { useStudentData } from '@/hooks/use-student-data'
+import Link from 'next/link'
 
-export default function StudentDashboardPage() {
-  const tabs = [
-    {
-      value: 'academic-records',
-      label: 'Academic Records',
-      icon: <Award className="h-4 w-4" />,
-      content: <AcademicRecordsTab />
-    },
-    {
-      value: 'schedule',
-      label: 'Schedule',
-      icon: <Calendar className="h-4 w-4" />,
-      content: <ScheduleTab />
-    },
-    {
-      value: 'enrollments',
-      label: 'Enrollments',
-      icon: <BookOpen className="h-4 w-4" />,
-      content: <EnrollmentsTab />
-    },
-    {
-      value: 'registration',
-      label: 'Registration',
-      icon: <ClipboardList className="h-4 w-4" />,
-      content: <RegistrationTab />
-    },
-    {
-      value: 'assignments',
-      label: 'Assignments',
-      icon: <Clock className="h-4 w-4" />,
-      content: <AssignmentsTab />
-    },
-    {
-      value: 'grades',
-      label: 'Grades',
-      icon: <Award className="h-4 w-4" />,
-      content: <GradesTab />
-    },
-    {
-      value: 'transcripts',
-      label: 'Transcripts',
-      icon: <FileText className="h-4 w-4" />,
-      content: <TranscriptsTab />
-    },
-    {
-      value: 'payments',
-      label: 'Payments',
-      icon: <CreditCard className="h-4 w-4" />,
-      content: <PaymentsTab />
-    },
-    {
-      value: 'meal-plans',
-      label: 'Meal Plans',
-      icon: <GraduationCap className="h-4 w-4" />,
-      content: <MealPlansTab />
-    },
-    {
-      value: 'housing',
-      label: 'Housing',
-      icon: <Home className="h-4 w-4" />,
-      content: <HousingTab />
-    },
-    {
-      value: 'career',
-      label: 'Career Services',
-      icon: <Briefcase className="h-4 w-4" />,
-      content: <CareerTab />
-    }
-  ]
+export default function StudentOverviewPage() {
+  const { student, isLoading } = useStudentData()
+
+  if (isLoading) {
+    return (
+      <AppShell>
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </AppShell>
+    )
+  }
 
   return (
     <AppShell>
-      <DashboardLayout
-        title="Student Dashboard"
-        description="Manage your academic information and services"
-        tabs={tabs}
-        defaultTab="academic-records"
-        action={
-          <Button>
-            Request Support
-          </Button>
-        }
-      />
+      <div className="flex flex-col gap-6 p-6">
+        {/* Header */}
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold">Student Overview</h1>
+            <p className="text-muted-foreground">
+              Welcome back, {student?.first_name || 'Student'}
+            </p>
+          </div>
+          <Button>Request Support</Button>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Current GPA</CardTitle>
+              <Award className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {student?.academic_records?.[0]?.gpa || 'N/A'}
+              </div>
+              <p className="text-xs text-muted-foreground">Cumulative GPA</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Credits Earned</CardTitle>
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {student?.academic_records?.[0]?.credits_earned || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Out of {student?.major_program?.credits_required || 120} required
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Enrollment Status
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {student?.enrollment_status || 'Unknown'}
+              </div>
+              <p className="text-xs text-muted-foreground">Current status</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Completion</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {student?.academic_records?.[0]?.credits_earned && student?.major_program?.credits_required
+                  ? Math.round(
+                      (student.academic_records[0].credits_earned /
+                        student.major_program.credits_required) *
+                        100
+                    )
+                  : 0}
+                %
+              </div>
+              <p className="text-xs text-muted-foreground">Degree progress</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Info Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>Academic Progress</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium">Degree Progress</span>
+                  <span className="text-muted-foreground">
+                    {student?.academic_records?.[0]?.credits_earned || 0} /{' '}
+                    {student?.major_program?.credits_required || 120} credits
+                  </span>
+                </div>
+                <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary"
+                    style={{
+                      width: `${
+                        student?.academic_records?.[0]?.credits_earned &&
+                        student?.major_program?.credits_required
+                          ? (student.academic_records[0].credits_earned /
+                              student.major_program.credits_required) *
+                            100
+                          : 0
+                      }%`,
+                    }}
+                  />
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {student?.major_program?.credits_required &&
+                student?.academic_records?.[0]?.credits_earned
+                  ? student.major_program.credits_required -
+                    student.academic_records[0].credits_earned
+                  : student?.major_program?.credits_required || 120}{' '}
+                credits remaining to complete your degree.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Student Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <dl className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Student Number</dt>
+                  <dd className="font-medium">{student?.student_number}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Enrollment Status</dt>
+                  <dd className="font-medium">{student?.enrollment_status}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Email</dt>
+                  <dd className="font-medium">{student?.email}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Phone</dt>
+                  <dd className="font-medium">{student?.phone}</dd>
+                </div>
+              </dl>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Links</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button variant="outline" className="w-full justify-start" asChild>
+                <Link href="/student/schedule">
+                  <Calendar className="mr-2 h-4 w-4" />
+                  View Schedule
+                </Link>
+              </Button>
+              <Button variant="outline" className="w-full justify-start" asChild>
+                <Link href="/student/grades">
+                  <Award className="mr-2 h-4 w-4" />
+                  Check Grades
+                </Link>
+              </Button>
+              <Button variant="outline" className="w-full justify-start" asChild>
+                <Link href="/student/enrollments">
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  My Enrollments
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </AppShell>
   )
 }

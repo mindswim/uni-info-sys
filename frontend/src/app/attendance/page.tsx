@@ -82,6 +82,7 @@ interface Course {
 export default function AttendancePage() {
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([])
   const [sections, setSections] = useState<CourseSection[]>([])
+  const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedCourse, setSelectedCourse] = useState<string>("all")

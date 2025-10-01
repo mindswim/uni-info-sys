@@ -4,6 +4,7 @@ export { courseService, default as CourseService } from './course-service'
 export { enrollmentService, default as EnrollmentService } from './enrollment-service'
 export { facultyService, default as FacultyService } from './faculty-service'
 export { adminService, default as AdminService } from './admin-service'
+export { authService, default as AuthService } from './auth'
 
 // Re-export types for convenience
 export type * from '@/types/api-types'

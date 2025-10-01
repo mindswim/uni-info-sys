@@ -25,11 +25,23 @@ const breadcrumbs = [
   { label: 'Course Management' }
 ]
 
+interface Course {
+  id: number
+  code: string
+  name: string
+  status: 'active' | 'draft' | 'inactive'
+  sections: number
+  totalEnrollment: number
+  capacity: number
+}
+
 export default function CourseManagementPage() {
   const [sections, setSections] = useState<CourseSection[]>([])
+  const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [showAddDialog, setShowAddDialog] = useState(false)
 
   useEffect(() => {
     const loadSections = async () => {
@@ -38,6 +50,14 @@ export default function CourseManagementPage() {
         setError(null)
         const mySections = await facultyService.getMySections()
         setSections(mySections)
+
+        // Mock courses data
+        const mockCourses: Course[] = [
+          { id: 1, code: 'CS101', name: 'Intro to CS', status: 'active', sections: 3, totalEnrollment: 90, capacity: 100 },
+          { id: 2, code: 'CS201', name: 'Data Structures', status: 'active', sections: 2, totalEnrollment: 60, capacity: 70 },
+          { id: 3, code: 'CS301', name: 'Algorithms', status: 'draft', sections: 1, totalEnrollment: 0, capacity: 40 },
+        ]
+        setCourses(mockCourses)
       } catch (err) {
         console.error('Failed to load course sections:', err)
         setError(err instanceof Error ? err.message : 'Failed to load courses')
@@ -52,6 +72,11 @@ export default function CourseManagementPage() {
   const filteredSections = sections.filter(section =>
     section.course?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     section.course?.code.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const filteredCourses = courses.filter(course =>
+    course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    course.code.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const getStatusColor = (status: string) => {

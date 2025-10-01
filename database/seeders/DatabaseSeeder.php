@@ -287,12 +287,15 @@ class DatabaseSeeder extends Seeder
             if ($application->status === 'accepted') {
                 $studentSections = $courseSections->random(rand(3, 5));
                 foreach ($studentSections as $section) {
+                    // 60% of enrollments get grades (completed courses)
+                    $isCompleted = fake()->boolean(60);
+
                     Enrollment::create([
                         'student_id' => $student->id,
                         'course_section_id' => $section->id,
-                        'status' => 'enrolled',
+                        'status' => $isCompleted ? 'completed' : 'enrolled',
                         'enrollment_date' => fake()->dateTimeBetween('-3 months', 'now'),
-                        'grade' => null,
+                        'grade' => $isCompleted ? $this->generateRealisticGrade() : null,
                     ]);
                 }
             }
@@ -309,12 +312,15 @@ class DatabaseSeeder extends Seeder
             })->take($section->capacity)->get();
             
             foreach ($availableStudents as $student) {
+                $isCompleted = fake()->boolean(60);
+
                 Enrollment::create([
                     'student_id' => $student->id,
                     'course_section_id' => $section->id,
-                    'status' => 'enrolled',
+                    'status' => $isCompleted ? 'completed' : 'enrolled',
                     'enrollment_date' => fake()->dateTimeBetween('-3 months', 'now'),
-        ]);
+                    'grade' => $isCompleted ? $this->generateRealisticGrade() : null,
+                ]);
             }
             
             // Add waitlist students
@@ -333,5 +339,25 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
         }
+    }
+
+    /**
+     * Generate realistic grade following a normal distribution
+     * Grade distribution: A (10%), A- (10%), B+ (15%), B (20%), B- (15%), C+ (15%), C (10%), C- (3%), D (1%), F (1%)
+     */
+    private function generateRealisticGrade(): string
+    {
+        $random = rand(1, 100);
+
+        if ($random <= 10) return 'A';      // 10%
+        if ($random <= 20) return 'A-';     // 10%
+        if ($random <= 35) return 'B+';     // 15%
+        if ($random <= 55) return 'B';      // 20%
+        if ($random <= 70) return 'B-';     // 15%
+        if ($random <= 85) return 'C+';     // 15%
+        if ($random <= 95) return 'C';      // 10%
+        if ($random <= 98) return 'C-';     // 3%
+        if ($random <= 99) return 'D';      // 1%
+        return 'F';                         // 1%
     }
 }

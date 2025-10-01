@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search, Clock, Users, MapPin, User, BookOpen, AlertCircle, CheckCircle, XCircle, Loader2 } from "lucide-react"
-import UniversityAPI, { CourseSection, Enrollment } from "@/lib/university-api"
+import { courseService, enrollmentService } from "@/services"
+import type { CourseSection, Enrollment } from "@/types/api-types"
 
 
 const breadcrumbs = [
@@ -101,7 +102,7 @@ function EnrollmentDialog({ section, onEnroll, currentEnrollments }: {
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            {section.course.course_code} - {section.course.title}
+            {section.course.code} - {section.course.name}
           </DialogTitle>
           <DialogDescription>
             Section {section.section_number} • {section.course.credits} credits
@@ -111,16 +112,16 @@ function EnrollmentDialog({ section, onEnroll, currentEnrollments }: {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <strong>Instructor:</strong> {section.instructor}
+              <strong>Instructor:</strong> {section.instructor ? `${section.instructor.first_name} ${section.instructor.last_name}` : 'TBA'}
             </div>
             <div>
-              <strong>Schedule:</strong> {section.schedule}
+              <strong>Schedule:</strong> {section.meeting_days} {section.start_time}-{section.end_time}
             </div>
             <div>
-              <strong>Location:</strong> {section.room || 'TBD'}
+              <strong>Location:</strong> {section.room ? `${section.room.building.code} ${section.room.room_number}` : 'TBD'}
             </div>
             <div>
-              <strong>Enrollment:</strong> {section.enrollments?.length || 0}/{section.capacity}
+              <strong>Enrollment:</strong> {section.enrolled_count || 0}/{section.capacity}
             </div>
           </div>
 
@@ -207,41 +208,11 @@ export default function CourseCatalogPage() {
     try {
       setLoading(true)
       setError(null)
-      
-      // Use demo endpoint for now since authentication isn't set up
-      const response = await fetch('http://localhost/api/demo/courses')
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch courses: ${response.statusText}`)
-      }
 
-      const data = await response.json()
-
-      // Transform demo data to match expected CourseSection format
-      const transformedSections = data.data.flatMap((course: any) => 
-        course.sections.map((section: any) => ({
-          id: section.id,
-          section_number: section.section_number,
-          capacity: section.capacity,
-          enrolled: section.enrolled,
-          waitlisted: section.waitlisted,
-          instructor: section.instructor,
-          schedule: section.schedule,
-          room: section.room,
-          course: {
-            id: course.id,
-            course_code: course.course_code,
-            title: course.title,
-            description: course.description,
-            credits: course.credits,
-            department: course.department
-          },
-          enrollments: [] // Mock empty enrollments array
-        }))
-      )
-
-      setCourseSections(transformedSections)
+      const catalogResponse = await courseService.getCatalog()
+      setCourseSections(catalogResponse)
     } catch (err) {
+      console.error('Failed to load course catalog:', err)
       setError(err instanceof Error ? err.message : 'Failed to load course sections')
     } finally {
       setLoading(false)
@@ -250,8 +221,9 @@ export default function CourseCatalogPage() {
 
   const loadStudentData = async () => {
     try {
-      // Mock some student enrollment data for demo
-      setStudentEnrollments([1]) // Pretend student is enrolled in section 1
+      const enrollments = await enrollmentService.getCurrentEnrollments()
+      const sectionIds = enrollments.map(e => e.course_section_id)
+      setStudentEnrollments(sectionIds)
     } catch (err) {
       console.warn('Failed to load student enrollment data:', err)
     }
@@ -264,22 +236,22 @@ export default function CourseCatalogPage() {
     }
   }, [searchQuery, selectedDepartment, selectedLevel])
 
-  const departments = [...new Set(courseSections.map(s => s.course.program?.department?.abbreviation || 'UNKNOWN'))]
-  
+  const departments = [...new Set(courseSections.map(s => s.course.code.split(' ')[0] || 'UNKNOWN'))]
+
   // Apply client-side filtering
   const filteredSections = courseSections.filter(section => {
-    const matchesSearch = !searchQuery || 
-      section.course.course_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      section.course.title.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    const matchesDepartment = selectedDepartment === 'all' || 
-      section.course.program?.department?.abbreviation === selectedDepartment
-    
-    const matchesLevel = selectedLevel === 'all' || 
-      (section.course.course_code.match(/\d/)?.[0] ? 
-        (parseInt(section.course.course_code.match(/\d/)[0]) >= 5 ? 'graduate' : 'undergraduate') === selectedLevel :
+    const matchesSearch = !searchQuery ||
+      section.course.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      section.course.name.toLowerCase().includes(searchQuery.toLowerCase())
+
+    const matchesDepartment = selectedDepartment === 'all' ||
+      section.course.code.split(' ')[0] === selectedDepartment
+
+    const matchesLevel = selectedLevel === 'all' ||
+      (section.course.code.match(/\d+/)?.[0] ?
+        (parseInt(section.course.code.match(/\d+/)[0]) >= 500 ? 'graduate' : 'undergraduate') === selectedLevel :
         true)
-    
+
     return matchesSearch && matchesDepartment && matchesLevel
   })
 
@@ -288,60 +260,33 @@ export default function CourseCatalogPage() {
     if (!section) return
 
     try {
-      // Enhanced enrollment logic with capacity checking
-      if (action === "enroll" || action === "waitlist") {
-        const availableSpots = section.capacity - section.enrolled
-
-        if (availableSpots > 0 && action === "enroll") {
-          setEnrollmentMessage({
-            type: "success",
-            message: `Successfully enrolled in ${section.course.course_code}! Confirmation email sent.`
-          })
-          // Update section capacity locally
-          setCourseSections(prev =>
-            prev.map(s =>
-              s.id === sectionId
-                ? { ...s, enrolled: s.enrolled + 1 }
-                : s
-            )
-          )
-        } else {
-          setEnrollmentMessage({
-            type: "success",
-            message: `Added to waitlist for ${section.course.course_code}. You're position #${section.waitlisted + 1}.`
-          })
-          // Update waitlist count locally
-          setCourseSections(prev =>
-            prev.map(s =>
-              s.id === sectionId
-                ? { ...s, waitlisted: s.waitlisted + 1 }
-                : s
-            )
-          )
-        }
-
-        // Update local state
-        setStudentEnrollments(prev => [...prev, sectionId])
-      } else if (action === "drop") {
+      if (action === "enroll") {
+        await enrollmentService.enrollCurrent(sectionId)
         setEnrollmentMessage({
           type: "success",
-          message: `Successfully dropped from ${section.course.course_code}. Refund will be processed within 3-5 business days.`
+          message: `Successfully enrolled in ${section.course.code}!`
         })
-        // Update section capacity locally
-        setCourseSections(prev =>
-          prev.map(s =>
-            s.id === sectionId
-              ? { ...s, enrolled: Math.max(0, s.enrolled - 1) }
-              : s
-          )
-        )
-        // Update local state
-        setStudentEnrollments(prev => prev.filter(id => id !== sectionId))
+        setStudentEnrollments(prev => [...prev, sectionId])
+        await loadCourseSections() // Reload to get updated enrollment counts
+      } else if (action === "waitlist") {
+        await enrollmentService.joinWaitlist(sectionId)
+        setEnrollmentMessage({
+          type: "success",
+          message: `Added to waitlist for ${section.course.code}.`
+        })
+      } else if (action === "drop") {
+        const enrollment = await enrollmentService.getCurrentEnrollments()
+        const enrollmentRecord = enrollment.find(e => e.course_section_id === sectionId)
+        if (enrollmentRecord) {
+          await enrollmentService.drop(enrollmentRecord.id)
+          setEnrollmentMessage({
+            type: "success",
+            message: `Successfully dropped from ${section.course.code}.`
+          })
+          setStudentEnrollments(prev => prev.filter(id => id !== sectionId))
+          await loadCourseSections() // Reload to get updated enrollment counts
+        }
       }
-
-      // Simulate API delay for realism
-      await new Promise(resolve => setTimeout(resolve, 800))
-
     } catch (error) {
       setEnrollmentMessage({
         type: "error",

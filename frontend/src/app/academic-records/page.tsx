@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { API_CONFIG, apiRequest } from '@/config/api'
 import { AppShell } from '@/components/layout/app-shell'
+import { studentService } from '@/services'
+import type { AcademicRecord, Student } from '@/types/api-types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -56,116 +57,67 @@ interface AcademicAchievement {
   icon: 'deans_list' | 'scholarship' | 'award' | 'honor'
 }
 
-// Mock data generator
-const generateMockData = () => {
-  const currentYear = 2024
-  const startYear = 2023
-
-  const courses: CourseRecord[] = [
-    // Fall 2023
-    { id: 1, course_code: 'CS 101', course_name: 'Introduction to Computer Science', credits: 4, grade: 'A', grade_points: 4.0, term: 'Fall', year: 2023, status: 'completed', category: 'major' },
-    { id: 2, course_code: 'MATH 201', course_name: 'Calculus I', credits: 4, grade: 'B+', grade_points: 3.3, term: 'Fall', year: 2023, status: 'completed', category: 'core' },
-    { id: 3, course_code: 'ENG 110', course_name: 'Composition I', credits: 3, grade: 'A-', grade_points: 3.7, term: 'Fall', year: 2023, status: 'completed', category: 'general_ed' },
-    { id: 4, course_code: 'HIST 101', course_name: 'World History', credits: 3, grade: 'B', grade_points: 3.0, term: 'Fall', year: 2023, status: 'completed', category: 'general_ed' },
-    { id: 5, course_code: 'BIO 101', course_name: 'Biology I', credits: 4, grade: 'B+', grade_points: 3.3, term: 'Fall', year: 2023, status: 'completed', category: 'elective' },
-
-    // Spring 2024
-    { id: 6, course_code: 'CS 201', course_name: 'Data Structures', credits: 4, grade: 'A-', grade_points: 3.7, term: 'Spring', year: 2024, status: 'completed', category: 'major' },
-    { id: 7, course_code: 'MATH 202', course_name: 'Calculus II', credits: 4, grade: 'B', grade_points: 3.0, term: 'Spring', year: 2024, status: 'completed', category: 'core' },
-    { id: 8, course_code: 'PHYS 201', course_name: 'Physics I', credits: 4, grade: 'B+', grade_points: 3.3, term: 'Spring', year: 2024, status: 'completed', category: 'core' },
-    { id: 9, course_code: 'ENG 111', course_name: 'Composition II', credits: 3, grade: 'A', grade_points: 4.0, term: 'Spring', year: 2024, status: 'completed', category: 'general_ed' },
-    { id: 10, course_code: 'PHIL 101', course_name: 'Introduction to Philosophy', credits: 3, grade: 'A-', grade_points: 3.7, term: 'Spring', year: 2024, status: 'completed', category: 'elective' },
-
-    // Fall 2024 (Current)
-    { id: 11, course_code: 'CS 301', course_name: 'Algorithms', credits: 4, grade: 'IP', grade_points: 0, term: 'Fall', year: 2024, status: 'in_progress', category: 'major' },
-    { id: 12, course_code: 'CS 320', course_name: 'Database Systems', credits: 3, grade: 'IP', grade_points: 0, term: 'Fall', year: 2024, status: 'in_progress', category: 'major' },
-    { id: 13, course_code: 'MATH 301', course_name: 'Linear Algebra', credits: 3, grade: 'IP', grade_points: 0, term: 'Fall', year: 2024, status: 'in_progress', category: 'core' },
-    { id: 14, course_code: 'CS 350', course_name: 'Software Engineering', credits: 3, grade: 'IP', grade_points: 0, term: 'Fall', year: 2024, status: 'in_progress', category: 'major' },
-    { id: 15, course_code: 'PSYC 201', course_name: 'Cognitive Psychology', credits: 3, grade: 'IP', grade_points: 0, term: 'Fall', year: 2024, status: 'in_progress', category: 'elective' }
-  ]
+// Transform API data to page format
+const transformAcademicData = (records: AcademicRecord[], student: Student) => {
+  const courses: CourseRecord[] = records.map(record => ({
+    id: record.id,
+    course_code: record.course.code,
+    course_name: record.course.name,
+    credits: record.course.credits,
+    grade: record.grade || 'IP',
+    grade_points: record.grade_points || 0,
+    term: record.term.name.split(' ')[0] || 'Unknown',
+    year: parseInt(record.term.name.split(' ')[1] || new Date().getFullYear().toString()),
+    status: record.status as 'completed' | 'in_progress' | 'withdrawn',
+    category: (record.course.type || 'elective') as 'core' | 'major' | 'elective' | 'general_ed'
+  }))
 
   const completedCourses = courses.filter(c => c.status === 'completed')
   const completedCredits = completedCourses.reduce((sum, c) => sum + c.credits, 0)
   const inProgressCredits = courses.filter(c => c.status === 'in_progress').reduce((sum, c) => sum + c.credits, 0)
-  const totalQualityPoints = completedCourses.reduce((sum, c) => sum + (c.credits * c.grade_points), 0)
-  const cumulativeGPA = completedCredits > 0 ? totalQualityPoints / completedCredits : 0
 
   const summary: AcademicSummary = {
-    total_credits_earned: completedCredits,
-    total_credits_attempted: completedCredits + inProgressCredits,
-    total_credits_required: 120,
-    cumulative_gpa: Math.round(cumulativeGPA * 100) / 100,
-    major_gpa: 3.65,
-    term_gpa: 3.5,
-    academic_standing: cumulativeGPA >= 3.5 ? "Dean's List" : cumulativeGPA >= 2.0 ? 'Good Standing' : 'Academic Probation',
-    expected_graduation: 'May 2027',
-    degree_progress: Math.round((completedCredits / 120) * 100)
+    total_credits_earned: student.total_credits_earned || completedCredits,
+    total_credits_attempted: student.total_credits_attempted || (completedCredits + inProgressCredits),
+    total_credits_required: student.program?.total_credits || 120,
+    cumulative_gpa: student.gpa || 0,
+    major_gpa: student.major_gpa || 0,
+    term_gpa: student.term_gpa || 0,
+    academic_standing: student.academic_standing || 'Good Standing',
+    expected_graduation: student.expected_graduation_date || 'Not Set',
+    degree_progress: Math.round(((student.total_credits_earned || 0) / (student.program?.total_credits || 120)) * 100)
   }
 
-  const requirements: DegreeRequirement[] = [
-    {
-      category: 'Core Requirements',
-      required_credits: 32,
-      earned_credits: 16,
-      in_progress_credits: 3,
-      remaining_credits: 13,
-      courses: ['MATH 201', 'MATH 202', 'PHYS 201', 'MATH 301']
-    },
-    {
-      category: 'Major Requirements',
-      required_credits: 48,
-      earned_credits: 8,
-      in_progress_credits: 13,
-      remaining_credits: 27,
-      courses: ['CS 101', 'CS 201', 'CS 301', 'CS 320', 'CS 350']
-    },
-    {
-      category: 'General Education',
-      required_credits: 24,
-      earned_credits: 9,
-      in_progress_credits: 0,
-      remaining_credits: 15,
-      courses: ['ENG 110', 'ENG 111', 'HIST 101']
-    },
-    {
-      category: 'Electives',
-      required_credits: 16,
-      earned_credits: 7,
-      in_progress_credits: 3,
-      remaining_credits: 6,
-      courses: ['BIO 101', 'PHIL 101', 'PSYC 201']
-    }
-  ]
-
-  const achievements: AcademicAchievement[] = [
-    { title: "Dean's List", date: 'Fall 2023', description: 'Achieved GPA of 3.5 or higher', icon: 'deans_list' },
-    { title: "Dean's List", date: 'Spring 2024', description: 'Achieved GPA of 3.5 or higher', icon: 'deans_list' },
-    { title: 'Academic Excellence Award', date: 'Spring 2024', description: 'Top 10% of class', icon: 'award' },
-    { title: 'STEM Scholarship', date: 'Fall 2024', description: '$5,000 merit scholarship', icon: 'scholarship' }
-  ]
+  // For now, return empty arrays for requirements and achievements
+  // These will be populated when backend provides these endpoints
+  const requirements: DegreeRequirement[] = []
+  const achievements: AcademicAchievement[] = []
 
   return { courses, summary, requirements, achievements }
 }
 
 export default function AcademicRecordsPage() {
-  const [data, setData] = useState<ReturnType<typeof generateMockData> | null>(null)
+  const [data, setData] = useState<ReturnType<typeof transformAcademicData> | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedTerm, setSelectedTerm] = useState<string>('all')
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Try authenticated endpoint
-        const response = await apiRequest(`${API_CONFIG.V1.BASE}/students/me/academic-records`)
-        if (response.ok) {
-          const academicData = await response.json()
-          setData(academicData)
-        } else {
-          throw new Error('Auth failed')
-        }
-      } catch (error) {
-        // Fallback to mock data
-        setData(generateMockData())
+        setLoading(true)
+        setError(null)
+
+        const [records, student] = await Promise.all([
+          studentService.getCurrentAcademicRecords(),
+          studentService.getCurrentProfile()
+        ])
+
+        const transformedData = transformAcademicData(records, student)
+        setData(transformedData)
+      } catch (err) {
+        console.error('Failed to fetch academic records:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load academic records')
       } finally {
         setLoading(false)
       }
@@ -175,11 +127,49 @@ export default function AcademicRecordsPage() {
   }, [])
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading academic records...</div>
+    return (
+      <AppShell breadcrumbs={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Academic Records' }]}>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading academic records...</p>
+          </div>
+        </div>
+      </AppShell>
+    )
+  }
+
+  if (error) {
+    return (
+      <AppShell breadcrumbs={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Academic Records' }]}>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="max-w-md">
+            <CardHeader>
+              <CardTitle className="text-red-600">Error Loading Records</CardTitle>
+              <CardDescription>{error}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={() => window.location.reload()}>Try Again</Button>
+            </CardContent>
+          </Card>
+        </div>
+      </AppShell>
+    )
   }
 
   if (!data) {
-    return <div className="flex items-center justify-center min-h-screen">No academic records found</div>
+    return (
+      <AppShell breadcrumbs={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Academic Records' }]}>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="max-w-md">
+            <CardHeader>
+              <CardTitle>No Academic Records</CardTitle>
+              <CardDescription>No academic records found for your account</CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      </AppShell>
+    )
   }
 
   const { courses, summary, requirements, achievements } = data

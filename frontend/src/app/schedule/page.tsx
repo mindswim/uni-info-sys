@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { API_CONFIG, apiRequest } from '@/config/api'
 import { AppShell } from '@/components/layout/app-shell'
+import { enrollmentService } from '@/services'
+import type { ScheduleResponse } from '@/types/api-types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -50,116 +51,57 @@ interface OfficeHours {
   type: 'in-person' | 'virtual'
 }
 
-// Mock data generator
-const generateMockData = () => {
-  const classes: ClassSchedule[] = [
-    {
-      id: 1,
-      course_code: 'CS 301',
-      course_name: 'Algorithms',
-      section: '001',
-      instructor: 'Dr. Smith',
-      days: ['Monday', 'Wednesday', 'Friday'],
-      start_time: '09:00',
-      end_time: '10:00',
-      location: 'Science Building',
-      room: 'SB 101',
-      type: 'lecture',
-      color: 'bg-blue-100 text-blue-800 border-blue-300'
-    },
-    {
-      id: 2,
-      course_code: 'CS 320',
-      course_name: 'Database Systems',
-      section: '001',
-      instructor: 'Prof. Johnson',
-      days: ['Tuesday', 'Thursday'],
-      start_time: '10:30',
-      end_time: '12:00',
-      location: 'Science Building',
-      room: 'SB 203',
-      type: 'lecture',
-      color: 'bg-green-100 text-green-800 border-green-300'
-    },
-    {
-      id: 3,
-      course_code: 'MATH 301',
-      course_name: 'Linear Algebra',
-      section: '002',
-      instructor: 'Dr. Chen',
-      days: ['Monday', 'Wednesday', 'Friday'],
-      start_time: '14:00',
-      end_time: '15:00',
-      location: 'Math Building',
-      room: 'MB 105',
-      type: 'lecture',
-      color: 'bg-purple-100 text-purple-800 border-purple-300'
-    },
-    {
-      id: 4,
-      course_code: 'CS 350',
-      course_name: 'Software Engineering',
-      section: '001',
-      instructor: 'Prof. Davis',
-      days: ['Tuesday', 'Thursday'],
-      start_time: '14:00',
-      end_time: '15:30',
-      location: 'Engineering Building',
-      room: 'EB 201',
-      type: 'lecture',
-      color: 'bg-orange-100 text-orange-800 border-orange-300'
-    },
-    {
-      id: 5,
-      course_code: 'CS 320L',
-      course_name: 'Database Systems Lab',
-      section: 'L01',
-      instructor: 'TA: Mike Wilson',
-      days: ['Thursday'],
-      start_time: '16:00',
-      end_time: '18:00',
-      location: 'Computer Lab',
-      room: 'CL 102',
-      type: 'lab',
-      color: 'bg-green-50 text-green-700 border-green-200'
-    },
-    {
-      id: 6,
-      course_code: 'PSYC 201',
-      course_name: 'Cognitive Psychology',
-      section: '003',
-      instructor: 'Dr. Brown',
-      days: ['Monday', 'Wednesday'],
-      start_time: '16:00',
-      end_time: '17:30',
-      location: 'Liberal Arts Hall',
-      room: 'LA 220',
-      type: 'seminar',
-      color: 'bg-pink-100 text-pink-800 border-pink-300'
+// Transform API schedule data to page format
+const transformScheduleData = (scheduleResponse: ScheduleResponse) => {
+  const colors = [
+    'bg-blue-100 text-blue-800 border-blue-300',
+    'bg-green-100 text-green-800 border-green-300',
+    'bg-purple-100 text-purple-800 border-purple-300',
+    'bg-orange-100 text-orange-800 border-orange-300',
+    'bg-pink-100 text-pink-800 border-pink-300',
+    'bg-cyan-100 text-cyan-800 border-cyan-300'
+  ]
+
+  const classes: ClassSchedule[] = scheduleResponse.enrollments.map((enrollment, idx) => {
+    const section = enrollment.course_section
+    const meetingDays = section.meeting_days?.split(',').map((d: string) => {
+      const dayMap: Record<string, string> = {
+        'M': 'Monday', 'T': 'Tuesday', 'W': 'Wednesday',
+        'R': 'Thursday', 'F': 'Friday', 'S': 'Saturday', 'U': 'Sunday'
+      }
+      return dayMap[d.trim()] || d
+    }) || []
+
+    return {
+      id: enrollment.id,
+      course_code: section.course.code,
+      course_name: section.course.name,
+      section: section.section_number,
+      instructor: section.instructor ?
+        `${section.instructor.first_name} ${section.instructor.last_name}` :
+        'TBA',
+      days: meetingDays,
+      start_time: section.start_time || '00:00',
+      end_time: section.end_time || '00:00',
+      location: section.room?.building.name || 'TBA',
+      room: section.room ? `${section.room.building.code} ${section.room.room_number}` : 'TBA',
+      type: (section.section_type || 'lecture') as 'lecture' | 'lab' | 'seminar' | 'tutorial',
+      color: colors[idx % colors.length]
     }
-  ]
+  })
 
-  const events: Event[] = [
-    { id: 1, title: 'Algorithms Midterm', type: 'exam', date: '2024-11-28', time: '09:00', course: 'CS 301', location: 'SB 101' },
-    { id: 2, title: 'Database Project Due', type: 'assignment', date: '2024-11-29', time: '23:59', course: 'CS 320' },
-    { id: 3, title: 'Linear Algebra Quiz 3', type: 'quiz', date: '2024-11-27', time: '14:00', course: 'MATH 301', location: 'MB 105' },
-    { id: 4, title: 'Software Design Presentation', type: 'presentation', date: '2024-12-03', time: '14:00', course: 'CS 350', location: 'EB 201' },
-    { id: 5, title: 'Thanksgiving Break', type: 'holiday', date: '2024-11-28', time: 'All Day', description: 'No classes' }
-  ]
-
-  const officeHours: OfficeHours[] = [
-    { instructor: 'Dr. Smith', course: 'CS 301', day: 'Monday', time: '11:00-12:00', location: 'SB 302', type: 'in-person' },
-    { instructor: 'Prof. Johnson', course: 'CS 320', day: 'Tuesday', time: '13:00-14:00', location: 'Virtual', type: 'virtual' },
-    { instructor: 'Dr. Chen', course: 'MATH 301', day: 'Wednesday', time: '10:00-11:00', location: 'MB 401', type: 'in-person' },
-    { instructor: 'Prof. Davis', course: 'CS 350', day: 'Friday', time: '13:00-14:00', location: 'EB 305', type: 'in-person' }
-  ]
+  // For now, return empty arrays for events and office hours
+  // These would come from additional API endpoints
+  const events: Event[] = []
+  const officeHours: OfficeHours[] = []
 
   return { classes, events, officeHours }
 }
 
 export default function SchedulePage() {
-  const [data, setData] = useState<ReturnType<typeof generateMockData> | null>(null)
+  const [data, setData] = useState<ReturnType<typeof transformScheduleData> | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [currentWeek, setCurrentWeek] = useState(0) // 0 = current week
   const [viewType, setViewType] = useState<'week' | 'day' | 'month'>('week')
 
@@ -172,17 +114,15 @@ export default function SchedulePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Try authenticated endpoint
-        const response = await apiRequest(`${API_CONFIG.V1.BASE}/students/me/schedule`)
-        if (response.ok) {
-          const scheduleData = await response.json()
-          setData(scheduleData)
-        } else {
-          throw new Error('Auth failed')
-        }
-      } catch (error) {
-        // Fallback to mock data
-        setData(generateMockData())
+        setLoading(true)
+        setError(null)
+
+        const scheduleResponse = await enrollmentService.getCurrentSchedule()
+        const transformedData = transformScheduleData(scheduleResponse)
+        setData(transformedData)
+      } catch (err) {
+        console.error('Failed to fetch schedule:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load schedule')
       } finally {
         setLoading(false)
       }
@@ -192,11 +132,49 @@ export default function SchedulePage() {
   }, [])
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading schedule...</div>
+    return (
+      <AppShell breadcrumbs={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Schedule' }]}>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading schedule...</p>
+          </div>
+        </div>
+      </AppShell>
+    )
   }
 
-  if (!data) {
-    return <div className="flex items-center justify-center min-h-screen">No schedule data found</div>
+  if (error) {
+    return (
+      <AppShell breadcrumbs={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Schedule' }]}>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="max-w-md">
+            <CardHeader>
+              <CardTitle className="text-red-600">Error Loading Schedule</CardTitle>
+              <CardDescription>{error}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={() => window.location.reload()}>Try Again</Button>
+            </CardContent>
+          </Card>
+        </div>
+      </AppShell>
+    )
+  }
+
+  if (!data || data.classes.length === 0) {
+    return (
+      <AppShell breadcrumbs={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Schedule' }]}>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="max-w-md">
+            <CardHeader>
+              <CardTitle>No Classes Scheduled</CardTitle>
+              <CardDescription>You don't have any classes scheduled for the current term</CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      </AppShell>
+    )
   }
 
   const { classes, events, officeHours } = data

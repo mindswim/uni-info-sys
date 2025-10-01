@@ -13,16 +13,16 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
-import { 
-  Users, 
-  Plus, 
-  Search, 
-  Filter, 
-  Eye, 
-  Edit2, 
-  Trash2, 
-  Phone, 
-  Mail, 
+import {
+  Users,
+  Plus,
+  Search,
+  Filter,
+  Eye,
+  Edit2,
+  Trash2,
+  Phone,
+  Mail,
   MapPin,
   Calendar,
   User,
@@ -36,8 +36,8 @@ import {
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import UniversityAPI, { Student, ApiResponse } from "@/lib/university-api"
-import authService from "@/lib/auth"
+import { adminService } from "@/services"
+import type { Student } from "@/types/api-types"
 import { format } from "date-fns"
 
 const studentFormSchema = z.object({
@@ -109,20 +109,7 @@ export default function StudentsPage() {
     }
   })
 
-  // Check authentication
   useEffect(() => {
-    if (!authService.isAuthenticated()) {
-      setError('Please log in to access student management')
-      setLoading(false)
-      return
-    }
-
-    if (!authService.hasAnyRole(['admin', 'staff'])) {
-      setError('You do not have permission to access student management')
-      setLoading(false)
-      return
-    }
-
     loadStudents()
   }, [currentPage, statusFilter, searchTerm])
 
@@ -144,7 +131,7 @@ export default function StudentsPage() {
         params.status = statusFilter
       }
 
-      const response = await UniversityAPI.getStudents(params)
+      const response = await adminService.getStudents(params)
 
       setStudents(response.data)
       setTotalPages(response.meta?.last_page || 1)
@@ -163,12 +150,12 @@ export default function StudentsPage() {
       setSubmitting(true)
       setError(null)
 
-      const newStudent = await UniversityAPI.createStudent({
+      const newStudent = await adminService.createStudent({
         ...data,
         user_id: 0 // Will be created on backend
       })
 
-      setStudents([newStudent, ...students])
+      await loadStudents() // Reload to get updated list
       setShowCreateDialog(false)
       form.reset()
       
@@ -190,11 +177,9 @@ export default function StudentsPage() {
       setSubmitting(true)
       setError(null)
 
-      const updatedStudent = await UniversityAPI.updateStudent(selectedStudent.id, data)
+      await adminService.updateStudent(selectedStudent.id, data)
 
-      setStudents(students.map(student => 
-        student.id === selectedStudent.id ? updatedStudent : student
-      ))
+      await loadStudents() // Reload to get updated data
       
       setShowEditDialog(false)
       setSelectedStudent(null)
@@ -215,9 +200,9 @@ export default function StudentsPage() {
       setSubmitting(true)
       setError(null)
 
-      await UniversityAPI.deleteStudent(selectedStudent.id)
+      await adminService.deleteStudent(selectedStudent.id)
 
-      setStudents(students.filter(student => student.id !== selectedStudent.id))
+      await loadStudents() // Reload to get updated list
       setShowDeleteDialog(false)
       setSelectedStudent(null)
       
@@ -233,21 +218,21 @@ export default function StudentsPage() {
     setSelectedStudent(student)
     form.reset({
       user: {
-        name: student.user.name,
-        email: student.user.email
+        name: `${student.first_name} ${student.last_name}`,
+        email: student.email
       },
       student_number: student.student_number,
-      date_of_birth: student.date_of_birth,
-      gender: student.gender as 'male' | 'female' | 'other',
-      phone: student.phone,
-      address: student.address,
-      city: student.city,
-      state: student.state,
-      country: student.country,
-      postal_code: student.postal_code,
-      emergency_contact_name: student.emergency_contact_name,
-      emergency_contact_phone: student.emergency_contact_phone,
-      enrollment_status: student.enrollment_status
+      date_of_birth: student.date_of_birth || '',
+      gender: (student.gender?.toLowerCase() as 'male' | 'female' | 'other') || 'other',
+      phone: student.phone_number || '',
+      address: student.address || '',
+      city: student.city || '',
+      state: student.state_province || '',
+      country: student.country || '',
+      postal_code: student.postal_code || '',
+      emergency_contact_name: student.emergency_contact_name || '',
+      emergency_contact_phone: student.emergency_contact_phone || '',
+      enrollment_status: student.enrollment_status as any
     })
     setShowEditDialog(true)
   }

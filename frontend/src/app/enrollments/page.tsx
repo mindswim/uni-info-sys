@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react"
 import { AppShell } from "@/components/layout/app-shell"
 import { EnrollmentsTable } from "@/components/data-table/enrollments-table"
-import { Enrollment } from "@/lib/university-api"
-import UniversityAPI from "@/lib/university-api"
+import { adminService } from "@/services"
+import type { Enrollment } from "@/types/api-types"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -41,7 +41,7 @@ export default function EnrollmentsPage() {
         params.status = statusFilter
       }
       
-      const response = await UniversityAPI.getEnrollments(params)
+      const response = await adminService.getEnrollments(params)
       setEnrollments(response.data)
       setTotalPages(response.meta?.last_page || 1)
       setTotalEnrollments(response.meta?.total || 0)
@@ -79,7 +79,7 @@ export default function EnrollmentsPage() {
 
   const handleEnrollmentDelete = async (enrollment: Enrollment) => {
     try {
-      await UniversityAPI.withdrawEnrollment(enrollment.id)
+      await adminService.withdrawEnrollment(enrollment.id)
       loadEnrollments()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to withdraw enrollment')
@@ -87,11 +87,16 @@ export default function EnrollmentsPage() {
   }
 
   const filteredEnrollments = searchTerm
-    ? enrollments.filter(enrollment => 
-        enrollment.student.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        enrollment.course_section.course.course_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        enrollment.course_section.course.title.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+    ? enrollments.filter(enrollment => {
+        const studentName = enrollment.student ?
+          `${enrollment.student.first_name} ${enrollment.student.last_name}` : ''
+        const courseCode = enrollment.course_section?.course?.code || ''
+        const courseName = enrollment.course_section?.course?.name || ''
+
+        return studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          courseCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          courseName.toLowerCase().includes(searchTerm.toLowerCase())
+      })
     : enrollments
 
   const tableData = {

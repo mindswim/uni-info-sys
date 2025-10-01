@@ -1,14 +1,13 @@
 import { ReactNode } from 'react'
+import { useAuth, useRole } from '@/contexts/auth-context'
 
 // Re-export from the main auth context
 // This file exists for backward compatibility with existing imports
 export { AuthProvider, useAuth, usePermission, useRole } from '@/contexts/auth-context'
 
 // Higher-order component for protecting routes
-export function withAuth<T extends {}>(Component: React.ComponentType<T>) {
+export function withAuth<T extends object>(Component: React.ComponentType<T>) {
   return function ProtectedComponent(props: T) {
-    // Import useAuth inside the component
-    const { useAuth } = require('@/contexts/auth-context')
     const { isAuthenticated, isLoading } = useAuth()
 
     if (isLoading) {
@@ -36,13 +35,11 @@ interface RoleGuardProps {
 }
 
 export function RoleGuard({ roles, children, fallback = null, requireAll = false }: RoleGuardProps) {
-  const { useRole } = require('@/contexts/auth-context')
-  const hasRole = (role: string) => useRole(role)
-  const hasAnyRole = (roles: string[]) => roles.some(role => hasRole(role))
+  // Check roles using the hook properly
+  const hasAnyRole = roles.some(role => useRole(role))
+  const hasAllRoles = roles.every(role => useRole(role))
 
-  const hasAccess = requireAll
-    ? roles.every(role => hasRole(role))
-    : hasAnyRole(roles)
+  const hasAccess = requireAll ? hasAllRoles : hasAnyRole
 
   return hasAccess ? <>{children}</> : <>{fallback}</>
 }

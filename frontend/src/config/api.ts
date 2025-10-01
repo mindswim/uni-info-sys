@@ -20,18 +20,8 @@ export const API_CONFIG = {
   // Authentication endpoints
   AUTH: {
     LOGIN: `${API_BASE}/tokens/create`,
-    QUICK_LOGIN: `${API_BASE}/quick-login`,
     LOGOUT: `${API_BASE}/auth/logout`,
     USER: `${API_BASE}/auth/user`,
-  },
-
-  // Demo endpoints (temporary)
-  DEMO: {
-    DASHBOARD: `${getApiHost()}/api/demo/dashboard`,
-    PIPELINE_ANALYTICS: `${getApiHost()}/api/demo/pipeline/analytics`,
-    ENROLLMENTS: `${getApiHost()}/api/demo/enrollments`,
-    STUDENT_ENROLLMENTS: (studentId: number) => `${getApiHost()}/api/demo/students/${studentId}/enrollments`,
-    WITHDRAW: (enrollmentId: number) => `${getApiHost()}/api/demo/enrollments/${enrollmentId}/withdraw`,
   },
 
   // Data viewer endpoints
@@ -64,13 +54,6 @@ export const API_CONFIG = {
     BUILDINGS: `${API_BASE}/buildings`,
     ROOMS: `${API_BASE}/rooms`,
     TERMS: `${API_BASE}/terms`,
-
-    // God Mode
-    GOD_MODE: {
-      USERS: `${API_BASE}/god-mode/users`,
-      IMPERSONATE: (userId: number) => `${API_BASE}/god-mode/impersonate/${userId}`,
-      STATISTICS: `${API_BASE}/god-mode/statistics`,
-    },
   },
 }
 
@@ -109,7 +92,7 @@ export const apiRequest = async (
       localStorage.removeItem('auth_token')
       localStorage.removeItem('auth_user')
       // Don't redirect if we're already on login page
-      if (!window.location.pathname.includes('/auth/login') && !window.location.pathname.includes('/god-mode')) {
+      if (!window.location.pathname.includes('/auth/login')) {
         window.location.href = '/auth/login'
       }
     }

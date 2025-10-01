@@ -21,9 +21,6 @@ use App\Http\Controllers\Api\V1\GradeImportController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\ImpersonationController;
 
-// Load demo routes
-require __DIR__.'/demo.php';
-
 /**
  * @OA\Get(
  *     path="/api/v1/health",
@@ -131,9 +128,6 @@ Route::post('/v1/reset-password', [PasswordResetController::class, 'reset'])
     ->middleware('throttle:api')
     ->name('api.password.update');
 
-// God Mode / Impersonation routes (development only)
-Route::post('/v1/quick-login', [ImpersonationController::class, 'quickLogin'])
-    ->middleware('throttle:api');
 
 Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     // Auth routes
@@ -243,12 +237,6 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::post('imports/courses', [CourseImportController::class, 'store']);
     Route::post('course-sections/{courseSection}/import-grades', [GradeImportController::class, 'store']);
 
-    // God Mode routes (admin only)
-    Route::prefix('god-mode')->group(function () {
-        Route::get('/users', [ImpersonationController::class, 'index']);
-        Route::post('/impersonate/{user}', [ImpersonationController::class, 'impersonate']);
-        Route::get('/statistics', [ImpersonationController::class, 'statistics']);
-    });
 }); 
 
 // Prometheus metrics endpoint (unauthenticated for monitoring systems)

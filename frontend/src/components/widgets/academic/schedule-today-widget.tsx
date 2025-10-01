@@ -1,50 +1,74 @@
 "use client"
 
+import { useEffect, useState } from 'react'
 import { WidgetProps } from '@/lib/widgets/widget-registry'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Clock, MapPin, User } from 'lucide-react'
+import { Clock, MapPin, User, Loader2 } from 'lucide-react'
+import { enrollmentService } from '@/services'
+import type { Enrollment } from '@/types/api-types'
 
-// Mock data - in production, this would fetch from API
-const todayClasses = [
-  {
-    time: '9:00 AM',
-    endTime: '10:15 AM',
-    course: 'CS350 - Introduction to AI',
-    instructor: 'Dr. Sarah Chen',
-    room: 'Engineering 301',
-    status: 'upcoming'
-  },
-  {
-    time: '11:00 AM',
-    endTime: '12:15 PM',
-    course: 'MATH201 - Linear Algebra',
-    instructor: 'Prof. Michael Roberts',
-    room: 'Math Building 205',
-    status: 'upcoming'
-  },
-  {
-    time: '2:00 PM',
-    endTime: '3:15 PM',
-    course: 'PHYS150 - Physics I',
-    instructor: 'Dr. Emily Johnson',
-    room: 'Science Hall 110',
-    status: 'upcoming'
-  },
-  {
-    time: '4:00 PM',
-    endTime: '5:15 PM',
-    course: 'CS Lab Session',
-    instructor: 'TA: Alex Kim',
-    room: 'Computer Lab 3',
-    status: 'upcoming'
-  }
-]
+interface ClassSchedule {
+  time: string
+  endTime: string
+  course: string
+  instructor: string
+  room: string
+  status: 'completed' | 'in-progress' | 'upcoming'
+}
 
 export function ScheduleTodayWidget({ size, isEditing }: WidgetProps) {
+  const [todayClasses, setTodayClasses] = useState<ClassSchedule[]>([])
+  const [loading, setLoading] = useState(true)
   const currentTime = new Date()
   const currentHour = currentTime.getHours()
   const currentMinute = currentTime.getMinutes()
+  const currentDay = currentTime.toLocaleDateString('en-US', { weekday: 'long' })
+
+  useEffect(() => {
+    const fetchEnrollments = async () => {
+      try {
+        const enrollments = await enrollmentService.getCurrentEnrollments()
+
+        // Filter enrollments for today's classes
+        const todaySchedule = enrollments
+          .filter((enrollment: Enrollment) => {
+            const section = enrollment.course_section
+            return section && section.schedule_days && section.schedule_days.includes(currentDay)
+          })
+          .map((enrollment: Enrollment) => {
+            const section = enrollment.course_section
+            const course = section?.course
+            const instructor = section?.instructor?.user
+            const room = section?.room
+            const building = room?.building
+
+            return {
+              time: section?.start_time || 'TBA',
+              endTime: section?.end_time || 'TBA',
+              course: course ? `${course.code} - ${course.name}` : 'Unknown Course',
+              instructor: instructor ? instructor.name : 'TBA',
+              room: room && building ? `${building.name} ${room.room_number}` : 'TBA',
+              status: 'upcoming' as const
+            }
+          })
+          .sort((a, b) => {
+            // Sort by time
+            const timeA = a.time.replace(/[^\d:]/g, '')
+            const timeB = b.time.replace(/[^\d:]/g, '')
+            return timeA.localeCompare(timeB)
+          })
+
+        setTodayClasses(todaySchedule)
+      } catch (error) {
+        console.error('Failed to fetch enrollments:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchEnrollments()
+  }, [])
 
   // Determine which classes have passed, are current, or upcoming
   const classesWithStatus = todayClasses.map(cls => {
@@ -60,6 +84,15 @@ export function ScheduleTodayWidget({ size, isEditing }: WidgetProps) {
     }
     return { ...cls, status: 'upcoming' }
   })
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="p-4 flex items-center justify-center h-full">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
 
   // Compact view for small widget sizes
   if (size.h <= 2) {

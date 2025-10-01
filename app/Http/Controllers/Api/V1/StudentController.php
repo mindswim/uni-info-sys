@@ -261,7 +261,7 @@ class StudentController extends Controller
         $user = $request->user();
 
         $student = Student::where('user_id', $user->id)
-            ->with(['user', 'majorProgram', 'minorProgram', 'enrollments.courseSection.course'])
+            ->with(['user', 'majorProgram', 'minorProgram', 'enrollments.courseSection.course', 'academicRecords'])
             ->first();
 
         if (!$student) {

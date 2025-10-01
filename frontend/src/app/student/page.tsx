@@ -4,11 +4,28 @@ import { AppShell } from '@/components/layout/app-shell'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Award, BookOpen, Calendar, TrendingUp } from 'lucide-react'
-import { useStudentData } from '@/hooks/use-student-data'
+import { studentService } from '@/services'
+import { useState, useEffect } from 'react'
+import type { Student } from '@/types/api-types'
 import Link from 'next/link'
 
 export default function StudentOverviewPage() {
-  const { student, isLoading } = useStudentData()
+  const [student, setStudent] = useState<Student | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStudent = async () => {
+      try {
+        const data = await studentService.getCurrentProfile()
+        setStudent(data)
+      } catch (error) {
+        console.error('Failed to load student:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchStudent()
+  }, [])
 
   if (isLoading) {
     return (
@@ -19,6 +36,13 @@ export default function StudentOverviewPage() {
       </AppShell>
     )
   }
+
+  // Calculate real stats from the data
+  const gpa = student?.academic_records?.[0]?.gpa || 'N/A'
+  const enrollmentCount = student?.enrollments?.length || 0
+  const totalCredits = student?.enrollments?.reduce((sum, e) => sum + (e.course_section?.course?.credits || 0), 0) || 0
+  const requiredCredits = student?.major_program?.credits_required || 120
+  const completionPercentage = requiredCredits > 0 ? Math.round((totalCredits / requiredCredits) * 100) : 0
 
   return (
     <AppShell>
@@ -42,24 +66,20 @@ export default function StudentOverviewPage() {
               <Award className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {student?.academic_records?.[0]?.gpa || 'N/A'}
-              </div>
+              <div className="text-2xl font-bold">{gpa}</div>
               <p className="text-xs text-muted-foreground">Cumulative GPA</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Credits Earned</CardTitle>
+              <CardTitle className="text-sm font-medium">Credits Enrolled</CardTitle>
               <BookOpen className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {student?.academic_records?.[0]?.credits_earned || 0}
-              </div>
+              <div className="text-2xl font-bold">{totalCredits}</div>
               <p className="text-xs text-muted-foreground">
-                Out of {student?.major_program?.credits_required || 120} required
+                Out of {requiredCredits} required
               </p>
             </CardContent>
           </Card>
@@ -72,10 +92,10 @@ export default function StudentOverviewPage() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {student?.enrollment_status || 'Unknown'}
+              <div className="text-2xl font-bold capitalize">
+                {student?.enrollment_status?.replace('_', ' ') || 'Unknown'}
               </div>
-              <p className="text-xs text-muted-foreground">Current status</p>
+              <p className="text-xs text-muted-foreground">{enrollmentCount} courses</p>
             </CardContent>
           </Card>
 
@@ -85,16 +105,7 @@ export default function StudentOverviewPage() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {student?.academic_records?.[0]?.credits_earned && student?.major_program?.credits_required
-                  ? Math.round(
-                      (student.academic_records[0].credits_earned /
-                        student.major_program.credits_required) *
-                        100
-                    )
-                  : 0}
-                %
-              </div>
+              <div className="text-2xl font-bold">{completionPercentage}%</div>
               <p className="text-xs text-muted-foreground">Degree progress</p>
             </CardContent>
           </Card>
@@ -111,33 +122,15 @@ export default function StudentOverviewPage() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-medium">Degree Progress</span>
                   <span className="text-muted-foreground">
-                    {student?.academic_records?.[0]?.credits_earned || 0} /{' '}
-                    {student?.major_program?.credits_required || 120} credits
+                    {totalCredits} / {requiredCredits} credits
                   </span>
                 </div>
                 <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-primary"
-                    style={{
-                      width: `${
-                        student?.academic_records?.[0]?.credits_earned &&
-                        student?.major_program?.credits_required
-                          ? (student.academic_records[0].credits_earned /
-                              student.major_program.credits_required) *
-                            100
-                          : 0
-                      }%`,
-                    }}
-                  />
+                  <div className="h-full bg-primary" style={{ width: `${completionPercentage}%` }} />
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
-                {student?.major_program?.credits_required &&
-                student?.academic_records?.[0]?.credits_earned
-                  ? student.major_program.credits_required -
-                    student.academic_records[0].credits_earned
-                  : student?.major_program?.credits_required || 120}{' '}
-                credits remaining to complete your degree.
+                {requiredCredits - totalCredits} credits remaining to complete your degree.
               </p>
             </CardContent>
           </Card>

@@ -54,9 +54,15 @@ class StudentResource extends JsonResource
             'postal_code' => $this->postal_code,
             'country' => $this->country,
             'phone' => $this->phone,
+            'email' => $this->user->email ?? null,
+            'enrollment_status' => $this->enrollment_status,
             'emergency_contact_name' => $this->emergency_contact_name,
             'emergency_contact_phone' => $this->emergency_contact_phone,
             'user' => new UserResource($this->whenLoaded('user')),
+            'major_program' => $this->whenLoaded('majorProgram'),
+            'minor_program' => $this->whenLoaded('minorProgram'),
+            'enrollments' => EnrollmentResource::collection($this->whenLoaded('enrollments')),
+            'academic_records' => AcademicRecordResource::collection($this->whenLoaded('academicRecords')),
         ];
     }
 }

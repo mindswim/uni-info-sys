@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { DataPageTemplate } from "@/components/templates/data-page-template"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,99 +11,56 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { BookOpen, Users, TrendingUp, Edit, Download, Plus, GraduationCap, Award, BarChart3 } from "lucide-react"
+import { facultyService } from "@/services"
+import type { CourseSection } from "@/types/api-types"
 
 export default function GradebookPage() {
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [sections, setSections] = useState<CourseSection[]>([])
+
+  useEffect(() => {
+    const loadGradebookData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const mySections = await facultyService.getMySections()
+        setSections(mySections)
+      } catch (err) {
+        console.error('Failed to load gradebook data:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load gradebook')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadGradebookData()
+  }, [])
+
+  const totalStudents = sections.reduce((sum, s) => sum + (s.enrolled_count || 0), 0)
+  const averageEnrollment = sections.length > 0 ? Math.round(totalStudents / sections.length) : 0
+
   const stats = [
     {
       label: "Active Courses",
-      value: "8",
+      value: sections.length.toString(),
       description: "Courses you're teaching"
     },
     {
       label: "Total Students",
-      value: "247", 
+      value: totalStudents.toString(),
       description: "Across all sections"
     },
     {
-      label: "Assignments Due",
-      value: "12",
-      description: "Pending grading"
+      label: "Avg Enrollment",
+      value: averageEnrollment.toString(),
+      description: "Students per course"
     },
     {
-      label: "Average Grade",
-      value: "82.5%",
-      description: "All courses combined"
-    }
-  ]
-
-  const courses = [
-    {
-      id: 1,
-      code: "CS350",
-      name: "Introduction to Artificial Intelligence",
-      section: "A",
-      term: "Fall 2024",
-      students: 32,
-      averageGrade: 85.2,
-      gradedAssignments: 8,
-      totalAssignments: 10
-    },
-    {
-      id: 2,
-      code: "CS250",
-      name: "Data Structures and Algorithms",
-      section: "B",
-      term: "Fall 2024",
-      students: 28,
-      averageGrade: 78.9,
-      gradedAssignments: 6,
-      totalAssignments: 8
-    },
-    {
-      id: 3,
-      code: "CS101",
-      name: "Introduction to Programming",
-      section: "C",
-      term: "Fall 2024",
-      students: 45,
-      averageGrade: 82.1,
-      gradedAssignments: 12,
-      totalAssignments: 15
-    }
-  ]
-
-  const recentGrades = [
-    {
-      student: "Alice Johnson",
-      course: "CS350-A",
-      assignment: "Final Project",
-      grade: "A-",
-      points: "88/100",
-      submittedAt: "2024-12-10"
-    },
-    {
-      student: "Bob Smith",
-      course: "CS250-B", 
-      assignment: "Midterm Exam",
-      grade: "B+",
-      points: "82/100",
-      submittedAt: "2024-12-09"
-    },
-    {
-      student: "Carol Davis",
-      course: "CS101-C",
-      assignment: "Lab Assignment 5",
-      grade: "A",
-      points: "95/100",
-      submittedAt: "2024-12-08"
-    },
-    {
-      student: "David Wilson",
-      course: "CS350-A",
-      assignment: "Research Paper",
-      grade: "B",
-      points: "85/100",
-      submittedAt: "2024-12-07"
+      label: "Sections",
+      value: sections.length.toString(),
+      description: "Active this term"
     }
   ]
 
@@ -118,6 +76,36 @@ export default function GradebookPage() {
     if (grade.startsWith('C')) return 'text-yellow-600'
     if (grade.startsWith('D')) return 'text-orange-600'
     return 'text-red-600'
+  }
+
+  if (loading) {
+    return (
+      <DataPageTemplate
+        title="Gradebook"
+        description="Loading gradebook data..."
+        stats={[]}
+        breadcrumbs={breadcrumbs}
+      >
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        </div>
+      </DataPageTemplate>
+    )
+  }
+
+  if (error) {
+    return (
+      <DataPageTemplate
+        title="Gradebook"
+        description="Error loading gradebook"
+        stats={[]}
+        breadcrumbs={breadcrumbs}
+      >
+        <div className="bg-destructive/15 text-destructive px-4 py-3 rounded-lg">
+          {error}
+        </div>
+      </DataPageTemplate>
+    )
   }
 
   return (
@@ -240,41 +228,37 @@ export default function GradebookPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {courses.map((course) => (
-                    <TableRow key={course.id}>
+                  {sections.map((section) => (
+                    <TableRow key={section.id}>
                       <TableCell>
                         <div className="space-y-1">
                           <div className="font-medium">
-                            {course.code}-{course.section}
+                            {section.course?.code}-{section.section_number}
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            {course.name}
+                            {section.course?.name}
                           </div>
                           <Badge variant="outline" className="text-xs">
-                            {course.term}
+                            {section.term?.name}
                           </Badge>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Users className="h-4 w-4 text-muted-foreground" />
-                          <span>{course.students}</span>
+                          <span>{section.enrolled_count || 0}/{section.capacity}</span>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="font-medium">
-                          {course.averageGrade.toFixed(1)}%
+                          -
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="space-y-1">
                           <div className="text-sm text-muted-foreground">
-                            {course.gradedAssignments}/{course.totalAssignments} graded
+                            View gradebook
                           </div>
-                          <Progress 
-                            value={(course.gradedAssignments / course.totalAssignments) * 100} 
-                            className="h-2 w-20" 
-                          />
                         </div>
                       </TableCell>
                       <TableCell>

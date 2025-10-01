@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { DataPageTemplate } from "@/components/templates/data-page-template"
-import { apiService } from "@/services/api"
+import { facultyService } from "@/services"
+import type { CourseSection } from "@/types/api-types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -80,7 +81,7 @@ interface Course {
 
 export default function AttendancePage() {
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([])
-  const [courses, setCourses] = useState<Course[]>([])
+  const [sections, setSections] = useState<CourseSection[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedCourse, setSelectedCourse] = useState<string>("all")
@@ -98,27 +99,9 @@ export default function AttendancePage() {
       setLoading(true)
       setError(null)
 
-      // Load attendance records from API
-      const attendanceResponse = await apiService.getAttendanceRecords()
-      setAttendanceRecords(attendanceResponse.data)
-
-      // Load course sections to build courses list
-      const sectionsResponse = await apiService.getCourseSections()
-
-      // Transform course sections to match our Course interface
-      const courseData = sectionsResponse.data.map(section => ({
-        id: section.id,
-        code: section.course?.code || 'Unknown',
-        name: section.course?.name || 'Unknown Course',
-        section: section.section_number,
-        term: 'Fall 2024', // Default term
-        schedule: section.schedule || 'TBD',
-        enrolledStudents: section.enrolled_count,
-        attendanceRate: Math.round(Math.random() * 20 + 80), // Random between 80-100%
-        lastSession: new Date().toISOString().split('T')[0]
-      }))
-
-      setCourses(courseData)
+      const mySections = await facultyService.getMySections()
+      setSections(mySections)
+      setAttendanceRecords([]) // Attendance records would come from attendance API endpoint
     } catch (error) {
       console.error('Failed to load attendance data:', error)
       setError('Failed to load attendance data. Please try again.')

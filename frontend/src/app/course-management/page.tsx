@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -17,114 +17,42 @@ import {
   Settings, Users, Calendar, Clock,
   AlertCircle, CheckCircle, Copy
 } from 'lucide-react'
+import { facultyService } from '@/services'
+import type { CourseSection } from '@/types/api-types'
 
 const breadcrumbs = [
   { label: 'Dashboard', href: '/' },
   { label: 'Course Management' }
 ]
 
-interface Course {
-  id: number
-  code: string
-  name: string
-  credits: number
-  department: string
-  level: 'undergraduate' | 'graduate'
-  status: 'active' | 'inactive' | 'draft'
-  description: string
-  prerequisites: string[]
-  sections: number
-  totalEnrollment: number
-  capacity: number
-}
-
-// Mock data
-const mockCourses: Course[] = [
-  {
-    id: 1,
-    code: 'CS101',
-    name: 'Introduction to Computer Science',
-    credits: 3,
-    department: 'Computer Science',
-    level: 'undergraduate',
-    status: 'active',
-    description: 'Fundamental concepts of computer science and programming',
-    prerequisites: [],
-    sections: 4,
-    totalEnrollment: 120,
-    capacity: 140
-  },
-  {
-    id: 2,
-    code: 'CS201',
-    name: 'Data Structures and Algorithms',
-    credits: 3,
-    department: 'Computer Science',
-    level: 'undergraduate',
-    status: 'active',
-    description: 'Study of data structures and algorithmic design',
-    prerequisites: ['CS101'],
-    sections: 3,
-    totalEnrollment: 85,
-    capacity: 90
-  },
-  {
-    id: 3,
-    code: 'MATH201',
-    name: 'Linear Algebra',
-    credits: 3,
-    department: 'Mathematics',
-    level: 'undergraduate',
-    status: 'active',
-    description: 'Vector spaces, matrices, and linear transformations',
-    prerequisites: ['MATH101'],
-    sections: 2,
-    totalEnrollment: 60,
-    capacity: 80
-  },
-  {
-    id: 4,
-    code: 'CS450',
-    name: 'Machine Learning',
-    credits: 4,
-    department: 'Computer Science',
-    level: 'graduate',
-    status: 'draft',
-    description: 'Advanced machine learning algorithms and applications',
-    prerequisites: ['CS350', 'MATH301'],
-    sections: 0,
-    totalEnrollment: 0,
-    capacity: 35
-  }
-]
-
 export default function CourseManagementPage() {
-  const [courses, setCourses] = useState<Course[]>(mockCourses)
+  const [sections, setSections] = useState<CourseSection[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [showAddDialog, setShowAddDialog] = useState(false)
-  const [editingCourse, setEditingCourse] = useState<Course | null>(null)
 
-  const filteredCourses = courses.filter(course =>
-    course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    course.code.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
-  const handleDeleteCourse = (courseId: number) => {
-    setCourses(courses.filter(c => c.id !== courseId))
-  }
-
-  const handleDuplicateCourse = (course: Course) => {
-    const newCourse = {
-      ...course,
-      id: courses.length + 1,
-      code: `${course.code}-COPY`,
-      name: `${course.name} (Copy)`,
-      status: 'draft' as const,
-      sections: 0,
-      totalEnrollment: 0
+  useEffect(() => {
+    const loadSections = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const mySections = await facultyService.getMySections()
+        setSections(mySections)
+      } catch (err) {
+        console.error('Failed to load course sections:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load courses')
+      } finally {
+        setLoading(false)
+      }
     }
-    setCourses([...courses, newCourse])
-  }
+
+    loadSections()
+  }, [])
+
+  const filteredSections = sections.filter(section =>
+    section.course?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    section.course?.code.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   const getStatusColor = (status: string) => {
     switch (status) {

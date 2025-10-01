@@ -1,10 +1,13 @@
 'use client'
 
+import { useEffect } from "react"
+// import { useRouter } from "next/navigation"
+// import { useAuthStore } from "@/stores/auth-store"
 import { AppShell } from "@/components/layout/app-shell"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Users, BookOpen, FileText, TrendingUp } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import UniversityAPI from "@/lib/university-api"
 import { API_CONFIG } from "@/config/api"
 
@@ -44,6 +47,9 @@ interface DashboardData {
 }
 
 export default function Home() {
+  // const router = useRouter()
+  // const { isAuthenticated, isLoading } = useAuthStore()
+
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     stats: {
       total_students: 0,
@@ -64,6 +70,15 @@ export default function Home() {
     }
   })
   const [loading, setLoading] = useState(true)
+
+  // // Check authentication
+  // useEffect(() => {
+  //   // Only redirect if auth loading is complete and not authenticated
+  //   if (isLoading === false && isAuthenticated === false) {
+  //     console.log('Redirecting to login - not authenticated')
+  //     router.push('/auth/login')
+  //   }
+  // }, [isAuthenticated, isLoading, router])
 
   useEffect(() => {
     async function fetchDashboardData() {
@@ -89,6 +104,21 @@ export default function Home() {
 
     fetchDashboardData()
   }, [])
+
+  // // Show loading while checking auth
+  // if (isLoading) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center">
+  //       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  //     </div>
+  //   )
+  // }
+
+  // // Redirect handled by useEffect
+  // if (!isAuthenticated) {
+  //   return null
+  // }
+
   return (
     <AppShell breadcrumbs={breadcrumbs}>
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">

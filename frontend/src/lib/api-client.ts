@@ -1,13 +1,18 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 
 // API configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost/api/v1'
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost'
 
+// Development mode flags
+const DEV_BYPASS_AUTH = process.env.NEXT_PUBLIC_DEV_BYPASS_AUTH === 'true'
+const ENABLE_LOGGING = process.env.NEXT_PUBLIC_API_LOGGING === 'true' || process.env.NODE_ENV === 'development'
+
 // Create axios instance
 export const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true, // Important for Sanctum
+  timeout: 30000,
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
@@ -18,6 +23,7 @@ export const apiClient: AxiosInstance = axios.create({
 export const sanctumClient = axios.create({
   baseURL: API_URL,
   withCredentials: true,
+  timeout: 30000,
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
@@ -27,14 +33,30 @@ export const sanctumClient = axios.create({
 // Request interceptor for authentication
 apiClient.interceptors.request.use(
   (config) => {
+    // Log request in development
+    if (ENABLE_LOGGING) {
+      console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
+        params: config.params,
+        data: config.data,
+      })
+    }
+
+    // Development mode bypass
+    if (DEV_BYPASS_AUTH) {
+      console.log('🔓 DEV MODE: Auth bypassed for', config.url)
+      return config
+    }
+
     // Add auth token if available
     const token = localStorage.getItem('auth_token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+
     return config
   },
   (error) => {
+    console.error('❌ Request Error:', error)
     return Promise.reject(error)
   }
 )
@@ -42,16 +64,49 @@ apiClient.interceptors.request.use(
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
+    // Log response in development
+    if (ENABLE_LOGGING) {
+      console.log(`✅ API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, {
+        status: response.status,
+        data: response.data,
+      })
+    }
+
     return response
   },
-  (error) => {
+  (error: AxiosError) => {
+    // Log error
+    if (ENABLE_LOGGING) {
+      console.error(`❌ API Error: ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      })
+    }
+
     if (error.response?.status === 401) {
       // Handle unauthorized - clear token and redirect to login
+      console.warn('🔒 Authentication expired or invalid')
       localStorage.removeItem('auth_token')
       localStorage.removeItem('user')
-      // In a real app, redirect to login page
-      console.warn('Authentication expired')
+      localStorage.removeItem('auth_token_expiry')
+
+      // Redirect to login if not already there
+      if (typeof window !== 'undefined' && !window.location.pathname.includes('/auth/login')) {
+        setTimeout(() => {
+          window.location.href = '/auth/login'
+        }, 100)
+      }
+    } else if (error.response?.status === 403) {
+      console.warn('🚫 Forbidden - insufficient permissions')
+    } else if (error.response?.status === 422) {
+      console.warn('⚠️ Validation Error:', error.response.data)
+    } else if (error.response?.status === 429) {
+      console.warn('⏰ Rate Limited - too many requests')
+    } else if (error.response?.status && error.response.status >= 500) {
+      console.error('🔥 Server Error:', error.response.status)
     }
+
     return Promise.reject(error)
   }
 )

@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { AppHeader } from "./app-header"
 import { AppSidebar } from "./app-sidebar"
-import { useAuth } from "@/components/auth/auth-provider"
+// import { useAuth } from "@/components/auth/auth-provider"
 
 interface AppShellProps {
   children: React.ReactNode
@@ -14,7 +14,13 @@ interface AppShellProps {
 }
 
 export function AppShell({ children, breadcrumbs }: AppShellProps) {
-  const { user } = useAuth()
+  // const { user } = useAuth()
+  // Mock user for now
+  const user = {
+    name: "Demo User",
+    email: "demo@university.edu",
+    roles: ["Admin"]
+  }
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   
   return (

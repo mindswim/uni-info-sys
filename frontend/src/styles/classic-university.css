@@ -1,0 +1,228 @@
+/* Classic University Theme - Traditional Enterprise Aesthetic */
+
+[data-theme="classic-university"] {
+  /* Traditional gradients */
+  --gradient-primary: linear-gradient(180deg, rgb(30 58 138) 0%, rgb(30 64 175) 100%);
+  --gradient-accent: linear-gradient(135deg, rgb(202 138 4) 0%, rgb(234 179 8) 100%);
+  --gradient-header: linear-gradient(180deg, rgb(248 250 252) 0%, rgb(255 255 255) 100%);
+
+  /* Professional shadows - minimal depth */
+  --shadow-card: 0 1px 3px rgb(0 0 0 / 0.12), 0 1px 2px rgb(0 0 0 / 0.06);
+  --shadow-hover: 0 4px 6px rgb(0 0 0 / 0.07), 0 2px 4px rgb(0 0 0 / 0.04);
+}
+
+/* Apply classic effects in Classic University theme */
+[data-theme="classic-university"] {
+  /* Clean, professional background */
+  background: rgb(248 250 252);
+
+  /* Traditional card styles */
+  .card {
+    background: rgb(255 255 255);
+    border: 1px solid rgb(226 232 240);
+    box-shadow: var(--shadow-card);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-hover);
+  }
+
+  /* Traditional buttons */
+  button, .btn {
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    text-transform: none;
+    transition: all 0.3s ease;
+  }
+
+  button[class*="primary"], .btn-primary {
+    background: rgb(30 58 138);
+    border: 1px solid rgb(30 58 138);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+  }
+
+  button[class*="primary"]:hover, .btn-primary:hover {
+    background: rgb(30 64 175);
+    border-color: rgb(30 64 175);
+  }
+
+  button[class*="secondary"], .btn-secondary {
+    background: rgb(255 255 255);
+    border: 2px solid rgb(226 232 240);
+    color: rgb(15 23 42);
+    font-weight: 600;
+  }
+
+  button[class*="secondary"]:hover, .btn-secondary:hover {
+    background: rgb(248 250 252);
+    border-color: rgb(203 213 225);
+  }
+
+  /* Traditional sidebar */
+  aside, [class*="sidebar"] {
+    background: rgb(248 250 252);
+    border-right: 1px solid rgb(226 232 240);
+  }
+
+  /* Traditional header */
+  header, [class*="header"] {
+    background: rgb(255 255 255);
+    border-bottom: 2px solid rgb(226 232 240);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.05);
+  }
+
+  /* Traditional inputs */
+  input, textarea, select {
+    border: 1px solid rgb(226 232 240);
+    background: rgb(255 255 255);
+    font-size: 1rem;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: rgb(30 58 138);
+    box-shadow: 0 0 0 3px rgb(30 58 138 / 0.1);
+    outline: none;
+  }
+
+  /* Traditional badges */
+  .badge {
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+  }
+
+  /* Traditional navigation */
+  nav a, [class*="nav-item"] {
+    font-weight: 500;
+    transition: background 0.3s ease;
+  }
+
+  nav a:hover, [class*="nav-item"]:hover {
+    background: rgb(241 245 249);
+  }
+
+  nav a[class*="active"], [class*="nav-item-active"] {
+    background: rgb(30 58 138);
+    color: rgb(255 255 255);
+    font-weight: 600;
+  }
+
+  /* Traditional tables */
+  table {
+    border: 1px solid rgb(226 232 240);
+  }
+
+  thead {
+    background: rgb(248 250 252);
+    border-bottom: 2px solid rgb(226 232 240);
+  }
+
+  th {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: rgb(71 85 105);
+    padding: 1rem;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgb(226 232 240);
+  }
+
+  tbody tr:hover {
+    background: rgb(248 250 252);
+  }
+
+  td {
+    padding: 1rem;
+  }
+
+  /* Traditional tooltips */
+  [role="tooltip"] {
+    background: rgb(15 23 42);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+    box-shadow: 0 4px 6px rgb(0 0 0 / 0.1);
+  }
+
+  /* Traditional scrollbar */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgb(248 250 252);
+    border: 1px solid rgb(226 232 240);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgb(203 213 225);
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(148 163 184);
+  }
+
+  /* Traditional headings */
+  h1, h2, h3, h4, h5, h6 {
+    color: rgb(15 23 42);
+    font-weight: 700;
+  }
+
+  h1 {
+    border-bottom: 2px solid rgb(226 232 240);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Traditional links */
+  a {
+    color: rgb(30 58 138);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  a:hover {
+    color: rgb(30 64 175);
+    text-decoration: underline;
+  }
+
+  /* Traditional alerts */
+  .alert, [role="alert"] {
+    border: 1px solid;
+    border-left-width: 4px;
+    background: rgb(255 255 255);
+  }
+
+  /* Traditional modals */
+  [role="dialog"] {
+    background: rgb(255 255 255);
+    border: 1px solid rgb(226 232 240);
+    box-shadow: 0 10px 25px rgb(0 0 0 / 0.1);
+  }
+
+  /* Traditional loading */
+  .skeleton, [class*="skeleton"] {
+    background: rgb(241 245 249);
+    animation: none;
+  }
+
+  /* Traditional code blocks */
+  code, pre {
+    background: rgb(241 245 249);
+    color: rgb(15 23 42);
+    border: 1px solid rgb(226 232 240);
+    font-family: 'Courier New', Courier, monospace;
+  }
+
+  /* Remove all fancy animations */
+  *, *::before, *::after {
+    transition-timing-function: ease;
+  }
+}

@@ -9,13 +9,13 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
-  GraduationCap, 
-  AlertCircle, 
-  User, 
-  Mail, 
-  Lock, 
-  Eye, 
+import {
+  GraduationCap,
+  AlertCircle,
+  User,
+  Mail,
+  Lock,
+  Eye,
   EyeOff,
   UserCheck,
   Users,
@@ -23,7 +23,7 @@ import {
   Play,
   ArrowRight
 } from "lucide-react"
-import authService, { type LoginCredentials } from "@/lib/auth"
+import { useAuth } from "@/hooks/use-auth"
 
 const demoPersonas = [
   {
@@ -69,61 +69,60 @@ const demoPersonas = [
 ]
 
 export default function LoginPage() {
-  const [credentials, setCredentials] = useState<LoginCredentials>({
-    email: "",
-    password: "",
-    device_name: "University Demo"
-  })
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
 
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth()
+
   useEffect(() => {
-    // Check if already authenticated
-    if (authService.isAuthenticated()) {
+    // Check if already authenticated, but only after initial load
+    if (!authLoading && isAuthenticated) {
       router.push('/')
     }
-  }, [router])
+  }, [isAuthenticated, authLoading, router])
+
+  useEffect(() => {
+    // Clear any existing errors when component mounts or fields change
+    if (error) {
+      setError(null)
+    }
+  }, [email, password])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setError(null)
+    setIsSubmitting(true)
 
     try {
-      await authService.login(credentials)
+      await login(email, password)
+      // Don't push immediately, let the useEffect handle redirect
       router.push('/')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed')
+      console.error('Login failed:', err)
+      setError(err instanceof Error ? err.message : 'Login failed. Please check your credentials.')
     } finally {
-      setLoading(false)
+      setIsSubmitting(false)
     }
   }
 
   const handleDemoLogin = async (persona: typeof demoPersonas[0]) => {
-    setLoading(true)
     setError(null)
+    setIsSubmitting(true)
 
     try {
-      await authService.login({
-        email: persona.email,
-        password: persona.password,
-        device_name: "University Demo"
-      })
+      await login(persona.email, persona.password)
+      // Don't push immediately, let the useEffect handle redirect
       router.push('/')
     } catch (err) {
+      console.error('Demo login failed:', err)
       setError(err instanceof Error ? err.message : 'Demo login failed')
     } finally {
-      setLoading(false)
+      setIsSubmitting(false)
     }
-  }
-
-  const handleInputChange = (field: keyof LoginCredentials) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCredentials(prev => ({
-      ...prev,
-      [field]: e.target.value
-    }))
   }
 
   return (
@@ -204,12 +203,12 @@ export default function LoginPage() {
                         </div>
                       </div>
                       
-                      <Button 
-                        className="w-full group-hover:bg-primary/90" 
-                        disabled={loading}
+                      <Button
+                        className="w-full group-hover:bg-primary/90"
+                        disabled={authLoading || isSubmitting}
                         size="sm"
                       >
-                        {loading ? "Logging in..." : (
+                        {(authLoading || isSubmitting) ? "Logging in..." : (
                           <>
                             Login as {persona.name.split(' ')[0]}
                             <ArrowRight className="ml-2 h-4 w-4" />
@@ -251,8 +250,8 @@ export default function LoginPage() {
                         id="email"
                         type="email"
                         placeholder="Enter your email"
-                        value={credentials.email}
-                        onChange={handleInputChange('email')}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         className="pl-9"
                         required
                       />
@@ -267,8 +266,8 @@ export default function LoginPage() {
                         id="password"
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
-                        value={credentials.password}
-                        onChange={handleInputChange('password')}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         className="pl-9 pr-9"
                         required
                       />
@@ -298,9 +297,9 @@ export default function LoginPage() {
                   <Button
                     type="submit"
                     className="w-full"
-                    disabled={loading || !credentials.email || !credentials.password}
+                    disabled={authLoading || isSubmitting || !email || !password}
                   >
-                    {loading ? "Signing in..." : "Sign In"}
+                    {(authLoading || isSubmitting) ? "Signing in..." : "Sign In"}
                   </Button>
                 </form>
 

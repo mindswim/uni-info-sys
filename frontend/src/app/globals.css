@@ -4,6 +4,8 @@
 /* Import design system files */
 @import '../styles/design-tokens.css';
 @import '../styles/themes.css';
+@import '../styles/modern-tech.css';
+@import '../styles/classic-university.css';
 
 @custom-variant dark (&:is(.dark *));
 

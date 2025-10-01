@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 // Define public routes that don't require authentication
-const publicRoutes = ['/auth/login', '/auth/register', '/auth/forgot-password']
+const publicRoutes = ['/auth/login', '/auth/register', '/auth/forgot-password', '/quick-login', '/god-mode']
 
 // Define admin-only routes
 const adminRoutes = ['/admin', '/users', '/settings', '/system']

@@ -99,28 +99,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Load auth state from localStorage on mount
   useEffect(() => {
-    const storedToken = storage.getToken()
-    const storedUser = storage.getUser()
+    try {
+      const storedToken = storage.getToken()
+      const storedUser = storage.getUser()
 
-    if (storedToken && storedUser) {
-      setToken(storedToken)
-      setUser(storedUser)
+      if (storedToken && storedUser) {
+        setToken(storedToken)
+        setUser(storedUser)
+      }
+    } catch (error) {
+      console.error('Error loading auth state:', error)
+      // Clear potentially corrupted data
+      storage.clearAuth()
+    } finally {
+      // Always set loading to false, even if there's an error
+      setIsLoading(false)
     }
-
-    setIsLoading(false)
   }, [])
 
   const login = async (email: string, password: string) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost'
-
-      const response = await fetch(`${apiUrl}/api/v1/tokens/create`, {
+      // Call our Next.js API route which will set the cookie AND return token
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
-        body: JSON.stringify({ email, password, device_name: "University Frontend" }),
+        body: JSON.stringify({ email, password }),
       })
 
       if (!response.ok) {
@@ -130,46 +135,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const data = await response.json()
 
-      // Laravel Sanctum returns token in different formats
-      // Handle both { token: "..." } and { access_token: "..." }
-      const authToken = data.token || data.access_token || data.data?.token
-      const userData = data.user || data.data?.user
-
-      if (!authToken || !userData) {
+      if (!data.token || !data.user) {
         throw new Error('Invalid response from server')
       }
 
-      // Store auth data
-      storage.setToken(authToken)
-      storage.setUser(userData)
+      // Store auth data in localStorage for client-side access
+      // Cookie is already set by the API route for middleware
+      storage.setToken(data.token)
+      storage.setUser(data.user)
 
-      setToken(authToken)
-      setUser(userData)
+      setToken(data.token)
+      setUser(data.user)
     } catch (error) {
       console.error('Login error:', error)
       throw error
     }
   }
 
-  const logout = () => {
+  const logout = async () => {
+    // Call API route to clear cookie
+    await fetch('/api/auth/logout', {
+      method: 'POST',
+    }).catch(err => console.error('Logout API error:', err))
+
     // Clear local storage
     storage.clearAuth()
 
     // Clear state
     setToken(null)
     setUser(null)
-
-    // Optionally call logout endpoint
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost'
-    if (token) {
-      fetch(`${apiUrl}/api/v1/logout`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json',
-        },
-      }).catch(err => console.error('Logout API error:', err))
-    }
   }
 
   const refreshUser = async () => {

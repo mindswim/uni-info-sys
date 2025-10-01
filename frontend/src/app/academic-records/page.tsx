@@ -508,7 +508,7 @@ export default function AcademicRecordsPage() {
                 <div className="space-y-2">
                   <div className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
-                    <p className="text-sm">You're on track to graduate in {summary.expected_graduation}</p>
+                    <p className="text-sm">You&apos;re on track to graduate in {summary.expected_graduation}</p>
                   </div>
                   <div className="flex items-start gap-2">
                     <Clock className="h-4 w-4 text-blue-600 mt-0.5" />
@@ -516,7 +516,7 @@ export default function AcademicRecordsPage() {
                   </div>
                   <div className="flex items-start gap-2">
                     <Star className="h-4 w-4 text-yellow-600 mt-0.5" />
-                    <p className="text-sm">Maintain your GPA above 3.5 to remain on the Dean's List</p>
+                    <p className="text-sm">Maintain your GPA above 3.5 to remain on the Dean&apos;s List</p>
                   </div>
                 </div>
               </CardContent>

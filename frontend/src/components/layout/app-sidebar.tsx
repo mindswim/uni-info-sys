@@ -47,7 +47,6 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/components/auth/auth-provider"
-import { PersonaSwitcher } from "@/components/demo/persona-switcher"
 
 interface AppSidebarProps {
   collapsed: boolean
@@ -287,7 +286,6 @@ const navigationItems = {
       title: "Dashboard",
       items: [
         { title: "Overview", url: "/", icon: Home },
-        { title: "Interactive Demo", url: "/demo", icon: Play },
         { title: "Analytics", url: "/analytics", icon: BarChart3 }
       ]
     },
@@ -323,7 +321,6 @@ const navigationItems = {
       title: "System",
       items: [
         { title: "System Overview", url: "/system", icon: Grid3X3 },
-        { title: "Data Explorer", url: "/data-explorer", icon: Database },
         { title: "User Management", url: "/users", icon: Users },
         { title: "Roles & Permissions", url: "/roles", icon: Settings },
         { title: "System Settings", url: "/settings", icon: Settings },
@@ -445,12 +442,6 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
               <Settings className="mr-2 h-4 w-4" />
               Settings
             </DropdownMenuItem>
-            {user?.roles.includes('admin') && (
-              <>
-                <DropdownMenuSeparator />
-                <PersonaSwitcher variant="menu-item" />
-              </>
-            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-red-600" onClick={() => logout()}>
               <LogOut className="mr-2 h-4 w-4" />

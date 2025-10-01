@@ -13,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         // Add security headers to all responses (web and API)
         $middleware->append(\App\Http\Middleware\AddSecurityHeaders::class);
-        
+
         // Use Laravel 11's built-in API throttling
         $middleware->throttleApi();
 
@@ -23,7 +23,12 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\PrometheusMetrics::class,
         ]);
 
-        //
+        // Register middleware aliases for role-based authorization
+        $middleware->alias([
+            'role.student' => \App\Http\Middleware\EnsureIsStudent::class,
+            'role.staff' => \App\Http\Middleware\EnsureIsStaff::class,
+            'role.admin' => \App\Http\Middleware\EnsureIsAdmin::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (Throwable $e, Illuminate\Http\Request $request) {

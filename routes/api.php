@@ -145,9 +145,11 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::get('course-catalog', [CourseController::class, 'catalog']);
     Route::apiResource('courses', CourseController::class);
 
-    // Staff-centric resources (must be before apiResource)
-    Route::get('staff/me', [\App\Http\Controllers\Api\V1\StaffController::class, 'me']);
-    Route::get('staff/me/sections', [\App\Http\Controllers\Api\V1\StaffController::class, 'mySections']);
+    // Staff-centric resources (must be before apiResource, protected by staff role middleware)
+    Route::middleware('role.staff')->group(function () {
+        Route::get('staff/me', [\App\Http\Controllers\Api\V1\StaffController::class, 'me']);
+        Route::get('staff/me/sections', [\App\Http\Controllers\Api\V1\StaffController::class, 'mySections']);
+    });
     Route::apiResource('staff', StaffController::class);
 
     Route::apiResource('terms', TermController::class);
@@ -159,14 +161,19 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     // Nested ProgramChoice routes - both nested and shallow for RESTful best practices
     Route::apiResource('admission-applications.program-choices', \App\Http\Controllers\Api\V1\ProgramChoiceController::class)->scoped()->shallow();
     
-    // Role and Permission management resources - full CRUD for roles, read-only for permissions
-    Route::apiResource('roles', \App\Http\Controllers\Api\V1\RoleController::class);
-    Route::post('roles/{role}/permissions', [\App\Http\Controllers\Api\V1\RoleController::class, 'syncPermissions']);
-    Route::apiResource('permissions', \App\Http\Controllers\Api\V1\PermissionController::class)->only(['index', 'show']);
+    // Role and Permission management resources (admin-only)
+    Route::middleware('role.admin')->group(function () {
+        Route::apiResource('roles', \App\Http\Controllers\Api\V1\RoleController::class);
+        Route::post('roles/{role}/permissions', [\App\Http\Controllers\Api\V1\RoleController::class, 'syncPermissions']);
+        Route::apiResource('permissions', \App\Http\Controllers\Api\V1\PermissionController::class)->only(['index', 'show']);
+    });
     
-    // Student-centric resources
-    Route::get('students/me', [\App\Http\Controllers\Api\V1\StudentController::class, 'me']);
-    Route::get('students/me/academic-records', [\App\Http\Controllers\Api\V1\AcademicRecordController::class, 'myRecords']);
+    // Student-centric resources (protected by student role middleware)
+    Route::middleware('role.student')->group(function () {
+        Route::get('students/me', [\App\Http\Controllers\Api\V1\StudentController::class, 'me']);
+        Route::get('students/me/academic-records', [\App\Http\Controllers\Api\V1\AcademicRecordController::class, 'myRecords']);
+    });
+
     Route::apiResource('students', \App\Http\Controllers\Api\V1\StudentController::class);
     Route::post('students/{student}/restore', [\App\Http\Controllers\Api\V1\StudentController::class, 'restore'])->withTrashed();
     Route::delete('students/{student}/force', [\App\Http\Controllers\Api\V1\StudentController::class, 'forceDelete'])->withTrashed();
@@ -180,7 +187,9 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::delete('documents/{document}/force', [\App\Http\Controllers\Api\V1\DocumentController::class, 'forceDelete'])->withTrashed();
 
     // Enrollment management with custom business logic endpoints (must be before apiResource)
-    Route::get('enrollments/me', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'myEnrollments']);
+    Route::middleware('role.student')->group(function () {
+        Route::get('enrollments/me', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'myEnrollments']);
+    });
     Route::post('enrollments/{enrollment}/withdraw', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'withdraw']);
     Route::post('enrollments/{enrollment}/complete', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'complete']);
     Route::get('students/{student}/enrollments', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'byStudent']);

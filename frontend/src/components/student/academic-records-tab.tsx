@@ -1,37 +1,93 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { StatCard } from "@/components/layouts"
 import { Award, TrendingUp, BookOpen, Target } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { studentService } from "@/services"
+import type { Student } from "@/types/api-types"
 
 export function AcademicRecordsTab() {
+  const [student, setStudent] = useState<Student | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      try {
+        setLoading(true)
+        const data = await studentService.getCurrentProfile()
+        setStudent(data)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load student data')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStudentData()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map(i => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-4 w-24" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-16 mb-2" />
+                <Skeleton className="h-3 w-32" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <p className="text-sm text-destructive">{error}</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const creditsEarned = student?.credits_earned || 0
+  const creditsRequired = 120
+
   return (
     <div className="space-y-6">
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Current GPA"
-          value="3.75"
+          value={student?.gpa?.toFixed(2) || "N/A"}
           description="Cumulative GPA"
           icon={<Award className="h-4 w-4" />}
-          trend={{ value: 5, label: "from last semester" }}
         />
         <StatCard
           title="Credits Earned"
-          value="87"
-          description="Out of 120 required"
+          value={creditsEarned.toString()}
+          description={`Out of ${creditsRequired} required`}
           icon={<BookOpen className="h-4 w-4" />}
         />
         <StatCard
-          title="Dean's List"
-          value="3x"
-          description="Semesters on list"
+          title="Enrollment Status"
+          value={student?.enrollment_status || "Unknown"}
+          description="Current status"
           icon={<Target className="h-4 w-4" />}
         />
         <StatCard
-          title="Class Rank"
-          value="Top 15%"
-          description="Of graduating class"
+          title="Completion"
+          value={`${Math.round((creditsEarned / creditsRequired) * 100)}%`}
+          description="Degree progress"
           icon={<TrendingUp className="h-4 w-4" />}
         />
       </div>
@@ -43,22 +99,55 @@ export function AcademicRecordsTab() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Degree Progress</span>
+                <span className="font-medium">{creditsEarned} / {creditsRequired} credits</span>
+              </div>
+              <div className="w-full bg-secondary rounded-full h-2">
+                <div
+                  className="bg-primary rounded-full h-2 transition-all"
+                  style={{ width: `${(creditsEarned / creditsRequired) * 100}%` }}
+                />
+              </div>
+            </div>
             <p className="text-sm text-muted-foreground">
-              You are on track to graduate in Spring 2025. Maintain your GPA above 3.5 to remain on the Dean&apos;s List.
+              {creditsEarned >= creditsRequired
+                ? "You have completed all required credits!"
+                : `${creditsRequired - creditsEarned} credits remaining to complete your degree.`}
             </p>
-            {/* TODO: Add progress bars, semester breakdown, course history */}
           </div>
         </CardContent>
       </Card>
 
-      {/* Recent Grades */}
+      {/* Student Information */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Grades</CardTitle>
+          <CardTitle>Student Information</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">Grade information will be displayed here.</p>
-          {/* TODO: Connect to backend API */}
+          <dl className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <dt className="font-medium text-muted-foreground">Student Number</dt>
+              <dd className="mt-1">{student?.student_number}</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-muted-foreground">Enrollment Status</dt>
+              <dd className="mt-1 capitalize">{student?.enrollment_status}</dd>
+            </div>
+            {student?.user && (
+              <>
+                <div>
+                  <dt className="font-medium text-muted-foreground">Email</dt>
+                  <dd className="mt-1">{student.user.email}</dd>
+                </div>
+                <div>
+                  <dt className="font-medium text-muted-foreground">Phone</dt>
+                  <dd className="mt-1">{student.phone || 'Not provided'}</dd>
+                </div>
+              </>
+            )}
+          </dl>
         </CardContent>
       </Card>
     </div>

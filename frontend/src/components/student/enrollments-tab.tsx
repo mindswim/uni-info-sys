@@ -18,8 +18,8 @@ export function EnrollmentsTab() {
     const fetchEnrollments = async () => {
       try {
         setLoading(true)
-        const data = await studentService.getCurrentEnrollments()
-        setEnrollments(data)
+        const student = await studentService.getCurrentProfile()
+        setEnrollments(student.enrollments || [])
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load enrollments')
       } finally {
@@ -104,10 +104,10 @@ export function EnrollmentsTab() {
               <div className="flex items-start justify-between">
                 <div>
                   <CardTitle className="text-lg">
-                    {enrollment.section?.course?.code || 'Course'} - {enrollment.section?.course?.name || 'Unknown Course'}
+                    {enrollment.course_section?.course?.course_code || 'Course'} - {enrollment.course_section?.course?.title || 'Unknown Course'}
                   </CardTitle>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Section {enrollment.section?.section_number}
+                    Section {enrollment.course_section?.section_number}
                   </p>
                 </div>
                 <Badge variant={getStatusVariant(enrollment.status)}>
@@ -117,25 +117,16 @@ export function EnrollmentsTab() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                {enrollment.section?.instructor && (
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-muted-foreground">Instructor</p>
-                      <p className="font-medium">{enrollment.section.instructor}</p>
-                    </div>
-                  </div>
-                )}
-                {enrollment.section?.schedule && (
+                {enrollment.course_section?.schedule_display && (
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-muted-foreground">Schedule</p>
-                      <p className="font-medium">{enrollment.section.schedule}</p>
+                      <p className="font-medium">{enrollment.course_section.schedule_display}</p>
                     </div>
                   </div>
                 )}
-                {enrollment.grade && (
+                {enrollment.grade ? (
                   <div className="flex items-center gap-2">
                     <Award className="h-4 w-4 text-muted-foreground" />
                     <div>
@@ -143,13 +134,30 @@ export function EnrollmentsTab() {
                       <p className="font-medium">{enrollment.grade}</p>
                     </div>
                   </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Award className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-muted-foreground">Grade</p>
+                      <p className="font-medium text-muted-foreground">In Progress</p>
+                    </div>
+                  </div>
                 )}
-                {enrollment.section?.course?.credits && (
+                {enrollment.course_section?.course?.credits && (
                   <div className="flex items-center gap-2">
                     <BookOpen className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-muted-foreground">Credits</p>
-                      <p className="font-medium">{enrollment.section.course.credits}</p>
+                      <p className="font-medium">{enrollment.course_section.course.credits}</p>
+                    </div>
+                  </div>
+                )}
+                {enrollment.course_section && (
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-muted-foreground">Capacity</p>
+                      <p className="font-medium">{enrollment.course_section.enrolled_count}/{enrollment.course_section.capacity}</p>
                     </div>
                   </div>
                 )}

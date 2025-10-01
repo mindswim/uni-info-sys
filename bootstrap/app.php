@@ -23,11 +23,12 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\PrometheusMetrics::class,
         ]);
 
-        // Register middleware aliases for role-based authorization
+        // Register middleware aliases for role-based and permission-based authorization
         $middleware->alias([
             'role.student' => \App\Http\Middleware\EnsureIsStudent::class,
             'role.staff' => \App\Http\Middleware\EnsureIsStaff::class,
             'role.admin' => \App\Http\Middleware\EnsureIsAdmin::class,
+            'permission' => \App\Http\Middleware\HasPermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

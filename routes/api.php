@@ -143,7 +143,12 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::apiResource('departments', DepartmentController::class);
     Route::apiResource('programs', ProgramController::class);
     Route::get('course-catalog', [CourseController::class, 'catalog']);
-    Route::apiResource('courses', CourseController::class);
+    // Course management with permission-based authorization
+    Route::get('courses', [CourseController::class, 'index'])->middleware('permission:view_courses');
+    Route::post('courses', [CourseController::class, 'store'])->middleware('permission:create_courses');
+    Route::get('courses/{course}', [CourseController::class, 'show'])->middleware('permission:view_courses');
+    Route::put('courses/{course}', [CourseController::class, 'update'])->middleware('permission:update_courses');
+    Route::delete('courses/{course}', [CourseController::class, 'destroy'])->middleware('permission:delete_courses');
 
     // Staff-centric resources (must be before apiResource, protected by staff role middleware)
     Route::middleware('role.staff')->group(function () {
@@ -156,7 +161,12 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::apiResource('buildings', BuildingController::class);
     Route::apiResource('rooms', RoomController::class);
     Route::apiResource('course-sections', CourseSectionController::class);
-    Route::apiResource('admission-applications', \App\Http\Controllers\Api\V1\AdmissionApplicationController::class);
+    // Admission application management with permission-based authorization
+    Route::get('admission-applications', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'index'])->middleware('permission:view_applications');
+    Route::post('admission-applications', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'store'])->middleware('permission:create_applications');
+    Route::get('admission-applications/{admission_application}', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'show'])->middleware('permission:view_applications');
+    Route::put('admission-applications/{admission_application}', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'update'])->middleware('permission:update_applications');
+    Route::delete('admission-applications/{admission_application}', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'destroy'])->middleware('permission:update_applications');
     
     // Nested ProgramChoice routes - both nested and shallow for RESTful best practices
     Route::apiResource('admission-applications.program-choices', \App\Http\Controllers\Api\V1\ProgramChoiceController::class)->scoped()->shallow();
@@ -174,11 +184,21 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
         Route::get('students/me/academic-records', [\App\Http\Controllers\Api\V1\AcademicRecordController::class, 'myRecords']);
     });
 
-    Route::apiResource('students', \App\Http\Controllers\Api\V1\StudentController::class);
-    Route::post('students/{student}/restore', [\App\Http\Controllers\Api\V1\StudentController::class, 'restore'])->withTrashed();
-    Route::delete('students/{student}/force', [\App\Http\Controllers\Api\V1\StudentController::class, 'forceDelete'])->withTrashed();
+    // Student management with permission-based authorization
+    Route::get('students', [\App\Http\Controllers\Api\V1\StudentController::class, 'index'])->middleware('permission:view_students');
+    Route::post('students', [\App\Http\Controllers\Api\V1\StudentController::class, 'store'])->middleware('permission:create_students');
+    Route::get('students/{student}', [\App\Http\Controllers\Api\V1\StudentController::class, 'show'])->middleware('permission:view_students');
+    Route::put('students/{student}', [\App\Http\Controllers\Api\V1\StudentController::class, 'update'])->middleware('permission:update_students');
+    Route::delete('students/{student}', [\App\Http\Controllers\Api\V1\StudentController::class, 'destroy'])->middleware('permission:delete_students');
+    Route::post('students/{student}/restore', [\App\Http\Controllers\Api\V1\StudentController::class, 'restore'])->withTrashed()->middleware('permission:update_students');
+    Route::delete('students/{student}/force', [\App\Http\Controllers\Api\V1\StudentController::class, 'forceDelete'])->withTrashed()->middleware('permission:delete_students');
 
-    Route::apiResource('students.academic-records', \App\Http\Controllers\Api\V1\AcademicRecordController::class)->scoped()->shallow();
+    // Academic records with permission-based authorization
+    Route::get('students/{student}/academic-records', [\App\Http\Controllers\Api\V1\AcademicRecordController::class, 'index'])->middleware('permission:view_academic_records');
+    Route::post('students/{student}/academic-records', [\App\Http\Controllers\Api\V1\AcademicRecordController::class, 'store'])->middleware('permission:update_grades');
+    Route::get('academic-records/{academic_record}', [\App\Http\Controllers\Api\V1\AcademicRecordController::class, 'show'])->middleware('permission:view_academic_records');
+    Route::put('academic-records/{academic_record}', [\App\Http\Controllers\Api\V1\AcademicRecordController::class, 'update'])->middleware('permission:update_grades');
+    Route::delete('academic-records/{academic_record}', [\App\Http\Controllers\Api\V1\AcademicRecordController::class, 'destroy'])->middleware('permission:update_grades');
     Route::apiResource('students.documents', \App\Http\Controllers\Api\V1\DocumentController::class)->scoped()->shallow();
     Route::get('students/{student}/documents/all-versions', [\App\Http\Controllers\Api\V1\DocumentController::class, 'allVersions']);
     
@@ -195,10 +215,14 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::get('students/{student}/enrollments', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'byStudent']);
     Route::get('course-sections/{courseSection}/enrollments', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'byCourseSection']);
 
-    // Enrollment API routes
-    Route::apiResource('enrollments', \App\Http\Controllers\Api\V1\EnrollmentController::class);
-    Route::post('enrollments/{enrollment}/restore', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'restore'])->withTrashed();
-    Route::delete('enrollments/{enrollment}/force', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'forceDelete'])->withTrashed();
+    // Enrollment API routes with permission-based authorization
+    Route::get('enrollments', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'index'])->middleware('permission:view_enrollments');
+    Route::post('enrollments', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'store'])->middleware('permission:create_enrollments');
+    Route::get('enrollments/{enrollment}', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'show'])->middleware('permission:view_enrollments');
+    Route::put('enrollments/{enrollment}', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'update'])->middleware('permission:update_enrollments');
+    Route::delete('enrollments/{enrollment}', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'destroy'])->middleware('permission:delete_enrollments');
+    Route::post('enrollments/{enrollment}/restore', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'restore'])->withTrashed()->middleware('permission:update_enrollments');
+    Route::delete('enrollments/{enrollment}/force', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'forceDelete'])->withTrashed()->middleware('permission:delete_enrollments');
 
     // Course restore routes
     Route::post('courses/{course}/restore', [\App\Http\Controllers\Api\V1\CourseController::class, 'restore'])->withTrashed();

@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
         // Step 1: Create foundational data (roles, permissions)
         $this->call([
             RolePermissionSeeder::class,
+            PermissionSeeder::class,
         ]);
         
         // Step 2: Create academic hierarchy manually to avoid unique issues

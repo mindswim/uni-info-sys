@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
+use App\Models\CourseSection;
 use App\Http\Resources\CourseResource;
 use App\Http\Requests\StoreCourseRequest;
 use App\Http\Requests\UpdateCourseRequest;
@@ -293,7 +294,126 @@ class CourseController extends Controller
         Cache::forget('courses.department.' . $course->department_id);
         
         $course->forceDelete();
-        
+
         return response()->json(null, 204);
+    }
+
+    #[OA\Get(
+        path: '/api/v1/course-catalog',
+        summary: 'Get public course catalog with available sections',
+        tags: ['Courses'],
+        parameters: [
+            new OA\Parameter(
+                name: 'term_id',
+                in: 'query',
+                required: false,
+                description: 'Filter by term ID (defaults to current term)',
+                schema: new OA\Schema(type: 'integer')
+            ),
+            new OA\Parameter(
+                name: 'department_id',
+                in: 'query',
+                required: false,
+                description: 'Filter by department ID',
+                schema: new OA\Schema(type: 'integer')
+            ),
+            new OA\Parameter(
+                name: 'level',
+                in: 'query',
+                required: false,
+                description: 'Filter by course level (undergraduate, graduate)',
+                schema: new OA\Schema(type: 'string')
+            ),
+            new OA\Parameter(
+                name: 'search',
+                in: 'query',
+                required: false,
+                description: 'Search in course code, name, or description',
+                schema: new OA\Schema(type: 'string')
+            ),
+            new OA\Parameter(
+                name: 'page',
+                in: 'query',
+                required: false,
+                description: 'Page number for pagination',
+                schema: new OA\Schema(type: 'integer', minimum: 1, default: 1)
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Course catalog with available sections.',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/CourseResource')),
+                        new OA\Property(property: 'meta', type: 'object'),
+                        new OA\Property(property: 'links', type: 'object'),
+                    ],
+                    type: 'object'
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+        ]
+    )]
+    public function catalog(Request $request): JsonResponse
+    {
+        $query = Course::with([
+            'department',
+            'prerequisites',
+            'courseSections' => function ($query) use ($request) {
+                $query->where('status', 'active')
+                    ->with(['term', 'instructor.user', 'room.building']);
+
+                if ($request->has('term_id')) {
+                    $query->where('term_id', $request->term_id);
+                } else {
+                    // Get current term - you may need to adjust this logic
+                    $query->whereHas('term', function ($q) {
+                        $q->where('is_current', true);
+                    });
+                }
+            }
+        ]);
+
+        // Filter by department
+        if ($request->has('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+
+        // Filter by level
+        if ($request->has('level')) {
+            $query->where('level', $request->level);
+        }
+
+        // Search functionality
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('code', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Only show courses that have active sections
+        $query->has('courseSections');
+
+        $courses = $query->paginate(20);
+
+        return response()->json([
+            'data' => CourseResource::collection($courses),
+            'meta' => [
+                'current_page' => $courses->currentPage(),
+                'last_page' => $courses->lastPage(),
+                'per_page' => $courses->perPage(),
+                'total' => $courses->total(),
+            ],
+            'links' => [
+                'first' => $courses->url(1),
+                'last' => $courses->url($courses->lastPage()),
+                'prev' => $courses->previousPageUrl(),
+                'next' => $courses->nextPageUrl(),
+            ]
+        ], 200);
     }
 }

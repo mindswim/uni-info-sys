@@ -599,9 +599,71 @@ class EnrollmentController extends Controller
     {
         $enrollment = Enrollment::withTrashed()->findOrFail($id);
         $this->authorize('forceDelete', $enrollment);
-        
+
         $enrollment->forceDelete();
-        
+
         return response()->json(null, 204);
+    }
+
+    #[OA\Get(
+        path: "/api/v1/enrollments/me",
+        summary: "Get current student's enrollments",
+        description: "Retrieve enrollments for the authenticated student in the current term",
+        security: [["sanctum" => []]],
+        tags: ["Enrollments"],
+        parameters: [
+            new OA\Parameter(
+                name: "term_id",
+                in: "query",
+                required: false,
+                schema: new OA\Schema(type: "integer"),
+                description: "Filter by specific term ID (optional, defaults to current term)"
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Successful",
+                content: new OA\JsonContent(
+                    type: "array",
+                    items: new OA\Items(ref: "#/components/schemas/EnrollmentResource")
+                )
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 404, description: "Student profile not found"),
+        ]
+    )]
+    public function myEnrollments(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $student = Student::where('user_id', $user->id)->first();
+
+        if (!$student) {
+            return response()->json([
+                'message' => 'Student profile not found for the authenticated user'
+            ], 404);
+        }
+
+        $query = Enrollment::where('student_id', $student->id)
+            ->with([
+                'courseSection.course',
+                'courseSection.instructor.user',
+                'courseSection.room.building',
+                'courseSection.term'
+            ]);
+
+        // Filter by term if provided, otherwise get current term
+        if ($request->has('term_id')) {
+            $query->whereHas('courseSection', function($q) use ($request) {
+                $q->where('term_id', $request->term_id);
+            });
+        }
+
+        $enrollments = $query->orderBy('created_at', 'desc')->get();
+
+        return response()->json([
+            'data' => EnrollmentResource::collection($enrollments)
+        ], 200);
     }
 }

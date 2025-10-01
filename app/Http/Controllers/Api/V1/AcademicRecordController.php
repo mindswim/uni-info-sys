@@ -165,9 +165,47 @@ class AcademicRecordController extends Controller
     public function destroy(AcademicRecord $academicRecord): JsonResponse
     {
         $academicRecord->delete();
-        
+
         return response()->json([
             'message' => 'Academic record deleted successfully'
         ]);
+    }
+
+    #[OA\Get(
+        path: "/api/v1/students/me/academic-records",
+        summary: "Get current student's academic records",
+        description: "Retrieve academic records for the authenticated student",
+        security: [["sanctum" => []]],
+        tags: ["Academic Records"],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Successful",
+                content: new OA\JsonContent(
+                    type: "array",
+                    items: new OA\Items(ref: "#/components/schemas/AcademicRecordResource")
+                )
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 404, description: "Student profile not found"),
+        ]
+    )]
+    public function myRecords(Request $request): AnonymousResourceCollection|JsonResponse
+    {
+        $user = $request->user();
+
+        $student = Student::where('user_id', $user->id)->first();
+
+        if (!$student) {
+            return response()->json([
+                'message' => 'Student profile not found for the authenticated user'
+            ], 404);
+        }
+
+        $records = AcademicRecord::where('student_id', $student->id)
+            ->orderBy('start_date', 'desc')
+            ->get();
+
+        return AcademicRecordResource::collection($records);
     }
 }

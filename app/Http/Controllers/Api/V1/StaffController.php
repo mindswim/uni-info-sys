@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
 use App\Models\User;
+use App\Models\CourseSection;
 use App\Http\Resources\StaffResource;
+use App\Http\Resources\CourseSectionResource;
 use App\Http\Requests\StoreStaffRequest;
 use App\Http\Requests\UpdateStaffRequest;
 use Illuminate\Http\Request;
@@ -196,5 +198,119 @@ class StaffController extends Controller
         });
 
         return response()->noContent();
+    }
+
+    #[OA\Get(
+        path: "/api/v1/staff/me",
+        summary: "Get the authenticated staff member's profile",
+        tags: ["Staff"],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "The authenticated staff member's profile.",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "data", ref: "#/components/schemas/StaffResource"),
+                    ],
+                    type: "object"
+                )
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 404, description: "Staff profile not found for the authenticated user"),
+        ]
+    )]
+    public function me(Request $request)
+    {
+        $user = $request->user();
+
+        $staff = Staff::where('user_id', $user->id)
+            ->with(['user', 'department'])
+            ->first();
+
+        if (!$staff) {
+            return response()->json([
+                'message' => 'Staff profile not found for the authenticated user'
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => new StaffResource($staff)
+        ], 200);
+    }
+
+    #[OA\Get(
+        path: "/api/v1/staff/me/sections",
+        summary: "Get the authenticated staff member's course sections",
+        tags: ["Staff"],
+        parameters: [
+            new OA\Parameter(
+                name: "term_id",
+                in: "query",
+                required: false,
+                description: "Filter by term ID",
+                schema: new OA\Schema(type: "integer")
+            ),
+            new OA\Parameter(
+                name: "status",
+                in: "query",
+                required: false,
+                description: "Filter by section status (active, completed, cancelled)",
+                schema: new OA\Schema(type: "string")
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "List of course sections taught by the authenticated staff member.",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: "data",
+                            type: "array",
+                            items: new OA\Items(ref: "#/components/schemas/CourseSectionResource")
+                        ),
+                    ],
+                    type: "object"
+                )
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 404, description: "Staff profile not found for the authenticated user"),
+        ]
+    )]
+    public function mySections(Request $request)
+    {
+        $user = $request->user();
+
+        $staff = Staff::where('user_id', $user->id)->first();
+
+        if (!$staff) {
+            return response()->json([
+                'message' => 'Staff profile not found for the authenticated user'
+            ], 404);
+        }
+
+        $query = CourseSection::where('instructor_id', $staff->id)
+            ->with([
+                'course',
+                'term',
+                'room.building',
+                'enrollments'
+            ]);
+
+        if ($request->has('term_id')) {
+            $query->where('term_id', $request->term_id);
+        }
+
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $sections = $query->orderBy('term_id', 'desc')
+            ->orderBy('section_number', 'asc')
+            ->get();
+
+        return response()->json([
+            'data' => CourseSectionResource::collection($sections)
+        ], 200);
     }
 }

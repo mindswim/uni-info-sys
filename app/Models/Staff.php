@@ -30,4 +30,9 @@ class Staff extends Model
     {
         return $this->belongsTo(Department::class);
     }
+
+    public function courseSections()
+    {
+        return $this->hasMany(CourseSection::class, 'instructor_id');
+    }
 }

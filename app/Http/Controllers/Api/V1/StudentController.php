@@ -234,9 +234,44 @@ class StudentController extends Controller
     {
         $student = Student::withTrashed()->findOrFail($id);
         $this->authorize('forceDelete', $student);
-        
+
         $student->forceDelete();
-        
+
         return response()->json(null, 204);
+    }
+
+    #[OA\Get(
+        path: "/api/v1/students/me",
+        summary: "Get current student's profile",
+        description: "Retrieve the authenticated student's profile with related data",
+        security: [["sanctum" => []]],
+        tags: ["Students"],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Successful",
+                content: new OA\JsonContent(ref: "#/components/schemas/StudentResource")
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 404, description: "Student profile not found"),
+        ]
+    )]
+    public function me(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $student = Student::where('user_id', $user->id)
+            ->with(['user', 'majorProgram', 'minorProgram', 'enrollments.courseSection.course'])
+            ->first();
+
+        if (!$student) {
+            return response()->json([
+                'message' => 'Student profile not found for the authenticated user'
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => new StudentResource($student)
+        ], 200);
     }
 }

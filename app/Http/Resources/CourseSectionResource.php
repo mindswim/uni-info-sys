@@ -37,14 +37,22 @@ class CourseSectionResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'section_number' => $this->section_number,
             'capacity' => $this->capacity,
+            'status' => $this->status,
             'schedule_days' => $this->schedule_days,
             'start_time' => $this->start_time,
             'end_time' => $this->end_time,
+            'enrolled_count' => $this->whenLoaded('enrollments', fn() => $this->enrollments->count(), 0),
+            'available_spots' => $this->capacity - $this->whenLoaded('enrollments', fn() => $this->enrollments->count(), 0),
+            'schedule_display' => $this->schedule_days
+                ? implode(', ', $this->schedule_days) . ' ' . substr($this->start_time, 0, 5) . '-' . substr($this->end_time, 0, 5)
+                : null,
             'course' => new CourseResource($this->whenLoaded('course')),
             'term' => new TermResource($this->whenLoaded('term')),
             'instructor' => new StaffResource($this->whenLoaded('instructor')),
             'room' => new RoomResource($this->whenLoaded('room')),
+            'enrollments' => EnrollmentResource::collection($this->whenLoaded('enrollments')),
         ];
     }
 }

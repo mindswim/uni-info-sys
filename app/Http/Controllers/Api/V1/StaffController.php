@@ -294,7 +294,7 @@ class StaffController extends Controller
                 'course',
                 'term',
                 'room.building',
-                'enrollments'
+                'enrollments.student.user'
             ]);
 
         if ($request->has('term_id')) {

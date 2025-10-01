@@ -277,7 +277,24 @@ class AuthService {
   hasRole(roleName: string): boolean {
     const user = this.getUser();
     if (!user || !user.roles) return false;
+    // Handle both string array and object array formats
+    if (typeof user.roles[0] === 'string') {
+      return (user.roles as string[]).includes(roleName);
+    }
     return user.roles.some(role => role.name === roleName);
+  }
+
+  /**
+   * Check if user has any of the specified roles
+   */
+  hasAnyRole(roleNames: string[]): boolean {
+    const user = this.getUser();
+    if (!user || !user.roles || !user.roles.length) return false;
+    // Handle both string array and object array formats
+    if (typeof user.roles[0] === 'string') {
+      return (user.roles as string[]).some(role => roleNames.includes(role));
+    }
+    return user.roles.some(role => roleNames.includes(role.name));
   }
 
   /**

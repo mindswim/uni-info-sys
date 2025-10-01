@@ -61,6 +61,14 @@ export const adminService = {
     await apiClient.delete(`/users/${id}`)
   },
 
+  /**
+   * Get all students
+   */
+  getStudents: async (params?: QueryParams): Promise<PaginatedResponse<any>> => {
+    const response = await apiClient.get<PaginatedResponse<any>>('/students', { params })
+    return response.data
+  },
+
   // === Academic Structure Management ===
 
   /**

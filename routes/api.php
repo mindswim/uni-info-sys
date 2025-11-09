@@ -233,6 +233,19 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     
+    // Grade management routes
+    Route::put('enrollments/{enrollment}/grade', [\App\Http\Controllers\Api\V1\GradeController::class, 'submitGrade']);
+    Route::post('course-sections/{courseSection}/grades/bulk', [\App\Http\Controllers\Api\V1\GradeController::class, 'bulkSubmitGrades']);
+    Route::get('course-sections/{courseSection}/grade-distribution', [\App\Http\Controllers\Api\V1\GradeController::class, 'getGradeDistribution']);
+    Route::get('course-sections/{courseSection}/grading-progress', [\App\Http\Controllers\Api\V1\GradeController::class, 'getGradingProgress']);
+    Route::get('grades/valid-grades', [\App\Http\Controllers\Api\V1\GradeController::class, 'getValidGrades']);
+
+    // Grade change request routes
+    Route::get('grade-change-requests', [\App\Http\Controllers\Api\V1\GradeController::class, 'listGradeChangeRequests']);
+    Route::post('grade-change-requests', [\App\Http\Controllers\Api\V1\GradeController::class, 'requestGradeChange']);
+    Route::post('grade-change-requests/{gradeChangeRequest}/approve', [\App\Http\Controllers\Api\V1\GradeController::class, 'approveGradeChange']);
+    Route::post('grade-change-requests/{gradeChangeRequest}/deny', [\App\Http\Controllers\Api\V1\GradeController::class, 'denyGradeChange']);
+
     // Import routes (requires specific permissions)
     Route::post('imports/courses', [CourseImportController::class, 'store']);
     Route::post('course-sections/{courseSection}/import-grades', [GradeImportController::class, 'store']);

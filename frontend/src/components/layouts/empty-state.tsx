@@ -33,18 +33,20 @@ export function EmptyState({
   action
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
       {icon && (
-        <div className="mb-4 text-muted-foreground opacity-50">{icon}</div>
+        <div className="mb-6 text-muted-foreground/40 [&_svg]:w-16 [&_svg]:h-16 [&_svg]:stroke-[1.5]">
+          {icon}
+        </div>
       )}
-      <h3 className="text-lg font-semibold mb-2">{title}</h3>
+      <h3 className="text-xl font-semibold mb-2 tracking-tight">{title}</h3>
       {description && (
-        <p className="text-sm text-muted-foreground mb-4 max-w-md">
+        <p className="text-sm text-muted-foreground mb-6 max-w-md leading-relaxed">
           {description}
         </p>
       )}
       {action && (
-        <Button onClick={action.onClick}>{action.label}</Button>
+        <Button onClick={action.onClick} size="lg">{action.label}</Button>
       )}
     </div>
   )

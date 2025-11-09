@@ -24,30 +24,30 @@ export function AppShell({ children, breadcrumbs }: AppShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   
   return (
-    <div className={`min-h-screen transition-all duration-300 ${
-      sidebarCollapsed 
-        ? 'grid grid-cols-[60px_1fr]' 
+    <div className={`h-screen transition-all duration-300 ${
+      sidebarCollapsed
+        ? 'grid grid-cols-[60px_1fr]'
         : 'grid grid-cols-[280px_1fr]'
     }`}>
       {/* Sidebar */}
       <div className="border-r border-border bg-card">
-        <AppSidebar 
-          collapsed={sidebarCollapsed} 
-          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
+        <AppSidebar
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
       </div>
-      
+
       {/* Main Content */}
-      <div className="flex flex-col overflow-hidden">
-        <AppHeader 
-          user={user} 
+      <div className="flex flex-col h-screen overflow-hidden">
+        <AppHeader
+          user={user}
           breadcrumbs={breadcrumbs}
           sidebarCollapsed={sidebarCollapsed}
           onSidebarToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
-        <main className="flex-1 overflow-auto">
-          <div className="p-4">
-            <div className="min-h-[calc(100vh-120px)] rounded-xl bg-muted/50 p-6">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="p-4 h-full">
+            <div className="rounded-xl bg-muted/50 p-6">
               {children}
             </div>
           </div>

@@ -174,9 +174,9 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
   const roleNavigation = navigationItems[userRole as keyof typeof navigationItems] || navigationItems.student
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-screen flex flex-col">
       {/* Header */}
-      <div className="h-16 border-b border-border px-4 flex items-center justify-between">
+      <div className="h-16 border-b border-border px-4 flex items-center justify-between shrink-0">
         <Link href="/" className="flex items-center space-x-2 min-w-0 overflow-hidden">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0">
             <GraduationCap className="h-4 w-4" />
@@ -231,7 +231,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
       </div>
 
       {/* User Footer */}
-      <div className="border-t border-border p-4">
+      <div className="border-t border-border p-4 shrink-0">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -272,13 +272,17 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              Profile
+            <DropdownMenuItem asChild>
+              <Link href="/profile" className="cursor-pointer">
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              Settings
+            <DropdownMenuItem asChild>
+              <Link href="/settings" className="cursor-pointer">
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-red-600" onClick={() => logout()}>

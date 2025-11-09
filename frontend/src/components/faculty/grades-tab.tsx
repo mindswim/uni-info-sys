@@ -1,16 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
-import { Download, Save, AlertCircle, CheckCircle2, Clock } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Download, Save, CheckCircle2, Clock } from "lucide-react"
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
 interface CourseSection {
   id: number
@@ -46,35 +45,49 @@ interface GradingProgress {
   is_complete: boolean
 }
 
-const VALID_GRADES = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F', 'P', 'NP', 'W', 'I']
+interface GradeDistribution {
+  distribution: Record<string, { count: number; percentage: number }>
+  total_students: number
+  average_gpa: number
+  graded_count: number
+  pending_count: number
+}
+
+const VALID_GRADES = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']
+
+const GRADE_COLORS: Record<string, string> = {
+  'A+': '#22c55e', 'A': '#22c55e', 'A-': '#22c55e',
+  'B+': '#3b82f6', 'B': '#3b82f6', 'B-': '#3b82f6',
+  'C+': '#eab308', 'C': '#eab308', 'C-': '#eab308',
+  'D+': '#f97316', 'D': '#f97316', 'D-': '#f97316',
+  'F': '#ef4444'
+}
 
 export function GradesTab() {
   const [sections, setSections] = useState<CourseSection[]>([])
   const [selectedSection, setSelectedSection] = useState<string>("")
   const [enrollments, setEnrollments] = useState<Enrollment[]>([])
   const [progress, setProgress] = useState<GradingProgress | null>(null)
+  const [distribution, setDistribution] = useState<GradeDistribution | null>(null)
   const [grades, setGrades] = useState<Record<number, string>>({})
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
 
-  // Fetch faculty's course sections
   useEffect(() => {
     fetchSections()
   }, [])
 
-  // Fetch enrollments when section is selected
   useEffect(() => {
     if (selectedSection) {
       fetchEnrollments(selectedSection)
       fetchGradingProgress(selectedSection)
+      fetchGradeDistribution(selectedSection)
     }
   }, [selectedSection])
 
   const fetchSections = async () => {
     setLoading(true)
-    setError(null)
     try {
       const token = localStorage.getItem('auth_token')
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/staff/me/sections`, {
@@ -89,7 +102,6 @@ export function GradesTab() {
       const data = await response.json()
       setSections(data.data || [])
     } catch (err) {
-      setError('Failed to load course sections')
       console.error(err)
     } finally {
       setLoading(false)
@@ -98,7 +110,6 @@ export function GradesTab() {
 
   const fetchEnrollments = async (sectionId: string) => {
     setLoading(true)
-    setError(null)
     try {
       const token = localStorage.getItem('auth_token')
       const response = await fetch(
@@ -117,7 +128,6 @@ export function GradesTab() {
       const enrollmentData = data.data || []
       setEnrollments(enrollmentData)
 
-      // Initialize grades state with existing grades
       const initialGrades: Record<number, string> = {}
       enrollmentData.forEach((enrollment: Enrollment) => {
         if (enrollment.grade) {
@@ -126,7 +136,6 @@ export function GradesTab() {
       })
       setGrades(initialGrades)
     } catch (err) {
-      setError('Failed to load students')
       console.error(err)
     } finally {
       setLoading(false)
@@ -155,6 +164,28 @@ export function GradesTab() {
     }
   }
 
+  const fetchGradeDistribution = async (sectionId: string) => {
+    try {
+      const token = localStorage.getItem('auth_token')
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/course-sections/${sectionId}/grade-distribution`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+          },
+        }
+      )
+
+      if (!response.ok) throw new Error('Failed to fetch distribution')
+
+      const data = await response.json()
+      setDistribution(data.data)
+    } catch (err) {
+      console.error('Failed to fetch grade distribution:', err)
+    }
+  }
+
   const handleGradeChange = (enrollmentId: number, grade: string) => {
     setGrades(prev => ({
       ...prev,
@@ -162,17 +193,14 @@ export function GradesTab() {
     }))
   }
 
-  const validateGrade = (grade: string): boolean => {
-    return VALID_GRADES.includes(grade.toUpperCase())
-  }
-
   const handleSaveGrades = async () => {
-    // Validate all grades
-    const invalidGrades = Object.entries(grades).filter(([_, grade]) => grade && !validateGrade(grade))
+    const invalidGrades = Object.entries(grades).filter(([_, grade]) =>
+      grade && !VALID_GRADES.includes(grade.toUpperCase())
+    )
     if (invalidGrades.length > 0) {
       toast({
         title: "Invalid Grades",
-        description: `Please enter valid grades (${VALID_GRADES.slice(0, 5).join(', ')}, etc.)`,
+        description: "Please use valid letter grades (A, B+, C, etc.)",
         variant: "destructive",
       })
       return
@@ -181,8 +209,6 @@ export function GradesTab() {
     setSaving(true)
     try {
       const token = localStorage.getItem('auth_token')
-
-      // Filter out empty grades
       const gradesToSubmit = Object.fromEntries(
         Object.entries(grades).filter(([_, grade]) => grade && grade.trim() !== '')
       )
@@ -217,47 +243,27 @@ export function GradesTab() {
       }
 
       toast({
-        title: "Success",
-        description: data.message || `Successfully saved ${data.data.successful} grades`,
+        title: "Grades Saved",
+        description: `Successfully saved ${data.data.successful} grades`,
       })
 
-      // Refresh enrollments and progress
       await fetchEnrollments(selectedSection)
       await fetchGradingProgress(selectedSection)
-
-      // Show any errors
-      if (data.data.failed && Object.keys(data.data.failed).length > 0) {
-        const failedCount = Object.keys(data.data.failed).length
-        toast({
-          title: "Partial Success",
-          description: `${failedCount} grade(s) failed to save. Check the console for details.`,
-          variant: "destructive",
-        })
-        console.error('Failed grades:', data.data.failed)
-      }
+      await fetchGradeDistribution(selectedSection)
     } catch (err: any) {
       toast({
         title: "Error",
         description: err.message || "Failed to save grades",
         variant: "destructive",
       })
-      console.error(err)
     } finally {
       setSaving(false)
     }
   }
 
   const handleExportGrades = () => {
-    if (!selectedSection || enrollments.length === 0) {
-      toast({
-        title: "No Data",
-        description: "Please select a section with students first",
-        variant: "destructive",
-      })
-      return
-    }
+    if (!selectedSection || enrollments.length === 0) return
 
-    // Create CSV
     const headers = ['Student ID', 'Name', 'Email', 'Grade', 'Status']
     const rows = enrollments.map(enrollment => [
       enrollment.student.student_id,
@@ -272,7 +278,6 @@ export function GradesTab() {
       ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
     ].join('\n')
 
-    // Download
     const blob = new Blob([csv], { type: 'text/csv' })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -289,175 +294,198 @@ export function GradesTab() {
 
   const selectedSectionData = sections.find(s => s.id.toString() === selectedSection)
 
+  // Prepare chart data
+  const chartData = distribution ?
+    ['A', 'B', 'C', 'D', 'F'].map(grade => ({
+      grade,
+      count: (distribution.distribution[`${grade}+`]?.count || 0) +
+             (distribution.distribution[grade]?.count || 0) +
+             (distribution.distribution[`${grade}-`]?.count || 0)
+    })).filter(d => d.count > 0) : []
+
   return (
     <div className="space-y-6">
-      {/* Section Selector */}
-      <div className="flex items-center gap-4">
-        <div className="flex-1 max-w-md">
-          <Select value={selectedSection} onValueChange={setSelectedSection}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a course section" />
-            </SelectTrigger>
-            <SelectContent>
-              {sections.map((section) => (
-                <SelectItem key={section.id} value={section.id.toString()}>
-                  {section.course.course_code} - {section.course.course_name} (Section {section.section_number})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Gradebook</h2>
+          <p className="text-muted-foreground">Manage student grades and track progress</p>
         </div>
         {selectedSection && (
-          <div className="flex gap-2 ml-auto">
-            <Button variant="outline" size="sm" onClick={handleExportGrades}>
-              <Download className="mr-2 h-4 w-4" />
-              Export CSV
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleExportGrades} className="gap-2">
+              <Download className="h-4 w-4" />
+              Export
+            </Button>
+            <Button onClick={handleSaveGrades} disabled={saving} className="gap-2">
+              <Save className="h-4 w-4" />
+              {saving ? 'Saving...' : 'Save Grades'}
             </Button>
           </div>
         )}
       </div>
 
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+      {/* Section Selector */}
+      <Card>
+        <CardContent className="pt-6">
+          <Select value={selectedSection} onValueChange={setSelectedSection}>
+            <SelectTrigger className="w-full max-w-md">
+              <SelectValue placeholder="Select a course section" />
+            </SelectTrigger>
+            <SelectContent>
+              {sections.map((section) => (
+                <SelectItem key={section.id} value={section.id.toString()}>
+                  {section.course.course_code} - {section.course.course_name} (Sec {section.section_number})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
 
-      {/* Grading Progress */}
-      {progress && selectedSection && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-base">Grading Progress</CardTitle>
-                <CardDescription>
-                  {progress.graded} of {progress.total} students graded
-                </CardDescription>
-              </div>
-              {progress.is_complete ? (
-                <Badge className="bg-green-500">
-                  <CheckCircle2 className="mr-1 h-3 w-3" />
-                  Complete
-                </Badge>
-              ) : (
-                <Badge variant="secondary">
-                  <Clock className="mr-1 h-3 w-3" />
-                  In Progress
-                </Badge>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Progress value={progress.percentage} className="h-2" />
-            <p className="text-xs text-muted-foreground mt-2">
-              {progress.pending} grade{progress.pending !== 1 ? 's' : ''} remaining
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Gradebook */}
       {selectedSection && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Gradebook</CardTitle>
-                {selectedSectionData && (
-                  <CardDescription>
-                    {selectedSectionData.course.course_code} - {selectedSectionData.term.name}
-                  </CardDescription>
-                )}
-              </div>
-              <Button onClick={handleSaveGrades} disabled={saving}>
-                <Save className="mr-2 h-4 w-4" />
-                {saving ? 'Saving...' : 'Save Grades'}
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">Loading students...</p>
-              </div>
-            ) : enrollments.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No students enrolled in this section</p>
-              </div>
-            ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-32">Student ID</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead className="w-64">Email</TableHead>
-                      <TableHead className="w-32">Current Grade</TableHead>
-                      <TableHead className="w-32">New Grade</TableHead>
-                      <TableHead className="w-24">Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {enrollments.map((enrollment) => (
-                      <TableRow key={enrollment.id}>
-                        <TableCell className="font-mono text-sm">
-                          {enrollment.student.student_id}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {enrollment.student.user.name}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {enrollment.student.user.email}
-                        </TableCell>
-                        <TableCell>
-                          {enrollment.grade ? (
-                            <Badge variant="secondary">{enrollment.grade}</Badge>
-                          ) : (
-                            <span className="text-muted-foreground text-sm">—</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            value={grades[enrollment.id] || ''}
-                            onChange={(e) => handleGradeChange(enrollment.id, e.target.value)}
-                            placeholder="A, B+, etc."
-                            className="w-24 uppercase"
-                            maxLength={3}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              enrollment.status === 'completed'
-                                ? 'default'
-                                : enrollment.status === 'enrolled'
-                                ? 'secondary'
-                                : 'outline'
-                            }
-                          >
-                            {enrollment.status}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+        <>
+          {/* Stats Row */}
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Students</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{progress?.total || 0}</div>
+              </CardContent>
+            </Card>
 
-            {enrollments.length > 0 && (
-              <div className="mt-4 text-sm text-muted-foreground">
-                <p>
-                  <strong>Valid grades:</strong> {VALID_GRADES.join(', ')}
-                </p>
-                <p className="mt-1">
-                  Enter grades in the "New Grade" column and click "Save Grades" to submit
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Grading Progress</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3">
+                  <div className="text-3xl font-bold">{progress?.graded || 0}/{progress?.total || 0}</div>
+                  {progress?.is_complete ? (
+                    <Badge className="bg-green-500 gap-1">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Complete
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="gap-1">
+                      <Clock className="h-3 w-3" />
+                      {progress?.pending || 0} pending
+                    </Badge>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Average GPA</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  {distribution?.average_gpa ? distribution.average_gpa.toFixed(2) : '—'}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Grade Distribution Chart */}
+          {chartData.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Grade Distribution</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={chartData}>
+                    <XAxis dataKey="grade" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                      {chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={GRADE_COLORS[entry.grade] || '#94a3b8'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Gradebook Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Student Grades</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="text-center py-8 text-muted-foreground">Loading...</div>
+              ) : enrollments.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">No students enrolled</div>
+              ) : (
+                <div className="border rounded-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/50">
+                        <TableHead className="w-32">Student ID</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead className="w-32">Current</TableHead>
+                        <TableHead className="w-32">New Grade</TableHead>
+                        <TableHead className="w-24 text-center">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {enrollments.map((enrollment) => (
+                        <TableRow key={enrollment.id} className="hover:bg-muted/30 transition-colors">
+                          <TableCell className="font-mono text-sm">
+                            {enrollment.student.student_id}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {enrollment.student.user.name}
+                          </TableCell>
+                          <TableCell>
+                            {enrollment.grade ? (
+                              <Badge
+                                variant="outline"
+                                className="font-mono"
+                                style={{
+                                  borderColor: GRADE_COLORS[enrollment.grade],
+                                  color: GRADE_COLORS[enrollment.grade]
+                                }}
+                              >
+                                {enrollment.grade}
+                              </Badge>
+                            ) : (
+                              <span className="text-muted-foreground text-sm">—</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              value={grades[enrollment.id] || ''}
+                              onChange={(e) => handleGradeChange(enrollment.id, e.target.value)}
+                              placeholder="A, B+..."
+                              className="w-24 uppercase font-mono"
+                              maxLength={3}
+                            />
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge
+                              variant={enrollment.status === 'completed' ? 'default' : 'secondary'}
+                              className="text-xs"
+                            >
+                              {enrollment.status}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </>
       )}
 
       {!selectedSection && (
@@ -465,7 +493,7 @@ export function GradesTab() {
           <CardContent className="pt-6">
             <div className="text-center py-12">
               <p className="text-muted-foreground">
-                Select a course section above to view and manage grades
+                Select a course section above to manage grades
               </p>
             </div>
           </CardContent>

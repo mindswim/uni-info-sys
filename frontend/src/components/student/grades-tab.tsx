@@ -1,13 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Award, TrendingUp, BookOpen, AlertCircle } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Progress } from "@/components/ui/progress"
+import { Award, TrendingUp, BookOpen } from "lucide-react"
 
 interface Enrollment {
   id: number
@@ -32,29 +30,12 @@ interface Enrollment {
   }
 }
 
-interface AcademicRecord {
-  id: number
-  term: {
-    name: string
-  }
-  gpa: number
-  credits_attempted: number
-  credits_earned: number
-}
-
-const getGradeColor = (grade: string): string => {
-  const letterGrade = grade.replace('+', '').replace('-', '')
-  switch (letterGrade) {
-    case 'A': return 'bg-green-500 text-white'
-    case 'B': return 'bg-blue-500 text-white'
-    case 'C': return 'bg-yellow-500 text-white'
-    case 'D': return 'bg-orange-500 text-white'
-    case 'F': return 'bg-red-500 text-white'
-    case 'P': return 'bg-green-500 text-white'
-    case 'W': return 'bg-gray-500 text-white'
-    case 'I': return 'bg-purple-500 text-white'
-    default: return 'bg-gray-500 text-white'
-  }
+const GRADE_COLORS: Record<string, string> = {
+  'A+': '#22c55e', 'A': '#22c55e', 'A-': '#22c55e',
+  'B+': '#3b82f6', 'B': '#3b82f6', 'B-': '#3b82f6',
+  'C+': '#eab308', 'C': '#eab308', 'C-': '#eab308',
+  'D+': '#f97316', 'D': '#f97316', 'D-': '#f97316',
+  'F': '#ef4444'
 }
 
 const getGradePoints = (grade: string): number | null => {
@@ -70,7 +51,6 @@ const getGradePoints = (grade: string): number | null => {
 
 export function GradesTab() {
   const [enrollments, setEnrollments] = useState<Enrollment[]>([])
-  const [academicRecords, setAcademicRecords] = useState<AcademicRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -84,7 +64,6 @@ export function GradesTab() {
     try {
       const token = localStorage.getItem('auth_token')
 
-      // Fetch student's enrollments
       const enrollmentsResponse = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/enrollments/me`,
         {
@@ -99,22 +78,6 @@ export function GradesTab() {
 
       const enrollmentsData = await enrollmentsResponse.json()
       setEnrollments(enrollmentsData.data || [])
-
-      // Fetch academic records
-      const recordsResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/students/me/academic-records`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-          },
-        }
-      )
-
-      if (recordsResponse.ok) {
-        const recordsData = await recordsResponse.json()
-        setAcademicRecords(recordsData.data || [])
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load grades')
       console.error(err)
@@ -125,7 +88,7 @@ export function GradesTab() {
 
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         <Skeleton className="h-32 w-full" />
         <Skeleton className="h-64 w-full" />
       </div>
@@ -134,14 +97,15 @@ export function GradesTab() {
 
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
+      <Card>
+        <CardContent className="pt-6">
+          <p className="text-sm text-destructive">{error}</p>
+        </CardContent>
+      </Card>
     )
   }
 
-  // Calculate overall statistics
+  // Calculate statistics
   const completedEnrollments = enrollments.filter(e => e.status === 'completed' && e.grade !== null)
   const inProgressEnrollments = enrollments.filter(e => e.status === 'enrolled')
 
@@ -185,56 +149,70 @@ export function GradesTab() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Academic Progress</h2>
+        <p className="text-muted-foreground">Track your grades and GPA across all terms</p>
+      </div>
+
       {/* Summary Stats */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Cumulative GPA</CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Cumulative GPA</CardTitle>
+              <Award className="h-4 w-4 text-muted-foreground" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{cumulativeGPA}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-3xl font-bold">{cumulativeGPA}</div>
+            <p className="text-xs text-muted-foreground mt-1">
               {totalCreditsForGPA} graded credits
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Credits Earned</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Credits Earned</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalCreditsEarned}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-3xl font-bold">{totalCreditsEarned}</div>
+            <p className="text-xs text-muted-foreground mt-1">
               of {totalCreditsAttempted} attempted
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Courses Completed</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{completedEnrollments.length}</div>
-            <p className="text-xs text-muted-foreground">
-              With final grades
+            <div className="text-3xl font-bold">{completedEnrollments.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              courses with grades
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">In Progress</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{inProgressEnrollments.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Current semester
+            <div className="text-3xl font-bold">{inProgressEnrollments.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              current courses
             </p>
           </CardContent>
         </Card>
@@ -244,7 +222,6 @@ export function GradesTab() {
       {sortedTerms.map((termName) => {
         const termEnrollments = enrollmentsByTerm[termName]
         const termCompleted = termEnrollments.filter(e => e.grade !== null)
-        const termInProgress = termEnrollments.filter(e => e.grade === null && e.status === 'enrolled')
 
         // Calculate term GPA
         let termGradePoints = 0
@@ -259,7 +236,6 @@ export function GradesTab() {
         const termGPA = termCredits > 0 ? (termGradePoints / termCredits).toFixed(2) : null
 
         const termCreditsTotal = termEnrollments.reduce((sum, e) => sum + e.course_section.course.credits, 0)
-        const gradingProgress = termEnrollments.length > 0 ? (termCompleted.length / termEnrollments.length) * 100 : 0
 
         return (
           <Card key={termName}>
@@ -267,36 +243,31 @@ export function GradesTab() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>{termName}</CardTitle>
-                  <CardDescription className="mt-1">
-                    {termEnrollments.length} course{termEnrollments.length !== 1 ? 's' : ''} • {termCreditsTotal} credits
-                    {termGPA && ` • Term GPA: ${termGPA}`}
-                  </CardDescription>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {termEnrollments.length} course{termEnrollments.length !== 1 ? 's' : ''} · {termCreditsTotal} credits
+                    {termGPA && ` · GPA: ${termGPA}`}
+                  </p>
                 </div>
-                {termInProgress.length > 0 && (
-                  <Badge variant="secondary">
-                    {termCompleted.length}/{termEnrollments.length} Graded
-                  </Badge>
-                )}
+                <Badge variant="outline" className="text-xs">
+                  {termCompleted.length}/{termEnrollments.length} graded
+                </Badge>
               </div>
-              {termInProgress.length > 0 && (
-                <Progress value={gradingProgress} className="h-1 mt-2" />
-              )}
             </CardHeader>
             <CardContent>
-              <div className="rounded-md border">
+              <div className="border rounded-lg">
                 <Table>
                   <TableHeader>
-                    <TableRow>
+                    <TableRow className="bg-muted/50">
                       <TableHead>Course</TableHead>
                       <TableHead>Title</TableHead>
-                      <TableHead className="text-center">Credits</TableHead>
-                      <TableHead className="text-center">Grade</TableHead>
-                      <TableHead className="text-center">Status</TableHead>
+                      <TableHead className="text-center w-24">Credits</TableHead>
+                      <TableHead className="text-center w-24">Grade</TableHead>
+                      <TableHead className="text-center w-24">Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {termEnrollments.map((enrollment) => (
-                      <TableRow key={enrollment.id}>
+                      <TableRow key={enrollment.id} className="hover:bg-muted/30 transition-colors">
                         <TableCell className="font-mono font-medium">
                           {enrollment.course_section.course.course_code}
                         </TableCell>
@@ -308,7 +279,15 @@ export function GradesTab() {
                         </TableCell>
                         <TableCell className="text-center">
                           {enrollment.grade ? (
-                            <Badge className={getGradeColor(enrollment.grade)}>
+                            <Badge
+                              variant="outline"
+                              className="font-mono font-semibold"
+                              style={{
+                                borderColor: GRADE_COLORS[enrollment.grade],
+                                color: GRADE_COLORS[enrollment.grade],
+                                backgroundColor: `${GRADE_COLORS[enrollment.grade]}10`
+                              }}
+                            >
                               {enrollment.grade}
                             </Badge>
                           ) : (
@@ -317,15 +296,8 @@ export function GradesTab() {
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge
-                            variant={
-                              enrollment.status === 'completed'
-                                ? 'default'
-                                : enrollment.status === 'enrolled'
-                                ? 'secondary'
-                                : enrollment.status === 'withdrawn'
-                                ? 'outline'
-                                : 'secondary'
-                            }
+                            variant={enrollment.status === 'completed' ? 'default' : 'secondary'}
+                            className="text-xs"
                           >
                             {enrollment.status}
                           </Badge>
@@ -345,7 +317,7 @@ export function GradesTab() {
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground">
                 No course enrollments found. Enroll in courses to see your grades here.
               </p>
             </div>

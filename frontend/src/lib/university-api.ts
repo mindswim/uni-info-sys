@@ -645,18 +645,19 @@ export class UniversityAPI {
     programs: number
   }> {
     await delay(400)
-    
+
     try {
-      // Use data viewer for public stats
+      // Use paginated API endpoints to get counts from metadata
+      // We just fetch the first page to get the total count from meta
       const [studentsRes, staffRes, coursesRes, enrollmentsRes, applicationsRes, facultiesRes, departmentsRes, programsRes] = await Promise.all([
-        fetch(`${DATA_VIEWER_URL}/students`),
-        fetch(`${DATA_VIEWER_URL}/staff`),
-        fetch(`${DATA_VIEWER_URL}/courses`),
-        fetch(`${DATA_VIEWER_URL}/enrollments`),
-        fetch(`${DATA_VIEWER_URL}/admission_applications`),
-        fetch(`${DATA_VIEWER_URL}/faculties`),
-        fetch(`${DATA_VIEWER_URL}/departments`),
-        fetch(`${DATA_VIEWER_URL}/programs`)
+        authService.apiRequest('/students?per_page=1'),
+        authService.apiRequest('/staff?per_page=1'),
+        authService.apiRequest('/courses?per_page=1'),
+        authService.apiRequest('/enrollments?per_page=1'),
+        authService.apiRequest('/admission-applications?per_page=1'),
+        authService.apiRequest('/faculties?per_page=1'),
+        authService.apiRequest('/departments?per_page=1'),
+        authService.apiRequest('/programs?per_page=1')
       ])
 
       const [students, staff, courses, enrollments, applications, faculties, departments, programs] = await Promise.all([
@@ -671,14 +672,14 @@ export class UniversityAPI {
       ])
 
       return {
-        students: students.stats.total_records,
-        staff: staff.stats.total_records,
-        courses: courses.stats.total_records,
-        enrollments: enrollments.stats.total_records,
-        applications: applications.stats.total_records,
-        faculties: faculties.stats.total_records,
-        departments: departments.stats.total_records,
-        programs: programs.stats.total_records
+        students: students.meta?.total || students.data?.length || 0,
+        staff: staff.meta?.total || staff.data?.length || 0,
+        courses: courses.meta?.total || courses.data?.length || 0,
+        enrollments: enrollments.meta?.total || enrollments.data?.length || 0,
+        applications: applications.meta?.total || applications.data?.length || 0,
+        faculties: faculties.meta?.total || faculties.data?.length || 0,
+        departments: departments.meta?.total || departments.data?.length || 0,
+        programs: programs.meta?.total || programs.data?.length || 0
       }
     } catch (error) {
       console.error('Error fetching system stats:', error)

@@ -89,7 +89,7 @@ const transformStudentToProfile = (student: Student): StudentProfile => ({
 })
 
 export default function ProfilePage() {
-  const { user } = useAuth()
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const [profile, setProfile] = useState<StudentProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -99,6 +99,22 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const loadProfile = async () => {
+      // Don't load if not authenticated
+      if (!isAuthenticated || authLoading) {
+        setLoading(false)
+        return
+      }
+
+      // Check if user is a student
+      const isStudent = user?.roles?.some(r => r.name === 'student') || user?.role === 'student'
+
+      if (!isStudent) {
+        // For non-student users, show a message
+        setError('Profile page is only available for student accounts. You are logged in as a staff/admin user.')
+        setLoading(false)
+        return
+      }
+
       try {
         setLoading(true)
         setError(null)
@@ -115,7 +131,7 @@ export default function ProfilePage() {
     }
 
     loadProfile()
-  }, [])
+  }, [isAuthenticated, authLoading, user])
 
   const handleSave = async () => {
     if (!editedProfile || !profile) return
@@ -148,7 +164,7 @@ export default function ProfilePage() {
     setEditing(false)
   }
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <AppShell breadcrumbs={breadcrumbs}>
         <div className="container mx-auto py-6">
@@ -164,14 +180,71 @@ export default function ProfilePage() {
     )
   }
 
-  if (error) {
+  if (!isAuthenticated) {
     return (
       <AppShell breadcrumbs={breadcrumbs}>
         <div className="container mx-auto py-6">
           <Alert>
             <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Please log in to view your profile.
+            </AlertDescription>
+          </Alert>
+        </div>
+      </AppShell>
+    )
+  }
+
+  if (error) {
+    const isNotStudentError = error.includes('staff/admin')
+
+    return (
+      <AppShell breadcrumbs={breadcrumbs}>
+        <div className="container mx-auto py-6 space-y-6">
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
+
+          {isNotStudentError && user && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  User Information
+                </CardTitle>
+                <CardDescription>Your current account details</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-muted-foreground">Name</Label>
+                    <p className="font-medium">{user.name}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Email</Label>
+                    <p className="font-medium">{user.email}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Role</Label>
+                    <Badge variant="secondary">
+                      {user.roles?.[0]?.name || user.role || 'User'}
+                    </Badge>
+                  </div>
+                </div>
+                {user.roles && user.roles.length > 1 && (
+                  <div>
+                    <Label className="text-muted-foreground mb-2 block">All Roles</Label>
+                    <div className="flex gap-2 flex-wrap">
+                      {user.roles.map((role, idx) => (
+                        <Badge key={idx} variant="outline">{role.name}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
       </AppShell>
     )

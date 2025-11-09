@@ -28,7 +28,7 @@ class AuthService {
   constructor() {
     // Initialize from localStorage on client-side
     if (typeof window !== 'undefined') {
-      this.token = localStorage.getItem('auth_token')
+      this.token = sessionStorage.getItem('auth_token')
       const userData = localStorage.getItem('auth_user')
       this.user = userData ? JSON.parse(userData) : null
     }

@@ -64,7 +64,7 @@ export const getAuthHeaders = (token?: string | null): HeadersInit => {
     'Accept': 'application/json',
   }
 
-  const authToken = token || (typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null)
+  const authToken = token || (typeof window !== 'undefined' ? sessionStorage.getItem('auth_token') : null)
 
   if (authToken) {
     headers['Authorization'] = `Bearer ${authToken}`

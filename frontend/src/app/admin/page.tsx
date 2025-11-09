@@ -5,11 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Users, UserCheck, GraduationCap, BarChart, TrendingUp, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
+import { WelcomeCard } from '@/components/admin/welcome-card'
 
 export default function AdminOverviewPage() {
   return (
     <AppShell>
       <div className="flex flex-col gap-6 p-6">
+        {/* Welcome Card */}
+        <WelcomeCard />
+
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>

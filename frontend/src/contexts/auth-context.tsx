@@ -33,22 +33,22 @@ const AUTH_CONFIG = {
   TOKEN_EXPIRY_HOURS: 24,
 }
 
-// Helper functions
+// Helper functions - Using sessionStorage so auth clears on browser/server restart
 const storage = {
   setToken: (token: string) => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(AUTH_CONFIG.TOKEN_KEY, token)
+      sessionStorage.setItem(AUTH_CONFIG.TOKEN_KEY, token)
       // Set expiry time (24 hours from now)
       const expiry = new Date().getTime() + (AUTH_CONFIG.TOKEN_EXPIRY_HOURS * 60 * 60 * 1000)
-      localStorage.setItem(AUTH_CONFIG.TOKEN_EXPIRY_KEY, expiry.toString())
+      sessionStorage.setItem(AUTH_CONFIG.TOKEN_EXPIRY_KEY, expiry.toString())
     }
   },
 
   getToken: (): string | null => {
     if (typeof window === 'undefined') return null
 
-    const token = localStorage.getItem(AUTH_CONFIG.TOKEN_KEY)
-    const expiry = localStorage.getItem(AUTH_CONFIG.TOKEN_EXPIRY_KEY)
+    const token = sessionStorage.getItem(AUTH_CONFIG.TOKEN_KEY)
+    const expiry = sessionStorage.getItem(AUTH_CONFIG.TOKEN_EXPIRY_KEY)
 
     // Check if token is expired
     if (token && expiry) {
@@ -65,14 +65,14 @@ const storage = {
 
   setUser: (user: User) => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(AUTH_CONFIG.USER_KEY, JSON.stringify(user))
+      sessionStorage.setItem(AUTH_CONFIG.USER_KEY, JSON.stringify(user))
     }
   },
 
   getUser: (): User | null => {
     if (typeof window === 'undefined') return null
 
-    const userStr = localStorage.getItem(AUTH_CONFIG.USER_KEY)
+    const userStr = sessionStorage.getItem(AUTH_CONFIG.USER_KEY)
     if (!userStr) return null
 
     try {
@@ -84,9 +84,9 @@ const storage = {
 
   clearAuth: () => {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem(AUTH_CONFIG.TOKEN_KEY)
-      localStorage.removeItem(AUTH_CONFIG.USER_KEY)
-      localStorage.removeItem(AUTH_CONFIG.TOKEN_EXPIRY_KEY)
+      sessionStorage.removeItem(AUTH_CONFIG.TOKEN_KEY)
+      sessionStorage.removeItem(AUTH_CONFIG.USER_KEY)
+      sessionStorage.removeItem(AUTH_CONFIG.TOKEN_EXPIRY_KEY)
     }
   }
 }
@@ -139,13 +139,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Invalid response from server')
       }
 
-      // Store auth data in localStorage for client-side access
+      // Store auth data in sessionStorage for client-side access
       // Cookie is already set by the API route for middleware
       storage.setToken(data.token)
-      storage.setUser(data.user)
 
+      // Set token first so refreshUser can use it
       setToken(data.token)
       setUser(data.user)
+      storage.setUser(data.user)
+
+      // Fetch real roles and permissions from backend
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost'
+      const rolesResponse = await fetch(`${apiUrl}/api/v1/users/${data.user.id}/roles`, {
+        headers: {
+          'Authorization': `Bearer ${data.token}`,
+          'Accept': 'application/json',
+        },
+      }).catch(() => null)
+
+      if (rolesResponse && rolesResponse.ok) {
+        const rolesData = await rolesResponse.json()
+        const enrichedUser = {
+          ...data.user,
+          roles: rolesData.data || rolesData,
+        }
+
+        // Extract all permissions from roles
+        const permissions = new Set<string>()
+        enrichedUser.roles?.forEach((role: any) => {
+          role.permissions?.forEach((permission: any) => {
+            permissions.add(permission.name || permission)
+          })
+        })
+        enrichedUser.permissions = Array.from(permissions)
+
+        storage.setUser(enrichedUser)
+        setUser(enrichedUser)
+      }
     } catch (error) {
       console.error('Login error:', error)
       throw error
@@ -158,12 +188,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       method: 'POST',
     }).catch(err => console.error('Logout API error:', err))
 
-    // Clear local storage
+    // Clear session storage
     storage.clearAuth()
 
     // Clear state
     setToken(null)
     setUser(null)
+
+    // Redirect to login page
+    if (typeof window !== 'undefined') {
+      window.location.href = '/auth/login'
+    }
   }
 
   const refreshUser = async () => {
@@ -172,6 +207,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost'
 
+      // Fetch user data with roles and permissions
       const response = await fetch(`${apiUrl}/api/v1/user`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -181,7 +217,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (response.ok) {
         const userData = await response.json()
-        const user = userData.data || userData
+        let user = userData.data || userData
+
+        // Fetch user's roles with permissions
+        const rolesResponse = await fetch(`${apiUrl}/api/v1/users/${user.id}/roles`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+          },
+        }).catch(() => null)
+
+        if (rolesResponse && rolesResponse.ok) {
+          const rolesData = await rolesResponse.json()
+          user.roles = rolesData.data || rolesData
+
+          // Extract all permissions from roles
+          const permissions = new Set<string>()
+          user.roles?.forEach((role: any) => {
+            role.permissions?.forEach((permission: any) => {
+              permissions.add(permission.name || permission)
+            })
+          })
+          user.permissions = Array.from(permissions)
+        }
+
         storage.setUser(user)
         setUser(user)
       } else if (response.status === 401) {

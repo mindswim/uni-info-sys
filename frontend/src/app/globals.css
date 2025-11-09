@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "tw-animate-css";
+/* @import "tw-animate-css"; */ /* Disabled to remove dropdown animations */
 
 /* Import design system files */
 @import '../styles/design-tokens.css';
@@ -227,8 +227,8 @@
   .shadow-lg { box-shadow: var(--shadow-lg); }
   .shadow-xl { box-shadow: var(--shadow-xl); }
 
-  /* Apply theme transitions */
-  * {
+  /* Apply theme transitions - disabled for dropdowns */
+  /* * {
     transition-duration: var(--duration-200, 200ms);
-  }
+  } */
 }

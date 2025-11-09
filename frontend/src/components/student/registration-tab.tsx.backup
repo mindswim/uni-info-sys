@@ -19,14 +19,9 @@ import {
   Plus,
   Loader2,
   Filter,
-  RefreshCw,
-  ShoppingCart,
-  X,
-  AlertTriangle,
-  Check
+  RefreshCw
 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Separator } from "@/components/ui/separator"
 
 interface CourseSection {
   id: number
@@ -72,15 +67,11 @@ export function RegistrationTab() {
   const { toast } = useToast()
   const [sections, setSections] = useState<CourseSection[]>([])
   const [loading, setLoading] = useState(true)
-  const [enrolling, setEnrolling] = useState(false)
+  const [enrolling, setEnrolling] = useState<number | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedTerm, setSelectedTerm] = useState<string>("all")
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all")
   const [availableTerms, setAvailableTerms] = useState<any[]>([])
-
-  // Shopping cart state
-  const [cart, setCart] = useState<CourseSection[]>([])
-  const [showCart, setShowCart] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -89,7 +80,7 @@ export function RegistrationTab() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const token = sessionStorage.getItem('auth_token')
+      const token = localStorage.getItem('auth_token')
 
       // Fetch available course sections
       const sectionsResponse = await fetch(
@@ -113,14 +104,14 @@ export function RegistrationTab() {
               JSON.stringify({ id: s.term.id, name: s.term.name, year: s.term.academic_year })
             )
           )
-        ).map(t => JSON.parse(t))
+        ).map(str => JSON.parse(str as string))
         setAvailableTerms(terms)
       }
     } catch (error) {
-      console.error('Failed to fetch courses:', error)
+      console.error('Failed to fetch course data:', error)
       toast({
         title: "Error",
-        description: "Failed to load available courses",
+        description: "Failed to load courses",
         variant: "destructive",
       })
     } finally {
@@ -128,83 +119,11 @@ export function RegistrationTab() {
     }
   }
 
-  // Cart functions
-  const addToCart = (section: CourseSection) => {
-    if (cart.find(s => s.id === section.id)) {
-      toast({
-        title: "Already in Cart",
-        description: "This course is already in your cart",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setCart([...cart, section])
-    toast({
-      title: "Added to Cart",
-      description: `${section.course.course_code} - ${section.course.course_name}`,
-    })
-  }
-
-  const removeFromCart = (sectionId: number) => {
-    setCart(cart.filter(s => s.id !== sectionId))
-  }
-
-  const clearCart = () => {
-    setCart([])
-  }
-
-  const detectScheduleConflicts = (): boolean => {
-    const schedules = cart
-      .filter(s => s.schedule_days && s.schedule_time)
-      .map(s => ({ id: s.id, days: s.schedule_days, time: s.schedule_time }))
-
-    for (let i = 0; i < schedules.length; i++) {
-      for (let j = i + 1; j < schedules.length; j++) {
-        const s1 = schedules[i]
-        const s2 = schedules[j]
-
-        // Check if days overlap
-        const days1 = s1.days.split(',').map(d => d.trim())
-        const days2 = s2.days.split(',').map(d => d.trim())
-        const hasCommonDay = days1.some(d => days2.includes(d))
-
-        if (hasCommonDay) {
-          // Simple time overlap check (this is a basic implementation)
-          // In production, you'd want more robust time parsing
-          if (s1.time === s2.time) {
-            return true
-          }
-        }
-      }
-    }
-
-    return false
-  }
-
-  const handleBulkEnroll = async () => {
-    if (cart.length === 0) {
-      toast({
-        title: "Cart is Empty",
-        description: "Add courses to your cart before enrolling",
-        variant: "destructive",
-      })
-      return
-    }
-
-    if (detectScheduleConflicts()) {
-      toast({
-        title: "Schedule Conflict Detected",
-        description: "You have courses with overlapping schedules in your cart",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setEnrolling(true)
+  const handleEnroll = async (sectionId: number) => {
+    setEnrolling(sectionId)
 
     try {
-      const token = sessionStorage.getItem('auth_token')
+      const token = localStorage.getItem('auth_token')
 
       // Get student profile to get student ID
       const studentResponse = await fetch(
@@ -222,53 +141,46 @@ export function RegistrationTab() {
       const studentData = await studentResponse.json()
       const studentId = studentData.data.id
 
-      // Enroll in each course
-      const results = await Promise.allSettled(
-        cart.map(section =>
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/enrollments`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: JSON.stringify({
-              student_id: studentId,
-              course_section_id: section.id,
-              enrollment_date: new Date().toISOString()
-            }),
-          }).then(async res => {
-            if (!res.ok) {
-              const error = await res.json()
-              throw new Error(error.message || 'Failed to enroll')
-            }
-            return res.json()
-          })
-        )
+      // Enroll in the course
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/enrollments`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({
+            student_id: studentId,
+            course_section_id: sectionId,
+            enrollment_date: new Date().toISOString()
+          }),
+        }
       )
 
-      const successful = results.filter(r => r.status === 'fulfilled').length
-      const failed = results.filter(r => r.status === 'rejected').length
+      const result = await response.json()
 
-      if (successful > 0) {
-        toast({
-          title: "Enrollment Complete!",
-          description: `Successfully enrolled in ${successful} course${successful !== 1 ? 's' : ''}${failed > 0 ? `. ${failed} failed.` : ''}`,
-        })
-        clearCart()
-        fetchData()
-      } else {
-        throw new Error('All enrollments failed')
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to enroll')
       }
+
+      toast({
+        title: "Enrollment Successful!",
+        description: result.message || "You have been enrolled in the course.",
+      })
+
+      // Refresh course data to update enrollment counts
+      fetchData()
     } catch (error: any) {
       console.error('Enrollment error:', error)
       toast({
         title: "Enrollment Failed",
-        description: error.message || "Failed to enroll in courses. Please try again.",
+        description: error.message || "Failed to enroll in course. Please try again.",
         variant: "destructive",
       })
     } finally {
-      setEnrolling(false)
+      setEnrolling(null)
     }
   }
 
@@ -290,9 +202,6 @@ export function RegistrationTab() {
     new Set(sections.map(s => s.course.department.name))
   ).sort()
 
-  const totalCredits = cart.reduce((sum, s) => sum + s.course.credits, 0)
-  const hasConflicts = detectScheduleConflicts()
-
   if (loading) {
     return (
       <div className="space-y-4">
@@ -304,113 +213,10 @@ export function RegistrationTab() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Course Registration</h2>
-          <p className="text-muted-foreground">Browse and add courses to your cart</p>
-        </div>
-        <Button
-          variant={cart.length > 0 ? "default" : "outline"}
-          onClick={() => setShowCart(!showCart)}
-          className="relative"
-        >
-          <ShoppingCart className="h-4 w-4 mr-2" />
-          Cart ({cart.length})
-          {cart.length > 0 && (
-            <Badge className="ml-2" variant="secondary">
-              {totalCredits} credits
-            </Badge>
-          )}
-        </Button>
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Course Registration</h2>
+        <p className="text-muted-foreground">Browse and enroll in available courses</p>
       </div>
-
-      {/* Shopping Cart Panel */}
-      {showCart && (
-        <Card className="border-primary">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Shopping Cart</CardTitle>
-                <CardDescription>
-                  {cart.length} course{cart.length !== 1 ? 's' : ''} selected ({totalCredits} credits)
-                </CardDescription>
-              </div>
-              <div className="flex items-center gap-2">
-                {cart.length > 0 && (
-                  <Button variant="outline" size="sm" onClick={clearCart}>
-                    Clear All
-                  </Button>
-                )}
-                <Button
-                  onClick={handleBulkEnroll}
-                  disabled={enrolling || cart.length === 0 || hasConflicts}
-                >
-                  {enrolling ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Enrolling...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Enroll in All ({cart.length})
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {cart.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <ShoppingCart className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Your cart is empty</p>
-                <p className="text-sm mt-1">Add courses below to get started</p>
-              </div>
-            ) : (
-              <>
-                {hasConflicts && (
-                  <Alert variant="destructive" className="mb-4">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription>
-                      Schedule conflict detected! Some courses have overlapping times.
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                <div className="space-y-2">
-                  {cart.map((section) => (
-                    <div
-                      key={section.id}
-                      className="flex items-center justify-between p-3 border rounded-lg"
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">
-                            {section.course.course_code} - {section.course.course_name}
-                          </p>
-                          <Badge variant="outline">Section {section.section_number}</Badge>
-                          <Badge variant="secondary">{section.course.credits} credits</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {section.schedule_display || 'TBA'} • {section.term.name}
-                        </p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeFromCart(section.id)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      )}
 
       {/* Filters */}
       <Card>
@@ -490,13 +296,12 @@ export function RegistrationTab() {
             const spotsAvailable = section.capacity - section.enrolled_count
             const isFull = spotsAvailable <= 0
             const isAlmostFull = spotsAvailable > 0 && spotsAvailable <= 5
-            const isInCart = cart.find(s => s.id === section.id)
 
             return (
-              <Card key={section.id} className={`hover:shadow-md transition-shadow ${isInCart ? 'border-primary' : ''}`}>
+              <Card key={section.id} className="hover:shadow-md transition-shadow">
                 <CardHeader>
                   <div className="flex items-start justify-between">
-                    <div className="space-y-1 flex-1">
+                    <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <CardTitle className="text-xl">
                           {section.course.course_code} - {section.course.course_name}
@@ -504,29 +309,24 @@ export function RegistrationTab() {
                         <Badge variant="outline">Section {section.section_number}</Badge>
                         {isFull && <Badge variant="destructive">Full</Badge>}
                         {isAlmostFull && <Badge variant="secondary">Almost Full</Badge>}
-                        {section.waitlist_count > 0 && (
-                          <Badge variant="outline">{section.waitlist_count} waitlisted</Badge>
-                        )}
-                        {isInCart && <Badge className="bg-primary">In Cart</Badge>}
                       </div>
                       <CardDescription>{section.course.title}</CardDescription>
                     </div>
                     <Button
-                      onClick={() => isInCart ? removeFromCart(section.id) : addToCart(section)}
-                      variant={isInCart ? "secondary" : "default"}
-                      disabled={isFull && !isInCart}
+                      onClick={() => handleEnroll(section.id)}
+                      disabled={enrolling === section.id || isFull}
                     >
-                      {isInCart ? (
+                      {enrolling === section.id ? (
                         <>
-                          <Check className="h-4 w-4 mr-2" />
-                          In Cart
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Enrolling...
                         </>
                       ) : isFull ? (
                         'Full'
                       ) : (
                         <>
                           <Plus className="h-4 w-4 mr-2" />
-                          Add to Cart
+                          Enroll
                         </>
                       )}
                     </Button>
@@ -548,7 +348,7 @@ export function RegistrationTab() {
                         <p className="text-muted-foreground">Enrollment</p>
                         <p className="font-medium">
                           {section.enrolled_count}/{section.capacity}
-                          {isFull && ' (Full)'}
+                          {section.waitlist_count > 0 && ` (+${section.waitlist_count} waitlist)`}
                         </p>
                       </div>
                     </div>

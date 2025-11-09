@@ -89,7 +89,7 @@ export function GradesTab() {
   const fetchSections = async () => {
     setLoading(true)
     try {
-      const token = localStorage.getItem('auth_token')
+      const token = sessionStorage.getItem('auth_token')
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/staff/me/sections`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -111,7 +111,7 @@ export function GradesTab() {
   const fetchEnrollments = async (sectionId: string) => {
     setLoading(true)
     try {
-      const token = localStorage.getItem('auth_token')
+      const token = sessionStorage.getItem('auth_token')
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/course-sections/${sectionId}/enrollments`,
         {
@@ -144,7 +144,7 @@ export function GradesTab() {
 
   const fetchGradingProgress = async (sectionId: string) => {
     try {
-      const token = localStorage.getItem('auth_token')
+      const token = sessionStorage.getItem('auth_token')
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/course-sections/${sectionId}/grading-progress`,
         {
@@ -166,7 +166,7 @@ export function GradesTab() {
 
   const fetchGradeDistribution = async (sectionId: string) => {
     try {
-      const token = localStorage.getItem('auth_token')
+      const token = sessionStorage.getItem('auth_token')
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/course-sections/${sectionId}/grade-distribution`,
         {
@@ -208,7 +208,7 @@ export function GradesTab() {
 
     setSaving(true)
     try {
-      const token = localStorage.getItem('auth_token')
+      const token = sessionStorage.getItem('auth_token')
       const gradesToSubmit = Object.fromEntries(
         Object.entries(grades).filter(([_, grade]) => grade && grade.trim() !== '')
       )

@@ -132,11 +132,12 @@ class AdmissionApplicationController extends Controller
 
         // If the user is a student, they can only see their own applications.
         // This is the primary authorization scope.
-        if (!in_array('admin', $userRoles) && !in_array('staff', $userRoles)) {
+        $userRolesLower = array_map('strtolower', $userRoles);
+        if (!in_array('admin', $userRolesLower) && !in_array('staff', $userRolesLower)) {
             $student = $user->student;
             if (!$student) {
-                // Return an empty collection if the user has no student record.
-                return response()->json(['data' => [], 'meta' => ['total' => 0]]);
+                // Return an empty resource collection if the user has no student record.
+                return AdmissionApplicationResource::collection(collect());
             }
             $query->where('student_id', $student->id);
         }

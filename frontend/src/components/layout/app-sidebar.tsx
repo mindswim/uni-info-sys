@@ -43,7 +43,8 @@ import {
   Car,
   MapPin,
   Mail,
-  Edit2
+  Edit2,
+  Building2
 } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/components/auth/auth-provider"
@@ -78,23 +79,8 @@ const navigationItems = {
       ]
     },
     {
-      title: "Financial",
-      items: [
-        { title: "Payments", url: "/student/payments", icon: CreditCard },
-        { title: "Meal Plans", url: "/student/meal-plans", icon: Receipt }
-      ]
-    },
-    {
-      title: "Campus Life",
-      items: [
-        { title: "Housing", url: "/student/housing", icon: Building },
-        { title: "Career Services", url: "/student/career", icon: Briefcase }
-      ]
-    },
-    {
       title: "Other",
       items: [
-        { title: "Assignments", url: "/student/assignments", icon: ClipboardCheck },
         { title: "Messages", url: "/messages", icon: MessageSquare },
         { title: "Profile", url: "/profile", icon: User }
       ]
@@ -117,21 +103,13 @@ const navigationItems = {
       title: "Teaching",
       items: [
         { title: "Sections", url: "/faculty/sections", icon: BookOpen },
-        { title: "Course Management", url: "/faculty/courses", icon: Settings },
-        { title: "Attendance", url: "/faculty/attendance", icon: ClipboardCheck }
+        { title: "Course Management", url: "/faculty/courses", icon: Settings }
       ]
     },
     {
       title: "Grading",
       items: [
         { title: "Grades", url: "/faculty/grades", icon: Award }
-      ]
-    },
-    {
-      title: "Advising",
-      items: [
-        { title: "Advising", url: "/faculty/advising", icon: MessageSquare },
-        { title: "Appointments", url: "/faculty/appointments", icon: Calendar }
       ]
     },
     {
@@ -146,7 +124,8 @@ const navigationItems = {
     {
       title: "Dashboard",
       items: [
-        { title: "Overview", url: "/admin", icon: Home }
+        { title: "Overview", url: "/admin", icon: Home },
+        { title: "Analytics", url: "/admin/analytics", icon: BarChart3 }
       ]
     },
     {
@@ -158,28 +137,30 @@ const navigationItems = {
       ]
     },
     {
+      title: "Academic",
+      items: [
+        { title: "Enrollments", url: "/admin/enrollments", icon: ClipboardCheck },
+        { title: "Programs", url: "/admin/programs", icon: GraduationCap },
+        { title: "Grades", url: "/admin/grades", icon: Award },
+        { title: "Terms", url: "/admin/terms", icon: Calendar }
+      ]
+    },
+    {
       title: "Admissions",
       items: [
         { title: "Applications", url: "/admin/admissions", icon: FileText }
       ]
     },
     {
-      title: "Alumni",
-      items: [
-        { title: "Alumni Records", url: "/admin/alumni", icon: GraduationCap }
-      ]
-    },
-    {
-      title: "Reports",
-      items: [
-        { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
-        { title: "Reports", url: "/admin/reports", icon: FileText }
-      ]
-    },
-    {
       title: "System",
       items: [
-        { title: "Settings", url: "/admin/settings", icon: Settings },
+        { title: "User Management", url: "/admin/system", icon: Shield },
+        { title: "Buildings", url: "/admin/buildings", icon: Building2 }
+      ]
+    },
+    {
+      title: "Other",
+      items: [
         { title: "Messages", url: "/messages", icon: MessageSquare },
         { title: "Profile", url: "/profile", icon: User }
       ]

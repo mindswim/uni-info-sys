@@ -62,7 +62,7 @@ export function GradesTab() {
     setLoading(true)
     setError(null)
     try {
-      const token = localStorage.getItem('auth_token')
+      const token = sessionStorage.getItem('auth_token')
 
       const enrollmentsResponse = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/enrollments/me`,

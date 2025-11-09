@@ -2,33 +2,100 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/layouts"
-import { BookOpen, Calendar, User, Award } from "lucide-react"
+import { BookOpen, Calendar, User, Award, LogOut, Loader2 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
+import { useToast } from "@/hooks/use-toast"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { studentService } from "@/services"
 import type { Enrollment } from "@/types/api-types"
 
 export function EnrollmentsTab() {
+  const { toast } = useToast()
   const [enrollments, setEnrollments] = useState<Enrollment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [withdrawing, setWithdrawing] = useState<number | null>(null)
+  const [showWithdrawDialog, setShowWithdrawDialog] = useState(false)
+  const [selectedEnrollment, setSelectedEnrollment] = useState<Enrollment | null>(null)
 
   useEffect(() => {
-    const fetchEnrollments = async () => {
-      try {
-        setLoading(true)
-        const student = await studentService.getCurrentProfile()
-        setEnrollments(student.enrollments || [])
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load enrollments')
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchEnrollments()
   }, [])
+
+  const fetchEnrollments = async () => {
+    try {
+      setLoading(true)
+      const student = await studentService.getCurrentProfile()
+      setEnrollments(student.enrollments || [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load enrollments')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleWithdrawClick = (enrollment: Enrollment) => {
+    setSelectedEnrollment(enrollment)
+    setShowWithdrawDialog(true)
+  }
+
+  const handleWithdraw = async () => {
+    if (!selectedEnrollment) return
+
+    setWithdrawing(selectedEnrollment.id)
+    setShowWithdrawDialog(false)
+
+    try {
+      const token = sessionStorage.getItem('auth_token')
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/enrollments/${selectedEnrollment.id}/withdraw`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        }
+      )
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to withdraw from course')
+      }
+
+      toast({
+        title: "Withdrawal Successful",
+        description: "You have been withdrawn from the course.",
+      })
+
+      // Refresh enrollments
+      fetchEnrollments()
+    } catch (error: any) {
+      console.error('Withdrawal error:', error)
+      toast({
+        title: "Withdrawal Failed",
+        description: error.message || "Failed to withdraw from course. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setWithdrawing(null)
+      setSelectedEnrollment(null)
+    }
+  }
 
   if (loading) {
     return (
@@ -102,7 +169,7 @@ export function EnrollmentsTab() {
           <Card key={enrollment.id}>
             <CardHeader>
               <div className="flex items-start justify-between">
-                <div>
+                <div className="flex-1">
                   <CardTitle className="text-lg">
                     {enrollment.course_section?.course?.course_code || 'Course'} - {enrollment.course_section?.course?.title || 'Unknown Course'}
                   </CardTitle>
@@ -110,9 +177,31 @@ export function EnrollmentsTab() {
                     Section {enrollment.course_section?.section_number}
                   </p>
                 </div>
-                <Badge variant={getStatusVariant(enrollment.status)}>
-                  {enrollment.status}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant={getStatusVariant(enrollment.status)}>
+                    {enrollment.status}
+                  </Badge>
+                  {enrollment.status === 'enrolled' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleWithdrawClick(enrollment)}
+                      disabled={withdrawing === enrollment.id}
+                    >
+                      {withdrawing === enrollment.id ? (
+                        <>
+                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          Withdrawing...
+                        </>
+                      ) : (
+                        <>
+                          <LogOut className="h-3 w-3 mr-1" />
+                          Withdraw
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -166,6 +255,35 @@ export function EnrollmentsTab() {
           </Card>
         ))}
       </div>
+
+      {/* Withdraw Confirmation Dialog */}
+      <AlertDialog open={showWithdrawDialog} onOpenChange={setShowWithdrawDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Withdrawal</AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedEnrollment && (
+                <>
+                  Are you sure you want to withdraw from{' '}
+                  <strong>
+                    {selectedEnrollment.course_section?.course?.course_code} -{' '}
+                    {selectedEnrollment.course_section?.course?.title}
+                  </strong>
+                  ?
+                  <br /><br />
+                  This action cannot be undone. You will need to re-enroll if you change your mind.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleWithdraw} className="bg-destructive hover:bg-destructive/90">
+              Withdraw from Course
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

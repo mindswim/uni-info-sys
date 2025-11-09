@@ -1,19 +1,19 @@
 "use client"
 
 import { AppShell } from '@/components/layout/app-shell'
-import { FacultyTab } from '@/components/admin/faculty-tab'
+import { BuildingsTab } from '@/components/admin/buildings-tab'
 
-export default function FacultyManagementPage() {
+export default function BuildingsManagementPage() {
   return (
     <AppShell>
       <div className="flex flex-col gap-6 p-6">
         <div>
-          <h1 className="text-3xl font-bold">Faculty Management</h1>
+          <h1 className="text-3xl font-bold">Buildings & Rooms</h1>
           <p className="text-muted-foreground">
-            Manage academic faculties and departments
+            Manage campus infrastructure and facilities
           </p>
         </div>
-        <FacultyTab />
+        <BuildingsTab />
       </div>
     </AppShell>
   )

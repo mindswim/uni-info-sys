@@ -69,6 +69,47 @@ export const adminService = {
     return response.data
   },
 
+  // === Staff Management ===
+
+  /**
+   * Get all staff
+   */
+  getAllStaff: async (params?: QueryParams): Promise<PaginatedResponse<any>> => {
+    const response = await apiClient.get<PaginatedResponse<any>>('/staff', { params })
+    return response.data
+  },
+
+  /**
+   * Get staff by ID
+   */
+  getStaffById: async (id: number): Promise<any> => {
+    const response = await apiClient.get<APIResponse<any>>(`/staff/${id}`)
+    return response.data.data
+  },
+
+  /**
+   * Create a new staff member
+   */
+  createStaff: async (data: Partial<any>): Promise<any> => {
+    const response = await apiClient.post<APIResponse<any>>('/staff', data)
+    return response.data.data
+  },
+
+  /**
+   * Update a staff member
+   */
+  updateStaff: async (id: number, data: Partial<any>): Promise<any> => {
+    const response = await apiClient.put<APIResponse<any>>(`/staff/${id}`, data)
+    return response.data.data
+  },
+
+  /**
+   * Delete a staff member
+   */
+  deleteStaff: async (id: number): Promise<void> => {
+    await apiClient.delete(`/staff/${id}`)
+  },
+
   // === Academic Structure Management ===
 
   /**
@@ -378,6 +419,31 @@ export const adminService = {
     return response.data.data
   },
 
+  // === Grade Management ===
+
+  /**
+   * Get pending grade change requests count
+   */
+  getPendingGradeChangesCount: async (): Promise<number> => {
+    try {
+      const response = await apiClient.get<PaginatedResponse<any>>('/grade-change-requests', {
+        params: { status: 'pending', per_page: 1 }
+      })
+      return response.data.meta?.total || 0
+    } catch (error) {
+      console.error('Error fetching pending grade changes:', error)
+      return 0
+    }
+  },
+
+  /**
+   * Get all grade change requests
+   */
+  getGradeChangeRequests: async (params?: QueryParams): Promise<PaginatedResponse<any>> => {
+    const response = await apiClient.get<PaginatedResponse<any>>('/grade-change-requests', { params })
+    return response.data
+  },
+
   // === System Statistics & Reports ===
 
   /**
@@ -427,6 +493,23 @@ export const adminService = {
       responseType: 'blob',
     })
     return response.data
+  },
+
+  // === Notifications ===
+
+  /**
+   * Get all notifications
+   */
+  getNotifications: async (params?: QueryParams): Promise<PaginatedResponse<any>> => {
+    const response = await apiClient.get<PaginatedResponse<any>>('/notifications', { params })
+    return response.data
+  },
+
+  /**
+   * Mark notification as read
+   */
+  markNotificationAsRead: async (id: number): Promise<void> => {
+    await apiClient.post(`/notifications/${id}/read`)
   },
 
   // === System Health & Monitoring ===

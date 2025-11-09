@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Users, BookOpen, FileText, TrendingUp } from "lucide-react"
 import { useState } from "react"
 import UniversityAPI from "@/lib/university-api"
+import { adminService } from "@/services"
 
 
 const breadcrumbs = [
@@ -84,8 +85,11 @@ export default function Home() {
       try {
         setLoading(true)
 
-        // Fetch system stats using UniversityAPI
-        const stats = await UniversityAPI.getSystemStats()
+        // Fetch system stats and pending grades in parallel
+        const [stats, pendingGrades] = await Promise.all([
+          UniversityAPI.getSystemStats(),
+          adminService.getPendingGradeChangesCount()
+        ])
 
         // Build dashboard data from available stats
         setDashboardData({
@@ -95,11 +99,11 @@ export default function Home() {
             pending_applications: stats.applications,
             total_enrollments: stats.enrollments,
             departments: stats.departments,
-            pending_grades: 0, // TODO: Add when grade endpoint is available
+            pending_grades: pendingGrades,
             active_staff: stats.staff,
-            available_reports: 0 // TODO: Add when reports endpoint is available
+            available_reports: 0 // Placeholder for future reports feature
           },
-          recent_activity: [], // TODO: Add when activity endpoint is available
+          recent_activity: [], // Placeholder for future activity feed
           current_term: {
             name: 'Fall 2024',
             start_date: '2024-09-01',

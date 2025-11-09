@@ -49,7 +49,7 @@ class StoreAdmissionApplicationRequest extends FormRequest
             'status' => [
                 'sometimes',
                 'string',
-                Rule::in(['draft', 'submitted', 'under_review', 'accepted', 'rejected'])
+                Rule::in(['draft', 'submitted', 'under_review', 'accepted', 'rejected', 'waitlisted', 'enrolled'])
             ],
             'application_date' => [
                 'sometimes',
@@ -76,7 +76,7 @@ class StoreAdmissionApplicationRequest extends FormRequest
             'student_id.exists' => 'The selected student does not exist.',
             'term_id.required' => 'Term ID is required.',
             'term_id.exists' => 'The selected term does not exist.',
-            'status.in' => 'Status must be one of: draft, submitted, under_review, accepted, rejected.',
+            'status.in' => 'Status must be one of: draft, submitted, under_review, accepted, rejected, waitlisted, enrolled.',
             'comments.max' => 'Comments cannot exceed 1000 characters.'
         ];
     }

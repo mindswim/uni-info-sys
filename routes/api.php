@@ -20,6 +20,8 @@ use App\Http\Controllers\Api\V1\CourseImportController;
 use App\Http\Controllers\Api\V1\GradeImportController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\ImpersonationController;
+use App\Http\Controllers\Api\V1\InvoiceController;
+use App\Http\Controllers\Api\V1\PaymentController;
 
 /**
  * @OA\Get(
@@ -133,9 +135,24 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     // Auth routes
     Route::post('/auth/logout', [\App\Http\Controllers\Api\V1\Auth\AuthController::class, 'logout']);
     Route::get('/auth/user', [\App\Http\Controllers\Api\V1\Auth\AuthController::class, 'user']);
+
+    // Faculties with CSV
     Route::apiResource('faculties', FacultyController::class);
+    Route::post('faculties/csv/import', [FacultyController::class, 'importCsv']);
+    Route::get('faculties/csv/export', [FacultyController::class, 'exportCsv']);
+    Route::get('faculties/csv/template', [FacultyController::class, 'downloadTemplate']);
+
+    // Departments with CSV
     Route::apiResource('departments', DepartmentController::class);
+    Route::post('departments/csv/import', [DepartmentController::class, 'importCsv']);
+    Route::get('departments/csv/export', [DepartmentController::class, 'exportCsv']);
+    Route::get('departments/csv/template', [DepartmentController::class, 'downloadTemplate']);
+
+    // Programs with CSV
     Route::apiResource('programs', ProgramController::class);
+    Route::post('programs/csv/import', [ProgramController::class, 'importCsv']);
+    Route::get('programs/csv/export', [ProgramController::class, 'exportCsv']);
+    Route::get('programs/csv/template', [ProgramController::class, 'downloadTemplate']);
     Route::get('course-catalog', [CourseController::class, 'catalog']);
     // Course management with permission-based authorization
     Route::get('courses', [CourseController::class, 'index'])->middleware('permission:view_courses');
@@ -150,17 +167,46 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
         Route::get('staff/me/sections', [\App\Http\Controllers\Api\V1\StaffController::class, 'mySections']);
     });
     Route::apiResource('staff', StaffController::class);
+    Route::post('staff/csv/import', [StaffController::class, 'importCsv']);
+    Route::get('staff/csv/export', [StaffController::class, 'exportCsv']);
+    Route::get('staff/csv/template', [StaffController::class, 'downloadTemplate']);
 
     Route::apiResource('terms', TermController::class);
+    Route::post('terms/csv/import', [TermController::class, 'importCsv']);
+    Route::get('terms/csv/export', [TermController::class, 'exportCsv']);
+    Route::get('terms/csv/template', [TermController::class, 'downloadTemplate']);
+
     Route::apiResource('buildings', BuildingController::class);
+    Route::post('buildings/csv/import', [BuildingController::class, 'importCsv']);
+    Route::get('buildings/csv/export', [BuildingController::class, 'exportCsv']);
+    Route::get('buildings/csv/template', [BuildingController::class, 'downloadTemplate']);
+
     Route::apiResource('rooms', RoomController::class);
+    Route::post('rooms/csv/import', [RoomController::class, 'importCsv']);
+    Route::get('rooms/csv/export', [RoomController::class, 'exportCsv']);
+    Route::get('rooms/csv/template', [RoomController::class, 'downloadTemplate']);
+
     Route::apiResource('course-sections', CourseSectionController::class);
+    Route::post('course-sections/csv/import', [CourseSectionController::class, 'importCsv']);
+    Route::get('course-sections/csv/export', [CourseSectionController::class, 'exportCsv']);
+    Route::get('course-sections/csv/template', [CourseSectionController::class, 'downloadTemplate']);
     // Admission application management with permission-based authorization
+    // Bulk actions and stats (must be before resourceful routes to avoid route conflicts)
+    Route::post('admission-applications/bulk-actions', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'bulkAction'])->middleware('permission:update_applications');
+    Route::get('admission-applications/stats', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'getStats'])->middleware('permission:view_applications');
+
+    // CRUD operations
     Route::get('admission-applications', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'index'])->middleware('permission:view_applications');
     Route::post('admission-applications', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'store'])->middleware('permission:create_applications');
     Route::get('admission-applications/{admission_application}', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'show'])->middleware('permission:view_applications');
     Route::put('admission-applications/{admission_application}', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'update'])->middleware('permission:update_applications');
     Route::delete('admission-applications/{admission_application}', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'destroy'])->middleware('permission:update_applications');
+
+    // Workflow actions
+    Route::post('admission-applications/{admission_application}/accept', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'accept'])->middleware('permission:update_applications');
+    Route::post('admission-applications/{admission_application}/reject', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'reject'])->middleware('permission:update_applications');
+    Route::post('admission-applications/{admission_application}/waitlist', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'waitlist'])->middleware('permission:update_applications');
+    Route::post('admission-applications/{admission_application}/enroll', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'enroll'])->middleware('permission:update_applications');
     
     // Nested ProgramChoice routes - both nested and shallow for RESTful best practices
     Route::apiResource('admission-applications.program-choices', \App\Http\Controllers\Api\V1\ProgramChoiceController::class)->scoped()->shallow();
@@ -186,6 +232,11 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::delete('students/{student}', [\App\Http\Controllers\Api\V1\StudentController::class, 'destroy'])->middleware('permission:delete_students');
     Route::post('students/{student}/restore', [\App\Http\Controllers\Api\V1\StudentController::class, 'restore'])->withTrashed()->middleware('permission:update_students');
     Route::delete('students/{student}/force', [\App\Http\Controllers\Api\V1\StudentController::class, 'forceDelete'])->withTrashed()->middleware('permission:delete_students');
+
+    // Student CSV Import/Export
+    Route::post('students/csv/import', [\App\Http\Controllers\Api\V1\StudentController::class, 'importCsv'])->middleware('permission:create_students');
+    Route::get('students/csv/export', [\App\Http\Controllers\Api\V1\StudentController::class, 'exportCsv'])->middleware('permission:view_students');
+    Route::get('students/csv/template', [\App\Http\Controllers\Api\V1\StudentController::class, 'downloadTemplate']);
 
     // Academic records with permission-based authorization
     Route::get('students/{student}/academic-records', [\App\Http\Controllers\Api\V1\AcademicRecordController::class, 'index'])->middleware('permission:view_academic_records');
@@ -249,6 +300,15 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     // Import routes (requires specific permissions)
     Route::post('imports/courses', [CourseImportController::class, 'store']);
     Route::post('course-sections/{courseSection}/import-grades', [GradeImportController::class, 'store']);
+
+    // Billing and payment routes
+    Route::get('invoices/student-summary', [InvoiceController::class, 'studentSummary']);
+    Route::post('invoices/{invoice}/discount', [InvoiceController::class, 'addDiscount']);
+    Route::post('invoices/{invoice}/adjustment', [InvoiceController::class, 'addAdjustment']);
+    Route::apiResource('invoices', InvoiceController::class);
+
+    Route::post('payments/{payment}/refund', [PaymentController::class, 'refund']);
+    Route::apiResource('payments', PaymentController::class);
 
 }); 
 

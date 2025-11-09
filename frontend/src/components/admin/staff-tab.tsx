@@ -29,6 +29,7 @@ import { Users, UserPlus, Search, Briefcase, Building, Loader2, Plus, Edit, Tras
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
+import { CsvImportExport } from "@/components/admin/csv-import-export"
 import { adminService } from "@/services"
 import type { Staff, User, Department } from "@/types/api-types"
 
@@ -350,6 +351,17 @@ export function StaffTab() {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end">
+        <CsvImportExport
+          entityName="staff"
+          entityDisplayName="Staff"
+          importEndpoint="/api/v1/staff/csv/import"
+          exportEndpoint="/api/v1/staff/csv/export"
+          templateEndpoint="/api/v1/staff/csv/template"
+          onImportComplete={fetchStaff}
+        />
+      </div>
+
       {/* Staff Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard

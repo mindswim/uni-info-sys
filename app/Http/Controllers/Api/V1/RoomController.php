@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\HandlesCsvImportExport;
+use App\Jobs\ProcessRoomImport;
 use App\Models\Room;
 use App\Http\Resources\RoomResource;
 use App\Http\Requests\StoreRoomRequest;
 use App\Http\Requests\UpdateRoomRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(
@@ -16,6 +19,7 @@ use OpenApi\Attributes as OA;
 )]
 class RoomController extends Controller
 {
+    use HandlesCsvImportExport;
     #[OA\Get(
         path: "/api/v1/rooms",
         summary: "List all rooms",
@@ -141,5 +145,42 @@ class RoomController extends Controller
     {
         $room->delete();
         return response()->noContent();
+    }
+
+    // CSV Import/Export Methods
+
+    protected function getEntityName(): string
+    {
+        return 'rooms';
+    }
+
+    protected function getImportJobClass(): string
+    {
+        return ProcessRoomImport::class;
+    }
+
+    protected function getCsvHeaders(): array
+    {
+        return ['room_number', 'building_code', 'capacity', 'room_type'];
+    }
+
+    protected function getSampleCsvData(): array
+    {
+        return ['101', 'SCI', '30', 'Classroom'];
+    }
+
+    protected function getExportData(Request $request): Collection
+    {
+        return Room::with('building')->get();
+    }
+
+    protected function transformToRow($room): array
+    {
+        return [
+            $room->room_number,
+            $room->building?->code ?? '',
+            $room->capacity,
+            $room->room_type ?? 'Classroom',
+        ];
     }
 }

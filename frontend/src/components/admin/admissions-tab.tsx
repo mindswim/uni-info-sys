@@ -170,21 +170,19 @@ export function AdmissionsTab() {
 
     try {
       const token = sessionStorage.getItem('auth_token')
-      const newStatus = reviewAction === 'approve' ? 'accepted' : 'rejected'
+      const endpoint = reviewAction === 'approve' ? 'accept' : 'reject'
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/admission-applications/${selectedApplication.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/admission-applications/${selectedApplication.id}/${endpoint}`,
         {
-          method: 'PUT',
+          method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
           body: JSON.stringify({
-            status: newStatus,
-            decision_status: newStatus,
-            decision_date: new Date().toISOString(),
+            decision_status: reviewNotes || undefined,
             comments: reviewNotes || undefined
           }),
         }
@@ -194,7 +192,7 @@ export function AdmissionsTab() {
 
       toast({
         title: "Success",
-        description: `Application ${reviewAction === 'approve' ? 'approved' : 'rejected'} successfully`,
+        description: `Application ${reviewAction === 'approve' ? 'accepted' : 'rejected'} successfully`,
       })
 
       setReviewDialogOpen(false)
@@ -316,6 +314,8 @@ export function AdmissionsTab() {
       under_review: { variant: "default", icon: Eye },
       accepted: { variant: "default", icon: CheckCircle },
       rejected: { variant: "destructive", icon: XCircle },
+      waitlisted: { variant: "secondary", icon: Clock },
+      enrolled: { variant: "default", icon: CheckCircle },
     }
 
     const config = variants[status] || variants.draft
@@ -335,7 +335,8 @@ export function AdmissionsTab() {
     pending: applications.filter(a => a.status === 'submitted' || a.status === 'under_review').length,
     accepted: applications.filter(a => a.status === 'accepted').length,
     rejected: applications.filter(a => a.status === 'rejected').length,
-    enrolled: applications.filter(a => a.decision_status === 'accepted').length,
+    waitlisted: applications.filter(a => a.status === 'waitlisted').length,
+    enrolled: applications.filter(a => a.status === 'enrolled').length,
   }
 
   const acceptanceRate = stats.total > 0
@@ -592,6 +593,8 @@ export function AdmissionsTab() {
                     <SelectItem value="under_review">Under Review</SelectItem>
                     <SelectItem value="accepted">Accepted</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="waitlisted">Waitlisted</SelectItem>
+                    <SelectItem value="enrolled">Enrolled</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

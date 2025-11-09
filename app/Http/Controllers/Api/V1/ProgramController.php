@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\HandlesCsvImportExport;
 use App\Http\Requests\StoreProgramRequest;
 use App\Http\Requests\UpdateProgramRequest;
+use App\Jobs\ProcessProgramImport;
 use App\Models\Program;
 use Illuminate\Http\Request;
 use App\Http\Resources\ProgramResource;
+use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(
@@ -16,6 +19,7 @@ use OpenApi\Attributes as OA;
 )]
 class ProgramController extends Controller
 {
+    use HandlesCsvImportExport;
     #[OA\Get(
         path: '/api/v1/programs',
         summary: 'List all programs',
@@ -164,5 +168,44 @@ class ProgramController extends Controller
         $program->delete();
 
         return response()->noContent();
+    }
+
+    // CSV Import/Export Methods
+
+    protected function getEntityName(): string
+    {
+        return 'programs';
+    }
+
+    protected function getImportJobClass(): string
+    {
+        return ProcessProgramImport::class;
+    }
+
+    protected function getCsvHeaders(): array
+    {
+        return ['name', 'code', 'department_code', 'degree_level', 'description', 'credits_required'];
+    }
+
+    protected function getSampleCsvData(): array
+    {
+        return ['Bachelor of Science in Computer Science', 'CS-BS', 'CS', 'Bachelor', 'Comprehensive CS program', '120'];
+    }
+
+    protected function getExportData(Request $request): Collection
+    {
+        return Program::with('department')->get();
+    }
+
+    protected function transformToRow($program): array
+    {
+        return [
+            $program->name,
+            $program->code,
+            $program->department?->code ?? '',
+            $program->degree_level,
+            $program->description ?? '',
+            $program->credits_required ?? '',
+        ];
     }
 }

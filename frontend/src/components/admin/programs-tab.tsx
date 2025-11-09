@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { Plus, Search, GraduationCap, BookOpen, Calendar, Pencil, Trash2 } from 'lucide-react'
+import { CsvImportExport } from '@/components/admin/csv-import-export'
 
 interface Department {
   id: number
@@ -336,9 +337,19 @@ export function ProgramsTab() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Programs Management</h1>
-        <p className="text-muted-foreground">Manage academic programs and degree offerings</p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Programs Management</h1>
+          <p className="text-muted-foreground">Manage academic programs and degree offerings</p>
+        </div>
+        <CsvImportExport
+          entityName="programs"
+          entityDisplayName="Programs"
+          importEndpoint="/api/v1/programs/csv/import"
+          exportEndpoint="/api/v1/programs/csv/export"
+          templateEndpoint="/api/v1/programs/csv/template"
+          onImportComplete={fetchPrograms}
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-5">

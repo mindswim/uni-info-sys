@@ -87,6 +87,16 @@ class Student extends Model implements Auditable
         return $this->hasMany(Enrollment::class);
     }
 
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
     public function majorProgram()
     {
         return $this->belongsTo(Program::class, 'major_program_id');

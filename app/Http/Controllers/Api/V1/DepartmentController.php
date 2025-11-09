@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\HandlesCsvImportExport;
+use App\Jobs\ProcessDepartmentImport;
 use App\Models\Department;
 use Illuminate\Http\Request;
 use App\Http\Resources\DepartmentResource;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -13,6 +16,8 @@ use Illuminate\Support\Facades\Cache;
  */
 class DepartmentController extends Controller
 {
+    use HandlesCsvImportExport;
+
     /**
      * @OA\Get(
      *     path="/api/v1/departments",
@@ -313,5 +318,41 @@ class DepartmentController extends Controller
         Cache::forget('departments.faculty.' . $facultyId);
 
         return response()->noContent();
+    }
+
+    // CSV Import/Export Methods
+
+    protected function getEntityName(): string
+    {
+        return 'departments';
+    }
+
+    protected function getImportJobClass(): string
+    {
+        return ProcessDepartmentImport::class;
+    }
+
+    protected function getCsvHeaders(): array
+    {
+        return ['name', 'code', 'faculty_name'];
+    }
+
+    protected function getSampleCsvData(): array
+    {
+        return ['Computer Science', 'CS', 'School of Engineering'];
+    }
+
+    protected function getExportData(Request $request): Collection
+    {
+        return Department::with('faculty')->get();
+    }
+
+    protected function transformToRow($dept): array
+    {
+        return [
+            $dept->name,
+            $dept->code,
+            $dept->faculty?->name ?? '',
+        ];
     }
 }

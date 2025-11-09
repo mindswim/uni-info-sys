@@ -33,7 +33,7 @@ use OpenApi\Attributes as OA;
             property: "status",
             type: "string",
             description: "Current status of the application",
-            enum: ["draft", "submitted", "under_review", "accepted", "rejected"],
+            enum: ["draft", "submitted", "under_review", "accepted", "rejected", "waitlisted", "enrolled"],
             example: "submitted"
         ),
         new OA\Property(

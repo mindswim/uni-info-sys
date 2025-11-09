@@ -30,6 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
+import { CsvImportExport } from "@/components/admin/csv-import-export"
 
 interface Faculty {
   id: number
@@ -259,10 +260,20 @@ export function DepartmentsTab() {
           <h2 className="text-2xl font-bold">Departments</h2>
           <p className="text-muted-foreground">Manage academic departments within faculties</p>
         </div>
-        <Button onClick={() => setCreateDialogOpen(true)} disabled={faculties.length === 0}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Department
-        </Button>
+        <div className="flex gap-2">
+          <CsvImportExport
+            entityName="departments"
+            entityDisplayName="Departments"
+            importEndpoint="/api/v1/departments/csv/import"
+            exportEndpoint="/api/v1/departments/csv/export"
+            templateEndpoint="/api/v1/departments/csv/template"
+            onImportComplete={fetchDepartments}
+          />
+          <Button onClick={() => setCreateDialogOpen(true)} disabled={faculties.length === 0}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Department
+          </Button>
+        </div>
       </div>
 
       {/* Warning if no faculties */}

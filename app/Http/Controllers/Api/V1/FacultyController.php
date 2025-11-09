@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\HandlesCsvImportExport;
 use App\Http\Resources\FacultyResource;
+use App\Jobs\ProcessFacultyImport;
 use App\Models\Faculty;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -13,6 +16,8 @@ use Illuminate\Support\Facades\Cache;
  */
 class FacultyController extends Controller
 {
+    use HandlesCsvImportExport;
+
     /**
      * @OA\Get(
      *     path="/api/v1/faculties",
@@ -252,5 +257,37 @@ class FacultyController extends Controller
         Cache::forget('faculties.all');
 
         return response()->noContent();
+    }
+
+    // CSV Import/Export Methods
+
+    protected function getEntityName(): string
+    {
+        return 'faculties';
+    }
+
+    protected function getImportJobClass(): string
+    {
+        return ProcessFacultyImport::class;
+    }
+
+    protected function getCsvHeaders(): array
+    {
+        return ['name'];
+    }
+
+    protected function getSampleCsvData(): array
+    {
+        return ['School of Engineering'];
+    }
+
+    protected function getExportData(Request $request): Collection
+    {
+        return Faculty::all();
+    }
+
+    protected function transformToRow($faculty): array
+    {
+        return [$faculty->name];
     }
 }

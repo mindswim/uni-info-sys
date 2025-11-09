@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\HandlesCsvImportExport;
+use App\Jobs\ProcessStaffImport;
 use App\Models\Staff;
 use App\Models\User;
 use App\Models\CourseSection;
@@ -11,6 +13,7 @@ use App\Http\Resources\CourseSectionResource;
 use App\Http\Requests\StoreStaffRequest;
 use App\Http\Requests\UpdateStaffRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use OpenApi\Attributes as OA;
@@ -21,6 +24,7 @@ use OpenApi\Attributes as OA;
 )]
 class StaffController extends Controller
 {
+    use HandlesCsvImportExport;
     #[OA\Get(
         path: "/api/v1/staff",
         summary: "List all staff members",
@@ -312,5 +316,47 @@ class StaffController extends Controller
         return response()->json([
             'data' => CourseSectionResource::collection($sections)
         ], 200);
+    }
+
+    // CSV Import/Export Methods
+
+    protected function getEntityName(): string
+    {
+        return 'staff';
+    }
+
+    protected function getImportJobClass(): string
+    {
+        return ProcessStaffImport::class;
+    }
+
+    protected function getCsvHeaders(): array
+    {
+        return ['employee_number', 'first_name', 'last_name', 'email', 'department_code', 'title', 'office_location', 'office_phone', 'hire_date'];
+    }
+
+    protected function getSampleCsvData(): array
+    {
+        return ['E24001', 'John', 'Smith', 'j.smith@university.edu', 'CS', 'Professor', 'SCI-301', '555-0100', '2020-08-15'];
+    }
+
+    protected function getExportData(Request $request): Collection
+    {
+        return Staff::with(['user', 'department'])->get();
+    }
+
+    protected function transformToRow($staff): array
+    {
+        return [
+            $staff->employee_number,
+            $staff->first_name,
+            $staff->last_name,
+            $staff->user?->email ?? '',
+            $staff->department?->code ?? '',
+            $staff->title ?? '',
+            $staff->office_location ?? '',
+            $staff->office_phone ?? '',
+            $staff->hire_date?->format('Y-m-d') ?? '',
+        ];
     }
 }

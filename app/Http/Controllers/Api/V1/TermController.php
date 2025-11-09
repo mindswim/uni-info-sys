@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\HandlesCsvImportExport;
+use App\Jobs\ProcessTermImport;
 use App\Models\Term;
 use App\Http\Resources\TermResource;
 use App\Http\Requests\StoreTermRequest;
 use App\Http\Requests\UpdateTermRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(
@@ -16,6 +19,7 @@ use OpenApi\Attributes as OA;
 )]
 class TermController extends Controller
 {
+    use HandlesCsvImportExport;
     #[OA\Get(
         path: '/api/v1/terms',
         summary: 'List all terms',
@@ -173,8 +177,46 @@ class TermController extends Controller
     public function destroy(Term $term)
     {
         $this->authorize('delete', $term);
-        
+
         $term->delete();
         return response()->noContent();
+    }
+
+    // CSV Import/Export Methods
+
+    protected function getEntityName(): string
+    {
+        return 'terms';
+    }
+
+    protected function getImportJobClass(): string
+    {
+        return ProcessTermImport::class;
+    }
+
+    protected function getCsvHeaders(): array
+    {
+        return ['name', 'code', 'start_date', 'end_date', 'is_current'];
+    }
+
+    protected function getSampleCsvData(): array
+    {
+        return ['Fall 2024', 'FALL2024', '2024-08-26', '2024-12-20', 'true'];
+    }
+
+    protected function getExportData(Request $request): Collection
+    {
+        return Term::all();
+    }
+
+    protected function transformToRow($term): array
+    {
+        return [
+            $term->name,
+            $term->code,
+            $term->start_date?->format('Y-m-d') ?? '',
+            $term->end_date?->format('Y-m-d') ?? '',
+            $term->is_current ? 'true' : 'false',
+        ];
     }
 }

@@ -31,6 +31,7 @@ import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { studentService } from "@/services"
 import type { Student, User } from "@/types/api-types"
+import { CsvImportExport } from "@/components/admin/csv-import-export"
 
 export function StudentsTab() {
   const { toast } = useToast()
@@ -443,6 +444,14 @@ export function StudentsTab() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        <CsvImportExport
+          entityName="students"
+          entityDisplayName="Students"
+          importEndpoint="/api/v1/students/csv/import"
+          exportEndpoint="/api/v1/students/csv/export"
+          templateEndpoint="/api/v1/students/csv/template"
+          onImportComplete={fetchStudents}
+        />
         <Button onClick={() => setDialogOpen(true)}>
           <UserPlus className="mr-2 h-4 w-4" />
           Add Student

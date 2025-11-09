@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
 import { Plus, Search, Building2, DoorOpen, Users, Pencil, Trash2 } from 'lucide-react'
+import { CsvImportExport } from '@/components/admin/csv-import-export'
 
 interface Building {
   id: number
@@ -383,9 +384,19 @@ export function BuildingsTab() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Buildings & Rooms Management</h1>
-        <p className="text-muted-foreground">Manage campus facilities and classroom spaces</p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Buildings & Rooms Management</h1>
+          <p className="text-muted-foreground">Manage campus facilities and classroom spaces</p>
+        </div>
+        <CsvImportExport
+          entityName="buildings"
+          entityDisplayName="Buildings"
+          importEndpoint="/api/v1/buildings/csv/import"
+          exportEndpoint="/api/v1/buildings/csv/export"
+          templateEndpoint="/api/v1/buildings/csv/template"
+          onImportComplete={fetchBuildings}
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">

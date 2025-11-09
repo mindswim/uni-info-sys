@@ -30,6 +30,7 @@ import { Calendar, Plus, Search, Loader2, Edit, Trash2, Users, BookOpen, Clock }
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
+import { CsvImportExport } from "@/components/admin/csv-import-export"
 import { useAuth } from "@/contexts/auth-context"
 
 interface Course {
@@ -382,10 +383,20 @@ export function CourseSectionsTab() {
           <h2 className="text-2xl font-bold">Course Sections</h2>
           <p className="text-muted-foreground">Manage class sections, schedules, and instructors</p>
         </div>
-        <Button onClick={() => setCreateDialogOpen(true)} disabled={!hasRequiredData}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Section
-        </Button>
+        <div className="flex gap-2">
+          <CsvImportExport
+            entityName="course-sections"
+            entityDisplayName="Course Sections"
+            importEndpoint="/api/v1/course-sections/csv/import"
+            exportEndpoint="/api/v1/course-sections/csv/export"
+            templateEndpoint="/api/v1/course-sections/csv/template"
+            onImportComplete={fetchSections}
+          />
+          <Button onClick={() => setCreateDialogOpen(true)} disabled={!hasRequiredData}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Section
+          </Button>
+        </div>
       </div>
 
       {/* Warning if missing data */}

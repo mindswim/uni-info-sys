@@ -29,6 +29,7 @@ import { Calendar, Plus, Search, CalendarCheck, CalendarClock, Loader2, Edit, Tr
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
+import { CsvImportExport } from "@/components/admin/csv-import-export"
 import { adminService } from "@/services"
 import type { Term } from "@/types/api-types"
 
@@ -359,6 +360,17 @@ export function TermsTab() {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end">
+        <CsvImportExport
+          entityName="terms"
+          entityDisplayName="Terms"
+          importEndpoint="/api/v1/terms/csv/import"
+          exportEndpoint="/api/v1/terms/csv/export"
+          templateEndpoint="/api/v1/terms/csv/template"
+          onImportComplete={fetchTerms}
+        />
+      </div>
+
       {/* Term Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard

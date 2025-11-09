@@ -137,12 +137,26 @@ const navigationItems = {
       ]
     },
     {
-      title: "Academic",
+      title: "Academic Structure",
+      items: [
+        { title: "Faculties", url: "/admin/faculties", icon: Building2 },
+        { title: "Departments", url: "/admin/departments", icon: Building },
+        { title: "Programs", url: "/admin/programs", icon: GraduationCap },
+        { title: "Terms", url: "/admin/terms", icon: Calendar }
+      ]
+    },
+    {
+      title: "Curriculum",
+      items: [
+        { title: "Courses", url: "/admin/courses", icon: BookOpen },
+        { title: "Sections", url: "/admin/sections", icon: Calendar }
+      ]
+    },
+    {
+      title: "Student Management",
       items: [
         { title: "Enrollments", url: "/admin/enrollments", icon: ClipboardCheck },
-        { title: "Programs", url: "/admin/programs", icon: GraduationCap },
-        { title: "Grades", url: "/admin/grades", icon: Award },
-        { title: "Terms", url: "/admin/terms", icon: Calendar }
+        { title: "Grades", url: "/admin/grades", icon: Award }
       ]
     },
     {

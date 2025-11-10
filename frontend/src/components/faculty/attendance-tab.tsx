@@ -20,6 +20,7 @@ import {
   Loader2,
   Save
 } from 'lucide-react'
+import { CsvImportExport } from "@/components/admin/csv-import-export"
 
 interface CourseSection {
   id: number
@@ -392,6 +393,14 @@ export function AttendanceTab() {
             <XCircle className="h-4 w-4 mr-2" />
             All Absent
           </Button>
+          <CsvImportExport
+            entityName="attendance"
+            entityDisplayName="Attendance"
+            importEndpoint="/api/v1/attendance/csv/import"
+            exportEndpoint="/api/v1/attendance/csv/export"
+            templateEndpoint="/api/v1/attendance/csv/template"
+            onImportComplete={fetchExistingAttendance}
+          />
         </div>
       </div>
 

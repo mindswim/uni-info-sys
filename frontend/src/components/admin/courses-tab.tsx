@@ -31,6 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
+import { CsvImportExport } from "@/components/admin/csv-import-export"
 
 interface Department {
   id: number
@@ -290,10 +291,20 @@ export function CoursesTab() {
           <h2 className="text-2xl font-bold">Courses</h2>
           <p className="text-muted-foreground">Manage course catalog and curriculum</p>
         </div>
-        <Button onClick={() => setCreateDialogOpen(true)} disabled={departments.length === 0}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Course
-        </Button>
+        <div className="flex gap-2">
+          <CsvImportExport
+            entityName="courses"
+            entityDisplayName="Courses"
+            importEndpoint="/api/v1/courses/csv/import"
+            exportEndpoint="/api/v1/courses/csv/export"
+            templateEndpoint="/api/v1/courses/csv/template"
+            onImportComplete={fetchCourses}
+          />
+          <Button onClick={() => setCreateDialogOpen(true)} disabled={departments.length === 0}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Course
+          </Button>
+        </div>
       </div>
 
       {/* Warning if no departments */}

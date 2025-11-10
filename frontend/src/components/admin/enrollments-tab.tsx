@@ -30,6 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import type { Enrollment, Student, CourseSection, Term } from "@/types/api-types"
+import { CsvImportExport } from "@/components/admin/csv-import-export"
 
 export function EnrollmentsTab() {
   const { toast } = useToast()
@@ -434,6 +435,14 @@ export function EnrollmentsTab() {
             ))}
           </SelectContent>
         </Select>
+        <CsvImportExport
+          entityName="enrollments"
+          entityDisplayName="Enrollments"
+          importEndpoint="/api/v1/enrollments/csv/import"
+          exportEndpoint="/api/v1/enrollments/csv/export"
+          templateEndpoint="/api/v1/enrollments/csv/template"
+          onImportComplete={fetchEnrollments}
+        />
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add Enrollment

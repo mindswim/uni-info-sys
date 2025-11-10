@@ -109,62 +109,8 @@ export default function NotificationsPage() {
         console.log('API notifications not available, using demo data:', apiError)
       }
 
-      // Fallback to demo notifications if API fails or returns no data
-      const demoNotifications: Notification[] = [
-        {
-          id: '1',
-          type: 'grade_update',
-          title: 'Grade Posted: CS350',
-          message: 'Your final grade for Introduction to Artificial Intelligence has been posted. Grade: A-',
-          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          read: false,
-          priority: 'medium',
-          related_course: 'CS350',
-          action_url: '/grades'
-        },
-        {
-          id: '2',
-          type: 'enrollment_confirmation',
-          title: 'Enrollment Confirmed',
-          message: 'You have been successfully enrolled in CS201 - Data Structures and Algorithms for Fall 2024.',
-          timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-          read: false,
-          priority: 'high',
-          related_course: 'CS201',
-          action_url: '/course-catalog'
-        },
-        {
-          id: '3',
-          type: 'deadline_reminder',
-          title: 'Add/Drop Deadline Approaching',
-          message: 'Reminder: The add/drop deadline is September 15, 2025. Make sure to finalize your course schedule.',
-          timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-          read: true,
-          priority: 'medium',
-          action_url: '/schedule'
-        },
-        {
-          id: '4',
-          type: 'system_announcement',
-          title: 'Maintenance Window Scheduled',
-          message: 'The student portal will be unavailable for maintenance on September 20, 2025 from 2:00 AM to 4:00 AM EST.',
-          timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-          read: true,
-          priority: 'low'
-        },
-        {
-          id: '5',
-          type: 'course_update',
-          title: 'Course Material Updated',
-          message: 'Prof. Turing has uploaded new lecture notes for Week 3 in your AI course.',
-          timestamp: new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString(),
-          read: true,
-          priority: 'low',
-          related_course: 'CS350'
-        }
-      ]
-
-      setNotifications(demoNotifications)
+      // No notifications - will be implemented later
+      setNotifications([])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load notifications')
     } finally {

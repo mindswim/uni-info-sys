@@ -49,8 +49,16 @@ class BillingService
             ]);
 
             // Get tuition rate for student's program
-            $program = $student->program;
-            $studentType = $student->student_type ?? 'domestic';
+            $program = $student->majorProgram;
+            if (!$program) {
+                throw new \Exception('Student must have a major program assigned to generate invoices.');
+            }
+
+            // Determine student type based on nationality/country
+            // International students are those not from USA, Canada, or Mexico (NAFTA countries)
+            $domesticCountries = ['USA', 'United States', 'Canada', 'Mexico'];
+            $studentType = in_array($student->country, $domesticCountries) ? 'domestic' : 'international';
+
             $enrollmentStatus = $enrollments->sum(function ($enrollment) {
                 return $enrollment->courseSection->course->credits ?? 0;
             }) >= 12 ? 'full_time' : 'part_time';

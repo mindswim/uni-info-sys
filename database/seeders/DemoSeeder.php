@@ -179,6 +179,7 @@ class DemoSeeder extends Seeder
             'phone' => '+52-555-123-4567',
             'emergency_contact_name' => 'Carlos Rodriguez',
             'emergency_contact_phone' => '+52-555-765-4321',
+            'major_program_id' => $csProgram->id,
         ]);
 
         // Maria's academic record - high achiever
@@ -232,6 +233,7 @@ class DemoSeeder extends Seeder
             'phone' => '+82-2-555-1234',
             'emergency_contact_name' => 'Min-Jung Park',
             'emergency_contact_phone' => '+82-2-555-4321',
+            'major_program_id' => $csProgram->id,
         ]);
 
         // David's application - accepted
@@ -293,6 +295,7 @@ class DemoSeeder extends Seeder
             'phone' => '+1-415-555-1234',
             'emergency_contact_name' => 'James Turner',
             'emergency_contact_phone' => '+1-415-555-4321',
+            'major_program_id' => $csProgram->id,
         ]);
 
         // Sophie's application - accepted
@@ -325,6 +328,7 @@ class DemoSeeder extends Seeder
         $fillerStudent = Student::factory()->create([
             'user_id' => $fillerUser->id,
             'student_number' => 'STU2025004',
+            'major_program_id' => $csProgram->id,
         ]);
 
         // Fill the second AI spot

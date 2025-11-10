@@ -292,7 +292,13 @@ class AttendanceController extends Controller
         ];
     }
 
-    protected function prepareCsvRow($attendance): array
+    protected function getExportData(Request $request): \Illuminate\Support\Collection
+    {
+        return AttendanceRecord::with(['student', 'courseSection', 'enrollment'])
+            ->orderBy('attendance_date', 'desc')->get();
+    }
+
+    protected function transformToRow($attendance): array
     {
         return [
             'enrollment_id' => $attendance->enrollment_id,
@@ -305,11 +311,5 @@ class AttendanceController extends Controller
             'notes' => $attendance->notes,
             'recorded_by' => $attendance->recorded_by,
         ];
-    }
-
-    protected function getExportQuery()
-    {
-        return AttendanceRecord::with(['student', 'courseSection', 'enrollment'])
-            ->orderBy('attendance_date', 'desc');
     }
 }

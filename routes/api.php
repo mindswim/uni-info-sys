@@ -155,6 +155,10 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::get('programs/csv/export', [ProgramController::class, 'exportCsv']);
     Route::get('programs/csv/template', [ProgramController::class, 'downloadTemplate']);
     Route::get('course-catalog', [CourseController::class, 'catalog']);
+    // Course CSV operations
+    Route::post('courses/csv/import', [CourseController::class, 'importCsv'])->middleware('permission:create_courses');
+    Route::get('courses/csv/export', [CourseController::class, 'exportCsv'])->middleware('permission:view_courses');
+    Route::get('courses/csv/template', [CourseController::class, 'downloadTemplate']);
     // Course management with permission-based authorization
     Route::get('courses', [CourseController::class, 'index'])->middleware('permission:view_courses');
     Route::post('courses', [CourseController::class, 'store'])->middleware('permission:create_courses');
@@ -252,6 +256,10 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::post('documents/{document}/restore', [\App\Http\Controllers\Api\V1\DocumentController::class, 'restore'])->withTrashed();
     Route::delete('documents/{document}/force', [\App\Http\Controllers\Api\V1\DocumentController::class, 'forceDelete'])->withTrashed();
 
+    // Enrollment CSV operations
+    Route::post('enrollments/csv/import', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'importCsv'])->middleware('permission:create_enrollments');
+    Route::get('enrollments/csv/export', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'exportCsv'])->middleware('permission:view_enrollments');
+    Route::get('enrollments/csv/template', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'downloadTemplate']);
     // Enrollment management with custom business logic endpoints (must be before apiResource)
     Route::middleware('role.student')->group(function () {
         Route::get('enrollments/me', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'myEnrollments']);
@@ -311,6 +319,10 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::post('payments/{payment}/refund', [PaymentController::class, 'refund']);
     Route::apiResource('payments', PaymentController::class);
 
+    // Attendance CSV operations
+    Route::post('attendance/csv/import', [AttendanceController::class, 'importCsv']);
+    Route::get('attendance/csv/export', [AttendanceController::class, 'exportCsv']);
+    Route::get('attendance/csv/template', [AttendanceController::class, 'downloadTemplate']);
     // Attendance routes
     Route::post('attendance/bulk', [AttendanceController::class, 'bulkStore']);
     Route::get('attendance/student-report', [AttendanceController::class, 'studentReport']);

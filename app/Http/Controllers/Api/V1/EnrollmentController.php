@@ -694,7 +694,12 @@ class EnrollmentController extends Controller
         ];
     }
 
-    protected function prepareCsvRow($enrollment): array
+    protected function getExportData(Request $request): \Illuminate\Support\Collection
+    {
+        return Enrollment::with(['student', 'courseSection.course'])->orderBy('created_at', 'desc')->get();
+    }
+
+    protected function transformToRow($enrollment): array
     {
         return [
             'student_id' => $enrollment->student_id,
@@ -704,10 +709,5 @@ class EnrollmentController extends Controller
             'grade' => $enrollment->grade,
             'grade_date' => $enrollment->grade_date?->format('Y-m-d'),
         ];
-    }
-
-    protected function getExportQuery()
-    {
-        return Enrollment::with(['student', 'courseSection.course'])->orderBy('created_at', 'desc');
     }
 }

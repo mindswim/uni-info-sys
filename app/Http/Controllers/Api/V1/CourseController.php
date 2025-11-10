@@ -445,7 +445,12 @@ class CourseController extends Controller
         ];
     }
 
-    protected function prepareCsvRow($course): array
+    protected function getExportData(Request $request): \Illuminate\Support\Collection
+    {
+        return Course::with('department')->orderBy('course_code')->get();
+    }
+
+    protected function transformToRow($course): array
     {
         return [
             'course_code' => $course->course_code,
@@ -456,10 +461,5 @@ class CourseController extends Controller
             'course_level' => $course->course_level,
             'cip_code' => $course->cip_code,
         ];
-    }
-
-    protected function getExportQuery()
-    {
-        return Course::with('department')->orderBy('course_code');
     }
 }

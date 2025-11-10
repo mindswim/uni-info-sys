@@ -1,7 +1,7 @@
 "use client"
 
 import { AppShell } from '@/components/layout/app-shell'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { FacultyTab } from '@/components/admin/faculty-tab'
 
 export default function FacultyManagementPage() {
   return (
@@ -10,17 +10,10 @@ export default function FacultyManagementPage() {
         <div>
           <h1 className="text-3xl font-bold">Faculty Management</h1>
           <p className="text-muted-foreground">
-            Manage faculty members and their assignments
+            Manage academic faculties and departments
           </p>
         </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>Faculty Management</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">Faculty management features coming soon...</p>
-          </CardContent>
-        </Card>
+        <FacultyTab />
       </div>
     </AppShell>
   )

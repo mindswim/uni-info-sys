@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Users, BookOpen, FileText, TrendingUp } from "lucide-react"
 import { useState } from "react"
 import UniversityAPI from "@/lib/university-api"
-import { API_CONFIG } from "@/config/api"
+import { adminService } from "@/services"
 
 
 const breadcrumbs = [
@@ -85,15 +85,32 @@ export default function Home() {
       try {
         setLoading(true)
 
-        // Use the real demo dashboard API
-        const response = await fetch(API_CONFIG.DEMO.DASHBOARD)
+        // Fetch system stats and pending grades in parallel
+        const [stats, pendingGrades] = await Promise.all([
+          UniversityAPI.getSystemStats(),
+          adminService.getPendingGradeChangesCount()
+        ])
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch dashboard data: ${response.statusText}`)
-        }
-
-        const data = await response.json()
-        setDashboardData(data)
+        // Build dashboard data from available stats
+        setDashboardData({
+          stats: {
+            total_students: stats.students,
+            active_courses: stats.courses,
+            pending_applications: stats.applications,
+            total_enrollments: stats.enrollments,
+            departments: stats.departments,
+            pending_grades: pendingGrades,
+            active_staff: stats.staff,
+            available_reports: 0 // Placeholder for future reports feature
+          },
+          recent_activity: [], // Placeholder for future activity feed
+          current_term: {
+            name: 'Fall 2024',
+            start_date: '2024-09-01',
+            end_date: '2024-12-15',
+            add_drop_deadline: '2024-09-15'
+          }
+        })
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error)
         // Keep default values on error

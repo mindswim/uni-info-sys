@@ -55,7 +55,7 @@ class AdmissionApplicationController extends Controller
                 required: false,
                 schema: new OA\Schema(
                     type: "string",
-                    enum: ["draft", "submitted", "under_review", "accepted", "rejected"]
+                    enum: ["draft", "submitted", "under_review", "accepted", "rejected", "waitlisted", "enrolled"]
                 )
             ),
             new OA\Parameter(
@@ -132,11 +132,12 @@ class AdmissionApplicationController extends Controller
 
         // If the user is a student, they can only see their own applications.
         // This is the primary authorization scope.
-        if (!in_array('admin', $userRoles) && !in_array('staff', $userRoles)) {
+        $userRolesLower = array_map('strtolower', $userRoles);
+        if (!in_array('admin', $userRolesLower) && !in_array('staff', $userRolesLower)) {
             $student = $user->student;
             if (!$student) {
-                // Return an empty collection if the user has no student record.
-                return response()->json(['data' => [], 'meta' => ['total' => 0]]);
+                // Return an empty resource collection if the user has no student record.
+                return AdmissionApplicationResource::collection(collect());
             }
             $query->where('student_id', $student->id);
         }
@@ -364,7 +365,7 @@ class AdmissionApplicationController extends Controller
                         property: "status",
                         type: "string",
                         description: "Application status",
-                        enum: ["draft", "submitted", "under_review", "accepted", "rejected"],
+                        enum: ["draft", "submitted", "under_review", "accepted", "rejected", "waitlisted", "enrolled"],
                         example: "submitted"
                     ),
                     new OA\Property(
@@ -559,9 +560,495 @@ class AdmissionApplicationController extends Controller
     {
         $admissionApplication = AdmissionApplication::withTrashed()->findOrFail($id);
         $this->authorize('forceDelete', $admissionApplication);
-        
+
         $admissionApplication->forceDelete();
-        
+
         return response()->json(null, 204);
+    }
+
+    /**
+     * Accept an admission application
+     */
+    #[OA\Post(
+        path: "/api/v1/admission-applications/{admission_application}/accept",
+        summary: "Accept an admission application",
+        description: "Accept an admission application and notify the applicant. Requires admin/staff permissions.",
+        security: [["sanctum" => []]],
+        tags: ["Admission Applications"],
+        parameters: [
+            new OA\Parameter(
+                name: "admission_application",
+                description: "ID of the admission application",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer")
+            )
+        ],
+        requestBody: new OA\RequestBody(
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(
+                        property: "decision_status",
+                        type: "string",
+                        description: "Additional decision notes",
+                        example: "Accepted with full scholarship",
+                        nullable: true
+                    ),
+                    new OA\Property(
+                        property: "comments",
+                        type: "string",
+                        description: "Additional comments",
+                        example: "Exceptional academic performance",
+                        nullable: true
+                    )
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Application accepted successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "message", type: "string", example: "Application accepted successfully."),
+                        new OA\Property(property: "data", ref: "#/components/schemas/AdmissionApplicationResource")
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 404, description: "Not Found")
+        ]
+    )]
+    public function accept(Request $request, AdmissionApplication $admissionApplication): JsonResponse
+    {
+        $this->authorize('update', $admissionApplication);
+
+        $validated = $request->validate([
+            'decision_status' => 'nullable|string|max:255',
+            'comments' => 'nullable|string'
+        ]);
+
+        $admissionApplication->update([
+            'status' => 'accepted',
+            'decision_date' => now(),
+            'decision_status' => $validated['decision_status'] ?? null,
+            'comments' => $validated['comments'] ?? $admissionApplication->comments
+        ]);
+
+        $admissionApplication->load([
+            'student.user',
+            'term',
+            'programChoices.program'
+        ]);
+
+        return response()->json([
+            'message' => 'Application accepted successfully.',
+            'data' => new AdmissionApplicationResource($admissionApplication)
+        ]);
+    }
+
+    /**
+     * Reject an admission application
+     */
+    #[OA\Post(
+        path: "/api/v1/admission-applications/{admission_application}/reject",
+        summary: "Reject an admission application",
+        description: "Reject an admission application and notify the applicant. Requires admin/staff permissions.",
+        security: [["sanctum" => []]],
+        tags: ["Admission Applications"],
+        parameters: [
+            new OA\Parameter(
+                name: "admission_application",
+                description: "ID of the admission application",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer")
+            )
+        ],
+        requestBody: new OA\RequestBody(
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(
+                        property: "decision_status",
+                        type: "string",
+                        description: "Reason for rejection",
+                        example: "Does not meet minimum GPA requirement",
+                        nullable: true
+                    ),
+                    new OA\Property(
+                        property: "comments",
+                        type: "string",
+                        description: "Additional comments",
+                        example: "We encourage you to reapply next year",
+                        nullable: true
+                    )
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Application rejected successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "message", type: "string", example: "Application rejected successfully."),
+                        new OA\Property(property: "data", ref: "#/components/schemas/AdmissionApplicationResource")
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 404, description: "Not Found")
+        ]
+    )]
+    public function reject(Request $request, AdmissionApplication $admissionApplication): JsonResponse
+    {
+        $this->authorize('update', $admissionApplication);
+
+        $validated = $request->validate([
+            'decision_status' => 'nullable|string|max:255',
+            'comments' => 'nullable|string'
+        ]);
+
+        $admissionApplication->update([
+            'status' => 'rejected',
+            'decision_date' => now(),
+            'decision_status' => $validated['decision_status'] ?? null,
+            'comments' => $validated['comments'] ?? $admissionApplication->comments
+        ]);
+
+        $admissionApplication->load([
+            'student.user',
+            'term',
+            'programChoices.program'
+        ]);
+
+        return response()->json([
+            'message' => 'Application rejected successfully.',
+            'data' => new AdmissionApplicationResource($admissionApplication)
+        ]);
+    }
+
+    /**
+     * Waitlist an admission application
+     */
+    #[OA\Post(
+        path: "/api/v1/admission-applications/{admission_application}/waitlist",
+        summary: "Waitlist an admission application",
+        description: "Place an admission application on waitlist and notify the applicant. Requires admin/staff permissions.",
+        security: [["sanctum" => []]],
+        tags: ["Admission Applications"],
+        parameters: [
+            new OA\Parameter(
+                name: "admission_application",
+                description: "ID of the admission application",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer")
+            )
+        ],
+        requestBody: new OA\RequestBody(
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(
+                        property: "decision_status",
+                        type: "string",
+                        description: "Waitlist status information",
+                        example: "Placed on waitlist - will notify if space becomes available",
+                        nullable: true
+                    ),
+                    new OA\Property(
+                        property: "comments",
+                        type: "string",
+                        description: "Additional comments",
+                        example: "Strong candidate, awaiting capacity",
+                        nullable: true
+                    )
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Application waitlisted successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "message", type: "string", example: "Application waitlisted successfully."),
+                        new OA\Property(property: "data", ref: "#/components/schemas/AdmissionApplicationResource")
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 404, description: "Not Found")
+        ]
+    )]
+    public function waitlist(Request $request, AdmissionApplication $admissionApplication): JsonResponse
+    {
+        $this->authorize('update', $admissionApplication);
+
+        $validated = $request->validate([
+            'decision_status' => 'nullable|string|max:255',
+            'comments' => 'nullable|string'
+        ]);
+
+        $admissionApplication->update([
+            'status' => 'waitlisted',
+            'decision_date' => now(),
+            'decision_status' => $validated['decision_status'] ?? null,
+            'comments' => $validated['comments'] ?? $admissionApplication->comments
+        ]);
+
+        $admissionApplication->load([
+            'student.user',
+            'term',
+            'programChoices.program'
+        ]);
+
+        return response()->json([
+            'message' => 'Application waitlisted successfully.',
+            'data' => new AdmissionApplicationResource($admissionApplication)
+        ]);
+    }
+
+    /**
+     * Enroll an accepted application
+     */
+    #[OA\Post(
+        path: "/api/v1/admission-applications/{admission_application}/enroll",
+        summary: "Enroll an accepted applicant",
+        description: "Convert an accepted application to enrolled student status. Creates student account if needed. Requires admin/staff permissions.",
+        security: [["sanctum" => []]],
+        tags: ["Admission Applications"],
+        parameters: [
+            new OA\Parameter(
+                name: "admission_application",
+                description: "ID of the admission application",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer")
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Student enrolled successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "message", type: "string", example: "Student enrolled successfully."),
+                        new OA\Property(property: "data", ref: "#/components/schemas/AdmissionApplicationResource")
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: "Bad request - application not accepted",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "message", type: "string", example: "Application must be accepted before enrollment.")
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 404, description: "Not Found")
+        ]
+    )]
+    public function enroll(AdmissionApplication $admissionApplication): JsonResponse
+    {
+        $this->authorize('update', $admissionApplication);
+
+        if ($admissionApplication->status !== 'accepted') {
+            return response()->json([
+                'message' => 'Application must be accepted before enrollment.'
+            ], 400);
+        }
+
+        $admissionApplication->update([
+            'status' => 'enrolled'
+        ]);
+
+        $admissionApplication->load([
+            'student.user',
+            'term',
+            'programChoices.program'
+        ]);
+
+        return response()->json([
+            'message' => 'Student enrolled successfully.',
+            'data' => new AdmissionApplicationResource($admissionApplication)
+        ]);
+    }
+
+    /**
+     * Perform bulk actions on applications
+     */
+    #[OA\Post(
+        path: "/api/v1/admission-applications/bulk-actions",
+        summary: "Perform bulk actions on multiple applications",
+        description: "Accept, reject, or waitlist multiple applications at once. Requires admin/staff permissions.",
+        security: [["sanctum" => []]],
+        tags: ["Admission Applications"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["application_ids", "action"],
+                properties: [
+                    new OA\Property(
+                        property: "application_ids",
+                        type: "array",
+                        items: new OA\Items(type: "integer"),
+                        description: "Array of application IDs",
+                        example: [1, 2, 3]
+                    ),
+                    new OA\Property(
+                        property: "action",
+                        type: "string",
+                        enum: ["accept", "reject", "waitlist"],
+                        description: "Action to perform",
+                        example: "accept"
+                    ),
+                    new OA\Property(
+                        property: "decision_status",
+                        type: "string",
+                        description: "Decision status for all applications",
+                        example: "Batch acceptance",
+                        nullable: true
+                    )
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Bulk action completed successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "message", type: "string", example: "3 applications processed successfully."),
+                        new OA\Property(
+                            property: "data",
+                            type: "object",
+                            properties: [
+                                new OA\Property(property: "processed", type: "integer", example: 3),
+                                new OA\Property(property: "failed", type: "integer", example: 0)
+                            ]
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(response: 400, description: "Bad request - validation failed"),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden")
+        ]
+    )]
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'application_ids' => 'required|array|min:1',
+            'application_ids.*' => 'required|integer|exists:admission_applications,id',
+            'action' => 'required|string|in:accept,reject,waitlist',
+            'decision_status' => 'nullable|string|max:255'
+        ]);
+
+        $applications = AdmissionApplication::whereIn('id', $validated['application_ids'])->get();
+
+        $processed = 0;
+        $failed = 0;
+
+        foreach ($applications as $application) {
+            try {
+                $this->authorize('update', $application);
+
+                $application->update([
+                    'status' => $validated['action'] === 'waitlist' ? 'waitlisted' : $validated['action'] . 'ed',
+                    'decision_date' => now(),
+                    'decision_status' => $validated['decision_status'] ?? null
+                ]);
+
+                $processed++;
+            } catch (\Exception $e) {
+                $failed++;
+            }
+        }
+
+        return response()->json([
+            'message' => "{$processed} applications processed successfully.",
+            'data' => [
+                'processed' => $processed,
+                'failed' => $failed
+            ]
+        ]);
+    }
+
+    /**
+     * Get admission statistics
+     */
+    #[OA\Get(
+        path: "/api/v1/admission-applications/stats",
+        summary: "Get admission application statistics",
+        description: "Retrieve statistics about admission applications including counts by status. Requires admin/staff permissions.",
+        security: [["sanctum" => []]],
+        tags: ["Admission Applications"],
+        parameters: [
+            new OA\Parameter(
+                name: "term_id",
+                description: "Filter statistics by term ID",
+                in: "query",
+                required: false,
+                schema: new OA\Schema(type: "integer")
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Statistics retrieved successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: "data",
+                            type: "object",
+                            properties: [
+                                new OA\Property(property: "total", type: "integer", example: 150),
+                                new OA\Property(property: "draft", type: "integer", example: 20),
+                                new OA\Property(property: "submitted", type: "integer", example: 50),
+                                new OA\Property(property: "under_review", type: "integer", example: 30),
+                                new OA\Property(property: "accepted", type: "integer", example: 40),
+                                new OA\Property(property: "rejected", type: "integer", example: 8),
+                                new OA\Property(property: "waitlisted", type: "integer", example: 2),
+                                new OA\Property(property: "enrolled", type: "integer", example: 0)
+                            ]
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated"),
+            new OA\Response(response: 403, description: "Forbidden")
+        ]
+    )]
+    public function getStats(Request $request): JsonResponse
+    {
+        $this->authorize('viewAny', AdmissionApplication::class);
+
+        $query = AdmissionApplication::query();
+
+        if ($request->has('term_id')) {
+            $query->where('term_id', $request->term_id);
+        }
+
+        $stats = [
+            'total' => $query->count(),
+            'draft' => (clone $query)->where('status', 'draft')->count(),
+            'submitted' => (clone $query)->where('status', 'submitted')->count(),
+            'under_review' => (clone $query)->where('status', 'under_review')->count(),
+            'accepted' => (clone $query)->where('status', 'accepted')->count(),
+            'rejected' => (clone $query)->where('status', 'rejected')->count(),
+            'waitlisted' => (clone $query)->where('status', 'waitlisted')->count(),
+            'enrolled' => (clone $query)->where('status', 'enrolled')->count()
+        ];
+
+        return response()->json([
+            'data' => $stats
+        ]);
     }
 }

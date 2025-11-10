@@ -43,7 +43,8 @@ import {
   Car,
   MapPin,
   Mail,
-  Edit2
+  Edit2,
+  Building2
 } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/components/auth/auth-provider"
@@ -78,23 +79,15 @@ const navigationItems = {
       ]
     },
     {
-      title: "Financial",
+      title: "Applications & Billing",
       items: [
-        { title: "Payments", url: "/student/payments", icon: CreditCard },
-        { title: "Meal Plans", url: "/student/meal-plans", icon: Receipt }
-      ]
-    },
-    {
-      title: "Campus Life",
-      items: [
-        { title: "Housing", url: "/student/housing", icon: Building },
-        { title: "Career Services", url: "/student/career", icon: Briefcase }
+        { title: "Apply", url: "/student/apply", icon: FileText },
+        { title: "Billing", url: "/student/billing", icon: DollarSign }
       ]
     },
     {
       title: "Other",
       items: [
-        { title: "Assignments", url: "/student/assignments", icon: ClipboardCheck },
         { title: "Messages", url: "/messages", icon: MessageSquare },
         { title: "Profile", url: "/profile", icon: User }
       ]
@@ -117,21 +110,14 @@ const navigationItems = {
       title: "Teaching",
       items: [
         { title: "Sections", url: "/faculty/sections", icon: BookOpen },
-        { title: "Course Management", url: "/faculty/courses", icon: Settings },
-        { title: "Attendance", url: "/faculty/attendance", icon: ClipboardCheck }
+        { title: "Course Management", url: "/faculty/courses", icon: Settings }
       ]
     },
     {
       title: "Grading",
       items: [
-        { title: "Grades", url: "/faculty/grades", icon: Award }
-      ]
-    },
-    {
-      title: "Advising",
-      items: [
-        { title: "Advising", url: "/faculty/advising", icon: MessageSquare },
-        { title: "Appointments", url: "/faculty/appointments", icon: Calendar }
+        { title: "Grades", url: "/faculty/grades", icon: Award },
+        { title: "Attendance", url: "/faculty/attendance", icon: ClipboardCheck }
       ]
     },
     {
@@ -146,7 +132,8 @@ const navigationItems = {
     {
       title: "Dashboard",
       items: [
-        { title: "Overview", url: "/admin", icon: Home }
+        { title: "Overview", url: "/admin", icon: Home },
+        { title: "Analytics", url: "/admin/analytics", icon: BarChart3 }
       ]
     },
     {
@@ -158,28 +145,44 @@ const navigationItems = {
       ]
     },
     {
+      title: "Academic Structure",
+      items: [
+        { title: "Faculties", url: "/admin/faculties", icon: Building2 },
+        { title: "Departments", url: "/admin/departments", icon: Building },
+        { title: "Programs", url: "/admin/programs", icon: GraduationCap },
+        { title: "Terms", url: "/admin/terms", icon: Calendar }
+      ]
+    },
+    {
+      title: "Curriculum",
+      items: [
+        { title: "Courses", url: "/admin/courses", icon: BookOpen },
+        { title: "Sections", url: "/admin/sections", icon: Calendar }
+      ]
+    },
+    {
+      title: "Student Management",
+      items: [
+        { title: "Enrollments", url: "/admin/enrollments", icon: ClipboardCheck },
+        { title: "Grades", url: "/admin/grades", icon: Award }
+      ]
+    },
+    {
       title: "Admissions",
       items: [
         { title: "Applications", url: "/admin/admissions", icon: FileText }
       ]
     },
     {
-      title: "Alumni",
-      items: [
-        { title: "Alumni Records", url: "/admin/alumni", icon: GraduationCap }
-      ]
-    },
-    {
-      title: "Reports",
-      items: [
-        { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
-        { title: "Reports", url: "/admin/reports", icon: FileText }
-      ]
-    },
-    {
       title: "System",
       items: [
-        { title: "Settings", url: "/admin/settings", icon: Settings },
+        { title: "User Management", url: "/admin/system", icon: Shield },
+        { title: "Buildings", url: "/admin/buildings", icon: Building2 }
+      ]
+    },
+    {
+      title: "Other",
+      items: [
         { title: "Messages", url: "/messages", icon: MessageSquare },
         { title: "Profile", url: "/profile", icon: User }
       ]
@@ -193,9 +196,9 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
   const roleNavigation = navigationItems[userRole as keyof typeof navigationItems] || navigationItems.student
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-screen flex flex-col">
       {/* Header */}
-      <div className="h-16 border-b border-border px-4 flex items-center justify-between">
+      <div className="h-16 border-b border-border px-4 flex items-center justify-between shrink-0">
         <Link href="/" className="flex items-center space-x-2 min-w-0 overflow-hidden">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0">
             <GraduationCap className="h-4 w-4" />
@@ -250,7 +253,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
       </div>
 
       {/* User Footer */}
-      <div className="border-t border-border p-4">
+      <div className="border-t border-border p-4 shrink-0">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -291,13 +294,17 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              Profile
+            <DropdownMenuItem asChild>
+              <Link href="/profile" className="cursor-pointer">
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              Settings
+            <DropdownMenuItem asChild>
+              <Link href="/settings" className="cursor-pointer">
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-red-600" onClick={() => logout()}>

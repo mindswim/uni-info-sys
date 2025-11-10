@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Program;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -32,6 +33,7 @@ class StudentFactory extends Factory
             'phone' => $this->faker->phoneNumber(),
             'emergency_contact_name' => $this->faker->name(),
             'emergency_contact_phone' => $this->faker->phoneNumber(),
+            'major_program_id' => Program::inRandomOrder()->first()?->id,
         ];
     }
 }

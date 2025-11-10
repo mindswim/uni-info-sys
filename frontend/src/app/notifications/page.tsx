@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
+import { adminService } from "@/services"
 import {
   Bell,
   BellRing,
@@ -85,12 +86,30 @@ export default function NotificationsPage() {
       setLoading(true)
       setError(null)
 
-      // Since we don't have authentication set up, let's create realistic demo notifications
-      // In a real app, this would call: await fetch('/api/v1/notifications')
+      // Try to fetch from real API first
+      try {
+        const response = await adminService.getNotifications()
+        if (response.data && response.data.length > 0) {
+          // Map backend notifications to our format
+          const mappedNotifications: Notification[] = response.data.map((n: any) => ({
+            id: n.id.toString(),
+            type: n.type || 'system_announcement',
+            title: n.title || n.data?.title || 'Notification',
+            message: n.message || n.data?.message || '',
+            timestamp: n.created_at,
+            read: n.read_at !== null,
+            priority: n.priority || 'medium',
+            related_course: n.data?.course_code,
+            action_url: n.data?.action_url
+          }))
+          setNotifications(mappedNotifications)
+          return
+        }
+      } catch (apiError) {
+        console.log('API notifications not available, using demo data:', apiError)
+      }
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800))
-
+      // Fallback to demo notifications if API fails or returns no data
       const demoNotifications: Notification[] = [
         {
           id: '1',
@@ -155,8 +174,10 @@ export default function NotificationsPage() {
 
   const markAsRead = async (notificationId: string) => {
     try {
-      // In a real app: await fetch(`/api/v1/notifications/${notificationId}/read`, { method: 'POST' })
+      // Try to mark as read via API
+      await adminService.markNotificationAsRead(parseInt(notificationId))
 
+      // Update local state
       setNotifications(prev =>
         prev.map(notification =>
           notification.id === notificationId
@@ -166,6 +187,14 @@ export default function NotificationsPage() {
       )
     } catch (err) {
       console.error('Failed to mark notification as read:', err)
+      // Still update local state even if API fails
+      setNotifications(prev =>
+        prev.map(notification =>
+          notification.id === notificationId
+            ? { ...notification, read: true }
+            : notification
+        )
+      )
     }
   }
 

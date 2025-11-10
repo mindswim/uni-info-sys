@@ -1,7 +1,7 @@
 "use client"
 
 import { AppShell } from '@/components/layout/app-shell'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { StaffTab } from '@/components/admin/staff-tab'
 
 export default function StaffManagementPage() {
   return (
@@ -13,14 +13,7 @@ export default function StaffManagementPage() {
             Manage staff members and their roles
           </p>
         </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>Staff Management</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">Staff management features coming soon...</p>
-          </CardContent>
-        </Card>
+        <StaffTab />
       </div>
     </AppShell>
   )

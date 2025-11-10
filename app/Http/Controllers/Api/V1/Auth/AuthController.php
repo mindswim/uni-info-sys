@@ -123,9 +123,9 @@ class AuthController extends Controller
                         new OA\Property(property: "id", type: "integer"),
                         new OA\Property(property: "name", type: "string"),
                         new OA\Property(property: "email", type: "string"),
-                        new OA\Property(property: "roles", type: "array"),
-                        new OA\Property(property: "student_id", type: "integer"),
-                        new OA\Property(property: "staff_id", type: "integer"),
+                        new OA\Property(property: "roles", type: "array", items: new OA\Items(type: "string")),
+                        new OA\Property(property: "student_id", type: "integer", nullable: true),
+                        new OA\Property(property: "staff_id", type: "integer", nullable: true),
                     ]
                 )
             ),

@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\HandlesCsvImportExport;
+use App\Jobs\ProcessCourseSectionImport;
 use App\Models\CourseSection;
 use App\Http\Resources\CourseSectionResource;
 use App\Http\Requests\StoreCourseSectionRequest;
 use App\Http\Requests\UpdateCourseSectionRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(
@@ -16,6 +19,7 @@ use OpenApi\Attributes as OA;
 )]
 class CourseSectionController extends Controller
 {
+    use HandlesCsvImportExport;
     #[OA\Get(
         path: "/api/v1/course-sections",
         summary: "List all course sections",
@@ -140,5 +144,53 @@ class CourseSectionController extends Controller
     {
         $courseSection->delete();
         return response()->noContent();
+    }
+
+    // CSV Import/Export Methods
+
+    protected function getEntityName(): string
+    {
+        return 'course-sections';
+    }
+
+    protected function getImportJobClass(): string
+    {
+        return ProcessCourseSectionImport::class;
+    }
+
+    protected function getCsvHeaders(): array
+    {
+        return ['course_code', 'term_code', 'section_number', 'instructor_email', 'room_code', 'capacity', 'schedule_days', 'start_time', 'end_time', 'status'];
+    }
+
+    protected function getSampleCsvData(): array
+    {
+        return ['CS101', 'FALL2024', '001', 'j.smith@university.edu', 'SCI-101', '30', 'Monday,Wednesday,Friday', '09:00', '09:50', 'Active'];
+    }
+
+    protected function getExportData(Request $request): Collection
+    {
+        return CourseSection::with(['course', 'term', 'instructor.user', 'room.building'])->get();
+    }
+
+    protected function transformToRow($section): array
+    {
+        $roomCode = '';
+        if ($section->room) {
+            $roomCode = ($section->room->building?->code ?? '') . '-' . $section->room->room_number;
+        }
+
+        return [
+            $section->course?->course_code ?? '',
+            $section->term?->code ?? '',
+            $section->section_number,
+            $section->instructor?->user?->email ?? '',
+            $roomCode,
+            $section->capacity,
+            implode(',', $section->schedule_days ?? []),
+            $section->start_time ?? '',
+            $section->end_time ?? '',
+            $section->status ?? 'Active',
+        ];
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\HandlesCsvImportExport;
+use App\Jobs\ProcessStudentImport;
 use App\Models\Student;
 use App\Http\Resources\StudentResource;
 use App\Http\Requests\StoreStudentRequest;
@@ -10,6 +12,7 @@ use App\Http\Requests\UpdateStudentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(
@@ -18,6 +21,8 @@ use OpenApi\Attributes as OA;
 )]
 class StudentController extends Controller
 {
+    use HandlesCsvImportExport;
+
     public function __construct()
     {
         $this->authorizeResource(Student::class, 'student');
@@ -273,5 +278,94 @@ class StudentController extends Controller
         return response()->json([
             'data' => new StudentResource($student)
         ], 200);
+    }
+
+    // CSV Import/Export Methods (required by HandlesCsvImportExport trait)
+
+    protected function getEntityName(): string
+    {
+        return 'students';
+    }
+
+    protected function getImportJobClass(): string
+    {
+        return ProcessStudentImport::class;
+    }
+
+    protected function getCsvHeaders(): array
+    {
+        return [
+            'student_number',
+            'first_name',
+            'last_name',
+            'email',
+            'date_of_birth',
+            'gender',
+            'nationality',
+            'phone',
+            'address',
+            'city',
+            'state',
+            'postal_code',
+            'country',
+            'program_code',
+            'enrollment_status',
+            'class_standing',
+            'emergency_contact_name',
+            'emergency_contact_phone',
+        ];
+    }
+
+    protected function getSampleCsvData(): array
+    {
+        return [
+            'S24123456',
+            'John',
+            'Doe',
+            'john.doe@example.com',
+            '2000-01-15',
+            'Male',
+            'US',
+            '+1-555-0100',
+            '123 Main St',
+            'New York',
+            'NY',
+            '10001',
+            'USA',
+            'CS-BS',
+            'Enrolled',
+            'Sophomore',
+            'Jane Doe',
+            '+1-555-0101',
+        ];
+    }
+
+    protected function getExportData(Request $request): Collection
+    {
+        return Student::with(['user', 'majorProgram'])->get();
+    }
+
+    protected function transformToRow($student): array
+    {
+        return [
+            $student->student_number,
+            $student->first_name,
+            $student->last_name,
+            $student->user?->email ?? '',
+            $student->date_of_birth?->format('Y-m-d') ?? '',
+            $student->gender ?? '',
+            $student->nationality ?? '',
+            $student->phone ?? '',
+            $student->address ?? '',
+            $student->city ?? '',
+            $student->state ?? '',
+            $student->postal_code ?? '',
+            $student->country ?? '',
+            $student->majorProgram?->code ?? '',
+            $student->enrollment_status ?? '',
+            $student->class_standing ?? '',
+            $student->emergency_contact_name ?? '',
+            $student->emergency_contact_phone ?? '',
+        ];
     }
 }

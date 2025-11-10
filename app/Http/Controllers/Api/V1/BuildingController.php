@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\HandlesCsvImportExport;
+use App\Jobs\ProcessBuildingImport;
 use App\Models\Building;
 use App\Http\Resources\BuildingResource;
 use App\Http\Requests\StoreBuildingRequest;
 use App\Http\Requests\UpdateBuildingRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(
@@ -16,6 +19,7 @@ use OpenApi\Attributes as OA;
 )]
 class BuildingController extends Controller
 {
+    use HandlesCsvImportExport;
     #[OA\Get(
         path: "/api/v1/buildings",
         summary: "List all buildings",
@@ -147,5 +151,44 @@ class BuildingController extends Controller
 
         $building->delete();
         return response()->noContent();
+    }
+
+    // CSV Import/Export Methods
+
+    protected function getEntityName(): string
+    {
+        return 'buildings';
+    }
+
+    protected function getImportJobClass(): string
+    {
+        return ProcessBuildingImport::class;
+    }
+
+    protected function getCsvHeaders(): array
+    {
+        return ['name', 'code', 'address', 'city', 'state', 'postal_code'];
+    }
+
+    protected function getSampleCsvData(): array
+    {
+        return ['Science Building', 'SCI', '123 Campus Dr', 'Boston', 'MA', '02115'];
+    }
+
+    protected function getExportData(Request $request): Collection
+    {
+        return Building::all();
+    }
+
+    protected function transformToRow($building): array
+    {
+        return [
+            $building->name,
+            $building->code,
+            $building->address ?? '',
+            $building->city ?? '',
+            $building->state ?? '',
+            $building->postal_code ?? '',
+        ];
     }
 }

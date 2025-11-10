@@ -260,6 +260,42 @@
                 ]
             }
         },
+        "/api/v1/students/me/academic-records": {
+            "get": {
+                "tags": [
+                    "Academic Records"
+                ],
+                "summary": "Get current student's academic records",
+                "description": "Retrieve academic records for the authenticated student",
+                "operationId": "d80e5c60fa772fb03b9287b101a316d2",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AcademicRecordResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Student profile not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/admission-applications": {
             "get": {
                 "tags": [
@@ -304,7 +340,9 @@
                                 "submitted",
                                 "under_review",
                                 "accepted",
-                                "rejected"
+                                "rejected",
+                                "waitlisted",
+                                "enrolled"
                             ]
                         }
                     },
@@ -509,17 +547,17 @@
                 ]
             }
         },
-        "/api/v1/admission-applications/{id}": {
+        "/api/v1/admission-applications/{admission_application}": {
             "get": {
                 "tags": [
                     "Admission Applications"
                 ],
                 "summary": "Get a specific admission application",
                 "description": "Retrieve details of a specific admission application. Students can only view their own applications.",
-                "operationId": "5f899f01a66fe05f14e481ed9d00205b",
+                "operationId": "50c68d5b21a9575211f20b0203bace25",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "admission_application",
                         "in": "path",
                         "description": "ID of the admission application",
                         "required": true,
@@ -579,10 +617,10 @@
                 ],
                 "summary": "Update an admission application",
                 "description": "Update an admission application. Students can only update their own draft applications. Admin/staff can update any application.",
-                "operationId": "52be95c3d898403cea1ee03f2ff660a1",
+                "operationId": "d5291cee0fb9efb24c59e3858995bad0",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "admission_application",
                         "in": "path",
                         "description": "ID of the admission application",
                         "required": true,
@@ -609,7 +647,9 @@
                                             "submitted",
                                             "under_review",
                                             "accepted",
-                                            "rejected"
+                                            "rejected",
+                                            "waitlisted",
+                                            "enrolled"
                                         ],
                                         "example": "submitted"
                                     },
@@ -683,10 +723,10 @@
                 ],
                 "summary": "Delete an admission application",
                 "description": "Delete an admission application. Students can only delete their own draft applications. Admin can delete any application.",
-                "operationId": "724b2a9e4c648c01d919cac7e70dcbfe",
+                "operationId": "5515e96960781ed1c6361c5b5a826ae4",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "admission_application",
                         "in": "path",
                         "description": "ID of the admission application",
                         "required": true,
@@ -805,6 +845,658 @@
                     },
                     "404": {
                         "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admission-applications/{admission_application}/accept": {
+            "post": {
+                "tags": [
+                    "Admission Applications"
+                ],
+                "summary": "Accept an admission application",
+                "description": "Accept an admission application and notify the applicant. Requires admin/staff permissions.",
+                "operationId": "386a41dd3a0fa4043971354f211bd4f0",
+                "parameters": [
+                    {
+                        "name": "admission_application",
+                        "in": "path",
+                        "description": "ID of the admission application",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "decision_status": {
+                                        "description": "Additional decision notes",
+                                        "type": "string",
+                                        "example": "Accepted with full scholarship",
+                                        "nullable": true
+                                    },
+                                    "comments": {
+                                        "description": "Additional comments",
+                                        "type": "string",
+                                        "example": "Exceptional academic performance",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Application accepted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Application accepted successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/AdmissionApplicationResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admission-applications/{admission_application}/reject": {
+            "post": {
+                "tags": [
+                    "Admission Applications"
+                ],
+                "summary": "Reject an admission application",
+                "description": "Reject an admission application and notify the applicant. Requires admin/staff permissions.",
+                "operationId": "14f7343910250f3c354db57f17a12b38",
+                "parameters": [
+                    {
+                        "name": "admission_application",
+                        "in": "path",
+                        "description": "ID of the admission application",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "decision_status": {
+                                        "description": "Reason for rejection",
+                                        "type": "string",
+                                        "example": "Does not meet minimum GPA requirement",
+                                        "nullable": true
+                                    },
+                                    "comments": {
+                                        "description": "Additional comments",
+                                        "type": "string",
+                                        "example": "We encourage you to reapply next year",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Application rejected successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Application rejected successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/AdmissionApplicationResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admission-applications/{admission_application}/waitlist": {
+            "post": {
+                "tags": [
+                    "Admission Applications"
+                ],
+                "summary": "Waitlist an admission application",
+                "description": "Place an admission application on waitlist and notify the applicant. Requires admin/staff permissions.",
+                "operationId": "0450454472849e24ab9fbb80739b553a",
+                "parameters": [
+                    {
+                        "name": "admission_application",
+                        "in": "path",
+                        "description": "ID of the admission application",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "decision_status": {
+                                        "description": "Waitlist status information",
+                                        "type": "string",
+                                        "example": "Placed on waitlist - will notify if space becomes available",
+                                        "nullable": true
+                                    },
+                                    "comments": {
+                                        "description": "Additional comments",
+                                        "type": "string",
+                                        "example": "Strong candidate, awaiting capacity",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Application waitlisted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Application waitlisted successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/AdmissionApplicationResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admission-applications/{admission_application}/enroll": {
+            "post": {
+                "tags": [
+                    "Admission Applications"
+                ],
+                "summary": "Enroll an accepted applicant",
+                "description": "Convert an accepted application to enrolled student status. Creates student account if needed. Requires admin/staff permissions.",
+                "operationId": "8e1fd48997e6e996a82ac7c2f647a16f",
+                "parameters": [
+                    {
+                        "name": "admission_application",
+                        "in": "path",
+                        "description": "ID of the admission application",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Student enrolled successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Student enrolled successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/AdmissionApplicationResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - application not accepted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Application must be accepted before enrollment."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admission-applications/bulk-actions": {
+            "post": {
+                "tags": [
+                    "Admission Applications"
+                ],
+                "summary": "Perform bulk actions on multiple applications",
+                "description": "Accept, reject, or waitlist multiple applications at once. Requires admin/staff permissions.",
+                "operationId": "d22055618f2b8734d4372522bc8e8d7a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "application_ids",
+                                    "action"
+                                ],
+                                "properties": {
+                                    "application_ids": {
+                                        "description": "Array of application IDs",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    },
+                                    "action": {
+                                        "description": "Action to perform",
+                                        "type": "string",
+                                        "enum": [
+                                            "accept",
+                                            "reject",
+                                            "waitlist"
+                                        ],
+                                        "example": "accept"
+                                    },
+                                    "decision_status": {
+                                        "description": "Decision status for all applications",
+                                        "type": "string",
+                                        "example": "Batch acceptance",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Bulk action completed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "3 applications processed successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "processed": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "failed": {
+                                                    "type": "integer",
+                                                    "example": 0
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - validation failed"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admission-applications/stats": {
+            "get": {
+                "tags": [
+                    "Admission Applications"
+                ],
+                "summary": "Get admission application statistics",
+                "description": "Retrieve statistics about admission applications including counts by status. Requires admin/staff permissions.",
+                "operationId": "c63fbe96601c63840677a3154cbb555a",
+                "parameters": [
+                    {
+                        "name": "term_id",
+                        "in": "query",
+                        "description": "Filter statistics by term ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Statistics retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 150
+                                                },
+                                                "draft": {
+                                                    "type": "integer",
+                                                    "example": 20
+                                                },
+                                                "submitted": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "under_review": {
+                                                    "type": "integer",
+                                                    "example": 30
+                                                },
+                                                "accepted": {
+                                                    "type": "integer",
+                                                    "example": 40
+                                                },
+                                                "rejected": {
+                                                    "type": "integer",
+                                                    "example": 8
+                                                },
+                                                "waitlisted": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "enrolled": {
+                                                    "type": "integer",
+                                                    "example": 0
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/tokens/create": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login and obtain API token",
+                "description": "Authenticate with email and password to receive an API token for subsequent requests.",
+                "operationId": "fccc7add0d8f13ef1b018c7a1712e59b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password",
+                                    "device_name"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@university.edu"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "device_name": {
+                                        "type": "string",
+                                        "example": "Mobile App"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful, token returned.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|abc123def456..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid credentials or validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout and revoke current token",
+                "description": "Revoke the current authentication token.",
+                "operationId": "3a27a9e02ceb521eb3f98c8d2394aef9",
+                "responses": {
+                    "200": {
+                        "description": "Successfully logged out.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/user": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Get current user information",
+                "description": "Get the authenticated user's profile information.",
+                "operationId": "a4cddb112551ac7618446c14d9526d9c",
+                "responses": {
+                    "200": {
+                        "description": "User information retrieved.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "email": {
+                                            "type": "string"
+                                        },
+                                        "roles": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "student_id": {
+                                            "type": "integer",
+                                            "nullable": true
+                                        },
+                                        "staff_id": {
+                                            "type": "integer",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -1030,83 +1722,6 @@
                                             "description": "Error message",
                                             "type": "string",
                                             "example": "This password reset token is invalid or has expired."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/tokens/create": {
-            "post": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Login and obtain API token",
-                "description": "Authenticate with email and password to receive an API token for subsequent requests.",
-                "operationId": "20f9ed47a7a17709741d60d449c3bcf4",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "email",
-                                    "password",
-                                    "device_name"
-                                ],
-                                "properties": {
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "user@university.edu"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "password123"
-                                    },
-                                    "device_name": {
-                                        "type": "string",
-                                        "example": "Mobile App"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Login successful, token returned.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "token": {
-                                            "type": "string",
-                                            "example": "1|abc123def456..."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Invalid credentials or validation error.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string"
-                                        },
-                                        "errors": {
-                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -1622,6 +2237,93 @@
                 ]
             }
         },
+        "/api/v1/course-catalog": {
+            "get": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Get public course catalog with available sections",
+                "operationId": "6e191b63e364aff0f84144afd4b4a85b",
+                "parameters": [
+                    {
+                        "name": "term_id",
+                        "in": "query",
+                        "description": "Filter by term ID (defaults to current term)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "department_id",
+                        "in": "query",
+                        "description": "Filter by department ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "level",
+                        "in": "query",
+                        "description": "Filter by course level (undergraduate, graduate)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search in course code, name, or description",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course catalog with available sections.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CourseResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                }
+            }
+        },
         "/api/v1/imports/courses": {
             "post": {
                 "tags": [
@@ -2027,6 +2729,7 @@
                             "schema": {
                                 "required": [
                                     "name",
+                                    "code",
                                     "faculty_id"
                                 ],
                                 "properties": {
@@ -2034,6 +2737,12 @@
                                         "type": "string",
                                         "maxLength": 255,
                                         "example": "Computer Science"
+                                    },
+                                    "code": {
+                                        "description": "Unique department code",
+                                        "type": "string",
+                                        "maxLength": 10,
+                                        "example": "CS"
                                     },
                                     "faculty_id": {
                                         "description": "ID of the faculty this department belongs to",
@@ -3346,6 +4055,53 @@
                 ]
             }
         },
+        "/api/v1/enrollments/me": {
+            "get": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Get current student's enrollments",
+                "description": "Retrieve enrollments for the authenticated student in the current term",
+                "operationId": "e8464693f70c3d3c09e5a059fd977c26",
+                "parameters": [
+                    {
+                        "name": "term_id",
+                        "in": "query",
+                        "description": "Filter by specific term ID (optional, defaults to current term)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/EnrollmentResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Student profile not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/enrollments/swap": {
             "post": {
                 "tags": [
@@ -3874,6 +4630,347 @@
                 "security": [
                     {
                         "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/enrollments/{enrollment}/grade": {
+            "put": {
+                "tags": [
+                    "Grades"
+                ],
+                "summary": "Submit or update a grade for an enrollment",
+                "operationId": "2229f5ea83481b027788a90292997e4e",
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "grade"
+                                ],
+                                "properties": {
+                                    "grade": {
+                                        "description": "Letter grade (A+, A, A-, B+, etc.)",
+                                        "type": "string",
+                                        "example": "A"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Grade submitted successfully"
+                    },
+                    "422": {
+                        "description": "Invalid grade or deadline passed"
+                    },
+                    "403": {
+                        "description": "Unauthorized to submit grade"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/course-sections/{courseSection}/grades/bulk": {
+            "post": {
+                "tags": [
+                    "Grades"
+                ],
+                "summary": "Submit grades for multiple students in bulk",
+                "operationId": "b19ed28036f1816b2e5c3806be522f8b",
+                "parameters": [
+                    {
+                        "name": "courseSection",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "grades"
+                                ],
+                                "properties": {
+                                    "grades": {
+                                        "description": "Map of enrollment_id to grade",
+                                        "type": "object",
+                                        "example": {
+                                            "1": "A",
+                                            "2": "B+",
+                                            "3": "A-"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Bulk grades submitted"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/course-sections/{courseSection}/grade-distribution": {
+            "get": {
+                "tags": [
+                    "Grades"
+                ],
+                "summary": "Get grade distribution for a course section",
+                "operationId": "165522bb30ef102b902aada788c94ad3",
+                "parameters": [
+                    {
+                        "name": "courseSection",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Grade distribution data"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/course-sections/{courseSection}/grading-progress": {
+            "get": {
+                "tags": [
+                    "Grades"
+                ],
+                "summary": "Get grading progress for a course section",
+                "operationId": "3aaf19c18af9ac3a27cf49108460a032",
+                "parameters": [
+                    {
+                        "name": "courseSection",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Grading progress data"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/grade-change-requests": {
+            "get": {
+                "tags": [
+                    "Grades"
+                ],
+                "summary": "List grade change requests",
+                "operationId": "e7e1443f1a0e07f226458d8f46ebffa6",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "approved",
+                                "denied"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of grade change requests"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Grades"
+                ],
+                "summary": "Request a grade change",
+                "operationId": "298a41cf01ad285fe260fbf5984b9f56",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "enrollment_id",
+                                    "new_grade",
+                                    "reason"
+                                ],
+                                "properties": {
+                                    "enrollment_id": {
+                                        "type": "integer"
+                                    },
+                                    "new_grade": {
+                                        "type": "string",
+                                        "example": "B+"
+                                    },
+                                    "reason": {
+                                        "type": "string",
+                                        "example": "Grading error - missed extra credit"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Grade change request created"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/grade-change-requests/{gradeChangeRequest}/approve": {
+            "post": {
+                "tags": [
+                    "Grades"
+                ],
+                "summary": "Approve a grade change request",
+                "operationId": "2944df31d8499a8683d678e3e4826173",
+                "parameters": [
+                    {
+                        "name": "gradeChangeRequest",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Grade change approved"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/grade-change-requests/{gradeChangeRequest}/deny": {
+            "post": {
+                "tags": [
+                    "Grades"
+                ],
+                "summary": "Deny a grade change request",
+                "operationId": "17fc045e45b4f93245da7d9c462b1085",
+                "parameters": [
+                    {
+                        "name": "gradeChangeRequest",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "denial_reason"
+                                ],
+                                "properties": {
+                                    "denial_reason": {
+                                        "type": "string",
+                                        "example": "Insufficient justification"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Grade change denied"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/grades/valid-grades": {
+            "get": {
+                "tags": [
+                    "Grades"
+                ],
+                "summary": "Get list of valid letter grades",
+                "operationId": "8eb0e03d6d45cb9c0103f54f05c36e61",
+                "responses": {
+                    "200": {
+                        "description": "List of valid grades"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
                     }
                 ]
             }
@@ -5567,6 +6664,93 @@
                 }
             }
         },
+        "/api/v1/staff/me": {
+            "get": {
+                "tags": [
+                    "Staff"
+                ],
+                "summary": "Get the authenticated staff member's profile",
+                "operationId": "f794e92a3bf6c563b3286d3a43753e90",
+                "responses": {
+                    "200": {
+                        "description": "The authenticated staff member's profile.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/StaffResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Staff profile not found for the authenticated user"
+                    }
+                }
+            }
+        },
+        "/api/v1/staff/me/sections": {
+            "get": {
+                "tags": [
+                    "Staff"
+                ],
+                "summary": "Get the authenticated staff member's course sections",
+                "operationId": "c0d701e2c1112e1247060b805b413ccf",
+                "parameters": [
+                    {
+                        "name": "term_id",
+                        "in": "query",
+                        "description": "Filter by term ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by section status (active, completed, cancelled)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of course sections taught by the authenticated staff member.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CourseSectionResource"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Staff profile not found for the authenticated user"
+                    }
+                }
+            }
+        },
         "/api/v1/students": {
             "get": {
                 "tags": [
@@ -5908,6 +7092,39 @@
                     },
                     "404": {
                         "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/students/me": {
+            "get": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Get current student's profile",
+                "description": "Retrieve the authenticated student's profile with related data",
+                "operationId": "bb7738e60067550897fe021f576dd4d4",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudentResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Student profile not found"
                     }
                 },
                 "security": [
@@ -6599,12 +7816,12 @@
                 "description": "Request body for creating a new program.",
                 "required": [
                     "name",
-                    "code",
-                    "faculty_id",
                     "department_id",
-                    "duration_years",
-                    "level",
-                    "status"
+                    "degree_level",
+                    "duration",
+                    "description",
+                    "requirements",
+                    "capacity"
                 ],
                 "properties": {
                     "name": {
@@ -6612,46 +7829,30 @@
                         "maxLength": 255,
                         "example": "Bachelor of Science in Computer Science"
                     },
-                    "code": {
+                    "department_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "degree_level": {
                         "type": "string",
-                        "maxLength": 50,
-                        "example": "BSc-CS"
+                        "maxLength": 255,
+                        "example": "Bachelors"
+                    },
+                    "duration": {
+                        "type": "integer",
+                        "example": 4
                     },
                     "description": {
                         "type": "string",
                         "example": "A comprehensive program covering the fundamentals of computer science."
                     },
-                    "faculty_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "department_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "duration_years": {
-                        "type": "integer",
-                        "minimum": 1,
-                        "example": 4
-                    },
-                    "level": {
+                    "requirements": {
                         "type": "string",
-                        "enum": [
-                            "undergraduate",
-                            "graduate",
-                            "diploma",
-                            "certificate"
-                        ],
-                        "example": "undergraduate"
+                        "example": "High school diploma with mathematics and science."
                     },
-                    "status": {
-                        "type": "string",
-                        "enum": [
-                            "active",
-                            "inactive",
-                            "suspended"
-                        ],
-                        "example": "active"
+                    "capacity": {
+                        "type": "integer",
+                        "example": 100
                     }
                 },
                 "type": "object"
@@ -7373,7 +8574,9 @@
                             "submitted",
                             "under_review",
                             "accepted",
-                            "rejected"
+                            "rejected",
+                            "waitlisted",
+                            "enrolled"
                         ],
                         "example": "submitted"
                     },
@@ -8306,6 +9509,10 @@
         {
             "name": "Faculties",
             "description": "Faculty management endpoints"
+        },
+        {
+            "name": "Grades",
+            "description": "Grade management endpoints"
         },
         {
             "name": "Grade Import",

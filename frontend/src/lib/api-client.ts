@@ -47,8 +47,8 @@ apiClient.interceptors.request.use(
       return config
     }
 
-    // Add auth token if available
-    const token = localStorage.getItem('auth_token')
+    // Add auth token if available (using sessionStorage - clears on restart)
+    const token = sessionStorage.getItem('auth_token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -87,9 +87,9 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       // Handle unauthorized - clear token and redirect to login
       console.warn('🔒 Authentication expired or invalid')
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('user')
-      localStorage.removeItem('auth_token_expiry')
+      sessionStorage.removeItem('auth_token')
+      sessionStorage.removeItem('auth_user')
+      sessionStorage.removeItem('auth_token_expiry')
 
       // Redirect to login if not already there
       if (typeof window !== 'undefined' && !window.location.pathname.includes('/auth/login')) {
@@ -142,20 +142,21 @@ export class ApiClient {
   static async login(email: string, password: string): Promise<any> {
     await this.getCsrfCookie()
     const response = await sanctumClient.post('/login', { email, password })
-    
-    // Store auth token if using token-based auth
+
+    // Store auth token if using token-based auth (sessionStorage clears on restart)
     if (response.data.token) {
-      localStorage.setItem('auth_token', response.data.token)
-      localStorage.setItem('user', JSON.stringify(response.data.user))
+      sessionStorage.setItem('auth_token', response.data.token)
+      sessionStorage.setItem('auth_user', JSON.stringify(response.data.user))
     }
-    
+
     return response.data
   }
 
   static async logout(): Promise<void> {
     await apiClient.post('/logout')
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('user')
+    sessionStorage.removeItem('auth_token')
+    sessionStorage.removeItem('auth_user')
+    sessionStorage.removeItem('auth_token_expiry')
   }
 
   static async getUser(): Promise<any> {

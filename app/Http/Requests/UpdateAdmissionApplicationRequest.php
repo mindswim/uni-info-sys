@@ -50,7 +50,7 @@ class UpdateAdmissionApplicationRequest extends FormRequest
             $rules['status'] = [
                 'sometimes',
                 'string',
-                Rule::in(['draft', 'submitted', 'under_review', 'accepted', 'rejected'])
+                Rule::in(['draft', 'submitted', 'under_review', 'accepted', 'rejected', 'waitlisted', 'enrolled'])
             ];
             $rules['decision_date'] = [
                 'sometimes',

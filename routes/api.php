@@ -20,6 +20,9 @@ use App\Http\Controllers\Api\V1\CourseImportController;
 use App\Http\Controllers\Api\V1\GradeImportController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\ImpersonationController;
+use App\Http\Controllers\Api\V1\InvoiceController;
+use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\AttendanceController;
 
 /**
  * @OA\Get(
@@ -133,10 +136,29 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     // Auth routes
     Route::post('/auth/logout', [\App\Http\Controllers\Api\V1\Auth\AuthController::class, 'logout']);
     Route::get('/auth/user', [\App\Http\Controllers\Api\V1\Auth\AuthController::class, 'user']);
+
+    // Faculties with CSV
     Route::apiResource('faculties', FacultyController::class);
+    Route::post('faculties/csv/import', [FacultyController::class, 'importCsv']);
+    Route::get('faculties/csv/export', [FacultyController::class, 'exportCsv']);
+    Route::get('faculties/csv/template', [FacultyController::class, 'downloadTemplate']);
+
+    // Departments with CSV
     Route::apiResource('departments', DepartmentController::class);
+    Route::post('departments/csv/import', [DepartmentController::class, 'importCsv']);
+    Route::get('departments/csv/export', [DepartmentController::class, 'exportCsv']);
+    Route::get('departments/csv/template', [DepartmentController::class, 'downloadTemplate']);
+
+    // Programs with CSV
     Route::apiResource('programs', ProgramController::class);
+    Route::post('programs/csv/import', [ProgramController::class, 'importCsv']);
+    Route::get('programs/csv/export', [ProgramController::class, 'exportCsv']);
+    Route::get('programs/csv/template', [ProgramController::class, 'downloadTemplate']);
     Route::get('course-catalog', [CourseController::class, 'catalog']);
+    // Course CSV operations
+    Route::post('courses/csv/import', [CourseController::class, 'importCsv'])->middleware('permission:create_courses');
+    Route::get('courses/csv/export', [CourseController::class, 'exportCsv'])->middleware('permission:view_courses');
+    Route::get('courses/csv/template', [CourseController::class, 'downloadTemplate']);
     // Course management with permission-based authorization
     Route::get('courses', [CourseController::class, 'index'])->middleware('permission:view_courses');
     Route::post('courses', [CourseController::class, 'store'])->middleware('permission:create_courses');
@@ -150,17 +172,46 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
         Route::get('staff/me/sections', [\App\Http\Controllers\Api\V1\StaffController::class, 'mySections']);
     });
     Route::apiResource('staff', StaffController::class);
+    Route::post('staff/csv/import', [StaffController::class, 'importCsv']);
+    Route::get('staff/csv/export', [StaffController::class, 'exportCsv']);
+    Route::get('staff/csv/template', [StaffController::class, 'downloadTemplate']);
 
     Route::apiResource('terms', TermController::class);
+    Route::post('terms/csv/import', [TermController::class, 'importCsv']);
+    Route::get('terms/csv/export', [TermController::class, 'exportCsv']);
+    Route::get('terms/csv/template', [TermController::class, 'downloadTemplate']);
+
     Route::apiResource('buildings', BuildingController::class);
+    Route::post('buildings/csv/import', [BuildingController::class, 'importCsv']);
+    Route::get('buildings/csv/export', [BuildingController::class, 'exportCsv']);
+    Route::get('buildings/csv/template', [BuildingController::class, 'downloadTemplate']);
+
     Route::apiResource('rooms', RoomController::class);
+    Route::post('rooms/csv/import', [RoomController::class, 'importCsv']);
+    Route::get('rooms/csv/export', [RoomController::class, 'exportCsv']);
+    Route::get('rooms/csv/template', [RoomController::class, 'downloadTemplate']);
+
     Route::apiResource('course-sections', CourseSectionController::class);
+    Route::post('course-sections/csv/import', [CourseSectionController::class, 'importCsv']);
+    Route::get('course-sections/csv/export', [CourseSectionController::class, 'exportCsv']);
+    Route::get('course-sections/csv/template', [CourseSectionController::class, 'downloadTemplate']);
     // Admission application management with permission-based authorization
+    // Bulk actions and stats (must be before resourceful routes to avoid route conflicts)
+    Route::post('admission-applications/bulk-actions', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'bulkAction'])->middleware('permission:update_applications');
+    Route::get('admission-applications/stats', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'getStats'])->middleware('permission:view_applications');
+
+    // CRUD operations
     Route::get('admission-applications', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'index'])->middleware('permission:view_applications');
     Route::post('admission-applications', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'store'])->middleware('permission:create_applications');
     Route::get('admission-applications/{admission_application}', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'show'])->middleware('permission:view_applications');
     Route::put('admission-applications/{admission_application}', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'update'])->middleware('permission:update_applications');
     Route::delete('admission-applications/{admission_application}', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'destroy'])->middleware('permission:update_applications');
+
+    // Workflow actions
+    Route::post('admission-applications/{admission_application}/accept', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'accept'])->middleware('permission:update_applications');
+    Route::post('admission-applications/{admission_application}/reject', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'reject'])->middleware('permission:update_applications');
+    Route::post('admission-applications/{admission_application}/waitlist', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'waitlist'])->middleware('permission:update_applications');
+    Route::post('admission-applications/{admission_application}/enroll', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'enroll'])->middleware('permission:update_applications');
     
     // Nested ProgramChoice routes - both nested and shallow for RESTful best practices
     Route::apiResource('admission-applications.program-choices', \App\Http\Controllers\Api\V1\ProgramChoiceController::class)->scoped()->shallow();
@@ -187,6 +238,11 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::post('students/{student}/restore', [\App\Http\Controllers\Api\V1\StudentController::class, 'restore'])->withTrashed()->middleware('permission:update_students');
     Route::delete('students/{student}/force', [\App\Http\Controllers\Api\V1\StudentController::class, 'forceDelete'])->withTrashed()->middleware('permission:delete_students');
 
+    // Student CSV Import/Export
+    Route::post('students/csv/import', [\App\Http\Controllers\Api\V1\StudentController::class, 'importCsv'])->middleware('permission:create_students');
+    Route::get('students/csv/export', [\App\Http\Controllers\Api\V1\StudentController::class, 'exportCsv'])->middleware('permission:view_students');
+    Route::get('students/csv/template', [\App\Http\Controllers\Api\V1\StudentController::class, 'downloadTemplate']);
+
     // Academic records with permission-based authorization
     Route::get('students/{student}/academic-records', [\App\Http\Controllers\Api\V1\AcademicRecordController::class, 'index'])->middleware('permission:view_academic_records');
     Route::post('students/{student}/academic-records', [\App\Http\Controllers\Api\V1\AcademicRecordController::class, 'store'])->middleware('permission:update_grades');
@@ -200,6 +256,10 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::post('documents/{document}/restore', [\App\Http\Controllers\Api\V1\DocumentController::class, 'restore'])->withTrashed();
     Route::delete('documents/{document}/force', [\App\Http\Controllers\Api\V1\DocumentController::class, 'forceDelete'])->withTrashed();
 
+    // Enrollment CSV operations
+    Route::post('enrollments/csv/import', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'importCsv'])->middleware('permission:create_enrollments');
+    Route::get('enrollments/csv/export', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'exportCsv'])->middleware('permission:view_enrollments');
+    Route::get('enrollments/csv/template', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'downloadTemplate']);
     // Enrollment management with custom business logic endpoints (must be before apiResource)
     Route::middleware('role.student')->group(function () {
         Route::get('enrollments/me', [\App\Http\Controllers\Api\V1\EnrollmentController::class, 'myEnrollments']);
@@ -233,9 +293,41 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     
+    // Grade management routes
+    Route::put('enrollments/{enrollment}/grade', [\App\Http\Controllers\Api\V1\GradeController::class, 'submitGrade']);
+    Route::post('course-sections/{courseSection}/grades/bulk', [\App\Http\Controllers\Api\V1\GradeController::class, 'bulkSubmitGrades']);
+    Route::get('course-sections/{courseSection}/grade-distribution', [\App\Http\Controllers\Api\V1\GradeController::class, 'getGradeDistribution']);
+    Route::get('course-sections/{courseSection}/grading-progress', [\App\Http\Controllers\Api\V1\GradeController::class, 'getGradingProgress']);
+    Route::get('grades/valid-grades', [\App\Http\Controllers\Api\V1\GradeController::class, 'getValidGrades']);
+
+    // Grade change request routes
+    Route::get('grade-change-requests', [\App\Http\Controllers\Api\V1\GradeController::class, 'listGradeChangeRequests']);
+    Route::post('grade-change-requests', [\App\Http\Controllers\Api\V1\GradeController::class, 'requestGradeChange']);
+    Route::post('grade-change-requests/{gradeChangeRequest}/approve', [\App\Http\Controllers\Api\V1\GradeController::class, 'approveGradeChange']);
+    Route::post('grade-change-requests/{gradeChangeRequest}/deny', [\App\Http\Controllers\Api\V1\GradeController::class, 'denyGradeChange']);
+
     // Import routes (requires specific permissions)
     Route::post('imports/courses', [CourseImportController::class, 'store']);
     Route::post('course-sections/{courseSection}/import-grades', [GradeImportController::class, 'store']);
+
+    // Billing and payment routes
+    Route::get('invoices/student-summary', [InvoiceController::class, 'studentSummary']);
+    Route::post('invoices/{invoice}/discount', [InvoiceController::class, 'addDiscount']);
+    Route::post('invoices/{invoice}/adjustment', [InvoiceController::class, 'addAdjustment']);
+    Route::apiResource('invoices', InvoiceController::class);
+
+    Route::post('payments/{payment}/refund', [PaymentController::class, 'refund']);
+    Route::apiResource('payments', PaymentController::class);
+
+    // Attendance CSV operations
+    Route::post('attendance/csv/import', [AttendanceController::class, 'importCsv']);
+    Route::get('attendance/csv/export', [AttendanceController::class, 'exportCsv']);
+    Route::get('attendance/csv/template', [AttendanceController::class, 'downloadTemplate']);
+    // Attendance routes
+    Route::post('attendance/bulk', [AttendanceController::class, 'bulkStore']);
+    Route::get('attendance/student-report', [AttendanceController::class, 'studentReport']);
+    Route::get('course-sections/{courseSection}/attendance-statistics', [AttendanceController::class, 'courseStatistics']);
+    Route::apiResource('attendance', AttendanceController::class)->parameters(['attendance' => 'attendanceRecord']);
 
 }); 
 
@@ -243,211 +335,4 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
 Route::get('/metrics', [\App\Http\Controllers\Api\V1\MetricsController::class, 'index'])
     ->middleware('throttle:60,1'); // Allow 60 requests per minute for metrics scraping
 
-// TEMPORARY: Demo enrollment endpoints for frontend testing (REMOVE BEFORE PRODUCTION!)
-Route::prefix('demo')->middleware('throttle:60,1')->group(function () {
-    Route::post('/enrollments', function(Request $request) {
-        // Simulate enrollment success/failure based on section capacity
-        $studentId = $request->input('student_id', 1);
-        $sectionId = $request->input('course_section_id');
-        
-        // Get current enrollment count for the section
-        $currentEnrollments = DB::table('enrollments')
-            ->where('course_section_id', $sectionId)
-            ->where('status', 'enrolled')
-            ->count();
-            
-        // Get section capacity
-        $section = DB::table('course_sections')->find($sectionId);
-        if (!$section) {
-            return response()->json(['message' => 'Course section not found'], 404);
-        }
-        
-        // Check if student is already enrolled
-        $existingEnrollment = DB::table('enrollments')
-            ->where('student_id', $studentId)
-            ->where('course_section_id', $sectionId)
-            ->whereNull('deleted_at')
-            ->first();
-            
-        if ($existingEnrollment) {
-            return response()->json(['message' => 'Student is already enrolled in this section'], 422);
-        }
-        
-        $status = $currentEnrollments >= $section->capacity ? 'waitlisted' : 'enrolled';
-        
-        // Create enrollment record
-        $enrollmentId = DB::table('enrollments')->insertGetId([
-            'student_id' => $studentId,
-            'course_section_id' => $sectionId,
-            'enrollment_date' => now()->toDateString(),
-            'status' => $status,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-        
-        $message = $status === 'waitlisted' 
-            ? 'Student has been added to the waitlist for this course section.'
-            : 'Student has been successfully enrolled in the course section.';
-            
-        return response()->json([
-            'message' => $message,
-            'data' => [
-                'id' => $enrollmentId,
-                'student_id' => $studentId,
-                'course_section_id' => $sectionId,
-                'status' => $status,
-                'enrollment_date' => now()->toDateString()
-            ]
-        ], 201);
-    });
-    
-    Route::post('/enrollments/{enrollmentId}/withdraw', function($enrollmentId) {
-        $enrollment = DB::table('enrollments')->find($enrollmentId);
-        if (!$enrollment) {
-            return response()->json(['message' => 'Enrollment not found'], 404);
-        }
-        
-        if ($enrollment->status === 'withdrawn') {
-            return response()->json(['message' => 'Enrollment is already withdrawn'], 422);
-        }
-        
-        DB::table('enrollments')
-            ->where('id', $enrollmentId)
-            ->update([
-                'status' => 'withdrawn',
-                'updated_at' => now()
-            ]);
-            
-        return response()->json(['message' => 'Student has been withdrawn from the course section.']);
-    });
-    
-    Route::get('/students/{studentId}/enrollments', function($studentId) {
-        $enrollments = DB::table('enrollments')
-            ->where('student_id', $studentId)
-            ->whereNull('deleted_at')
-            ->pluck('course_section_id')
-            ->toArray();
-            
-        return response()->json([
-            'enrollments' => $enrollments,
-            'stats' => ['total_enrollments' => count($enrollments)]
-        ]);
-    });
-    
-    // Pipeline analytics endpoint
-    Route::get('/pipeline/analytics', function() {
-        // Get application statistics
-        $totalApplications = DB::table('admission_applications')->count();
-        $acceptedApplications = DB::table('admission_applications')->where('status', 'accepted')->count();
-        
-        // Get enrollment statistics 
-        $totalEnrollments = DB::table('enrollments')->where('status', 'enrolled')->count();
-        $uniqueEnrolledStudents = DB::table('enrollments')
-            ->where('status', 'enrolled')
-            ->distinct('student_id')
-            ->count();
-            
-        // Get student and course statistics
-        $totalStudents = DB::table('students')->count();
-        $totalCourseSections = DB::table('course_sections')->count();
-        
-        // Calculate conversion rates
-        $applicationToAcceptanceRate = $totalApplications > 0 ? ($acceptedApplications / $totalApplications) * 100 : 0;
-        $acceptanceToEnrollmentRate = $acceptedApplications > 0 ? ($uniqueEnrolledStudents / $acceptedApplications) * 100 : 0;
-        $overallSuccessRate = $totalApplications > 0 ? ($uniqueEnrolledStudents / $totalApplications) * 100 : 0;
-        
-        // Get recent pipeline activity (students with applications and enrollments)
-        $pipelineActivity = DB::table('students')
-            ->join('users', 'students.user_id', '=', 'users.id')
-            ->leftJoin('admission_applications', 'admission_applications.student_id', '=', 'students.id')
-            ->leftJoin('enrollments', 'enrollments.student_id', '=', 'students.id')
-            ->select([
-                'students.id',
-                'users.name',
-                'users.email',
-                'admission_applications.status as application_status',
-                'admission_applications.application_date',
-                DB::raw('COUNT(CASE WHEN enrollments.status = "enrolled" THEN 1 END) as current_enrollments')
-            ])
-            ->whereNotNull('admission_applications.id')
-            ->groupBy('students.id', 'users.name', 'users.email', 'admission_applications.status', 'admission_applications.application_date')
-            ->orderBy('admission_applications.application_date', 'desc')
-            ->limit(10)
-            ->get();
-            
-        return response()->json([
-            'stats' => [
-                'total_applications' => $totalApplications,
-                'accepted_applications' => $acceptedApplications,
-                'enrolled_students' => $uniqueEnrolledStudents,
-                'total_enrollments' => $totalEnrollments,
-                'total_students' => $totalStudents,
-                'course_sections' => $totalCourseSections
-            ],
-            'conversion_rates' => [
-                'application_to_acceptance' => round($applicationToAcceptanceRate, 2),
-                'acceptance_to_enrollment' => round($acceptanceToEnrollmentRate, 2),
-                'overall_success_rate' => round($overallSuccessRate, 2)
-            ],
-            'recent_activity' => $pipelineActivity
-        ]);
-    });
-});
-
-// TEMPORARY: Data viewer for development (REMOVE BEFORE PRODUCTION!)
-Route::prefix('data-viewer')->middleware('throttle:60,1')->group(function () {
-    Route::get('/{table}', function ($table, Request $request) {
-        $allowedTables = [
-            'students', 'users', 'courses', 'course_sections', 'enrollments',
-            'departments', 'faculties', 'programs', 'staff', 'terms',
-            'buildings', 'rooms', 'admission_applications', 'program_choices',
-            'academic_records', 'documents', 'roles', 'permissions'
-        ];
-        
-        if (!in_array($table, $allowedTables)) {
-            return response()->json(['error' => 'Table not allowed'], 400);
-        }
-        
-        $limit = min($request->get('limit', 25), 100);
-        
-        try {
-            $data = DB::table($table)->limit($limit)->get();
-            
-            $stats = [
-                'total_records' => DB::table($table)->count(),
-                'showing_records' => count($data),
-            ];
-            
-            // Add table-specific stats
-            switch ($table) {
-                case 'students':
-                    $stats['with_enrollments'] = DB::table('students')
-                        ->join('enrollments', 'students.id', '=', 'enrollments.student_id')
-                        ->distinct('students.id')
-                        ->count();
-                    break;
-                case 'enrollments':
-                    $stats['enrolled'] = DB::table($table)->where('status', 'enrolled')->count();
-                    $stats['waitlisted'] = DB::table($table)->where('status', 'waitlisted')->count();
-                    break;
-                case 'courses':
-                    $stats['with_sections'] = DB::table('courses')
-                        ->join('course_sections', 'courses.id', '=', 'course_sections.course_id')
-                        ->distinct('courses.id')
-                        ->count();
-                    break;
-            }
-            
-            return response()->json([
-                'data' => $data,
-                'stats' => $stats,
-                'table' => $table
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Database error: ' . $e->getMessage()
-            ], 500);
-        }
-    });
-}); 
+ 

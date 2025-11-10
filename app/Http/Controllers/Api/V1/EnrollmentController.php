@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\HandlesCsvImportExport;
 use App\Http\Requests\StoreEnrollmentRequest;
 use App\Http\Requests\UpdateEnrollmentRequest;
 use App\Http\Resources\EnrollmentResource;
@@ -26,6 +27,8 @@ use OpenApi\Attributes as OA;
 )]
 class EnrollmentController extends Controller
 {
+    use HandlesCsvImportExport;
+
     public function __construct(
         private EnrollmentService $enrollmentService,
         private EnrollmentFilter $enrollmentFilter
@@ -665,5 +668,46 @@ class EnrollmentController extends Controller
         return response()->json([
             'data' => EnrollmentResource::collection($enrollments)
         ], 200);
+    }
+
+    // CSV Import/Export Methods
+
+    protected function getEntityName(): string
+    {
+        return 'enrollments';
+    }
+
+    protected function getImportJobClass(): string
+    {
+        return \App\Jobs\ProcessEnrollmentImport::class;
+    }
+
+    protected function getCsvHeaders(): array
+    {
+        return [
+            'student_id',
+            'course_section_id',
+            'enrollment_date',
+            'status',
+            'grade',
+            'grade_date',
+        ];
+    }
+
+    protected function prepareCsvRow($enrollment): array
+    {
+        return [
+            'student_id' => $enrollment->student_id,
+            'course_section_id' => $enrollment->course_section_id,
+            'enrollment_date' => $enrollment->enrollment_date?->format('Y-m-d'),
+            'status' => $enrollment->status,
+            'grade' => $enrollment->grade,
+            'grade_date' => $enrollment->grade_date?->format('Y-m-d'),
+        ];
+    }
+
+    protected function getExportQuery()
+    {
+        return Enrollment::with(['student', 'courseSection.course'])->orderBy('created_at', 'desc');
     }
 }

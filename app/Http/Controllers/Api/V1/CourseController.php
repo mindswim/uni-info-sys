@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\HandlesCsvImportExport;
 use App\Models\Course;
 use App\Models\CourseSection;
 use App\Http\Resources\CourseResource;
@@ -19,6 +20,8 @@ use Illuminate\Http\JsonResponse;
 )]
 class CourseController extends Controller
 {
+    use HandlesCsvImportExport;
+
     #[OA\Get(
         path: '/api/v1/courses',
         summary: 'List all courses',
@@ -415,5 +418,48 @@ class CourseController extends Controller
                 'next' => $courses->nextPageUrl(),
             ]
         ], 200);
+    }
+
+    // CSV Import/Export Methods
+
+    protected function getEntityName(): string
+    {
+        return 'courses';
+    }
+
+    protected function getImportJobClass(): string
+    {
+        return \App\Jobs\ProcessCourseImport::class;
+    }
+
+    protected function getCsvHeaders(): array
+    {
+        return [
+            'course_code',
+            'title',
+            'description',
+            'credits',
+            'department_id',
+            'course_level',
+            'cip_code',
+        ];
+    }
+
+    protected function prepareCsvRow($course): array
+    {
+        return [
+            'course_code' => $course->course_code,
+            'title' => $course->title,
+            'description' => $course->description,
+            'credits' => $course->credits,
+            'department_id' => $course->department_id,
+            'course_level' => $course->course_level,
+            'cip_code' => $course->cip_code,
+        ];
+    }
+
+    protected function getExportQuery()
+    {
+        return Course::with('department')->orderBy('course_code');
     }
 }

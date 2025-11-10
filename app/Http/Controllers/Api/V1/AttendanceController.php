@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\HandlesCsvImportExport;
 use App\Models\AttendanceRecord;
 use App\Models\CourseSection;
 use App\Models\Enrollment;
@@ -11,6 +12,8 @@ use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
+    use HandlesCsvImportExport;
+
     /**
      * Display attendance records with filtering
      */
@@ -260,5 +263,53 @@ class AttendanceController extends Controller
         return response()->json([
             'data' => $statistics
         ]);
+    }
+
+    // CSV Import/Export Methods
+
+    protected function getEntityName(): string
+    {
+        return 'attendance';
+    }
+
+    protected function getImportJobClass(): string
+    {
+        return \App\Jobs\ProcessAttendanceImport::class;
+    }
+
+    protected function getCsvHeaders(): array
+    {
+        return [
+            'enrollment_id',
+            'course_section_id',
+            'student_id',
+            'attendance_date',
+            'status',
+            'check_in_time',
+            'check_out_time',
+            'notes',
+            'recorded_by',
+        ];
+    }
+
+    protected function prepareCsvRow($attendance): array
+    {
+        return [
+            'enrollment_id' => $attendance->enrollment_id,
+            'course_section_id' => $attendance->course_section_id,
+            'student_id' => $attendance->student_id,
+            'attendance_date' => $attendance->attendance_date?->format('Y-m-d'),
+            'status' => $attendance->status,
+            'check_in_time' => $attendance->check_in_time,
+            'check_out_time' => $attendance->check_out_time,
+            'notes' => $attendance->notes,
+            'recorded_by' => $attendance->recorded_by,
+        ];
+    }
+
+    protected function getExportQuery()
+    {
+        return AttendanceRecord::with(['student', 'courseSection', 'enrollment'])
+            ->orderBy('attendance_date', 'desc');
     }
 }

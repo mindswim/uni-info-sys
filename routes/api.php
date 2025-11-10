@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\ImpersonationController;
 use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\AttendanceController;
 
 /**
  * @OA\Get(
@@ -309,6 +310,12 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
 
     Route::post('payments/{payment}/refund', [PaymentController::class, 'refund']);
     Route::apiResource('payments', PaymentController::class);
+
+    // Attendance routes
+    Route::post('attendance/bulk', [AttendanceController::class, 'bulkStore']);
+    Route::get('attendance/student-report', [AttendanceController::class, 'studentReport']);
+    Route::get('course-sections/{courseSection}/attendance-statistics', [AttendanceController::class, 'courseStatistics']);
+    Route::apiResource('attendance', AttendanceController::class)->parameters(['attendance' => 'attendanceRecord']);
 
 }); 
 

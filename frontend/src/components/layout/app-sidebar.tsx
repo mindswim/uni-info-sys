@@ -79,6 +79,13 @@ const navigationItems = {
       ]
     },
     {
+      title: "Applications & Billing",
+      items: [
+        { title: "Apply", url: "/student/apply", icon: FileText },
+        { title: "Billing", url: "/student/billing", icon: DollarSign }
+      ]
+    },
+    {
       title: "Other",
       items: [
         { title: "Messages", url: "/messages", icon: MessageSquare },
@@ -109,7 +116,8 @@ const navigationItems = {
     {
       title: "Grading",
       items: [
-        { title: "Grades", url: "/faculty/grades", icon: Award }
+        { title: "Grades", url: "/faculty/grades", icon: Award },
+        { title: "Attendance", url: "/faculty/attendance", icon: ClipboardCheck }
       ]
     },
     {

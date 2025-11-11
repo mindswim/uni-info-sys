@@ -14,7 +14,7 @@ import {
   MessageSquare, Send, Search, Paperclip,
   MoreVertical, User, Clock, Archive,
   Trash2, Star, CheckCheck, Check,
-  Plus, Filter, Users
+  Plus, Filter, Users, ArrowLeft, PanelLeftClose, PanelLeft
 } from 'lucide-react'
 
 const breadcrumbs = [
@@ -177,6 +177,8 @@ export default function MessagesPage() {
   const [messageInput, setMessageInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
+  const [showMobileChat, setShowMobileChat] = useState(false)
+  const [showConversations, setShowConversations] = useState(true)
 
   useEffect(() => {
     // Simulate loading
@@ -290,44 +292,31 @@ export default function MessagesPage() {
   return (
     <AppShell breadcrumbs={breadcrumbs}>
       <div className="h-[calc(100vh-4rem)] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <MessageSquare className="h-8 w-8" />
-              Messages
-            </h1>
-            <p className="text-muted-foreground">
-              Communicate with instructors, advisors, and staff
-            </p>
-          </div>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            New Message
+        {/* Compact Header - Only visible on mobile */}
+        <div className="flex items-center justify-between pb-3 lg:hidden">
+          <h1 className="text-xl font-bold flex items-center gap-2">
+            <MessageSquare className="h-5 w-5" />
+            Messages
+          </h1>
+          <Button size="sm">
+            <Plus className="h-4 w-4" />
           </Button>
         </div>
 
         {/* Messages Interface - Fixed height, no scroll */}
-        <div className="grid grid-cols-3 gap-4 flex-1 min-h-0">
+        <div className="flex gap-0 flex-1 min-h-0 border rounded-lg overflow-hidden">
           {/* Conversations List */}
-          <Card className="col-span-1 flex flex-col">
-            <CardHeader className="pb-3 flex-shrink-0">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">Conversations</CardTitle>
-                  <Button variant="ghost" size="icon">
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search messages..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
+          {showConversations && (
+          <div className={`flex flex-col border-r bg-card w-full lg:w-80 ${showMobileChat ? 'hidden lg:flex' : 'flex'}`}>
+            <CardHeader className="px-3 py-2 lg:p-4 flex-shrink-0 space-y-0">
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search conversations..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 h-9"
+                />
               </div>
             </CardHeader>
             <CardContent className="p-0 flex-1 overflow-hidden">
@@ -336,39 +325,39 @@ export default function MessagesPage() {
                   {filteredConversations.map((conversation) => (
                     <div
                       key={conversation.id}
-                      className={`p-4 cursor-pointer hover:bg-accent transition-colors ${
+                      className={`px-3 py-2.5 cursor-pointer hover:bg-accent/50 transition-colors border-b last:border-b-0 ${
                         selectedConversation?.id === conversation.id ? 'bg-accent' : ''
                       }`}
-                      onClick={() => setSelectedConversation(conversation)}
+                      onClick={() => {
+                        setSelectedConversation(conversation)
+                        setShowMobileChat(true)
+                      }}
                     >
-                      <div className="flex items-start space-x-3 min-w-0">
+                      <div className="flex items-center gap-2.5 min-w-0">
                         <div className="relative flex-shrink-0">
-                          <Avatar>
+                          <Avatar className="h-10 w-10">
                             <AvatarImage src={conversation.recipient.avatar} />
-                            <AvatarFallback>
+                            <AvatarFallback className="text-xs">
                               {conversation.recipient.name.split(' ').map(n => n[0]).join('')}
                             </AvatarFallback>
                           </Avatar>
-                          <div className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${getStatusColor(conversation.recipient.status)}`} />
+                          <div className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-background ${getStatusColor(conversation.recipient.status)}`} />
                         </div>
                         <div className="flex-1 min-w-0 overflow-hidden">
-                          <div className="flex items-center justify-between gap-2 mb-1">
+                          <div className="flex items-baseline justify-between gap-2 mb-0.5">
                             <p className="font-medium text-sm truncate flex-1">
                               {conversation.recipient.name}
                             </p>
-                            <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
+                            <span className="text-[11px] text-muted-foreground whitespace-nowrap flex-shrink-0">
                               {conversation.lastMessageTime}
                             </span>
                           </div>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {conversation.recipient.role}
-                          </p>
-                          <p className="text-sm text-muted-foreground truncate mt-1">
+                          <p className="text-xs text-muted-foreground truncate leading-tight">
                             {conversation.lastMessage}
                           </p>
                         </div>
                         {conversation.unreadCount > 0 && (
-                          <Badge variant="default" className="ml-2 flex-shrink-0">
+                          <Badge variant="default" className="h-5 min-w-5 px-1.5 text-xs flex-shrink-0">
                             {conversation.unreadCount}
                           </Badge>
                         )}
@@ -378,40 +367,51 @@ export default function MessagesPage() {
                 </div>
               </ScrollArea>
             </CardContent>
-          </Card>
+          </div>
+          )}
 
           {/* Message Thread */}
-          <Card className="col-span-2 flex flex-col">
+          <div className={`flex flex-col bg-card flex-1 ${!showMobileChat ? 'hidden lg:flex' : 'flex'}`}>
             {selectedConversation ? (
               <>
-                <CardHeader className="border-b flex-shrink-0">
+                <CardHeader className="px-3 py-2 lg:p-3 border-b flex-shrink-0">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="relative">
-                        <Avatar>
+                    <div className="flex items-center gap-2.5">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 lg:hidden"
+                        onClick={() => setShowMobileChat(false)}
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 hidden lg:flex"
+                        onClick={() => setShowConversations(!showConversations)}
+                      >
+                        {showConversations ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
+                      </Button>
+                      <div className="relative flex-shrink-0">
+                        <Avatar className="h-9 w-9">
                           <AvatarImage src={selectedConversation.recipient.avatar} />
-                          <AvatarFallback>
+                          <AvatarFallback className="text-xs">
                             {selectedConversation.recipient.name.split(' ').map(n => n[0]).join('')}
                           </AvatarFallback>
                         </Avatar>
-                        <div className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${getStatusColor(selectedConversation.recipient.status)}`} />
+                        <div className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-background ${getStatusColor(selectedConversation.recipient.status)}`} />
                       </div>
-                      <div>
-                        <h3 className="font-medium">{selectedConversation.recipient.name}</h3>
-                        <p className="text-sm text-muted-foreground">{selectedConversation.recipient.role}</p>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-medium text-sm truncate">{selectedConversation.recipient.name}</h3>
+                        <p className="text-xs text-muted-foreground truncate">{selectedConversation.recipient.role}</p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Button variant="ghost" size="icon">
+                    <div className="flex items-center gap-0.5">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 hidden sm:flex">
                         <Star className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon">
-                        <Archive className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </div>
@@ -494,7 +494,7 @@ export default function MessagesPage() {
                 </div>
               </div>
             )}
-          </Card>
+          </div>
         </div>
       </div>
     </AppShell>

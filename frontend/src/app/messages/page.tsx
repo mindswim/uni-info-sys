@@ -332,48 +332,50 @@ export default function MessagesPage() {
             </CardHeader>
             <CardContent className="p-0 flex-1 overflow-hidden">
               <ScrollArea className="h-full">
-                {filteredConversations.map((conversation) => (
-                  <div
-                    key={conversation.id}
-                    className={`p-4 cursor-pointer hover:bg-accent transition-colors ${
-                      selectedConversation?.id === conversation.id ? 'bg-accent' : ''
-                    }`}
-                    onClick={() => setSelectedConversation(conversation)}
-                  >
-                    <div className="flex items-start space-x-3">
-                      <div className="relative">
-                        <Avatar>
-                          <AvatarImage src={conversation.recipient.avatar} />
-                          <AvatarFallback>
-                            {conversation.recipient.name.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${getStatusColor(conversation.recipient.status)}`} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <p className="font-medium text-sm truncate">
-                            {conversation.recipient.name}
-                          </p>
-                          <span className="text-xs text-muted-foreground">
-                            {conversation.lastMessageTime}
-                          </span>
+                <div className="flex flex-col">
+                  {filteredConversations.map((conversation) => (
+                    <div
+                      key={conversation.id}
+                      className={`p-4 cursor-pointer hover:bg-accent transition-colors ${
+                        selectedConversation?.id === conversation.id ? 'bg-accent' : ''
+                      }`}
+                      onClick={() => setSelectedConversation(conversation)}
+                    >
+                      <div className="flex items-start space-x-3 min-w-0">
+                        <div className="relative flex-shrink-0">
+                          <Avatar>
+                            <AvatarImage src={conversation.recipient.avatar} />
+                            <AvatarFallback>
+                              {conversation.recipient.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${getStatusColor(conversation.recipient.status)}`} />
                         </div>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {conversation.recipient.role}
-                        </p>
-                        <p className="text-sm text-muted-foreground truncate mt-1">
-                          {conversation.lastMessage}
-                        </p>
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <p className="font-medium text-sm truncate flex-1">
+                              {conversation.recipient.name}
+                            </p>
+                            <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
+                              {conversation.lastMessageTime}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {conversation.recipient.role}
+                          </p>
+                          <p className="text-sm text-muted-foreground truncate mt-1">
+                            {conversation.lastMessage}
+                          </p>
+                        </div>
+                        {conversation.unreadCount > 0 && (
+                          <Badge variant="default" className="ml-2 flex-shrink-0">
+                            {conversation.unreadCount}
+                          </Badge>
+                        )}
                       </div>
-                      {conversation.unreadCount > 0 && (
-                        <Badge variant="default" className="ml-2">
-                          {conversation.unreadCount}
-                        </Badge>
-                      )}
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </ScrollArea>
             </CardContent>
           </Card>

@@ -276,13 +276,11 @@ export default function MessagesPage() {
   if (loading) {
     return (
       <AppShell breadcrumbs={breadcrumbs}>
-        <div className="container mx-auto py-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-12 bg-muted rounded" />
-            <div className="grid grid-cols-3 gap-4 h-[600px]">
-              <div className="bg-muted rounded" />
-              <div className="col-span-2 bg-muted rounded" />
-            </div>
+        <div className="h-[calc(100vh-4rem)] animate-pulse">
+          <div className="h-12 bg-muted rounded mb-4" />
+          <div className="grid grid-cols-3 gap-4 h-[calc(100%-4rem)]">
+            <div className="bg-muted rounded" />
+            <div className="col-span-2 bg-muted rounded" />
           </div>
         </div>
       </AppShell>
@@ -291,9 +289,9 @@ export default function MessagesPage() {
 
   return (
     <AppShell breadcrumbs={breadcrumbs}>
-      <div className="container mx-auto py-6 space-y-6">
+      <div className="h-[calc(100vh-4rem)] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pb-4">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <MessageSquare className="h-8 w-8" />
@@ -309,11 +307,11 @@ export default function MessagesPage() {
           </Button>
         </div>
 
-        {/* Messages Interface */}
-        <div className="grid grid-cols-3 gap-4 h-[700px]">
+        {/* Messages Interface - Fixed height, no scroll */}
+        <div className="grid grid-cols-3 gap-4 flex-1 min-h-0">
           {/* Conversations List */}
-          <Card className="col-span-1">
-            <CardHeader className="pb-3">
+          <Card className="col-span-1 flex flex-col">
+            <CardHeader className="pb-3 flex-shrink-0">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">Conversations</CardTitle>
@@ -332,8 +330,8 @@ export default function MessagesPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-0">
-              <ScrollArea className="h-[560px]">
+            <CardContent className="p-0 flex-1 overflow-hidden">
+              <ScrollArea className="h-full">
                 {filteredConversations.map((conversation) => (
                   <div
                     key={conversation.id}
@@ -381,10 +379,10 @@ export default function MessagesPage() {
           </Card>
 
           {/* Message Thread */}
-          <Card className="col-span-2">
+          <Card className="col-span-2 flex flex-col">
             {selectedConversation ? (
               <>
-                <CardHeader className="border-b">
+                <CardHeader className="border-b flex-shrink-0">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="relative">
@@ -417,8 +415,8 @@ export default function MessagesPage() {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="p-0">
-                  <ScrollArea className="h-[480px] p-4">
+                <CardContent className="p-0 flex-1 overflow-hidden flex flex-col">
+                  <ScrollArea className="flex-1 p-4">
                     <div className="space-y-4">
                       {selectedConversation.messages.map((message) => (
                         <div
@@ -456,27 +454,29 @@ export default function MessagesPage() {
                       ))}
                     </div>
                   </ScrollArea>
-                  <Separator />
-                  <div className="p-4">
-                    <div className="flex items-end space-x-2">
-                      <Button variant="ghost" size="icon">
-                        <Paperclip className="h-4 w-4" />
-                      </Button>
-                      <Textarea
-                        placeholder="Type your message..."
-                        value={messageInput}
-                        onChange={(e) => setMessageInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault()
-                            sendMessage()
-                          }
-                        }}
-                        className="flex-1 min-h-[40px] max-h-[120px] resize-none"
-                      />
-                      <Button onClick={sendMessage} disabled={!messageInput.trim()}>
-                        <Send className="h-4 w-4" />
-                      </Button>
+                  <div className="flex-shrink-0">
+                    <Separator />
+                    <div className="p-4">
+                      <div className="flex items-end space-x-2">
+                        <Button variant="ghost" size="icon">
+                          <Paperclip className="h-4 w-4" />
+                        </Button>
+                        <Textarea
+                          placeholder="Type your message..."
+                          value={messageInput}
+                          onChange={(e) => setMessageInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault()
+                              sendMessage()
+                            }
+                          }}
+                          className="flex-1 min-h-[40px] max-h-[120px] resize-none"
+                        />
+                        <Button onClick={sendMessage} disabled={!messageInput.trim()}>
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>

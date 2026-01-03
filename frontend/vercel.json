@@ -5,11 +5,11 @@
       "headers": [
         {
           "key": "X-Frame-Options",
-          "value": "ALLOWALL"
+          "value": ""
         },
         {
           "key": "Content-Security-Policy",
-          "value": "frame-ancestors *"
+          "value": "frame-ancestors 'self' http://localhost:* https://*.vercel.app"
         }
       ]
     }

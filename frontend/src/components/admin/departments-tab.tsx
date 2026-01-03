@@ -267,7 +267,7 @@ export function DepartmentsTab() {
             importEndpoint="/api/v1/departments/csv/import"
             exportEndpoint="/api/v1/departments/csv/export"
             templateEndpoint="/api/v1/departments/csv/template"
-            onImportComplete={fetchDepartments}
+            onImportComplete={fetchData}
           />
           <Button onClick={() => setCreateDialogOpen(true)} disabled={faculties.length === 0}>
             <Plus className="mr-2 h-4 w-4" />

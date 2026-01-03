@@ -298,7 +298,7 @@ export function CoursesTab() {
             importEndpoint="/api/v1/courses/csv/import"
             exportEndpoint="/api/v1/courses/csv/export"
             templateEndpoint="/api/v1/courses/csv/template"
-            onImportComplete={fetchCourses}
+            onImportComplete={fetchData}
           />
           <Button onClick={() => setCreateDialogOpen(true)} disabled={departments.length === 0}>
             <Plus className="mr-2 h-4 w-4" />

@@ -395,7 +395,7 @@ export function BuildingsTab() {
           importEndpoint="/api/v1/buildings/csv/import"
           exportEndpoint="/api/v1/buildings/csv/export"
           templateEndpoint="/api/v1/buildings/csv/template"
-          onImportComplete={fetchBuildings}
+          onImportComplete={fetchData}
         />
       </div>
 

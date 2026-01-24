@@ -26,4 +26,14 @@ class CourseSection extends Model implements Auditable
     {
         return $this->hasMany(Enrollment::class);
     }
+
+    public function classSessions()
+    {
+        return $this->hasMany(ClassSession::class);
+    }
+
+    public function attendanceRecords()
+    {
+        return $this->hasMany(AttendanceRecord::class);
+    }
 }

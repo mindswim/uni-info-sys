@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\V1\ImpersonationController;
 use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\AttendanceController;
+use App\Http\Controllers\Api\V1\ClassSessionController;
 
 /**
  * @OA\Get(
@@ -328,6 +329,37 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::get('attendance/student-report', [AttendanceController::class, 'studentReport']);
     Route::get('course-sections/{courseSection}/attendance-statistics', [AttendanceController::class, 'courseStatistics']);
     Route::apiResource('attendance', AttendanceController::class)->parameters(['attendance' => 'attendanceRecord']);
+
+    // Class Session routes
+    // Student/staff-centric session views
+    Route::middleware('role.student')->group(function () {
+        Route::get('class-sessions/me', [ClassSessionController::class, 'mySessions']);
+    });
+    Route::middleware('role.staff')->group(function () {
+        Route::get('class-sessions/me/instructor', [ClassSessionController::class, 'myInstructorSessions']);
+    });
+
+    // Session queries
+    Route::get('class-sessions/for-date', [ClassSessionController::class, 'forDate']);
+    Route::get('class-sessions/student', [ClassSessionController::class, 'studentSessions']);
+    Route::get('class-sessions/instructor', [ClassSessionController::class, 'instructorSessions']);
+
+    // Course section specific session routes
+    Route::get('course-sections/{courseSection}/sessions', [ClassSessionController::class, 'byCourseSection']);
+    Route::post('course-sections/{courseSection}/sessions/generate', [ClassSessionController::class, 'generateForSection']);
+    Route::get('course-sections/{courseSection}/session-stats', [ClassSessionController::class, 'sectionStats']);
+
+    // Term-wide session generation
+    Route::post('terms/{term}/sessions/generate', [ClassSessionController::class, 'generateForTerm']);
+
+    // Session actions
+    Route::post('class-sessions/{classSession}/complete', [ClassSessionController::class, 'complete']);
+    Route::post('class-sessions/{classSession}/cancel', [ClassSessionController::class, 'cancel']);
+    Route::post('class-sessions/{classSession}/reschedule', [ClassSessionController::class, 'reschedule']);
+    Route::post('class-sessions/{classSession}/substitute', [ClassSessionController::class, 'assignSubstitute']);
+
+    // Standard CRUD
+    Route::apiResource('class-sessions', ClassSessionController::class);
 
 }); 
 

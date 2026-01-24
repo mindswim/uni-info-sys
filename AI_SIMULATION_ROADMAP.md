@@ -28,15 +28,15 @@ A living university simulation where:
 
 ### What's Missing (Required for Simulation)
 
-| Feature | Priority | Why Needed |
-|---------|----------|------------|
-| Class Sessions | Critical | Discrete events for agents to attend |
-| Assignments | Critical | Work for students to complete |
-| Submissions | Critical | Student work artifacts |
-| Gradebook | High | Assignment grades -> final grades |
-| Course Materials | Medium | Content for "learning" |
-| Announcements | Medium | Professor-student communication |
-| Messages | Low | Agent-to-agent communication |
+| Feature | Priority | Status | Why Needed |
+|---------|----------|--------|------------|
+| Class Sessions | Critical | **Done** | Discrete events for agents to attend |
+| Assignments | Critical | **Done** | Work for students to complete |
+| Submissions | Critical | **Done** | Student work artifacts |
+| Gradebook | High | Pending | Assignment grades -> final grades |
+| Course Materials | Medium | Pending | Content for "learning" |
+| Announcements | Medium | Pending | Professor-student communication |
+| Messages | Low | Pending | Agent-to-agent communication |
 
 ---
 
@@ -195,14 +195,14 @@ unique: [assignment_id, enrollment_id, attempt_number]
 - `bulkGrade(assignment, grades[])` - Batch grading
 
 **Tasks:**
-- [ ] Create migration
-- [ ] Create model with relationships
-- [ ] Create controller
-- [ ] Create AssignmentService
-- [ ] Create request validation
-- [ ] Create API routes
-- [ ] Write tests
-- [ ] Update API documentation
+- [x] Create migration (`2025_11_10_000003_create_assignment_submissions_table.php`)
+- [x] Create model with relationships (`app/Models/AssignmentSubmission.php`)
+- [x] Create controller (`app/Http/Controllers/Api/V1/AssignmentSubmissionController.php`)
+- [x] Create AssignmentSubmissionService (`app/Services/AssignmentSubmissionService.php`)
+- [x] Create API routes (added to `routes/api.php`)
+- [x] Create factory (`database/factories/AssignmentSubmissionFactory.php`)
+- [x] Write tests (`tests/Feature/AssignmentSubmissionTest.php` - 17 passing)
+- [ ] Update API documentation (Swagger annotations)
 
 ---
 

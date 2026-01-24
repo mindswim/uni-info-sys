@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\AttendanceController;
 use App\Http\Controllers\Api\V1\ClassSessionController;
 use App\Http\Controllers\Api\V1\AssignmentController;
+use App\Http\Controllers\Api\V1\AssignmentSubmissionController;
 
 /**
  * @OA\Get(
@@ -384,6 +385,31 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
 
     // Standard CRUD
     Route::apiResource('assignments', AssignmentController::class);
+
+    // Assignment Submission routes
+    // Student-centric submission views
+    Route::middleware('role.student')->group(function () {
+        Route::get('submissions/me', [AssignmentSubmissionController::class, 'mySubmissions']);
+        Route::get('assignments/{assignment}/my-submission', [AssignmentSubmissionController::class, 'mySubmissionForAssignment']);
+    });
+
+    // Submission queries
+    Route::get('submissions/pending-grading', [AssignmentSubmissionController::class, 'pendingGrading']);
+    Route::get('assignments/{assignment}/submissions', [AssignmentSubmissionController::class, 'forAssignment']);
+    Route::get('assignments/{assignment}/submission-stats', [AssignmentSubmissionController::class, 'assignmentStats']);
+
+    // Submission actions
+    Route::post('submissions/submit', [AssignmentSubmissionController::class, 'submit']);
+    Route::post('submissions/draft', [AssignmentSubmissionController::class, 'saveDraft']);
+    Route::post('submissions/{assignmentSubmission}/grade', [AssignmentSubmissionController::class, 'grade']);
+    Route::post('submissions/batch-grade', [AssignmentSubmissionController::class, 'batchGrade']);
+    Route::post('submissions/{assignmentSubmission}/return', [AssignmentSubmissionController::class, 'returnForRevision']);
+    Route::post('submissions/{assignmentSubmission}/resubmit', [AssignmentSubmissionController::class, 'resubmit']);
+
+    // Standard CRUD (limited - mostly read operations)
+    Route::get('submissions', [AssignmentSubmissionController::class, 'index']);
+    Route::get('submissions/{assignmentSubmission}', [AssignmentSubmissionController::class, 'show']);
+    Route::delete('submissions/{assignmentSubmission}', [AssignmentSubmissionController::class, 'destroy']);
 
 }); 
 

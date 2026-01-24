@@ -34,7 +34,7 @@ A living university simulation where:
 | Assignments | Critical | **Done** | Work for students to complete |
 | Submissions | Critical | **Done** | Student work artifacts |
 | Gradebook | High | **Done** | Assignment grades -> final grades |
-| Course Materials | Medium | Pending | Content for "learning" |
+| Course Materials | Medium | **Done** | Content for "learning" |
 | Announcements | Medium | Pending | Professor-student communication |
 | Messages | Low | Pending | Agent-to-agent communication |
 
@@ -273,11 +273,13 @@ updated_at          - timestamp
 ```
 
 **Tasks:**
-- [ ] Create migration
-- [ ] Create model
-- [ ] Create controller with CRUD
-- [ ] Create API routes
-- [ ] Write tests
+- [x] Create migration (`2025_11_10_000004_create_course_materials_table.php`)
+- [x] Create model (`app/Models/CourseMaterial.php`)
+- [x] Create controller with CRUD (`app/Http/Controllers/Api/V1/CourseMaterialController.php`)
+- [x] Create API routes (added to `routes/api.php`)
+- [x] Create factory (`database/factories/CourseMaterialFactory.php`)
+- [x] Write tests (`tests/Feature/CourseMaterialTest.php` - 17 passing)
+- [ ] Update API documentation (Swagger annotations)
 
 ---
 

@@ -41,4 +41,9 @@ class CourseSection extends Model implements Auditable
     {
         return $this->hasMany(Assignment::class);
     }
+
+    public function courseMaterials()
+    {
+        return $this->hasMany(CourseMaterial::class);
+    }
 }

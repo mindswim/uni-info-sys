@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\V1\ClassSessionController;
 use App\Http\Controllers\Api\V1\AssignmentController;
 use App\Http\Controllers\Api\V1\AssignmentSubmissionController;
 use App\Http\Controllers\Api\V1\GradebookController;
+use App\Http\Controllers\Api\V1\CourseMaterialController;
 
 /**
  * @OA\Get(
@@ -429,6 +430,27 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::get('course-sections/{courseSection}/gradebook/export', [GradebookController::class, 'exportGradebook']);
     Route::get('course-sections/{courseSection}/gradebook/statistics', [GradebookController::class, 'classStatistics']);
     Route::post('course-sections/{courseSection}/gradebook/finalize', [GradebookController::class, 'finalizeGrades']);
+
+    // Course Materials routes
+    // Student-centric material views
+    Route::middleware('role.student')->group(function () {
+        Route::get('course-materials/me', [CourseMaterialController::class, 'myMaterials']);
+        Route::get('course-sections/{courseSection}/materials/me', [CourseMaterialController::class, 'myCourseMaterials']);
+    });
+
+    // Material queries
+    Route::get('course-materials/types', [CourseMaterialController::class, 'types']);
+    Route::get('course-sections/{courseSection}/materials', [CourseMaterialController::class, 'byCourseSection']);
+    Route::get('course-sections/{courseSection}/syllabus', [CourseMaterialController::class, 'syllabus']);
+    Route::get('class-sessions/{classSession}/materials', [CourseMaterialController::class, 'byClassSession']);
+
+    // Material actions
+    Route::post('course-materials/{courseMaterial}/publish', [CourseMaterialController::class, 'publish']);
+    Route::post('course-materials/{courseMaterial}/unpublish', [CourseMaterialController::class, 'unpublish']);
+    Route::post('course-materials/reorder', [CourseMaterialController::class, 'reorder']);
+
+    // Standard CRUD
+    Route::apiResource('course-materials', CourseMaterialController::class);
 
 }); 
 

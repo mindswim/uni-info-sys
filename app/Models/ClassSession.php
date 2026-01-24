@@ -56,6 +56,14 @@ class ClassSession extends Model
     }
 
     /**
+     * Get materials for this session
+     */
+    public function materials(): HasMany
+    {
+        return $this->hasMany(CourseMaterial::class);
+    }
+
+    /**
      * Get the effective instructor (substitute or regular)
      */
     public function getEffectiveInstructorAttribute(): ?Staff

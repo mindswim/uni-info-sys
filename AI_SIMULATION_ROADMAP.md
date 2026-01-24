@@ -35,7 +35,7 @@ A living university simulation where:
 | Submissions | Critical | **Done** | Student work artifacts |
 | Gradebook | High | **Done** | Assignment grades -> final grades |
 | Course Materials | Medium | **Done** | Content for "learning" |
-| Announcements | Medium | Pending | Professor-student communication |
+| Announcements | Medium | **Done** | Professor-student communication |
 | Messages | Low | Pending | Agent-to-agent communication |
 
 ---
@@ -304,11 +304,13 @@ updated_at          - timestamp
 ```
 
 **Tasks:**
-- [ ] Create migration
-- [ ] Create model (polymorphic relationship)
-- [ ] Create controller
-- [ ] Create API routes
-- [ ] Write tests
+- [x] Create migration (`2025_11_10_000005_create_announcements_table.php`)
+- [x] Create model with polymorphic relationship (`app/Models/Announcement.php`)
+- [x] Create controller (`app/Http/Controllers/Api/V1/AnnouncementController.php`)
+- [x] Create API routes (added to `routes/api.php`)
+- [x] Create factory (`database/factories/AnnouncementFactory.php`)
+- [x] Write tests (`tests/Feature/AnnouncementTest.php` - 16 passing)
+- [ ] Update API documentation (Swagger annotations)
 
 ---
 

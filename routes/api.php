@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\V1\AssignmentController;
 use App\Http\Controllers\Api\V1\AssignmentSubmissionController;
 use App\Http\Controllers\Api\V1\GradebookController;
 use App\Http\Controllers\Api\V1\CourseMaterialController;
+use App\Http\Controllers\Api\V1\AnnouncementController;
 
 /**
  * @OA\Get(
@@ -451,6 +452,32 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
 
     // Standard CRUD
     Route::apiResource('course-materials', CourseMaterialController::class);
+
+    // Announcement routes
+    // Student-centric announcement views
+    Route::middleware('role.student')->group(function () {
+        Route::get('announcements/me', [AnnouncementController::class, 'myAnnouncements']);
+    });
+
+    // Staff-centric announcement views
+    Route::middleware('role.staff')->group(function () {
+        Route::get('announcements/me/created', [AnnouncementController::class, 'myCreatedAnnouncements']);
+    });
+
+    // Announcement queries
+    Route::get('announcements/priorities', [AnnouncementController::class, 'priorities']);
+    Route::get('announcements/university-wide', [AnnouncementController::class, 'universityWide']);
+    Route::get('course-sections/{courseSection}/announcements', [AnnouncementController::class, 'forCourseSection']);
+    Route::get('departments/{department}/announcements', [AnnouncementController::class, 'forDepartment']);
+
+    // Announcement actions
+    Route::post('announcements/{announcement}/publish', [AnnouncementController::class, 'publish']);
+    Route::post('announcements/{announcement}/unpublish', [AnnouncementController::class, 'unpublish']);
+    Route::post('announcements/{announcement}/pin', [AnnouncementController::class, 'pin']);
+    Route::post('announcements/{announcement}/unpin', [AnnouncementController::class, 'unpin']);
+
+    // Standard CRUD
+    Route::apiResource('announcements', AnnouncementController::class);
 
 }); 
 

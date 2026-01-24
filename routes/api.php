@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\AttendanceController;
 use App\Http\Controllers\Api\V1\ClassSessionController;
+use App\Http\Controllers\Api\V1\AssignmentController;
 
 /**
  * @OA\Get(
@@ -360,6 +361,29 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
 
     // Standard CRUD
     Route::apiResource('class-sessions', ClassSessionController::class);
+
+    // Assignment routes
+    // Student-centric assignment views
+    Route::middleware('role.student')->group(function () {
+        Route::get('assignments/me', [AssignmentController::class, 'myAssignments']);
+        Route::get('assignments/me/upcoming', [AssignmentController::class, 'myUpcoming']);
+    });
+
+    // Assignment queries
+    Route::get('assignments/types', [AssignmentController::class, 'types']);
+    Route::get('assignments/student', [AssignmentController::class, 'forStudent']);
+
+    // Course section specific assignment routes
+    Route::get('course-sections/{courseSection}/assignments', [AssignmentController::class, 'byCourseSection']);
+
+    // Assignment actions
+    Route::post('assignments/{assignment}/publish', [AssignmentController::class, 'publish']);
+    Route::post('assignments/{assignment}/unpublish', [AssignmentController::class, 'unpublish']);
+    Route::post('assignments/{assignment}/duplicate', [AssignmentController::class, 'duplicate']);
+    Route::get('assignments/{assignment}/grading-progress', [AssignmentController::class, 'gradingProgress']);
+
+    // Standard CRUD
+    Route::apiResource('assignments', AssignmentController::class);
 
 }); 
 

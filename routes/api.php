@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\V1\AttendanceController;
 use App\Http\Controllers\Api\V1\ClassSessionController;
 use App\Http\Controllers\Api\V1\AssignmentController;
 use App\Http\Controllers\Api\V1\AssignmentSubmissionController;
+use App\Http\Controllers\Api\V1\GradebookController;
 
 /**
  * @OA\Get(
@@ -410,6 +411,24 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::get('submissions', [AssignmentSubmissionController::class, 'index']);
     Route::get('submissions/{assignmentSubmission}', [AssignmentSubmissionController::class, 'show']);
     Route::delete('submissions/{assignmentSubmission}', [AssignmentSubmissionController::class, 'destroy']);
+
+    // Gradebook routes
+    // Student-centric gradebook views
+    Route::middleware('role.student')->group(function () {
+        Route::get('gradebook/me', [GradebookController::class, 'myGrades']);
+        Route::get('course-sections/{courseSection}/gradebook/me', [GradebookController::class, 'myGradebook']);
+    });
+
+    // Gradebook queries
+    Route::get('enrollments/{enrollment}/gradebook', [GradebookController::class, 'studentGradebook']);
+    Route::get('enrollments/{enrollment}/gradebook/categories', [GradebookController::class, 'gradesByCategory']);
+    Route::get('enrollments/{enrollment}/gradebook/needed', [GradebookController::class, 'calculateNeeded']);
+
+    // Class gradebook (instructor view)
+    Route::get('course-sections/{courseSection}/gradebook', [GradebookController::class, 'classGradebook']);
+    Route::get('course-sections/{courseSection}/gradebook/export', [GradebookController::class, 'exportGradebook']);
+    Route::get('course-sections/{courseSection}/gradebook/statistics', [GradebookController::class, 'classStatistics']);
+    Route::post('course-sections/{courseSection}/gradebook/finalize', [GradebookController::class, 'finalizeGrades']);
 
 }); 
 

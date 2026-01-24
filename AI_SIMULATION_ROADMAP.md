@@ -33,7 +33,7 @@ A living university simulation where:
 | Class Sessions | Critical | **Done** | Discrete events for agents to attend |
 | Assignments | Critical | **Done** | Work for students to complete |
 | Submissions | Critical | **Done** | Student work artifacts |
-| Gradebook | High | Pending | Assignment grades -> final grades |
+| Gradebook | High | **Done** | Assignment grades -> final grades |
 | Course Materials | Medium | Pending | Content for "learning" |
 | Announcements | Medium | Pending | Professor-student communication |
 | Messages | Low | Pending | Agent-to-agent communication |
@@ -242,11 +242,11 @@ class GradebookService
 - `POST /v1/course-sections/{id}/finalize-grades` - Calculate final grades
 
 **Tasks:**
-- [ ] Create GradebookService
-- [ ] Create GradebookController
-- [ ] Create API routes
-- [ ] Write tests
-- [ ] Update API documentation
+- [x] Create GradebookService (`app/Services/GradebookService.php`)
+- [x] Create GradebookController (`app/Http/Controllers/Api/V1/GradebookController.php`)
+- [x] Create API routes (added to `routes/api.php`)
+- [x] Write tests (`tests/Feature/GradebookTest.php` - 14 passing)
+- [ ] Update API documentation (Swagger annotations)
 
 ---
 

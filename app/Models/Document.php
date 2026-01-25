@@ -10,8 +10,9 @@ class Document extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'student_id', 'document_type', 'file_path', 'original_filename', 
-        'mime_type', 'file_size', 'status', 'version', 'is_active', 'uploaded_at'
+        'student_id', 'document_type', 'file_path', 'original_filename',
+        'mime_type', 'file_size', 'status', 'version', 'is_active', 'uploaded_at',
+        'verified', 'verified_at'
     ];
 
     protected $casts = [

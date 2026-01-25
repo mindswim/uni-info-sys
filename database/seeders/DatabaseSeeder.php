@@ -65,6 +65,11 @@ class DatabaseSeeder extends Seeder
             AcademicCoreSeeder::class,
         ]);
 
+        // Step 10: Create comprehensive admissions data (prospective students, applications, essays)
+        $this->call([
+            AdmissionsSeeder::class,
+        ]);
+
         Log::info('Database seeding completed successfully!');
     }
     

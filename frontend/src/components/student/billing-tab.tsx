@@ -350,10 +350,10 @@ export function BillingTab() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Paid</CardTitle>
-              <CheckCircle className="h-4 w-4 text-green-600" />
+              <CheckCircle className="h-4 w-4 text-success" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-success">
                 {formatCurrency(summary.total_paid)}
               </div>
             </CardContent>
@@ -362,10 +362,10 @@ export function BillingTab() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Balance Due</CardTitle>
-              <DollarSign className="h-4 w-4 text-orange-600" />
+              <DollarSign className="h-4 w-4 text-warning" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">
+              <div className="text-2xl font-bold text-warning">
                 {formatCurrency(summary.total_balance)}
               </div>
             </CardContent>
@@ -374,10 +374,10 @@ export function BillingTab() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Overdue</CardTitle>
-              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertCircle className="h-4 w-4 text-danger" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-2xl font-bold text-danger">
                 {summary.count_overdue}
               </div>
               <p className="text-xs text-muted-foreground">invoices</p>
@@ -536,13 +536,13 @@ export function BillingTab() {
                     {formatCurrency(selectedInvoice.total_amount)}
                   </span>
                 </div>
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-success">
                   <span>Paid Amount:</span>
                   <span className="font-semibold">
                     {formatCurrency(selectedInvoice.paid_amount)}
                   </span>
                 </div>
-                <div className="flex justify-between text-xl font-bold text-orange-600">
+                <div className="flex justify-between text-xl font-bold text-warning">
                   <span>Balance Due:</span>
                   <span>{formatCurrency(selectedInvoice.balance_due)}</span>
                 </div>

@@ -523,11 +523,11 @@ export function CoursesTab() {
                 <span>{assignments.length} Assignments</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <CheckCircle2 className="h-4 w-4 text-success" />
                 <span>{assignments.filter(a => a.is_published).length} Published</span>
               </div>
               <div className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-yellow-500" />
+                <AlertCircle className="h-4 w-4 text-warning" />
                 <span>{assignments.filter(a => !a.is_published).length} Drafts</span>
               </div>
             </div>

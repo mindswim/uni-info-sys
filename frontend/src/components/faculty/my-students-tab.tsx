@@ -102,10 +102,10 @@ export function MyStudentsTab() {
 
   const getGpaColor = (gpa: number | null) => {
     if (gpa === null) return "text-muted-foreground"
-    if (gpa >= 3.5) return "text-green-600"
-    if (gpa >= 3.0) return "text-blue-600"
-    if (gpa >= 2.0) return "text-yellow-600"
-    return "text-red-600"
+    if (gpa >= 3.5) return "text-success"
+    if (gpa >= 3.0) return "text-info"
+    if (gpa >= 2.0) return "text-warning"
+    return "text-danger"
   }
 
   const getGpaTrend = (gpa: number | null, semesterGpa: number | null) => {
@@ -203,8 +203,8 @@ export function MyStudentsTab() {
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-500/10 rounded-lg">
-                <GraduationCap className="h-5 w-5 text-blue-500" />
+              <div className="p-2 bg-info-subtle rounded-lg">
+                <GraduationCap className="h-5 w-5 text-info" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.avgGpa}</p>
@@ -216,8 +216,8 @@ export function MyStudentsTab() {
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-500/10 rounded-lg">
-                <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              <div className="p-2 bg-warning-subtle rounded-lg">
+                <AlertTriangle className="h-5 w-5 text-warning" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.atRisk}</p>
@@ -229,8 +229,8 @@ export function MyStudentsTab() {
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-red-500/10 rounded-lg">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
+              <div className="p-2 bg-danger-subtle rounded-lg">
+                <AlertTriangle className="h-5 w-5 text-danger" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.withHolds}</p>
@@ -323,8 +323,8 @@ export function MyStudentsTab() {
                             <span className={`font-semibold ${getGpaColor(student.gpa)}`}>
                               {student.gpa?.toFixed(2) || '-'}
                             </span>
-                            {trend === 'up' && <TrendingUp className="h-3 w-3 text-green-500" />}
-                            {trend === 'down' && <TrendingDown className="h-3 w-3 text-red-500" />}
+                            {trend === 'up' && <TrendingUp className="h-3 w-3 text-success" />}
+                            {trend === 'down' && <TrendingDown className="h-3 w-3 text-danger" />}
                             {trend === 'stable' && <Minus className="h-3 w-3 text-muted-foreground" />}
                           </div>
                         </TableCell>

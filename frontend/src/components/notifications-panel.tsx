@@ -76,9 +76,9 @@ export function NotificationsPanel() {
 
   const getPriorityColor = (priority?: string) => {
     switch (priority) {
-      case 'high': return 'text-red-500'
-      case 'medium': return 'text-yellow-500'
-      case 'low': return 'text-green-500'
+      case 'high': return 'text-danger'
+      case 'medium': return 'text-warning'
+      case 'low': return 'text-success'
       default: return 'text-muted-foreground'
     }
   }
@@ -182,7 +182,7 @@ export function NotificationsPanel() {
                     onClick={() => handleNotificationClick(notification)}
                   >
                     {!notification.read && (
-                      <div className="absolute left-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-blue-500" />
+                      <div className="absolute left-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary" />
                     )}
 
                     <div className="flex items-start gap-3 pl-2">

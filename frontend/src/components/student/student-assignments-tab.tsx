@@ -348,7 +348,7 @@ export function StudentAssignmentsTab() {
                 <CardTitle className="text-sm font-medium text-muted-foreground">Submitted</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">{stats.submitted}</div>
+                <div className="text-2xl font-bold text-success">{stats.submitted}</div>
               </CardContent>
             </Card>
             <Card>
@@ -364,7 +364,7 @@ export function StudentAssignmentsTab() {
                 <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-amber-600">{stats.pending}</div>
+                <div className="text-2xl font-bold text-warning">{stats.pending}</div>
               </CardContent>
             </Card>
           </div>
@@ -514,7 +514,7 @@ export function StudentAssignmentsTab() {
                       disabled={isPast(new Date(selectedAssignment.due_date)) && !selectedAssignment.allow_late_submissions}
                     />
                     {isPast(new Date(selectedAssignment.due_date)) && selectedAssignment.allow_late_submissions && (
-                      <p className="text-sm text-amber-600 mt-2">
+                      <p className="text-sm text-warning mt-2">
                         This submission will be marked as late ({selectedAssignment.late_penalty_percent}% penalty)
                       </p>
                     )}

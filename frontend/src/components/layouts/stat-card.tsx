@@ -49,14 +49,21 @@ export function StatCard({
 
   const trendColor = trend
     ? trend.value > 0
-      ? "text-green-600"
+      ? "text-success"
       : trend.value < 0
-      ? "text-red-600"
+      ? "text-danger"
       : "text-muted-foreground"
     : ""
 
+  const variantClasses = {
+    default: "",
+    success: "border-success",
+    warning: "border-warning",
+    destructive: "border-danger"
+  }
+
   return (
-    <Card className={variant !== "default" ? `border-${variant}` : ""}>
+    <Card className={variantClasses[variant]}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         {icon && <div className="text-muted-foreground">{icon}</div>}

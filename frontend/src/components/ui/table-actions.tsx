@@ -48,14 +48,14 @@ export function TableActions({ onView, onEdit, onDelete, customActions }: TableA
           <DropdownMenuItem 
             key={index}
             onClick={action.onClick}
-            className={action.destructive ? "text-red-600" : ""}
+            className={action.destructive ? "text-danger" : ""}
           >
             {action.icon && <span className="mr-2">{action.icon}</span>}
             {action.label}
           </DropdownMenuItem>
         ))}
         {onDelete && (
-          <DropdownMenuItem onClick={onDelete} className="text-red-600">
+          <DropdownMenuItem onClick={onDelete} className="text-danger">
             <Trash2 className="mr-2 h-4 w-4" />
             Delete
           </DropdownMenuItem>

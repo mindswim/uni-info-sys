@@ -420,30 +420,30 @@ export function AttendanceTab() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Present</CardTitle>
-              <CheckCircle className="h-4 w-4 text-green-600" />
+              <CheckCircle className="h-4 w-4 text-success" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{statistics.present}</div>
+              <div className="text-2xl font-bold text-success">{statistics.present}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Absent</CardTitle>
-              <XCircle className="h-4 w-4 text-red-600" />
+              <XCircle className="h-4 w-4 text-danger" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">{statistics.absent}</div>
+              <div className="text-2xl font-bold text-danger">{statistics.absent}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Late/Excused</CardTitle>
-              <Clock className="h-4 w-4 text-orange-600" />
+              <Clock className="h-4 w-4 text-warning" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">
+              <div className="text-2xl font-bold text-warning">
                 {statistics.late + statistics.excused}
               </div>
             </CardContent>
@@ -452,10 +452,10 @@ export function AttendanceTab() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Attendance Rate</CardTitle>
-              <TrendingUp className="h-4 w-4 text-blue-600" />
+              <TrendingUp className="h-4 w-4 text-info" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-info">
                 {statistics.attendance_rate.toFixed(1)}%
               </div>
             </CardContent>

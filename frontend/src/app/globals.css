@@ -181,6 +181,39 @@
     letter-spacing: -0.01em;
   }
 
+  /* =================================================================
+     SEMANTIC COLOR UTILITIES
+     Use these instead of hardcoded Tailwind colors (text-green-600, etc.)
+     ================================================================= */
+
+  /* Success States */
+  .text-success { color: rgb(var(--color-success-600)); }
+  .text-success-muted { color: rgb(var(--color-success-500)); }
+  .bg-success { background-color: rgb(var(--color-success-600)); }
+  .bg-success-subtle { background-color: rgb(var(--color-success-50)); }
+  .border-success { border-color: rgb(var(--color-success-200)); }
+
+  /* Warning States */
+  .text-warning { color: rgb(var(--color-warning-600)); }
+  .text-warning-muted { color: rgb(var(--color-warning-500)); }
+  .bg-warning { background-color: rgb(var(--color-warning-600)); }
+  .bg-warning-subtle { background-color: rgb(var(--color-warning-50)); }
+  .border-warning { border-color: rgb(var(--color-warning-200)); }
+
+  /* Danger/Error States */
+  .text-danger { color: rgb(var(--color-danger-600)); }
+  .text-danger-muted { color: rgb(var(--color-danger-500)); }
+  .bg-danger { background-color: rgb(var(--color-danger-600)); }
+  .bg-danger-subtle { background-color: rgb(var(--color-danger-50)); }
+  .border-danger { border-color: rgb(var(--color-danger-200)); }
+
+  /* Info States */
+  .text-info { color: rgb(var(--color-info-600)); }
+  .text-info-muted { color: rgb(var(--color-info-500)); }
+  .bg-info { background-color: rgb(var(--color-info-600)); }
+  .bg-info-subtle { background-color: rgb(var(--color-info-50)); }
+  .border-info { border-color: rgb(var(--color-info-200)); }
+
   /* Apply theme spacing to common elements */
   .p-4 { padding: var(--spacing-4, 1rem); }
   .p-6 { padding: var(--spacing-6, 1.5rem); }

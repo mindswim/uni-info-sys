@@ -263,7 +263,7 @@ export function FinancialAidTab() {
         </CardHeader>
         {aidPackage.dates.response_deadline && aidPackage.status === 'offered' && (
           <CardContent className="pt-0">
-            <div className="flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-950/20 p-3 rounded-lg">
+            <div className="flex items-center gap-2 text-warning bg-amber-50 dark:bg-amber-950/20 p-3 rounded-lg">
               <AlertCircle className="h-5 w-5" />
               <span className="text-sm font-medium">
                 Response required by {formatDate(aidPackage.dates.response_deadline)}
@@ -289,10 +289,10 @@ export function FinancialAidTab() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Gift Aid</CardTitle>
-            <Gift className="h-4 w-4 text-green-600" />
+            <Gift className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-success">
               {formatCurrency(aid_totals.total_gift_aid)}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -304,10 +304,10 @@ export function FinancialAidTab() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Loans</CardTitle>
-            <Landmark className="h-4 w-4 text-amber-600" />
+            <Landmark className="h-4 w-4 text-warning" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-amber-600">
+            <div className="text-2xl font-bold text-warning">
               {formatCurrency(aid_totals.loans)}
             </div>
             <p className="text-xs text-muted-foreground">Must be repaid</p>
@@ -378,7 +378,7 @@ export function FinancialAidTab() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <Gift className="h-5 w-5 text-green-600" />
+                  <Gift className="h-5 w-5 text-success" />
                   <CardTitle>Gift Aid (Grants & Scholarships)</CardTitle>
                 </div>
                 <CardDescription>
@@ -397,7 +397,7 @@ export function FinancialAidTab() {
                             </Badge>
                             <span className="font-medium">{award.name}</span>
                           </div>
-                          <span className="text-green-600 font-bold">{formatCurrency(award.amount)}</span>
+                          <span className="text-success font-bold">{formatCurrency(award.amount)}</span>
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="pt-4">
@@ -430,7 +430,7 @@ export function FinancialAidTab() {
                 <Separator className="my-4" />
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total Gift Aid</span>
-                  <span className="text-green-600">{formatCurrency(aid_totals.total_gift_aid)}</span>
+                  <span className="text-success">{formatCurrency(aid_totals.total_gift_aid)}</span>
                 </div>
               </CardContent>
             </Card>
@@ -441,7 +441,7 @@ export function FinancialAidTab() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <Landmark className="h-5 w-5 text-amber-600" />
+                  <Landmark className="h-5 w-5 text-warning" />
                   <CardTitle>Student Loans</CardTitle>
                 </div>
                 <CardDescription>
@@ -460,7 +460,7 @@ export function FinancialAidTab() {
                             </Badge>
                             <span className="font-medium">{award.name}</span>
                           </div>
-                          <span className="text-amber-600 font-bold">{formatCurrency(award.amount)}</span>
+                          <span className="text-warning font-bold">{formatCurrency(award.amount)}</span>
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="pt-4">
@@ -494,7 +494,7 @@ export function FinancialAidTab() {
                 <Separator className="my-4" />
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total Loans</span>
-                  <span className="text-amber-600">{formatCurrency(aid_totals.loans)}</span>
+                  <span className="text-warning">{formatCurrency(aid_totals.loans)}</span>
                 </div>
               </CardContent>
             </Card>
@@ -505,7 +505,7 @@ export function FinancialAidTab() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <Briefcase className="h-5 w-5 text-blue-600" />
+                  <Briefcase className="h-5 w-5 text-info" />
                   <CardTitle>Federal Work-Study</CardTitle>
                 </div>
                 <CardDescription>
@@ -521,13 +521,13 @@ export function FinancialAidTab() {
                         <p className="text-sm text-muted-foreground">{award.description}</p>
                       )}
                     </div>
-                    <span className="text-blue-600 font-bold">{formatCurrency(award.amount)}</span>
+                    <span className="text-info font-bold">{formatCurrency(award.amount)}</span>
                   </div>
                 ))}
                 <Separator className="my-4" />
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total Work-Study</span>
-                  <span className="text-blue-600">{formatCurrency(aid_totals.work_study)}</span>
+                  <span className="text-info">{formatCurrency(aid_totals.work_study)}</span>
                 </div>
               </CardContent>
             </Card>

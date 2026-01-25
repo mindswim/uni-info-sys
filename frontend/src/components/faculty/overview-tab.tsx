@@ -178,7 +178,7 @@ export function OverviewTab() {
             <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${pendingSubmissions > 0 ? 'text-amber-600' : ''}`}>
+            <div className={`text-2xl font-bold ${pendingSubmissions > 0 ? 'text-warning' : ''}`}>
               {pendingSubmissions}
             </div>
             <p className="text-xs text-muted-foreground">Submissions to grade</p>
@@ -232,9 +232,9 @@ export function OverviewTab() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0 ml-4">
-                        {isUrgent && <AlertCircle className="h-4 w-4 text-amber-500" />}
+                        {isUrgent && <AlertCircle className="h-4 w-4 text-warning" />}
                         <div className="text-right">
-                          <div className={`text-sm font-medium ${isUrgent ? 'text-amber-600' : ''}`}>
+                          <div className={`text-sm font-medium ${isUrgent ? 'text-warning' : ''}`}>
                             {format(dueDate, 'MMM d, h:mm a')}
                           </div>
                           <div className="text-xs text-muted-foreground">

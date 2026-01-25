@@ -35,9 +35,9 @@ interface Assignment {
   type: string
   max_points: number
   weight?: number
-  due_at: string
+  due_date: string
   available_from?: string
-  late_due_at?: string
+  late_due_date?: string
   late_penalty_percent?: number
   allow_late_submissions: boolean
   max_attempts?: number
@@ -72,9 +72,9 @@ export function AssignmentsTab() {
     type: 'homework',
     max_points: 100,
     weight: 0,
-    due_at: '',
+    due_date: '',
     available_from: '',
-    late_due_at: '',
+    late_due_date: '',
     late_penalty_percent: 10,
     allow_late_submissions: false,
     max_attempts: 1,
@@ -240,9 +240,9 @@ export function AssignmentsTab() {
       type: 'homework',
       max_points: 100,
       weight: 0,
-      due_at: '',
+      due_date: '',
       available_from: '',
-      late_due_at: '',
+      late_due_date: '',
       late_penalty_percent: 10,
       allow_late_submissions: false,
       max_attempts: 1,
@@ -259,9 +259,9 @@ export function AssignmentsTab() {
       type: assignment.type,
       max_points: assignment.max_points,
       weight: assignment.weight || 0,
-      due_at: assignment.due_at ? assignment.due_at.slice(0, 16) : '',
+      due_date: assignment.due_date ? assignment.due_date.slice(0, 16) : '',
       available_from: assignment.available_from ? assignment.available_from.slice(0, 16) : '',
-      late_due_at: assignment.late_due_at ? assignment.late_due_at.slice(0, 16) : '',
+      late_due_date: assignment.late_due_date ? assignment.late_due_date.slice(0, 16) : '',
       late_penalty_percent: assignment.late_penalty_percent || 10,
       allow_late_submissions: assignment.allow_late_submissions,
       max_attempts: assignment.max_attempts || 1,
@@ -271,7 +271,7 @@ export function AssignmentsTab() {
   }
 
   const getStatusBadge = (assignment: Assignment) => {
-    const dueDate = new Date(assignment.due_at)
+    const dueDate = new Date(assignment.due_date)
     const now = new Date()
 
     if (!assignment.is_published) {
@@ -289,7 +289,7 @@ export function AssignmentsTab() {
   const stats = {
     total: assignments.length,
     published: assignments.filter(a => a.is_published).length,
-    active: assignments.filter(a => a.is_published && !isPast(new Date(a.due_at))).length,
+    active: assignments.filter(a => a.is_published && !isPast(new Date(a.due_date))).length,
     totalSubmissions: assignments.reduce((sum, a) => sum + (a.submission_count || 0), 0),
   }
 
@@ -434,12 +434,12 @@ export function AssignmentsTab() {
                         />
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="due_at">Due Date</Label>
+                        <Label htmlFor="due_date">Due Date</Label>
                         <Input
-                          id="due_at"
+                          id="due_date"
                           type="datetime-local"
-                          value={formData.due_at}
-                          onChange={(e) => setFormData({ ...formData, due_at: e.target.value })}
+                          value={formData.due_date}
+                          onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
                         />
                       </div>
                     </div>
@@ -454,12 +454,12 @@ export function AssignmentsTab() {
                     {formData.allow_late_submissions && (
                       <div className="grid grid-cols-2 gap-4 pl-6">
                         <div className="grid gap-2">
-                          <Label htmlFor="late_due_at">Late Deadline</Label>
+                          <Label htmlFor="late_due_date">Late Deadline</Label>
                           <Input
-                            id="late_due_at"
+                            id="late_due_date"
                             type="datetime-local"
-                            value={formData.late_due_at}
-                            onChange={(e) => setFormData({ ...formData, late_due_at: e.target.value })}
+                            value={formData.late_due_date}
+                            onChange={(e) => setFormData({ ...formData, late_due_date: e.target.value })}
                           />
                         </div>
                         <div className="grid gap-2">
@@ -537,10 +537,10 @@ export function AssignmentsTab() {
                           </TableCell>
                           <TableCell>
                             <div className="text-sm">
-                              {format(new Date(assignment.due_at), 'MMM d, yyyy')}
+                              {format(new Date(assignment.due_date), 'MMM d, yyyy')}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              {format(new Date(assignment.due_at), 'h:mm a')}
+                              {format(new Date(assignment.due_date), 'h:mm a')}
                             </div>
                           </TableCell>
                           <TableCell>

@@ -63,7 +63,7 @@ export function OverviewTab() {
                 pendingSubmissions += pending
 
                 // Add upcoming deadlines
-                if (assignment.is_published && !isPast(new Date(assignment.due_at))) {
+                if (assignment.is_published && !isPast(new Date(assignment.due_date))) {
                   allDeadlines.push({
                     ...assignment,
                     course_code: section.course?.course_code || section.course?.code,
@@ -79,7 +79,7 @@ export function OverviewTab() {
 
         // Sort deadlines by due date and take top 5
         const upcomingDeadlines = allDeadlines
-          .sort((a, b) => new Date(a.due_at).getTime() - new Date(b.due_at).getTime())
+          .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_at).getTime())
           .slice(0, 5)
 
         setData({
@@ -218,7 +218,7 @@ export function OverviewTab() {
             ) : (
               <div className="space-y-3">
                 {upcomingDeadlines.map((assignment: any) => {
-                  const dueDate = new Date(assignment.due_at)
+                  const dueDate = new Date(assignment.due_date)
                   const isUrgent = dueDate.getTime() - Date.now() < 24 * 60 * 60 * 1000
                   return (
                     <div

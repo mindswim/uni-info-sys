@@ -60,8 +60,8 @@ export default function StudentOverviewPage() {
         const assignmentArrays = await Promise.all(assignmentPromises)
         const allAssignments = assignmentArrays.flat()
         const upcomingAssignments = allAssignments
-          .filter((a: Assignment) => a.is_published && !isPast(new Date(a.due_at)))
-          .sort((a: Assignment, b: Assignment) => new Date(a.due_at).getTime() - new Date(b.due_at).getTime())
+          .filter((a: Assignment) => a.is_published && !isPast(new Date(a.due_date)))
+          .sort((a: Assignment, b: Assignment) => new Date(a.due_date).getTime() - new Date(b.due_at).getTime())
           .slice(0, 5)
 
         setData({ student, enrollments, upcomingAssignments, announcements: announcements.slice(0, 3) })
@@ -183,7 +183,7 @@ export default function StudentOverviewPage() {
               ) : (
                 <div className="space-y-3">
                   {upcomingAssignments.map((assignment: any) => {
-                    const dueDate = new Date(assignment.due_at)
+                    const dueDate = new Date(assignment.due_date)
                     const isUrgent = dueDate.getTime() - Date.now() < 48 * 60 * 60 * 1000 // 48 hours
                     return (
                       <div

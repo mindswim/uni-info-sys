@@ -526,8 +526,8 @@ export interface Assignment {
   max_points: number
   weight?: number
   available_from?: string
-  due_at: string
-  late_due_at?: string
+  due_date: string
+  late_due_date?: string
   late_penalty_percent?: number
   allow_late_submissions: boolean
   max_attempts?: number

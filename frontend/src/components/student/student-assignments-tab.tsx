@@ -35,9 +35,9 @@ interface Assignment {
   description?: string
   type: string
   max_points: number
-  due_at: string
+  due_date: string
   available_from?: string
-  late_due_at?: string
+  late_due_date?: string
   late_penalty_percent?: number
   allow_late_submissions: boolean
   is_published: boolean
@@ -60,8 +60,8 @@ interface Submission {
 
 const getAssignmentStatus = (assignment: Assignment, submission?: Submission) => {
   const now = new Date()
-  const dueDate = new Date(assignment.due_at)
-  const lateDueDate = assignment.late_due_at ? new Date(assignment.late_due_at) : null
+  const dueDate = new Date(assignment.due_date)
+  const lateDueDate = assignment.late_due_date ? new Date(assignment.late_due_date) : null
 
   if (submission?.status === 'graded') {
     return { label: 'Graded', variant: 'default' as const, icon: CheckCircle2 }
@@ -233,8 +233,8 @@ export function StudentAssignmentsTab() {
     setViewDialogOpen(true)
   }
 
-  const upcomingAssignments = assignments.filter(a => !isPast(new Date(a.due_at)))
-  const pastAssignments = assignments.filter(a => isPast(new Date(a.due_at)))
+  const upcomingAssignments = assignments.filter(a => !isPast(new Date(a.due_date)))
+  const pastAssignments = assignments.filter(a => isPast(new Date(a.due_date)))
 
   const stats = {
     total: assignments.length,
@@ -247,7 +247,7 @@ export function StudentAssignmentsTab() {
     const submission = submissions[assignment.id]
     const status = getAssignmentStatus(assignment, submission)
     const StatusIcon = status.icon
-    const dueDate = new Date(assignment.due_at)
+    const dueDate = new Date(assignment.due_date)
     const isOverdue = isPast(dueDate) && !submission
 
     return (
@@ -453,7 +453,7 @@ export function StudentAssignmentsTab() {
                   </span>
                   <span className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
-                    Due {format(new Date(selectedAssignment.due_at), 'MMM d, h:mm a')}
+                    Due {format(new Date(selectedAssignment.due_date), 'MMM d, h:mm a')}
                   </span>
                 </div>
 
@@ -511,9 +511,9 @@ export function StudentAssignmentsTab() {
                       onChange={(e) => setSubmissionContent(e.target.value)}
                       placeholder="Enter your submission..."
                       rows={8}
-                      disabled={isPast(new Date(selectedAssignment.due_at)) && !selectedAssignment.allow_late_submissions}
+                      disabled={isPast(new Date(selectedAssignment.due_date)) && !selectedAssignment.allow_late_submissions}
                     />
-                    {isPast(new Date(selectedAssignment.due_at)) && selectedAssignment.allow_late_submissions && (
+                    {isPast(new Date(selectedAssignment.due_date)) && selectedAssignment.allow_late_submissions && (
                       <p className="text-sm text-amber-600 mt-2">
                         This submission will be marked as late ({selectedAssignment.late_penalty_percent}% penalty)
                       </p>
@@ -528,7 +528,7 @@ export function StudentAssignmentsTab() {
                 {!submissions[selectedAssignment.id] && (
                   <Button
                     onClick={handleSubmit}
-                    disabled={submitting || !submissionContent.trim() || (isPast(new Date(selectedAssignment.due_at)) && !selectedAssignment.allow_late_submissions)}
+                    disabled={submitting || !submissionContent.trim() || (isPast(new Date(selectedAssignment.due_date)) && !selectedAssignment.allow_late_submissions)}
                     className="gap-2"
                   >
                     <Send className="h-4 w-4" />

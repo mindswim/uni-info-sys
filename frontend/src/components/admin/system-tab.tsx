@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
 import { Plus, Search, Shield, Users as UsersIcon, Key, Pencil, Trash2, UserPlus } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
+import { getAuthToken } from '@/lib/api-client'
 
 interface User {
   id: number
@@ -96,7 +97,7 @@ export function SystemTab() {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
 
       const [usersResponse, rolesResponse, permissionsResponse] = await Promise.all([
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users`, {
@@ -153,7 +154,7 @@ export function SystemTab() {
 
     setSubmitting(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${editingUser.id}/roles`,
         {
@@ -195,7 +196,7 @@ export function SystemTab() {
 
     setDeleting(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${deletingUser.id}`,
         {
@@ -263,7 +264,7 @@ export function SystemTab() {
 
     setSubmitting(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
       const url = editingRole
         ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/roles/${editingRole.id}`
         : `${process.env.NEXT_PUBLIC_API_URL}/api/v1/roles`
@@ -310,7 +311,7 @@ export function SystemTab() {
 
     setDeleting(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/roles/${deletingRole.id}`,
         {
@@ -376,7 +377,7 @@ export function SystemTab() {
 
     setSubmitting(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
       const url = editingPermission
         ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/permissions/${editingPermission.id}`
         : `${process.env.NEXT_PUBLIC_API_URL}/api/v1/permissions`
@@ -422,7 +423,7 @@ export function SystemTab() {
 
     setDeleting(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/permissions/${deletingPermission.id}`,
         {

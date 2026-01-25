@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Users, FileText, BookOpen, Award, Download, TrendingUp, TrendingDown } from "lucide-react"
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { useToast } from "@/hooks/use-toast"
+import { getAuthToken } from '@/lib/api-client'
 
 interface Term {
   id: number
@@ -62,7 +63,7 @@ export function AnalyticsTab() {
 
   const fetchAllData = async () => {
     setLoading(true)
-    const token = localStorage.getItem('token')
+    const token = getAuthToken()
     if (!token) return
 
     try {
@@ -87,7 +88,7 @@ export function AnalyticsTab() {
   }
 
   const fetchTerms = async () => {
-    const token = localStorage.getItem('token')
+    const token = getAuthToken()
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/terms`, {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -102,7 +103,7 @@ export function AnalyticsTab() {
   }
 
   const fetchEnrollmentTrends = async () => {
-    const token = localStorage.getItem('token')
+    const token = getAuthToken()
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/enrollments`, {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -137,7 +138,7 @@ export function AnalyticsTab() {
   }
 
   const fetchApplicationStats = async () => {
-    const token = localStorage.getItem('token')
+    const token = getAuthToken()
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/admission-applications`, {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -166,7 +167,7 @@ export function AnalyticsTab() {
   }
 
   const fetchProgramStats = async () => {
-    const token = localStorage.getItem('token')
+    const token = getAuthToken()
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/students`, {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -195,7 +196,7 @@ export function AnalyticsTab() {
   }
 
   const fetchGradeDistribution = async () => {
-    const token = localStorage.getItem('token')
+    const token = getAuthToken()
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/enrollments`, {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -227,7 +228,7 @@ export function AnalyticsTab() {
   }
 
   const fetchSummaryStats = async () => {
-    const token = localStorage.getItem('token')
+    const token = getAuthToken()
 
     // Fetch students
     const studentsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/students`, {

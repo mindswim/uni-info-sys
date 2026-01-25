@@ -1,17 +1,20 @@
 'use client'
 
+import { AppShell } from '@/components/layout/app-shell'
 import { FinancialAidTab } from '@/components/student/financial-aid-tab'
 
 export default function StudentFinancialAidPage() {
   return (
-    <div className="container mx-auto py-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">Financial Aid</h1>
-        <p className="text-muted-foreground">
-          View your financial aid package, awards, and disbursement schedule
-        </p>
+    <AppShell>
+      <div className="flex flex-col gap-6 p-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Financial Aid</h1>
+          <p className="text-muted-foreground">
+            View your financial aid package, awards, and disbursement schedule
+          </p>
+        </div>
+        <FinancialAidTab />
       </div>
-      <FinancialAidTab />
-    </div>
+    </AppShell>
   )
 }

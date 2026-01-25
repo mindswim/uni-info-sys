@@ -106,7 +106,9 @@ export default function StudentOverviewPage() {
               Welcome back, {student?.first_name || 'Student'}
             </p>
           </div>
-          <Button>Request Support</Button>
+          <Button asChild>
+            <Link href="/messages">Request Support</Link>
+          </Button>
         </div>
 
         {/* Stats Grid */}

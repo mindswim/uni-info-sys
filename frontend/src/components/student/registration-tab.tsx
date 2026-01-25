@@ -235,7 +235,6 @@ export function RegistrationTab() {
             body: JSON.stringify({
               student_id: studentId,
               course_section_id: section.id,
-              enrollment_date: new Date().toISOString()
             }),
           }).then(async res => {
             if (!res.ok) {

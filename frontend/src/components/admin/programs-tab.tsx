@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { Plus, Search, GraduationCap, BookOpen, Calendar, Pencil, Trash2 } from 'lucide-react'
 import { CsvImportExport } from '@/components/admin/csv-import-export'
+import { getAuthToken } from '@/lib/api-client'
 
 interface Department {
   id: number
@@ -82,7 +83,7 @@ export function ProgramsTab() {
   const fetchPrograms = async () => {
     setLoading(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
 
       const [programsResponse, departmentsResponse] = await Promise.all([
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/programs`, {
@@ -131,7 +132,7 @@ export function ProgramsTab() {
 
     setSubmitting(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/programs`, {
         method: 'POST',
         headers: {
@@ -210,7 +211,7 @@ export function ProgramsTab() {
 
     setSubmitting(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/programs/${editingProgram.id}`, {
         method: 'PUT',
         headers: {
@@ -263,7 +264,7 @@ export function ProgramsTab() {
 
     setDeleting(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/programs/${deletingProgram.id}`, {
         method: 'DELETE',
         headers: {

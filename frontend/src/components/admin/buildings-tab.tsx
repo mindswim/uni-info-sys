@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
 import { Plus, Search, Building2, DoorOpen, Users, Pencil, Trash2 } from 'lucide-react'
 import { CsvImportExport } from '@/components/admin/csv-import-export'
+import { getAuthToken } from '@/lib/api-client'
 
 interface Building {
   id: number
@@ -83,7 +84,7 @@ export function BuildingsTab() {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
 
       const [buildingsResponse, roomsResponse] = await Promise.all([
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/buildings`, {
@@ -154,7 +155,7 @@ export function BuildingsTab() {
 
     setSubmitting(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
       const url = editingBuilding
         ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/buildings/${editingBuilding.id}`
         : `${process.env.NEXT_PUBLIC_API_URL}/api/v1/buildings`
@@ -202,7 +203,7 @@ export function BuildingsTab() {
 
     setDeleting(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/buildings/${deletingBuilding.id}`,
         {
@@ -274,7 +275,7 @@ export function BuildingsTab() {
 
     setSubmitting(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
       const url = editingRoom
         ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/rooms/${editingRoom.id}`
         : `${process.env.NEXT_PUBLIC_API_URL}/api/v1/rooms`
@@ -327,7 +328,7 @@ export function BuildingsTab() {
 
     setDeleting(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/rooms/${deletingRoom.id}`,
         {

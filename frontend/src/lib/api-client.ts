@@ -4,6 +4,28 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } f
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost/api/v1'
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost'
 
+/**
+ * Get the auth token from sessionStorage.
+ * Use this function instead of directly accessing storage to ensure consistency.
+ */
+export function getAuthToken(): string | null {
+  if (typeof window === 'undefined') return null
+  return sessionStorage.getItem('auth_token')
+}
+
+/**
+ * Get standard auth headers for fetch requests.
+ * Use this when you need to make direct fetch() calls instead of using ApiClient.
+ */
+export function getAuthHeaders(): Record<string, string> {
+  const token = getAuthToken()
+  return {
+    'Authorization': token ? `Bearer ${token}` : '',
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+  }
+}
+
 // Development mode flags
 const DEV_BYPASS_AUTH = process.env.NEXT_PUBLIC_DEV_BYPASS_AUTH === 'true'
 const ENABLE_LOGGING = process.env.NEXT_PUBLIC_API_LOGGING === 'true' || process.env.NODE_ENV === 'development'

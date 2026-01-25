@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast'
 import { Plus, Search, Award, TrendingUp, Users, BookOpen, Pencil, Download } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { getAuthToken } from '@/lib/api-client'
 
 const VALID_GRADES = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F', 'P', 'NP', 'W', 'I', 'IP']
 
@@ -96,7 +97,7 @@ export function GradesTab() {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
 
       const [enrollmentsResponse, sectionsResponse, termsResponse] = await Promise.all([
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/enrollments`, {
@@ -161,7 +162,7 @@ export function GradesTab() {
 
     setSubmitting(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getAuthToken()
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/enrollments/${editingEnrollment.id}`, {
         method: 'PUT',
         headers: {

@@ -22,6 +22,7 @@ use App\Models\Room;
 use App\Models\Staff;
 use App\Models\Student;
 use App\Models\Term;
+use App\Models\User;
 
 use App\Policies\AcademicRecordPolicy;
 use App\Policies\AdmissionApplicationPolicy;
@@ -40,6 +41,7 @@ use App\Policies\RoomPolicy;
 use App\Policies\StaffPolicy;
 use App\Policies\StudentPolicy;
 use App\Policies\TermPolicy;
+use App\Policies\UserPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -66,6 +68,7 @@ class AuthServiceProvider extends ServiceProvider
         Staff::class => StaffPolicy::class,
         Student::class => StudentPolicy::class,
         Term::class => TermPolicy::class,
+        User::class => UserPolicy::class,
     ];
 
     /**

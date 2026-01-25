@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useToast } from "@/hooks/use-toast"
 import { Download, Upload, FileText, AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
+import { getAuthToken } from '@/lib/api-client'
 
 interface CsvImportExportProps {
   entityName: string // e.g., "students", "courses"
@@ -61,7 +62,7 @@ export function CsvImportExport({
     setImporting(true)
 
     try {
-      const token = sessionStorage.getItem('token')
+      const token = getAuthToken()
       const formData = new FormData()
       formData.append('file', selectedFile)
 
@@ -113,7 +114,7 @@ export function CsvImportExport({
     setExporting(true)
 
     try {
-      const token = sessionStorage.getItem('token')
+      const token = getAuthToken()
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${exportEndpoint}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -157,7 +158,7 @@ export function CsvImportExport({
 
   const handleDownloadTemplate = async () => {
     try {
-      const token = sessionStorage.getItem('token')
+      const token = getAuthToken()
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${templateEndpoint}`, {
         headers: {
           'Authorization': `Bearer ${token}`,

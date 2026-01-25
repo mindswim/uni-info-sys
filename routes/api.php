@@ -31,6 +31,7 @@ use App\Http\Controllers\Api\V1\AnnouncementController;
 use App\Http\Controllers\Api\V1\FinancialAidController;
 use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\MessageController;
+use App\Http\Controllers\Api\V1\UserController;
 
 /**
  * @OA\Get(
@@ -231,6 +232,9 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
         Route::post('roles/{role}/permissions', [\App\Http\Controllers\Api\V1\RoleController::class, 'syncPermissions']);
         Route::apiResource('permissions', \App\Http\Controllers\Api\V1\PermissionController::class)->only(['index', 'show']);
     });
+
+    // User management (for admin to list users without student records)
+    Route::apiResource('users', UserController::class)->only(['index', 'show']);
     
     // Student-centric resources (protected by student role middleware)
     Route::middleware('role.student')->group(function () {

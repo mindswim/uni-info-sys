@@ -95,6 +95,11 @@ class DatabaseSeeder extends Seeder
             MessageSeeder::class,
         ]);
 
+        // Step 16: Create billing data (tuition rates, invoices, payments)
+        $this->call([
+            BillingSeeder::class,
+        ]);
+
         Log::info('Database seeding completed successfully!');
     }
     

@@ -191,6 +191,12 @@ const navigationItems = {
       ]
     },
     {
+      title: "Communications",
+      items: [
+        { title: "Announcements", url: "/admin/announcements", icon: Megaphone }
+      ]
+    },
+    {
       title: "System",
       items: [
         { title: "User Management", url: "/admin/system", icon: Shield },

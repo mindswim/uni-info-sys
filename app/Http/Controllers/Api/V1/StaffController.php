@@ -318,6 +318,97 @@ class StaffController extends Controller
         ], 200);
     }
 
+    /**
+     * Get all students enrolled in the authenticated staff member's course sections
+     */
+    public function myStudents(Request $request)
+    {
+        $user = $request->user();
+
+        $staff = Staff::where('user_id', $user->id)->first();
+
+        if (!$staff) {
+            return response()->json([
+                'message' => 'Staff profile not found for the authenticated user'
+            ], 404);
+        }
+
+        // Get all students enrolled in staff's sections
+        $query = \App\Models\Student::whereHas('enrollments.courseSection', function ($q) use ($staff, $request) {
+            $q->where('instructor_id', $staff->id);
+            if ($request->has('term_id')) {
+                $q->where('term_id', $request->term_id);
+            }
+        })
+        ->with([
+            'user',
+            'majorProgram',
+            'enrollments' => function ($q) use ($staff, $request) {
+                $q->whereHas('courseSection', function ($sq) use ($staff, $request) {
+                    $sq->where('instructor_id', $staff->id);
+                    if ($request->has('term_id')) {
+                        $sq->where('term_id', $request->term_id);
+                    }
+                })->with('courseSection.course');
+            }
+        ]);
+
+        // Search filter
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('student_number', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($uq) use ($search) {
+                        $uq->where('email', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Academic status filter
+        if ($request->has('academic_status')) {
+            $query->where('academic_status', $request->academic_status);
+        }
+
+        $students = $query->orderBy('last_name')->orderBy('first_name')->get();
+
+        return response()->json([
+            'data' => $students->map(function ($student) {
+                return [
+                    'id' => $student->id,
+                    'student_number' => $student->student_number,
+                    'first_name' => $student->first_name,
+                    'last_name' => $student->last_name,
+                    'full_name' => $student->first_name . ' ' . $student->last_name,
+                    'email' => $student->user?->email,
+                    'gpa' => $student->gpa,
+                    'semester_gpa' => $student->semester_gpa,
+                    'class_standing' => $student->class_standing,
+                    'academic_status' => $student->academic_status,
+                    'enrollment_status' => $student->enrollment_status,
+                    'total_credits_earned' => $student->total_credits_earned,
+                    'credits_in_progress' => $student->credits_in_progress,
+                    'major' => $student->majorProgram?->name,
+                    'financial_hold' => $student->financial_hold,
+                    'enrollments' => $student->enrollments->map(function ($enrollment) {
+                        return [
+                            'id' => $enrollment->id,
+                            'course_code' => $enrollment->courseSection->course->course_code,
+                            'course_title' => $enrollment->courseSection->course->title,
+                            'section_number' => $enrollment->courseSection->section_number,
+                            'status' => $enrollment->status,
+                            'grade' => $enrollment->grade,
+                        ];
+                    }),
+                ];
+            }),
+            'meta' => [
+                'total' => $students->count(),
+            ]
+        ]);
+    }
+
     // CSV Import/Export Methods
 
     protected function getEntityName(): string

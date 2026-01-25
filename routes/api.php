@@ -19,7 +19,6 @@ use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\CourseImportController;
 use App\Http\Controllers\Api\V1\GradeImportController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
-use App\Http\Controllers\Api\V1\ImpersonationController;
 use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\AttendanceController;
@@ -179,6 +178,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::middleware('role.staff')->group(function () {
         Route::get('staff/me', [\App\Http\Controllers\Api\V1\StaffController::class, 'me']);
         Route::get('staff/me/sections', [\App\Http\Controllers\Api\V1\StaffController::class, 'mySections']);
+        Route::get('staff/me/students', [\App\Http\Controllers\Api\V1\StaffController::class, 'myStudents']);
     });
     Route::apiResource('staff', StaffController::class);
     Route::post('staff/csv/import', [StaffController::class, 'importCsv']);

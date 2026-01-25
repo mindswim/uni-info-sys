@@ -515,3 +515,193 @@ export interface GradebookResponse {
     grade_distribution: Record<string, number>
   }
 }
+
+// Assignment Types
+export interface Assignment {
+  id: number
+  course_section_id: number
+  title: string
+  description?: string
+  type: 'homework' | 'quiz' | 'exam' | 'project' | 'essay' | 'lab' | 'discussion' | 'other'
+  max_points: number
+  weight?: number
+  available_from?: string
+  due_at: string
+  late_due_at?: string
+  late_penalty_percent?: number
+  allow_late_submissions: boolean
+  max_attempts?: number
+  instructions?: string
+  is_published: boolean
+
+  // Relationships
+  course_section?: CourseSection
+  submissions?: AssignmentSubmission[]
+
+  // Computed
+  submission_count?: number
+  graded_count?: number
+  average_score?: number
+
+  // Timestamps
+  created_at: string
+  updated_at: string
+}
+
+export interface AssignmentSubmission {
+  id: number
+  assignment_id: number
+  student_id: number
+  content?: string
+  file_path?: string
+  file_name?: string
+  submitted_at: string
+  is_late: boolean
+  attempt_number: number
+  points_earned?: number
+  points_deducted?: number
+  final_score?: number
+  feedback?: string
+  graded_at?: string
+  graded_by?: number
+  status: 'submitted' | 'graded' | 'resubmit_requested' | 'late'
+
+  // Relationships
+  assignment?: Assignment
+  student?: Student
+  grader?: Staff
+
+  // Timestamps
+  created_at: string
+  updated_at: string
+}
+
+// Course Material Types
+export interface CourseMaterial {
+  id: number
+  course_section_id: number
+  class_session_id?: number
+  title: string
+  description?: string
+  type: 'syllabus' | 'reading' | 'lecture_notes' | 'video' | 'link' | 'file' | 'other'
+  file_path?: string
+  file_name?: string
+  file_size?: number
+  mime_type?: string
+  url?: string
+  is_required: boolean
+  is_published: boolean
+  published_at?: string
+  display_order: number
+
+  // Relationships
+  course_section?: CourseSection
+  class_session?: ClassSession
+
+  // Timestamps
+  created_at: string
+  updated_at: string
+}
+
+// Class Session Types
+export interface ClassSession {
+  id: number
+  course_section_id: number
+  session_date: string
+  start_time: string
+  end_time: string
+  topic?: string
+  description?: string
+  room_id?: number
+  is_cancelled: boolean
+  cancellation_reason?: string
+
+  // Relationships
+  course_section?: CourseSection
+  room?: Room
+  materials?: CourseMaterial[]
+
+  // Timestamps
+  created_at: string
+  updated_at: string
+}
+
+// Announcement Types
+export interface Announcement {
+  id: number
+  announceable_type?: string
+  announceable_id?: number
+  author_id: number
+  title: string
+  content: string
+  priority: 'normal' | 'important' | 'urgent'
+  is_published: boolean
+  published_at?: string
+  expires_at?: string
+  is_pinned: boolean
+
+  // Relationships
+  author?: Staff
+  announceable?: CourseSection | Department
+
+  // Computed
+  is_visible?: boolean
+  is_expired?: boolean
+  is_university_wide?: boolean
+  priority_badge?: string
+
+  // Context (for student view)
+  course_code?: string
+  course_title?: string
+
+  // Timestamps
+  created_at: string
+  updated_at: string
+}
+
+// Gradebook Detail Response
+export interface StudentGradebookResponse {
+  enrollment: Enrollment
+  student: Student
+  course_section: CourseSection
+  assignments: Array<{
+    assignment: Assignment
+    submission?: AssignmentSubmission
+    status: 'pending' | 'submitted' | 'graded' | 'missing'
+  }>
+  current_grade: {
+    percentage: number
+    letter_grade: string
+    grade_points: number
+    points_earned: number
+    points_possible: number
+  }
+  statistics: {
+    assignments_total: number
+    assignments_completed: number
+    assignments_graded: number
+    on_time_submissions: number
+    late_submissions: number
+  }
+}
+
+export interface ClassGradebookResponse {
+  course_section: CourseSection
+  assignments: Assignment[]
+  students: Array<{
+    student: Student
+    enrollment: Enrollment
+    submissions: Record<number, AssignmentSubmission>
+    current_grade: {
+      percentage: number
+      letter_grade: string
+      grade_points: number
+    }
+  }>
+  class_statistics: {
+    average_percentage: number
+    median_percentage: number
+    grade_distribution: Record<string, number>
+    completion_rate: number
+  }
+}

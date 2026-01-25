@@ -44,7 +44,10 @@ import {
   MapPin,
   Mail,
   Edit2,
-  Building2
+  Building2,
+  Megaphone,
+  FolderOpen,
+  PenTool
 } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/components/auth/auth-provider"
@@ -75,7 +78,10 @@ const navigationItems = {
       title: "Courses",
       items: [
         { title: "Enrollments", url: "/student/enrollments", icon: BookOpen },
-        { title: "Registration", url: "/student/registration", icon: ClipboardCheck }
+        { title: "Registration", url: "/student/registration", icon: ClipboardCheck },
+        { title: "Assignments", url: "/student/assignments", icon: PenTool },
+        { title: "Materials", url: "/student/materials", icon: FolderOpen },
+        { title: "Announcements", url: "/student/announcements", icon: Megaphone }
       ]
     },
     {
@@ -110,7 +116,10 @@ const navigationItems = {
       title: "Teaching",
       items: [
         { title: "Sections", url: "/faculty/sections", icon: BookOpen },
-        { title: "Course Management", url: "/faculty/courses", icon: Settings }
+        { title: "Course Management", url: "/faculty/courses", icon: Settings },
+        { title: "Assignments", url: "/faculty/assignments", icon: PenTool },
+        { title: "Materials", url: "/faculty/materials", icon: FolderOpen },
+        { title: "Announcements", url: "/faculty/announcements", icon: Megaphone }
       ]
     },
     {

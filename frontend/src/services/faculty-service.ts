@@ -7,6 +7,12 @@ import type {
   GradebookResponse,
   CourseSection,
   Enrollment,
+  Assignment,
+  AssignmentSubmission,
+  CourseMaterial,
+  Announcement,
+  ClassGradebookResponse,
+  StudentGradebookResponse,
 } from '@/types/api-types'
 
 /**
@@ -242,6 +248,276 @@ export const facultyService = {
    */
   deleteAssignment: async (assignmentId: number): Promise<void> => {
     await apiClient.delete(`/assignments/${assignmentId}`)
+  },
+
+  /**
+   * Get a single assignment
+   */
+  getAssignment: async (assignmentId: number): Promise<Assignment> => {
+    const response = await apiClient.get<APIResponse<Assignment>>(`/assignments/${assignmentId}`)
+    return response.data.data
+  },
+
+  /**
+   * Publish an assignment
+   */
+  publishAssignment: async (assignmentId: number): Promise<Assignment> => {
+    const response = await apiClient.post<APIResponse<Assignment>>(`/assignments/${assignmentId}/publish`)
+    return response.data.data
+  },
+
+  /**
+   * Unpublish an assignment
+   */
+  unpublishAssignment: async (assignmentId: number): Promise<Assignment> => {
+    const response = await apiClient.post<APIResponse<Assignment>>(`/assignments/${assignmentId}/unpublish`)
+    return response.data.data
+  },
+
+  // === Submission Management ===
+
+  /**
+   * Get submissions for an assignment
+   */
+  getSubmissions: async (assignmentId: number): Promise<AssignmentSubmission[]> => {
+    const response = await apiClient.get<APIResponse<AssignmentSubmission[]>>(
+      `/assignments/${assignmentId}/submissions`
+    )
+    return response.data.data
+  },
+
+  /**
+   * Get a single submission
+   */
+  getSubmission: async (submissionId: number): Promise<AssignmentSubmission> => {
+    const response = await apiClient.get<APIResponse<AssignmentSubmission>>(`/submissions/${submissionId}`)
+    return response.data.data
+  },
+
+  /**
+   * Grade a submission
+   */
+  gradeSubmission: async (
+    submissionId: number,
+    data: { points_earned: number; feedback?: string }
+  ): Promise<AssignmentSubmission> => {
+    const response = await apiClient.post<APIResponse<AssignmentSubmission>>(
+      `/submissions/${submissionId}/grade`,
+      data
+    )
+    return response.data.data
+  },
+
+  /**
+   * Batch grade submissions
+   */
+  batchGradeSubmissions: async (
+    assignmentId: number,
+    grades: Array<{ submission_id: number; points_earned: number; feedback?: string }>
+  ): Promise<{ successful: number; failed: number }> => {
+    const response = await apiClient.post<APIResponse<{ successful: number; failed: number }>>(
+      `/assignments/${assignmentId}/submissions/batch-grade`,
+      { grades }
+    )
+    return response.data.data
+  },
+
+  /**
+   * Request resubmission
+   */
+  requestResubmission: async (
+    submissionId: number,
+    feedback: string
+  ): Promise<AssignmentSubmission> => {
+    const response = await apiClient.post<APIResponse<AssignmentSubmission>>(
+      `/submissions/${submissionId}/request-resubmission`,
+      { feedback }
+    )
+    return response.data.data
+  },
+
+  // === Enhanced Gradebook ===
+
+  /**
+   * Get detailed class gradebook with all assignments
+   */
+  getClassGradebook: async (courseSectionId: number): Promise<ClassGradebookResponse> => {
+    const response = await apiClient.get<APIResponse<ClassGradebookResponse>>(
+      `/course-sections/${courseSectionId}/gradebook`
+    )
+    return response.data.data
+  },
+
+  /**
+   * Export gradebook to CSV
+   */
+  exportGradebook: async (courseSectionId: number): Promise<Blob> => {
+    const response = await apiClient.get(`/course-sections/${courseSectionId}/gradebook/export`, {
+      responseType: 'blob',
+    })
+    return response.data
+  },
+
+  /**
+   * Finalize grades for a course section
+   */
+  finalizeGrades: async (courseSectionId: number): Promise<{ finalized: number }> => {
+    const response = await apiClient.post<APIResponse<{ finalized: number }>>(
+      `/course-sections/${courseSectionId}/gradebook/finalize`
+    )
+    return response.data.data
+  },
+
+  // === Course Materials Management ===
+
+  /**
+   * Get materials for a course section
+   */
+  getMaterials: async (courseSectionId: number): Promise<CourseMaterial[]> => {
+    const response = await apiClient.get<APIResponse<CourseMaterial[]>>(
+      `/course-sections/${courseSectionId}/materials`
+    )
+    return response.data.data
+  },
+
+  /**
+   * Create a new course material
+   */
+  createMaterial: async (data: Partial<CourseMaterial>): Promise<CourseMaterial> => {
+    const response = await apiClient.post<APIResponse<CourseMaterial>>('/course-materials', data)
+    return response.data.data
+  },
+
+  /**
+   * Update a course material
+   */
+  updateMaterial: async (materialId: number, data: Partial<CourseMaterial>): Promise<CourseMaterial> => {
+    const response = await apiClient.put<APIResponse<CourseMaterial>>(`/course-materials/${materialId}`, data)
+    return response.data.data
+  },
+
+  /**
+   * Delete a course material
+   */
+  deleteMaterial: async (materialId: number): Promise<void> => {
+    await apiClient.delete(`/course-materials/${materialId}`)
+  },
+
+  /**
+   * Publish a course material
+   */
+  publishMaterial: async (materialId: number): Promise<CourseMaterial> => {
+    const response = await apiClient.post<APIResponse<CourseMaterial>>(`/course-materials/${materialId}/publish`)
+    return response.data.data
+  },
+
+  /**
+   * Reorder materials
+   */
+  reorderMaterials: async (
+    courseSectionId: number,
+    materialIds: number[]
+  ): Promise<void> => {
+    await apiClient.post(`/course-sections/${courseSectionId}/materials/reorder`, {
+      material_ids: materialIds,
+    })
+  },
+
+  // === Announcements Management ===
+
+  /**
+   * Get announcements (all or filtered)
+   */
+  getAnnouncements: async (params?: {
+    target_type?: 'university' | 'course_section' | 'department'
+    target_id?: number
+    visible_only?: boolean
+  }): Promise<Announcement[]> => {
+    const response = await apiClient.get<APIResponse<Announcement[]>>('/announcements', { params })
+    return response.data.data
+  },
+
+  /**
+   * Get announcements created by current staff
+   */
+  getMyAnnouncements: async (): Promise<Announcement[]> => {
+    const response = await apiClient.get<APIResponse<Announcement[]>>('/announcements/me/created')
+    return response.data.data
+  },
+
+  /**
+   * Get announcements for a course section
+   */
+  getSectionAnnouncements: async (courseSectionId: number): Promise<Announcement[]> => {
+    const response = await apiClient.get<APIResponse<Announcement[]>>(
+      `/course-sections/${courseSectionId}/announcements`
+    )
+    return response.data.data
+  },
+
+  /**
+   * Create an announcement
+   */
+  createAnnouncement: async (data: {
+    title: string
+    content: string
+    target_type?: 'course_section' | 'department'
+    target_id?: number
+    priority?: 'normal' | 'important' | 'urgent'
+    is_published?: boolean
+    published_at?: string
+    expires_at?: string
+    is_pinned?: boolean
+  }): Promise<Announcement> => {
+    const response = await apiClient.post<APIResponse<Announcement>>('/announcements', data)
+    return response.data.data
+  },
+
+  /**
+   * Update an announcement
+   */
+  updateAnnouncement: async (announcementId: number, data: Partial<Announcement>): Promise<Announcement> => {
+    const response = await apiClient.put<APIResponse<Announcement>>(`/announcements/${announcementId}`, data)
+    return response.data.data
+  },
+
+  /**
+   * Delete an announcement
+   */
+  deleteAnnouncement: async (announcementId: number): Promise<void> => {
+    await apiClient.delete(`/announcements/${announcementId}`)
+  },
+
+  /**
+   * Publish an announcement
+   */
+  publishAnnouncement: async (announcementId: number): Promise<Announcement> => {
+    const response = await apiClient.post<APIResponse<Announcement>>(`/announcements/${announcementId}/publish`)
+    return response.data.data
+  },
+
+  /**
+   * Unpublish an announcement
+   */
+  unpublishAnnouncement: async (announcementId: number): Promise<Announcement> => {
+    const response = await apiClient.post<APIResponse<Announcement>>(`/announcements/${announcementId}/unpublish`)
+    return response.data.data
+  },
+
+  /**
+   * Pin an announcement
+   */
+  pinAnnouncement: async (announcementId: number): Promise<Announcement> => {
+    const response = await apiClient.post<APIResponse<Announcement>>(`/announcements/${announcementId}/pin`)
+    return response.data.data
+  },
+
+  /**
+   * Unpin an announcement
+   */
+  unpinAnnouncement: async (announcementId: number): Promise<Announcement> => {
+    const response = await apiClient.post<APIResponse<Announcement>>(`/announcements/${announcementId}/unpin`)
+    return response.data.data
   },
 
   // === Office Hours & Advising ===

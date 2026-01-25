@@ -92,6 +92,21 @@ export function BillingTab() {
       const token = sessionStorage.getItem('auth_token')
       const user = JSON.parse(sessionStorage.getItem('user') || '{}')
 
+      // If no student_id, show empty state
+      if (!user.student_id) {
+        setInvoices([])
+        setSummary({
+          total_charges: 0,
+          total_payments: 0,
+          total_adjustments: 0,
+          balance_due: 0,
+          overdue_amount: 0,
+          next_due_date: null,
+          invoice_count: 0,
+        })
+        return
+      }
+
       // Fetch invoices
       const invoicesResponse = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/invoices?student_id=${user.student_id}`,
@@ -103,11 +118,14 @@ export function BillingTab() {
         }
       )
 
-      if (!invoicesResponse.ok) throw new Error('Failed to fetch invoices')
-      const invoicesData = await invoicesResponse.json()
-      setInvoices(invoicesData.data || [])
+      if (invoicesResponse.ok) {
+        const invoicesData = await invoicesResponse.json()
+        setInvoices(invoicesData.data || [])
+      } else {
+        setInvoices([])
+      }
 
-      // Fetch billing summary
+      // Fetch billing summary - gracefully handle no data
       const summaryResponse = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/invoices/student-summary?student_id=${user.student_id}`,
         {
@@ -118,9 +136,21 @@ export function BillingTab() {
         }
       )
 
-      if (!summaryResponse.ok) throw new Error('Failed to fetch summary')
-      const summaryData = await summaryResponse.json()
-      setSummary(summaryData.data)
+      if (summaryResponse.ok) {
+        const summaryData = await summaryResponse.json()
+        setSummary(summaryData.data)
+      } else {
+        // No billing data yet - set empty summary
+        setSummary({
+          total_charges: 0,
+          total_payments: 0,
+          total_adjustments: 0,
+          balance_due: 0,
+          overdue_amount: 0,
+          next_due_date: null,
+          invoice_count: 0,
+        })
+      }
     } catch (error) {
       console.error('Error fetching billing data:', error)
       toast({

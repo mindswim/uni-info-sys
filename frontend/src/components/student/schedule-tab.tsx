@@ -72,7 +72,7 @@ export function ScheduleTab() {
 
       // Fetch enrollments directly
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/students/me/enrollments`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/enrollments/me`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,

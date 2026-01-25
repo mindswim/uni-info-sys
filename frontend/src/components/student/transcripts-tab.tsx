@@ -92,7 +92,7 @@ export function TranscriptsTab() {
 
       const [studentRes, enrollmentsRes] = await Promise.all([
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/students/me`, { headers }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/students/me/enrollments`, { headers }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/enrollments/me`, { headers }),
       ])
 
       if (!studentRes.ok) throw new Error('Failed to load student profile')

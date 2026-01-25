@@ -85,7 +85,7 @@ export const studentService = {
   getCurrentEnrollments: async (termId?: number): Promise<Enrollment[]> => {
     const params = termId ? { term_id: termId } : {}
     const response = await apiClient.get<APIResponse<Enrollment[]>>(
-      '/students/me/enrollments',
+      '/enrollments/me',
       { params }
     )
     return response.data.data

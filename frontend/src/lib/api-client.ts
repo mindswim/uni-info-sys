@@ -229,7 +229,7 @@ export class StudentAPI {
 
   // Get student's enrollments for current term
   static async getCurrentEnrollments(): Promise<any> {
-    return await ApiClient.get('/students/me/enrollments/current')
+    return await ApiClient.get('/enrollments/me')
   }
 
   // Get student's transcript

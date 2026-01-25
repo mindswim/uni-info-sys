@@ -84,7 +84,7 @@ export function StudentMaterialsTab() {
   const fetchEnrollments = async () => {
     try {
       const token = sessionStorage.getItem('auth_token')
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/students/me/enrollments`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/enrollments/me`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',

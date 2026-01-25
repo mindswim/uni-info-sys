@@ -39,7 +39,7 @@ export default function StudentOverviewPage() {
         // Fetch all dashboard data in parallel
         const [studentRes, enrollmentsRes, announcementsRes] = await Promise.all([
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/students/me`, { headers }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/students/me/enrollments`, { headers }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/enrollments/me`, { headers }),
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/announcements/me`, { headers }).catch(() => null),
         ])
 

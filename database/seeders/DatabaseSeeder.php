@@ -59,7 +59,12 @@ class DatabaseSeeder extends Seeder
         $this->call([
             DemoSeeder::class,
         ]);
-        
+
+        // Step 9: Create academic core data (assignments, submissions, announcements, etc.)
+        $this->call([
+            AcademicCoreSeeder::class,
+        ]);
+
         Log::info('Database seeding completed successfully!');
     }
     

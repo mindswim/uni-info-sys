@@ -265,6 +265,60 @@ export class AdmissionAPI {
   }
 }
 
+// Messaging API methods
+export class MessageAPI {
+  // Get all conversations for current user
+  static async getConversations(): Promise<any> {
+    return await ApiClient.get('/messages/conversations')
+  }
+
+  // Get a specific conversation with messages
+  static async getConversation(conversationId: number, params?: { per_page?: number }): Promise<any> {
+    const queryParams = new URLSearchParams()
+    if (params?.per_page) queryParams.append('per_page', params.per_page.toString())
+    const url = `/messages/conversations/${conversationId}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+    return await ApiClient.get(url)
+  }
+
+  // Start a new conversation with initial message
+  static async startConversation(data: {
+    recipient_id?: number
+    course_section_id?: number
+    subject?: string
+    message: string
+  }): Promise<any> {
+    return await ApiClient.post('/messages/conversations', data)
+  }
+
+  // Send a message in a conversation
+  static async sendMessage(conversationId: number, data: {
+    body: string
+    reply_to_id?: number
+  }): Promise<any> {
+    return await ApiClient.post(`/messages/conversations/${conversationId}/messages`, data)
+  }
+
+  // Mark conversation as read
+  static async markAsRead(conversationId: number): Promise<any> {
+    return await ApiClient.put(`/messages/conversations/${conversationId}/read`)
+  }
+
+  // Get unread message count
+  static async getUnreadCount(): Promise<any> {
+    return await ApiClient.get('/messages/unread-count')
+  }
+
+  // Archive a conversation
+  static async archiveConversation(conversationId: number): Promise<any> {
+    return await ApiClient.post(`/messages/conversations/${conversationId}/archive`)
+  }
+
+  // Search for users to message
+  static async searchUsers(query: string): Promise<any> {
+    return await ApiClient.get(`/messages/search-users?query=${encodeURIComponent(query)}`)
+  }
+}
+
 // System/Admin API methods
 export class SystemAPI {
   // Health check

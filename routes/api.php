@@ -29,6 +29,9 @@ use App\Http\Controllers\Api\V1\AssignmentSubmissionController;
 use App\Http\Controllers\Api\V1\GradebookController;
 use App\Http\Controllers\Api\V1\CourseMaterialController;
 use App\Http\Controllers\Api\V1\AnnouncementController;
+use App\Http\Controllers\Api\V1\FinancialAidController;
+use App\Http\Controllers\Api\V1\EventController;
+use App\Http\Controllers\Api\V1\MessageController;
 
 /**
  * @OA\Get(
@@ -478,6 +481,43 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
 
     // Standard CRUD
     Route::apiResource('announcements', AnnouncementController::class);
+
+    // Financial Aid routes
+    // Student-centric financial aid views
+    Route::middleware('role.student')->group(function () {
+        Route::get('financial-aid/me', [FinancialAidController::class, 'myPackage']);
+    });
+
+    // Financial aid queries
+    Route::get('financial-aid/scholarships', [FinancialAidController::class, 'scholarships']);
+    Route::get('financial-aid/scholarships/{scholarship}', [FinancialAidController::class, 'scholarship']);
+    Route::get('financial-aid/stats', [FinancialAidController::class, 'stats'])->middleware('role.admin');
+    Route::get('students/{student}/financial-aid', [FinancialAidController::class, 'studentPackages'])->middleware('permission:view_students');
+
+    // Calendar/Event routes
+    // User-centric event views
+    Route::get('events/me', [EventController::class, 'myEvents']);
+    Route::get('events/upcoming', [EventController::class, 'upcoming']);
+    Route::get('events/types', [EventController::class, 'types']);
+
+    // Event RSVP
+    Route::post('events/{event}/rsvp', [EventController::class, 'rsvp']);
+
+    // Event cancellation
+    Route::post('events/{event}/cancel', [EventController::class, 'cancel']);
+
+    // Standard CRUD
+    Route::apiResource('events', EventController::class);
+
+    // Messaging routes
+    Route::get('messages/conversations', [MessageController::class, 'conversations']);
+    Route::get('messages/conversations/{conversation}', [MessageController::class, 'conversation']);
+    Route::post('messages/conversations', [MessageController::class, 'startConversation']);
+    Route::post('messages/conversations/{conversation}/messages', [MessageController::class, 'sendMessage']);
+    Route::post('messages/conversations/{conversation}/read', [MessageController::class, 'markAsRead']);
+    Route::post('messages/conversations/{conversation}/archive', [MessageController::class, 'archive']);
+    Route::get('messages/unread-count', [MessageController::class, 'unreadCount']);
+    Route::get('messages/search-users', [MessageController::class, 'searchUsers']);
 
 }); 
 

@@ -70,6 +70,31 @@ class DatabaseSeeder extends Seeder
             AdmissionsSeeder::class,
         ]);
 
+        // Step 11: Create financial aid data (scholarships, aid packages, awards, disbursements)
+        $this->call([
+            FinancialAidSeeder::class,
+        ]);
+
+        // Step 12: Convert accepted students to enrolled (matriculation)
+        $this->call([
+            EnrollmentConversionSeeder::class,
+        ]);
+
+        // Step 13: Update student academic records (GPA, credits, standing)
+        $this->call([
+            StudentAcademicUpdateSeeder::class,
+        ]);
+
+        // Step 14: Create calendar events
+        $this->call([
+            EventSeeder::class,
+        ]);
+
+        // Step 15: Create messages and conversations
+        $this->call([
+            MessageSeeder::class,
+        ]);
+
         Log::info('Database seeding completed successfully!');
     }
     

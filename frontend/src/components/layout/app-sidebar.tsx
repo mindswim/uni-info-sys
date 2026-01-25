@@ -69,6 +69,7 @@ const navigationItems = {
       title: "Academic",
       items: [
         { title: "Academic Records", url: "/student/academic-records", icon: Award },
+        { title: "Calendar", url: "/student/calendar", icon: Calendar },
         { title: "Schedule", url: "/student/schedule", icon: Calendar },
         { title: "Grades", url: "/student/grades", icon: Award },
         { title: "Transcripts", url: "/student/transcripts", icon: FileText }
@@ -85,10 +86,17 @@ const navigationItems = {
       ]
     },
     {
-      title: "Applications & Billing",
+      title: "Financial",
+      items: [
+        { title: "Financial Aid", url: "/student/financial-aid", icon: Award },
+        { title: "Billing", url: "/student/billing", icon: DollarSign }
+      ]
+    },
+    {
+      title: "Applications",
       items: [
         { title: "Apply", url: "/student/apply", icon: FileText },
-        { title: "Billing", url: "/student/billing", icon: DollarSign }
+        { title: "Application Status", url: "/student/admissions", icon: ClipboardCheck }
       ]
     },
     {

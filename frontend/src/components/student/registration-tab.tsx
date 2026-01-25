@@ -280,14 +280,14 @@ export function RegistrationTab() {
       section.course.title.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesTerm = selectedTerm === "all" || section.term.id.toString() === selectedTerm
-    const matchesDept = selectedDepartment === "all" || section.course.department.name === selectedDepartment
+    const matchesDept = selectedDepartment === "all" || section.course.department?.name === selectedDepartment
 
     return matchesSearch && matchesTerm && matchesDept
   })
 
   // Get unique departments
   const departments = Array.from(
-    new Set(sections.map(s => s.course.department.name))
+    new Set(sections.map(s => s.course.department?.name).filter(Boolean))
   ).sort()
 
   const totalCredits = cart.reduce((sum, s) => sum + s.course.credits, 0)
@@ -587,7 +587,7 @@ export function RegistrationTab() {
                       <BookOpen className="h-4 w-4 text-muted-foreground" />
                       <div>
                         <p className="text-muted-foreground">Department</p>
-                        <p className="font-medium">{section.course.department.name}</p>
+                        <p className="font-medium">{section.course.department?.name || 'N/A'}</p>
                       </div>
                     </div>
                   </div>

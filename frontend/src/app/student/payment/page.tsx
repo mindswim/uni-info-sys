@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -18,13 +18,29 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { PageSkeleton } from '@/components/ui/page-skeleton'
 import {
   CreditCard, Building2, DollarSign, Shield, CheckCircle,
   AlertCircle, Calendar, ArrowRight, Lock
 } from 'lucide-react'
 import { format, addDays } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
+import { BillingAPI } from '@/lib/api-client'
 import Link from 'next/link'
+
+interface AccountSummary {
+  balance: number
+  due_date: string | null
+  minimum_payment: number
+  invoices: Array<{
+    id: number
+    invoice_number: string
+    total_amount: number
+    balance: number
+    due_date: string
+    status: string
+  }>
+}
 
 export default function PaymentPage() {
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'bank'>('card')
@@ -32,20 +48,62 @@ export default function PaymentPage() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [paymentComplete, setPaymentComplete] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [accountData, setAccountData] = useState<AccountSummary | null>(null)
   const { toast } = useToast()
 
-  // Mock account data
-  const accountBalance = 2450.00
-  const dueDate = addDays(new Date(), 14)
-  const minimumPayment = 500.00
+  const fetchAccountSummary = useCallback(async () => {
+    setLoading(true)
+    try {
+      const response = await BillingAPI.getStudentSummary()
+      setAccountData(response.data)
+    } catch (error) {
+      console.error('Failed to fetch account summary:', error)
+      // Use fallback values if API fails
+      setAccountData({
+        balance: 0,
+        due_date: null,
+        minimum_payment: 0,
+        invoices: []
+      })
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchAccountSummary()
+  }, [fetchAccountSummary])
+
+  // Account data from API or fallback
+  const accountBalance = accountData?.balance || 0
+  const dueDate = accountData?.due_date ? new Date(accountData.due_date) : addDays(new Date(), 14)
+  const minimumPayment = accountData?.minimum_payment || Math.min(500, accountBalance)
+  const primaryInvoice = accountData?.invoices?.[0]
 
   const handlePayment = async () => {
+    if (!primaryInvoice) {
+      toast({ title: 'No invoice to pay', variant: 'destructive' })
+      return
+    }
+
     setProcessing(true)
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setProcessing(false)
-    setPaymentComplete(true)
-    toast({ title: 'Payment successful' })
+    try {
+      await BillingAPI.createPayment({
+        invoice_id: primaryInvoice.id,
+        amount: parseFloat(amount),
+        payment_method: paymentMethod === 'card' ? 'credit_card' : 'ach',
+        reference_number: `PAY-${Date.now()}`
+      })
+      setPaymentComplete(true)
+      toast({ title: 'Payment successful' })
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Payment failed'
+      toast({ title: message, variant: 'destructive' })
+    } finally {
+      setProcessing(false)
+      setShowConfirmDialog(false)
+    }
   }
 
   const quickAmounts = [
@@ -54,6 +112,14 @@ export default function PaymentPage() {
     { label: '$500', value: 500 },
     { label: '$1,000', value: 1000 },
   ]
+
+  if (loading) {
+    return (
+      <AppShell>
+        <PageSkeleton type="detail" />
+      </AppShell>
+    )
+  }
 
   if (paymentComplete) {
     return (
@@ -76,6 +142,27 @@ export default function PaymentPage() {
                 <Link href="/student">Return to Dashboard</Link>
               </Button>
             </div>
+          </div>
+        </div>
+      </AppShell>
+    )
+  }
+
+  if (accountBalance === 0) {
+    return (
+      <AppShell>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] p-6">
+          <div className="text-center max-w-md">
+            <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+              <CheckCircle className="h-8 w-8 text-green-600" />
+            </div>
+            <h1 className="text-2xl font-bold mb-2">No Balance Due</h1>
+            <p className="text-muted-foreground mb-6">
+              Your account has no outstanding balance. You're all set!
+            </p>
+            <Button asChild>
+              <Link href="/student">Return to Dashboard</Link>
+            </Button>
           </div>
         </div>
       </AppShell>

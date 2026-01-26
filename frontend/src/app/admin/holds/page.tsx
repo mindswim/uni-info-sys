@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -42,12 +42,17 @@ import {
 } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
+import { HoldsAPI } from '@/lib/api-client'
 
 interface Hold {
   id: number
   student_id: number
-  student_name: string
-  student_email: string
+  student?: {
+    id: number
+    first_name: string
+    last_name: string
+    user?: { email: string }
+  }
   type: 'registration' | 'financial' | 'academic' | 'administrative' | 'immunization' | 'library' | 'parking'
   reason: string
   description?: string
@@ -55,10 +60,13 @@ interface Hold {
   prevents_registration: boolean
   prevents_transcript: boolean
   prevents_graduation: boolean
-  placed_by: string
+  placed_by: number
+  placed_by_user?: { name: string }
+  department?: string
   placed_at: string
   resolved_at?: string
-  resolved_by?: string
+  resolved_by?: number
+  resolved_by_user?: { name: string }
   resolution_notes?: string
 }
 
@@ -97,84 +105,21 @@ const severityColors: Record<string, string> = {
   critical: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
 }
 
-// Mock data for demonstration
-const mockHolds: Hold[] = [
-  {
-    id: 1,
-    student_id: 101,
-    student_name: 'Maria Rodriguez',
-    student_email: 'maria@demo.com',
-    type: 'financial',
-    reason: 'Unpaid tuition balance',
-    description: 'Outstanding balance of $2,450.00 from Fall 2024 term',
-    severity: 'critical',
-    prevents_registration: true,
-    prevents_transcript: true,
-    prevents_graduation: true,
-    placed_by: 'Bursar Office',
-    placed_at: '2024-12-15T10:30:00Z',
-  },
-  {
-    id: 2,
-    student_id: 102,
-    student_name: 'David Park',
-    student_email: 'david@demo.com',
-    type: 'immunization',
-    reason: 'Missing immunization records',
-    description: 'Required MMR vaccination documentation not on file',
-    severity: 'warning',
-    prevents_registration: true,
-    prevents_transcript: false,
-    prevents_graduation: false,
-    placed_by: 'Health Services',
-    placed_at: '2024-11-20T14:15:00Z',
-  },
-  {
-    id: 3,
-    student_id: 103,
-    student_name: 'Sophie Turner',
-    student_email: 'sophie@demo.com',
-    type: 'academic',
-    reason: 'Academic probation review',
-    description: 'Must meet with academic advisor before registering',
-    severity: 'warning',
-    prevents_registration: true,
-    prevents_transcript: false,
-    prevents_graduation: false,
-    placed_by: 'Academic Affairs',
-    placed_at: '2024-12-01T09:00:00Z',
-  },
-  {
-    id: 4,
-    student_id: 104,
-    student_name: 'James Wilson',
-    student_email: 'james@demo.com',
-    type: 'library',
-    reason: 'Overdue library materials',
-    description: '3 books overdue for more than 30 days',
-    severity: 'info',
-    prevents_registration: false,
-    prevents_transcript: false,
-    prevents_graduation: true,
-    placed_by: 'Library Services',
-    placed_at: '2024-12-10T11:00:00Z',
-  },
-  {
-    id: 5,
-    student_id: 105,
-    student_name: 'Emma Johnson',
-    student_email: 'emma@demo.com',
-    type: 'registration',
-    reason: 'Advising hold',
-    description: 'Must complete mandatory advising session before registration',
-    severity: 'info',
-    prevents_registration: true,
-    prevents_transcript: false,
-    prevents_graduation: false,
-    placed_by: 'Advising Center',
-    placed_at: '2024-12-05T13:30:00Z',
-  },
-]
+// Helper to get student display info from hold
+function getStudentName(hold: Hold): string {
+  if (hold.student) {
+    return `${hold.student.first_name} ${hold.student.last_name}`
+  }
+  return `Student #${hold.student_id}`
+}
+
+function getStudentEmail(hold: Hold): string {
+  return hold.student?.user?.email || ''
+}
+
+function getPlacedByName(hold: Hold): string {
+  return hold.placed_by_user?.name || hold.department || 'System'
+}
 
 export default function AdminHoldsPage() {
   const { toast } = useToast()
@@ -202,20 +147,23 @@ export default function AdminHoldsPage() {
     prevents_graduation: false,
   })
 
-  useEffect(() => {
-    fetchHolds()
-  }, [])
-
-  const fetchHolds = async () => {
+  const fetchHolds = useCallback(async () => {
     setLoading(true)
     try {
-      // Simulate API call - in real app, fetch from backend
-      await new Promise(resolve => setTimeout(resolve, 500))
-      setHolds(mockHolds)
+      // Fetch holds from the real API
+      const response = await HoldsAPI.getHolds({
+        status: statusFilter,
+        type: typeFilter !== 'all' ? typeFilter : undefined,
+        severity: severityFilter !== 'all' ? severityFilter : undefined,
+        search: searchQuery || undefined,
+      })
 
-      // Calculate summary
-      const summary: HoldsSummary = {
-        total: mockHolds.length,
+      const holdsData = response.data || []
+      setHolds(holdsData)
+
+      // Calculate summary from the data
+      const summaryData: HoldsSummary = {
+        total: holdsData.length,
         by_type: {},
         by_severity: {},
         preventing_registration: 0,
@@ -223,26 +171,39 @@ export default function AdminHoldsPage() {
         preventing_graduation: 0,
       }
 
-      mockHolds.forEach(hold => {
-        summary.by_type[hold.type] = (summary.by_type[hold.type] || 0) + 1
-        summary.by_severity[hold.severity] = (summary.by_severity[hold.severity] || 0) + 1
-        if (hold.prevents_registration) summary.preventing_registration++
-        if (hold.prevents_transcript) summary.preventing_transcript++
-        if (hold.prevents_graduation) summary.preventing_graduation++
+      holdsData.forEach((hold: Hold) => {
+        summaryData.by_type[hold.type] = (summaryData.by_type[hold.type] || 0) + 1
+        summaryData.by_severity[hold.severity] = (summaryData.by_severity[hold.severity] || 0) + 1
+        if (hold.prevents_registration) summaryData.preventing_registration++
+        if (hold.prevents_transcript) summaryData.preventing_transcript++
+        if (hold.prevents_graduation) summaryData.preventing_graduation++
       })
 
-      setSummary(summary)
+      setSummary(summaryData)
     } catch (error) {
+      console.error('Failed to fetch holds:', error)
       toast({ title: 'Failed to load holds', variant: 'destructive' })
     } finally {
       setLoading(false)
     }
-  }
+  }, [statusFilter, typeFilter, severityFilter, searchQuery, toast])
+
+  useEffect(() => {
+    fetchHolds()
+  }, [fetchHolds])
 
   const handlePlaceHold = async () => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 300))
+      await HoldsAPI.createHold({
+        student_id: parseInt(newHold.student_id),
+        type: newHold.type,
+        reason: newHold.reason,
+        description: newHold.description || undefined,
+        severity: newHold.severity,
+        prevents_registration: newHold.prevents_registration,
+        prevents_transcript: newHold.prevents_transcript,
+        prevents_graduation: newHold.prevents_graduation,
+      })
       toast({ title: 'Hold placed successfully' })
       setShowPlaceHoldDialog(false)
       setNewHold({
@@ -256,35 +217,39 @@ export default function AdminHoldsPage() {
         prevents_graduation: false,
       })
       fetchHolds()
-    } catch (error) {
-      toast({ title: 'Failed to place hold', variant: 'destructive' })
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Failed to place hold'
+      toast({ title: message, variant: 'destructive' })
     }
   }
 
   const handleResolveHold = async () => {
     if (!selectedHold) return
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 300))
+      await HoldsAPI.resolveHold(selectedHold.id, resolutionNotes || undefined)
       setHolds(holds.filter(h => h.id !== selectedHold.id))
       toast({ title: 'Hold resolved successfully' })
       setShowResolveDialog(false)
       setSelectedHold(null)
       setResolutionNotes('')
-    } catch (error) {
-      toast({ title: 'Failed to resolve hold', variant: 'destructive' })
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Failed to resolve hold'
+      toast({ title: message, variant: 'destructive' })
     }
   }
 
-  // Filter holds
+  // Holds are now filtered server-side, but we still filter locally for immediate UI response
   const filteredHolds = holds.filter(hold => {
-    if (searchQuery && !hold.student_name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        !hold.student_email.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        !hold.reason.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false
+    // Local search filter for immediate feedback
+    if (searchQuery) {
+      const studentName = getStudentName(hold).toLowerCase()
+      const studentEmail = getStudentEmail(hold).toLowerCase()
+      const query = searchQuery.toLowerCase()
+      if (!studentName.includes(query) && !studentEmail.includes(query) && !hold.reason.toLowerCase().includes(query)) {
+        return false
+      }
     }
-    if (typeFilter !== 'all' && hold.type !== typeFilter) return false
-    if (severityFilter !== 'all' && hold.severity !== severityFilter) return false
+    // Status is handled server-side, but double-check here
     if (statusFilter === 'active' && hold.resolved_at) return false
     if (statusFilter === 'resolved' && !hold.resolved_at) return false
     return true
@@ -572,6 +537,9 @@ export default function AdminHoldsPage() {
                   <TableBody>
                     {filteredHolds.map((hold) => {
                       const Icon = holdTypeIcons[hold.type] || AlertCircle
+                      const studentName = getStudentName(hold)
+                      const studentEmail = getStudentEmail(hold)
+                      const placedByName = getPlacedByName(hold)
                       return (
                         <TableRow key={hold.id}>
                           <TableCell>
@@ -580,8 +548,10 @@ export default function AdminHoldsPage() {
                                 <User className="h-4 w-4" />
                               </div>
                               <div>
-                                <p className="font-medium">{hold.student_name}</p>
-                                <p className="text-xs text-muted-foreground">{hold.student_email}</p>
+                                <p className="font-medium">{studentName}</p>
+                                {studentEmail && (
+                                  <p className="text-xs text-muted-foreground">{studentEmail}</p>
+                                )}
                               </div>
                             </div>
                           </TableCell>
@@ -620,7 +590,7 @@ export default function AdminHoldsPage() {
                           <TableCell>
                             <div>
                               <p className="text-sm">{formatDistanceToNow(new Date(hold.placed_at), { addSuffix: true })}</p>
-                              <p className="text-xs text-muted-foreground">by {hold.placed_by}</p>
+                              <p className="text-xs text-muted-foreground">by {placedByName}</p>
                             </div>
                           </TableCell>
                           <TableCell className="text-right">
@@ -661,7 +631,7 @@ export default function AdminHoldsPage() {
             <DialogHeader>
               <DialogTitle>Resolve Hold</DialogTitle>
               <DialogDescription>
-                This will remove the hold from {selectedHold?.student_name}'s account.
+                This will remove the hold from {selectedHold ? getStudentName(selectedHold) : 'this student'}'s account.
               </DialogDescription>
             </DialogHeader>
             {selectedHold && (

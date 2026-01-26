@@ -23,7 +23,7 @@ class Student extends Model implements Auditable
         // Academic Standing
         'class_standing', 'enrollment_status', 'academic_status',
         // Program Information
-        'major_program_id', 'minor_program_id',
+        'major_program_id', 'minor_program_id', 'advisor_id',
         // Academic Timeline
         'admission_date', 'expected_graduation_date', 'total_credits_earned', 'credits_in_progress',
         // Financial Information
@@ -140,6 +140,21 @@ class Student extends Model implements Auditable
     public function minorProgram()
     {
         return $this->belongsTo(Program::class, 'minor_program_id');
+    }
+
+    public function advisor()
+    {
+        return $this->belongsTo(Staff::class, 'advisor_id');
+    }
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
+    public function upcomingAppointments()
+    {
+        return $this->hasMany(Appointment::class)->upcoming();
     }
 
     // Academic Status Helper Methods

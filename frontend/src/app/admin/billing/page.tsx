@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -22,101 +22,118 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PageSkeleton } from '@/components/ui/page-skeleton'
 import {
   DollarSign, Search, TrendingUp, AlertCircle, CheckCircle,
-  Download, CreditCard, Receipt, Users
+  Download, CreditCard, Receipt, Users, RefreshCw
 } from 'lucide-react'
 import { format } from 'date-fns'
+import { useToast } from '@/hooks/use-toast'
+import { BillingAPI } from '@/lib/api-client'
 
 interface Invoice {
-  id: string
-  student_name: string
-  student_id: string
-  amount: number
+  id: number
+  invoice_number?: string
+  student_id: number
+  student?: {
+    id: number
+    first_name: string
+    last_name: string
+    student_number: string
+    user?: { email: string }
+  }
+  term_id?: number
+  term?: { name: string }
+  total_amount: number
+  amount_paid: number
+  balance: number
   due_date: string
-  status: 'paid' | 'pending' | 'overdue' | 'partial'
-  term: string
-  type: 'tuition' | 'fees' | 'housing' | 'meal_plan'
+  status: string
+  created_at: string
+  line_items?: Array<{
+    id: number
+    description: string
+    amount: number
+    type: string
+  }>
+}
+
+// Helper functions
+function getStudentName(invoice: Invoice): string {
+  if (invoice.student) {
+    return `${invoice.student.first_name} ${invoice.student.last_name}`
+  }
+  return `Student #${invoice.student_id}`
+}
+
+function getStudentNumber(invoice: Invoice): string {
+  return invoice.student?.student_number || `#${invoice.student_id}`
+}
+
+function getInvoiceNumber(invoice: Invoice): string {
+  return invoice.invoice_number || `INV-${invoice.id}`
+}
+
+function getTermName(invoice: Invoice): string {
+  return invoice.term?.name || ''
 }
 
 export default function BillingPage() {
+  const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const { toast } = useToast()
 
-  // Mock billing data
-  const invoices: Invoice[] = [
-    {
-      id: 'INV-2025-001',
-      student_name: 'Maria Rodriguez',
-      student_id: 'STU001',
-      amount: 15000,
-      due_date: '2025-02-01',
-      status: 'pending',
-      term: 'Spring 2025',
-      type: 'tuition',
-    },
-    {
-      id: 'INV-2025-002',
-      student_name: 'David Park',
-      student_id: 'STU002',
-      amount: 2450,
-      due_date: '2025-01-15',
-      status: 'overdue',
-      term: 'Spring 2025',
-      type: 'tuition',
-    },
-    {
-      id: 'INV-2025-003',
-      student_name: 'Sophie Turner',
-      student_id: 'STU003',
-      amount: 15000,
-      due_date: '2025-02-01',
-      status: 'paid',
-      term: 'Spring 2025',
-      type: 'tuition',
-    },
-    {
-      id: 'INV-2025-004',
-      student_name: 'James Wilson',
-      student_id: 'STU004',
-      amount: 7500,
-      due_date: '2025-02-01',
-      status: 'partial',
-      term: 'Spring 2025',
-      type: 'tuition',
-    },
-    {
-      id: 'INV-2025-005',
-      student_name: 'Emma Johnson',
-      student_id: 'STU005',
-      amount: 4500,
-      due_date: '2025-02-01',
-      status: 'paid',
-      term: 'Spring 2025',
-      type: 'housing',
-    },
-  ]
+  const fetchInvoices = useCallback(async () => {
+    setLoading(true)
+    try {
+      const response = await BillingAPI.getInvoices({
+        status: statusFilter !== 'all' ? statusFilter : undefined,
+      })
+      setInvoices(response.data || [])
+    } catch (error) {
+      console.error('Failed to fetch invoices:', error)
+      toast({ title: 'Failed to load invoices', variant: 'destructive' })
+    } finally {
+      setLoading(false)
+    }
+  }, [statusFilter, toast])
 
-  // Stats
+  useEffect(() => {
+    fetchInvoices()
+  }, [fetchInvoices])
+
+  // Stats calculated from real data
   const stats = {
-    totalBilled: invoices.reduce((sum, i) => sum + i.amount, 0),
-    totalCollected: invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.amount, 0),
-    outstanding: invoices.filter(i => i.status !== 'paid').reduce((sum, i) => sum + i.amount, 0),
-    overdue: invoices.filter(i => i.status === 'overdue').reduce((sum, i) => sum + i.amount, 0),
+    totalBilled: invoices.reduce((sum, i) => sum + (i.total_amount || 0), 0),
+    totalCollected: invoices.reduce((sum, i) => sum + (i.amount_paid || 0), 0),
+    outstanding: invoices.reduce((sum, i) => sum + (i.balance || 0), 0),
+    overdue: invoices.filter(i => i.status === 'overdue').reduce((sum, i) => sum + (i.balance || 0), 0),
   }
 
   const filteredInvoices = invoices.filter(inv => {
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
-      if (!inv.student_name.toLowerCase().includes(q) &&
-          !inv.student_id.toLowerCase().includes(q) &&
-          !inv.id.toLowerCase().includes(q)) {
+      const studentName = getStudentName(inv).toLowerCase()
+      const studentNumber = getStudentNumber(inv).toLowerCase()
+      const invoiceNumber = getInvoiceNumber(inv).toLowerCase()
+      if (!studentName.includes(q) && !studentNumber.includes(q) && !invoiceNumber.includes(q)) {
         return false
       }
     }
+    // Status is filtered server-side, but double-check locally
     if (statusFilter !== 'all' && inv.status !== statusFilter) return false
     return true
   })
+
+  if (loading) {
+    return (
+      <AppShell>
+        <PageSkeleton type="list" />
+      </AppShell>
+    )
+  }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -152,6 +169,10 @@ export default function BillingPage() {
             </p>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={fetchInvoices}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
             <Button variant="outline">
               <Download className="h-4 w-4 mr-2" />
               Export
@@ -255,8 +276,8 @@ export default function BillingPage() {
               <TableRow>
                 <TableHead>Invoice</TableHead>
                 <TableHead>Student</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Amount</TableHead>
+                <TableHead>Term</TableHead>
+                <TableHead>Total</TableHead>
                 <TableHead>Due Date</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -265,15 +286,15 @@ export default function BillingPage() {
             <TableBody>
               {filteredInvoices.map((invoice) => (
                 <TableRow key={invoice.id}>
-                  <TableCell className="font-mono text-sm">{invoice.id}</TableCell>
+                  <TableCell className="font-mono text-sm">{getInvoiceNumber(invoice)}</TableCell>
                   <TableCell>
                     <div>
-                      <p className="font-medium">{invoice.student_name}</p>
-                      <p className="text-xs text-muted-foreground">{invoice.student_id}</p>
+                      <p className="font-medium">{getStudentName(invoice)}</p>
+                      <p className="text-xs text-muted-foreground">{getStudentNumber(invoice)}</p>
                     </div>
                   </TableCell>
-                  <TableCell className="capitalize">{invoice.type.replace('_', ' ')}</TableCell>
-                  <TableCell className="font-medium">{formatCurrency(invoice.amount)}</TableCell>
+                  <TableCell>{getTermName(invoice) || '-'}</TableCell>
+                  <TableCell className="font-medium">{formatCurrency(invoice.total_amount)}</TableCell>
                   <TableCell>{format(new Date(invoice.due_date), 'MMM d, yyyy')}</TableCell>
                   <TableCell>{getStatusBadge(invoice.status)}</TableCell>
                   <TableCell className="text-right">

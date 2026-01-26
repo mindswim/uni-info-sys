@@ -34,6 +34,8 @@ use App\Http\Controllers\Api\V1\MessageController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\HoldController;
 use App\Http\Controllers\Api\V1\ActionItemController;
+use App\Http\Controllers\Api\V1\AppointmentController;
+use App\Http\Controllers\Api\V1\SettingController;
 
 /**
  * @OA\Get(
@@ -526,6 +528,24 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     // Standard CRUD
     Route::apiResource('events', EventController::class);
 
+    // Appointment routes
+    // Student appointment views
+    Route::get('appointments/me', [AppointmentController::class, 'myAppointments']);
+    Route::get('students/me/advisor', [AppointmentController::class, 'myAdvisor']);
+
+    // Staff/advisor appointment views
+    Route::get('staff/me/advisees', [AppointmentController::class, 'myAdvisees']);
+    Route::get('staff/me/appointments', [AppointmentController::class, 'advisorAppointments']);
+
+    // Appointment actions
+    Route::post('appointments/{appointment}/cancel', [AppointmentController::class, 'cancel']);
+    Route::post('appointments/{appointment}/confirm', [AppointmentController::class, 'confirm']);
+    Route::post('appointments/{appointment}/complete', [AppointmentController::class, 'complete']);
+    Route::post('appointments/{appointment}/no-show', [AppointmentController::class, 'noShow']);
+
+    // Standard CRUD for appointments
+    Route::apiResource('appointments', AppointmentController::class);
+
     // Messaging routes
     Route::get('messages/conversations', [MessageController::class, 'conversations']);
     Route::get('messages/conversations/{conversation}', [MessageController::class, 'conversation']);
@@ -535,6 +555,22 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::post('messages/conversations/{conversation}/archive', [MessageController::class, 'archive']);
     Route::get('messages/unread-count', [MessageController::class, 'unreadCount']);
     Route::get('messages/search-users', [MessageController::class, 'searchUsers']);
+
+    // User Settings routes
+    Route::get('settings/me', [SettingController::class, 'mySettings']);
+    Route::patch('settings/me', [SettingController::class, 'updateMySettings']);
+    Route::patch('settings/me/notifications', [SettingController::class, 'updateNotifications']);
+    Route::patch('settings/me/appearance', [SettingController::class, 'updateAppearance']);
+
+    // System Settings routes (admin only)
+    Route::get('settings/system', [SettingController::class, 'index']);
+    Route::get('settings/system/info', [SettingController::class, 'systemInfo']);
+    Route::get('settings/system/{group}', [SettingController::class, 'getGroup']);
+    Route::patch('settings/system/{group}', [SettingController::class, 'updateGroup']);
+    Route::get('settings/system/{group}/{key}', [SettingController::class, 'getSetting']);
+    Route::put('settings/system/{group}/{key}', [SettingController::class, 'setSetting']);
+    Route::post('settings/system/cache/clear', [SettingController::class, 'clearCache']);
+    Route::post('settings/system/maintenance', [SettingController::class, 'toggleMaintenance']);
 
 }); 
 

@@ -100,7 +100,12 @@ class DatabaseSeeder extends Seeder
             BillingSeeder::class,
         ]);
 
-        // Step 17: Create holds and action items for demo
+        // Step 17: Create system settings
+        $this->call([
+            SystemSettingSeeder::class,
+        ]);
+
+        // Step 18: Create holds and action items for demo
         $this->call([
             HoldsAndActionItemsSeeder::class,
         ]);

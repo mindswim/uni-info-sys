@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -23,105 +23,117 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PageSkeleton } from '@/components/ui/page-skeleton'
 import {
   DollarSign, Search, Award, FileText, CheckCircle, Clock,
-  AlertCircle, Download, Users, TrendingUp
+  AlertCircle, Download, Users, TrendingUp, RefreshCw
 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+import { FinancialAidAPI } from '@/lib/api-client'
 
 interface AidPackage {
   id: number
-  student_name: string
-  student_id: string
-  total_aid: number
-  grants: number
-  loans: number
-  work_study: number
-  status: 'pending' | 'offered' | 'accepted' | 'declined'
-  term: string
-  fafsa_status: 'complete' | 'incomplete' | 'verification'
+  student_id: number
+  student?: {
+    id: number
+    first_name: string
+    last_name: string
+    student_number: string
+  }
+  term_id?: number
+  term?: { name: string }
+  status: string
+  aid_totals?: {
+    grants: number
+    scholarships: number
+    loans: number
+    work_study: number
+    total_gift_aid: number
+    total_aid: number
+  }
+  notes?: string
+}
+
+// Helper functions
+function getStudentName(pkg: AidPackage): string {
+  if (pkg.student) {
+    return `${pkg.student.first_name} ${pkg.student.last_name}`
+  }
+  return `Student #${pkg.student_id}`
+}
+
+function getStudentNumber(pkg: AidPackage): string {
+  return pkg.student?.student_number || `#${pkg.student_id}`
+}
+
+function getTermName(pkg: AidPackage): string {
+  return pkg.term?.name || ''
+}
+
+function getTotalAid(pkg: AidPackage): number {
+  return pkg.aid_totals?.total_aid || 0
+}
+
+function getGrants(pkg: AidPackage): number {
+  return (pkg.aid_totals?.grants || 0) + (pkg.aid_totals?.scholarships || 0)
+}
+
+function getLoans(pkg: AidPackage): number {
+  return pkg.aid_totals?.loans || 0
+}
+
+function getWorkStudy(pkg: AidPackage): number {
+  return pkg.aid_totals?.work_study || 0
+}
+
+function getFafsaStatus(pkg: AidPackage): string {
+  // Infer FAFSA status from notes or package status
+  if (pkg.notes?.toLowerCase().includes('verification')) return 'verification'
+  if (pkg.status === 'pending') return 'incomplete'
+  return 'complete'
 }
 
 export default function FinancialAidAdminPage() {
+  const [packages, setPackages] = useState<AidPackage[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const { toast } = useToast()
 
-  // Mock aid packages
-  const packages: AidPackage[] = [
-    {
-      id: 1,
-      student_name: 'Maria Rodriguez',
-      student_id: 'STU001',
-      total_aid: 25000,
-      grants: 15000,
-      loans: 8000,
-      work_study: 2000,
-      status: 'accepted',
-      term: 'Spring 2025',
-      fafsa_status: 'complete',
-    },
-    {
-      id: 2,
-      student_name: 'David Park',
-      student_id: 'STU002',
-      total_aid: 18500,
-      grants: 10000,
-      loans: 7000,
-      work_study: 1500,
-      status: 'offered',
-      term: 'Spring 2025',
-      fafsa_status: 'complete',
-    },
-    {
-      id: 3,
-      student_name: 'Sophie Turner',
-      student_id: 'STU003',
-      total_aid: 22000,
-      grants: 12000,
-      loans: 8500,
-      work_study: 1500,
-      status: 'pending',
-      term: 'Spring 2025',
-      fafsa_status: 'verification',
-    },
-    {
-      id: 4,
-      student_name: 'James Wilson',
-      student_id: 'STU004',
-      total_aid: 15000,
-      grants: 8000,
-      loans: 5500,
-      work_study: 1500,
-      status: 'accepted',
-      term: 'Spring 2025',
-      fafsa_status: 'complete',
-    },
-    {
-      id: 5,
-      student_name: 'Emma Johnson',
-      student_id: 'STU005',
-      total_aid: 30000,
-      grants: 20000,
-      loans: 8000,
-      work_study: 2000,
-      status: 'offered',
-      term: 'Spring 2025',
-      fafsa_status: 'complete',
-    },
-  ]
+  const fetchPackages = useCallback(async () => {
+    setLoading(true)
+    try {
+      const response = await FinancialAidAPI.getPackages({
+        status: statusFilter !== 'all' ? statusFilter : undefined,
+        search: searchQuery || undefined,
+      })
+      setPackages(response.data || [])
+    } catch (error) {
+      console.error('Failed to fetch financial aid packages:', error)
+      toast({ title: 'Failed to load packages', variant: 'destructive' })
+    } finally {
+      setLoading(false)
+    }
+  }, [statusFilter, searchQuery, toast])
 
-  // Stats
+  useEffect(() => {
+    fetchPackages()
+  }, [fetchPackages])
+
+  // Stats calculated from real data
   const stats = {
-    totalAwarded: packages.reduce((sum, p) => sum + p.total_aid, 0),
-    totalGrants: packages.reduce((sum, p) => sum + p.grants, 0),
+    totalAwarded: packages.reduce((sum, p) => sum + getTotalAid(p), 0),
+    totalGrants: packages.reduce((sum, p) => sum + getGrants(p), 0),
     packagesOffered: packages.filter(p => p.status === 'offered' || p.status === 'accepted').length,
-    pendingVerification: packages.filter(p => p.fafsa_status === 'verification').length,
+    pendingVerification: packages.filter(p => getFafsaStatus(p) === 'verification').length,
   }
 
   const filteredPackages = packages.filter(pkg => {
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
-      if (!pkg.student_name.toLowerCase().includes(q) &&
-          !pkg.student_id.toLowerCase().includes(q)) {
+      const studentName = getStudentName(pkg).toLowerCase()
+      const studentNumber = getStudentNumber(pkg).toLowerCase()
+      if (!studentName.includes(q) && !studentNumber.includes(q)) {
         return false
       }
     }
@@ -165,6 +177,14 @@ export default function FinancialAidAdminPage() {
     }).format(amount)
   }
 
+  if (loading) {
+    return (
+      <AppShell>
+        <PageSkeleton type="list" />
+      </AppShell>
+    )
+  }
+
   return (
     <AppShell>
       <div className="flex flex-col gap-4 p-6">
@@ -177,6 +197,10 @@ export default function FinancialAidAdminPage() {
             </p>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={fetchPackages}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
             <Button variant="outline">
               <Download className="h-4 w-4 mr-2" />
               Export Report
@@ -291,30 +315,30 @@ export default function FinancialAidAdminPage() {
                 <TableRow key={pkg.id}>
                   <TableCell>
                     <div>
-                      <p className="font-medium">{pkg.student_name}</p>
-                      <p className="text-xs text-muted-foreground">{pkg.student_id}</p>
+                      <p className="font-medium">{getStudentName(pkg)}</p>
+                      <p className="text-xs text-muted-foreground">{getStudentNumber(pkg)}</p>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <p className="text-lg font-bold">{formatCurrency(pkg.total_aid)}</p>
+                    <p className="text-lg font-bold">{formatCurrency(getTotalAid(pkg))}</p>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1 text-xs">
                       <div className="flex justify-between">
                         <span>Grants</span>
-                        <span className="font-medium">{formatCurrency(pkg.grants)}</span>
+                        <span className="font-medium">{formatCurrency(getGrants(pkg))}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Loans</span>
-                        <span className="font-medium">{formatCurrency(pkg.loans)}</span>
+                        <span className="font-medium">{formatCurrency(getLoans(pkg))}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Work-Study</span>
-                        <span className="font-medium">{formatCurrency(pkg.work_study)}</span>
+                        <span className="font-medium">{formatCurrency(getWorkStudy(pkg))}</span>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>{getFafsaBadge(pkg.fafsa_status)}</TableCell>
+                  <TableCell>{getFafsaBadge(getFafsaStatus(pkg))}</TableCell>
                   <TableCell>{getStatusBadge(pkg.status)}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm">View</Button>

@@ -110,4 +110,17 @@ class User extends Authenticatable implements Auditable
     {
         return $this->hasOne(Student::class);
     }
+
+    public function settings()
+    {
+        return $this->hasOne(UserSetting::class);
+    }
+
+    /**
+     * Get or create user settings
+     */
+    public function getSettings(): UserSetting
+    {
+        return UserSetting::getOrCreateForUser($this->id);
+    }
 }

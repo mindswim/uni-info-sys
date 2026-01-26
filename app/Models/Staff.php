@@ -35,4 +35,19 @@ class Staff extends Model
     {
         return $this->hasMany(CourseSection::class, 'instructor_id');
     }
+
+    public function advisees()
+    {
+        return $this->hasMany(Student::class, 'advisor_id');
+    }
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class, 'advisor_id');
+    }
+
+    public function upcomingAppointments()
+    {
+        return $this->hasMany(Appointment::class, 'advisor_id')->upcoming();
+    }
 }

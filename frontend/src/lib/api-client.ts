@@ -280,10 +280,57 @@ export class AdmissionAPI {
     const formData = new FormData()
     formData.append('file', file)
     formData.append('document_type', documentType)
-    
+
     return await ApiClient.post(`/admission-applications/${applicationId}/documents`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
+  }
+
+  // Get all applications (admin)
+  static async getApplications(params?: {
+    status?: string
+    term_id?: number
+    search?: string
+    page?: number
+    per_page?: number
+  }): Promise<any> {
+    const queryParams = new URLSearchParams()
+    if (params?.status) queryParams.append('status', params.status)
+    if (params?.term_id) queryParams.append('term_id', params.term_id.toString())
+    if (params?.search) queryParams.append('search', params.search)
+    if (params?.page) queryParams.append('page', params.page.toString())
+    if (params?.per_page) queryParams.append('per_page', params.per_page.toString())
+    const url = `/admission-applications${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+    return await ApiClient.get(url)
+  }
+
+  // Get applications stats
+  static async getStats(): Promise<any> {
+    return await ApiClient.get('/admission-applications/stats')
+  }
+
+  // Accept application
+  static async accept(applicationId: number, data?: { notes?: string }): Promise<any> {
+    return await ApiClient.post(`/admission-applications/${applicationId}/accept`, data)
+  }
+
+  // Reject application
+  static async reject(applicationId: number, data?: { notes?: string; reason?: string }): Promise<any> {
+    return await ApiClient.post(`/admission-applications/${applicationId}/reject`, data)
+  }
+
+  // Waitlist application
+  static async waitlist(applicationId: number, data?: { notes?: string }): Promise<any> {
+    return await ApiClient.post(`/admission-applications/${applicationId}/waitlist`, data)
+  }
+
+  // Bulk actions
+  static async bulkAction(data: {
+    action: 'accept' | 'reject' | 'waitlist'
+    application_ids: number[]
+    notes?: string
+  }): Promise<any> {
+    return await ApiClient.post('/admission-applications/bulk-actions', data)
   }
 }
 
@@ -348,18 +395,69 @@ export class HoldsAPI {
     return await ApiClient.get('/holds/summary')
   }
 
-  // Get all holds for a student
-  static async getHolds(params?: { student_id?: number; status?: string }): Promise<any> {
+  // Get all holds (admin) or for a student
+  static async getHolds(params?: {
+    student_id?: number
+    type?: string
+    severity?: string
+    status?: 'active' | 'resolved'
+    search?: string
+    page?: number
+    per_page?: number
+  }): Promise<any> {
     const queryParams = new URLSearchParams()
     if (params?.student_id) queryParams.append('student_id', params.student_id.toString())
+    if (params?.type) queryParams.append('type', params.type)
+    if (params?.severity) queryParams.append('severity', params.severity)
     if (params?.status) queryParams.append('status', params.status)
+    if (params?.search) queryParams.append('search', params.search)
+    if (params?.page) queryParams.append('page', params.page.toString())
+    if (params?.per_page) queryParams.append('per_page', params.per_page.toString())
     const url = `/holds${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
     return await ApiClient.get(url)
+  }
+
+  // Get a single hold
+  static async getHold(holdId: number): Promise<any> {
+    return await ApiClient.get(`/holds/${holdId}`)
+  }
+
+  // Create a new hold (admin only)
+  static async createHold(data: {
+    student_id: number
+    type: string
+    reason: string
+    description?: string
+    severity?: string
+    prevents_registration?: boolean
+    prevents_transcript?: boolean
+    prevents_graduation?: boolean
+    department?: string
+  }): Promise<any> {
+    return await ApiClient.post('/holds', data)
+  }
+
+  // Update a hold
+  static async updateHold(holdId: number, data: Partial<{
+    type: string
+    reason: string
+    description: string
+    severity: string
+    prevents_registration: boolean
+    prevents_transcript: boolean
+    prevents_graduation: boolean
+  }>): Promise<any> {
+    return await ApiClient.put(`/holds/${holdId}`, data)
   }
 
   // Resolve a hold (admin only)
   static async resolveHold(holdId: number, notes?: string): Promise<any> {
     return await ApiClient.post(`/holds/${holdId}/resolve`, { resolution_notes: notes })
+  }
+
+  // Delete a hold
+  static async deleteHold(holdId: number): Promise<any> {
+    return await ApiClient.delete(`/holds/${holdId}`)
   }
 }
 
@@ -424,6 +522,375 @@ export class SystemAPI {
   // Create new user (admin only)
   static async createUser(userData: any): Promise<any> {
     return await ApiClient.post('/users', userData)
+  }
+}
+
+// Enrollment/Waitlist API methods
+export class EnrollmentAPI {
+  // Get all enrollments with filters
+  static async getEnrollments(params?: {
+    student_id?: number
+    course_section_id?: number
+    status?: string
+    term_id?: number
+    search?: string
+    page?: number
+    per_page?: number
+  }): Promise<any> {
+    const queryParams = new URLSearchParams()
+    if (params?.student_id) queryParams.append('student_id', params.student_id.toString())
+    if (params?.course_section_id) queryParams.append('course_section_id', params.course_section_id.toString())
+    if (params?.status) queryParams.append('status', params.status)
+    if (params?.term_id) queryParams.append('term_id', params.term_id.toString())
+    if (params?.search) queryParams.append('search', params.search)
+    if (params?.page) queryParams.append('page', params.page.toString())
+    if (params?.per_page) queryParams.append('per_page', params.per_page.toString())
+    const url = `/enrollments${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+    return await ApiClient.get(url)
+  }
+
+  // Get waitlisted enrollments
+  static async getWaitlist(params?: {
+    course_section_id?: number
+    search?: string
+  }): Promise<any> {
+    return this.getEnrollments({ ...params, status: 'waitlisted' })
+  }
+
+  // Promote from waitlist (enroll the student)
+  static async promoteFromWaitlist(enrollmentId: number): Promise<any> {
+    return await ApiClient.put(`/enrollments/${enrollmentId}`, { status: 'enrolled' })
+  }
+
+  // Withdraw/remove from waitlist
+  static async withdraw(enrollmentId: number): Promise<any> {
+    return await ApiClient.post(`/enrollments/${enrollmentId}/withdraw`)
+  }
+
+  // Delete enrollment
+  static async deleteEnrollment(enrollmentId: number): Promise<any> {
+    return await ApiClient.delete(`/enrollments/${enrollmentId}`)
+  }
+}
+
+// Invoice/Billing API methods
+export class BillingAPI {
+  // Get all invoices
+  static async getInvoices(params?: {
+    student_id?: number
+    status?: string
+    term_id?: number
+    page?: number
+    per_page?: number
+  }): Promise<any> {
+    const queryParams = new URLSearchParams()
+    if (params?.student_id) queryParams.append('student_id', params.student_id.toString())
+    if (params?.status) queryParams.append('status', params.status)
+    if (params?.term_id) queryParams.append('term_id', params.term_id.toString())
+    if (params?.page) queryParams.append('page', params.page.toString())
+    if (params?.per_page) queryParams.append('per_page', params.per_page.toString())
+    const url = `/invoices${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+    return await ApiClient.get(url)
+  }
+
+  // Get student billing summary
+  static async getStudentSummary(): Promise<any> {
+    return await ApiClient.get('/invoices/student-summary')
+  }
+
+  // Get single invoice
+  static async getInvoice(invoiceId: number): Promise<any> {
+    return await ApiClient.get(`/invoices/${invoiceId}`)
+  }
+
+  // Get student's invoice summary (for payment page)
+  static async getStudentSummary(): Promise<any> {
+    return await ApiClient.get('/invoices/student-summary')
+  }
+
+  // Create invoice
+  static async createInvoice(data: {
+    student_id: number
+    term_id: number
+    due_date: string
+    items?: Array<{ description: string; amount: number; type?: string }>
+  }): Promise<any> {
+    return await ApiClient.post('/invoices', data)
+  }
+
+  // Add discount to invoice
+  static async addDiscount(invoiceId: number, data: {
+    description: string
+    amount: number
+  }): Promise<any> {
+    return await ApiClient.post(`/invoices/${invoiceId}/discount`, data)
+  }
+
+  // Get all payments
+  static async getPayments(params?: {
+    invoice_id?: number
+    student_id?: number
+    page?: number
+  }): Promise<any> {
+    const queryParams = new URLSearchParams()
+    if (params?.invoice_id) queryParams.append('invoice_id', params.invoice_id.toString())
+    if (params?.student_id) queryParams.append('student_id', params.student_id.toString())
+    if (params?.page) queryParams.append('page', params.page.toString())
+    const url = `/payments${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+    return await ApiClient.get(url)
+  }
+
+  // Create payment
+  static async createPayment(data: {
+    invoice_id: number
+    amount: number
+    payment_method: string
+    reference_number?: string
+  }): Promise<any> {
+    return await ApiClient.post('/payments', data)
+  }
+
+  // Refund payment
+  static async refundPayment(paymentId: number, data?: {
+    amount?: number
+    reason?: string
+  }): Promise<any> {
+    return await ApiClient.post(`/payments/${paymentId}/refund`, data)
+  }
+}
+
+// Financial Aid API methods
+export class FinancialAidAPI {
+  // Get current student's financial aid package
+  static async getMyPackage(): Promise<any> {
+    return await ApiClient.get('/financial-aid/me')
+  }
+
+  // Get all financial aid packages (admin)
+  static async getPackages(params?: {
+    student_id?: number
+    term_id?: number
+    status?: string
+    search?: string
+    page?: number
+    per_page?: number
+  }): Promise<any> {
+    const queryParams = new URLSearchParams()
+    if (params?.student_id) queryParams.append('student_id', params.student_id.toString())
+    if (params?.term_id) queryParams.append('term_id', params.term_id.toString())
+    if (params?.status) queryParams.append('status', params.status)
+    if (params?.search) queryParams.append('search', params.search)
+    if (params?.page) queryParams.append('page', params.page.toString())
+    if (params?.per_page) queryParams.append('per_page', params.per_page.toString())
+    const url = `/financial-aid${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+    return await ApiClient.get(url)
+  }
+
+  // Get a student's financial aid packages
+  static async getStudentPackages(studentId: number): Promise<any> {
+    return await ApiClient.get(`/students/${studentId}/financial-aid`)
+  }
+
+  // Get financial aid stats
+  static async getStats(): Promise<any> {
+    return await ApiClient.get('/financial-aid/stats')
+  }
+
+  // Get available scholarships
+  static async getScholarships(): Promise<any> {
+    return await ApiClient.get('/financial-aid/scholarships')
+  }
+
+  // Get scholarship details
+  static async getScholarship(scholarshipId: number): Promise<any> {
+    return await ApiClient.get(`/financial-aid/scholarships/${scholarshipId}`)
+  }
+}
+
+// Settings API methods
+export class SettingsAPI {
+  // Get current user's settings
+  static async getMySettings(): Promise<any> {
+    return await ApiClient.get('/settings/me')
+  }
+
+  // Update current user's settings
+  static async updateMySettings(data: {
+    email_grades?: boolean
+    email_courses?: boolean
+    email_announcements?: boolean
+    push_notifications?: boolean
+    sms_alerts?: boolean
+    theme?: 'light' | 'dark' | 'system'
+    compact_mode?: boolean
+    animations?: boolean
+    language?: string
+    timezone?: string
+  }): Promise<any> {
+    return await ApiClient.patch('/settings/me', data)
+  }
+
+  // Update notification preferences
+  static async updateNotifications(data: {
+    email_grades?: boolean
+    email_courses?: boolean
+    email_announcements?: boolean
+    push_notifications?: boolean
+    sms_alerts?: boolean
+  }): Promise<any> {
+    return await ApiClient.patch('/settings/me/notifications', data)
+  }
+
+  // Update appearance preferences
+  static async updateAppearance(data: {
+    theme?: 'light' | 'dark' | 'system'
+    compact_mode?: boolean
+    animations?: boolean
+  }): Promise<any> {
+    return await ApiClient.patch('/settings/me/appearance', data)
+  }
+
+  // Get all system settings (admin)
+  static async getSystemSettings(): Promise<any> {
+    return await ApiClient.get('/settings/system')
+  }
+
+  // Get system info (admin)
+  static async getSystemInfo(): Promise<any> {
+    return await ApiClient.get('/settings/system/info')
+  }
+
+  // Get settings for a specific group (admin)
+  static async getSettingsGroup(group: 'registration' | 'notifications' | 'academic' | 'system'): Promise<any> {
+    return await ApiClient.get(`/settings/system/${group}`)
+  }
+
+  // Update settings for a group (admin)
+  static async updateSettingsGroup(group: 'registration' | 'notifications' | 'academic' | 'system', data: Record<string, any>): Promise<any> {
+    return await ApiClient.patch(`/settings/system/${group}`, data)
+  }
+
+  // Clear system cache (admin)
+  static async clearCache(): Promise<any> {
+    return await ApiClient.post('/settings/system/cache/clear')
+  }
+
+  // Toggle maintenance mode (admin)
+  static async toggleMaintenance(enable: boolean): Promise<any> {
+    return await ApiClient.post('/settings/system/maintenance', { enable })
+  }
+}
+
+// Appointment API methods
+export class AppointmentAPI {
+  // Get current student's appointments
+  static async getMyAppointments(params?: { upcoming?: boolean }): Promise<any> {
+    const queryParams = new URLSearchParams()
+    if (params?.upcoming) queryParams.append('upcoming', 'true')
+    const url = `/appointments/me${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+    return await ApiClient.get(url)
+  }
+
+  // Get current student's advisor info
+  static async getMyAdvisor(): Promise<any> {
+    return await ApiClient.get('/students/me/advisor')
+  }
+
+  // Get current staff's advisees
+  static async getMyAdvisees(): Promise<any> {
+    return await ApiClient.get('/staff/me/advisees')
+  }
+
+  // Get current staff's appointments
+  static async getAdvisorAppointments(params?: { upcoming?: boolean }): Promise<any> {
+    const queryParams = new URLSearchParams()
+    if (params?.upcoming) queryParams.append('upcoming', 'true')
+    const url = `/staff/me/appointments${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+    return await ApiClient.get(url)
+  }
+
+  // Get all appointments (admin)
+  static async getAppointments(params?: {
+    student_id?: number
+    advisor_id?: number
+    status?: string
+    type?: string
+    upcoming?: boolean
+    from_date?: string
+    to_date?: string
+    page?: number
+    per_page?: number
+  }): Promise<any> {
+    const queryParams = new URLSearchParams()
+    if (params?.student_id) queryParams.append('student_id', params.student_id.toString())
+    if (params?.advisor_id) queryParams.append('advisor_id', params.advisor_id.toString())
+    if (params?.status) queryParams.append('status', params.status)
+    if (params?.type) queryParams.append('type', params.type)
+    if (params?.upcoming) queryParams.append('upcoming', 'true')
+    if (params?.from_date) queryParams.append('from_date', params.from_date)
+    if (params?.to_date) queryParams.append('to_date', params.to_date)
+    if (params?.page) queryParams.append('page', params.page.toString())
+    if (params?.per_page) queryParams.append('per_page', params.per_page.toString())
+    const url = `/appointments${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+    return await ApiClient.get(url)
+  }
+
+  // Get a specific appointment
+  static async getAppointment(appointmentId: number): Promise<any> {
+    return await ApiClient.get(`/appointments/${appointmentId}`)
+  }
+
+  // Book a new appointment
+  static async bookAppointment(data: {
+    advisor_id: number
+    scheduled_at: string
+    duration_minutes?: number
+    type?: string
+    location?: string
+    meeting_link?: string
+    student_notes?: string
+  }): Promise<any> {
+    return await ApiClient.post('/appointments', data)
+  }
+
+  // Update an appointment
+  static async updateAppointment(appointmentId: number, data: {
+    scheduled_at?: string
+    duration_minutes?: number
+    type?: string
+    status?: string
+    location?: string
+    meeting_link?: string
+    student_notes?: string
+    advisor_notes?: string
+    meeting_notes?: string
+  }): Promise<any> {
+    return await ApiClient.patch(`/appointments/${appointmentId}`, data)
+  }
+
+  // Cancel an appointment
+  static async cancelAppointment(appointmentId: number, reason?: string): Promise<any> {
+    return await ApiClient.post(`/appointments/${appointmentId}/cancel`, { reason })
+  }
+
+  // Confirm an appointment
+  static async confirmAppointment(appointmentId: number): Promise<any> {
+    return await ApiClient.post(`/appointments/${appointmentId}/confirm`)
+  }
+
+  // Complete an appointment
+  static async completeAppointment(appointmentId: number, meetingNotes?: string): Promise<any> {
+    return await ApiClient.post(`/appointments/${appointmentId}/complete`, { meeting_notes: meetingNotes })
+  }
+
+  // Mark as no show
+  static async markNoShow(appointmentId: number): Promise<any> {
+    return await ApiClient.post(`/appointments/${appointmentId}/no-show`)
+  }
+
+  // Delete an appointment
+  static async deleteAppointment(appointmentId: number): Promise<any> {
+    return await ApiClient.delete(`/appointments/${appointmentId}`)
   }
 }
 

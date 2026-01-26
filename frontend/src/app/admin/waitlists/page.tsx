@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -29,18 +29,59 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
+import { EnrollmentAPI } from '@/lib/api-client'
 
 interface WaitlistEntry {
   id: number
-  student_name: string
-  student_email: string
-  student_id: string
-  course_code: string
-  course_name: string
-  section: string
-  position: number
-  added_at: string
-  status: 'waiting' | 'offered' | 'enrolled' | 'expired'
+  student_id: number
+  student?: {
+    id: number
+    first_name: string
+    last_name: string
+    student_number: string
+    user?: { email: string }
+  }
+  course_section_id: number
+  course_section?: {
+    id: number
+    section_number: string
+    course?: {
+      course_code: string
+      title: string
+    }
+  }
+  waitlist_position?: number
+  status: string
+  created_at: string
+  updated_at: string
+}
+
+// Helper functions
+function getStudentName(entry: WaitlistEntry): string {
+  if (entry.student) {
+    return `${entry.student.first_name} ${entry.student.last_name}`
+  }
+  return `Student #${entry.student_id}`
+}
+
+function getStudentEmail(entry: WaitlistEntry): string {
+  return entry.student?.user?.email || ''
+}
+
+function getStudentNumber(entry: WaitlistEntry): string {
+  return entry.student?.student_number || `#${entry.student_id}`
+}
+
+function getCourseCode(entry: WaitlistEntry): string {
+  return entry.course_section?.course?.course_code || `Section ${entry.course_section_id}`
+}
+
+function getCourseName(entry: WaitlistEntry): string {
+  return entry.course_section?.course?.title || ''
+}
+
+function getSectionNumber(entry: WaitlistEntry): string {
+  return entry.course_section?.section_number || ''
 }
 
 export default function WaitlistsPage() {
@@ -50,80 +91,54 @@ export default function WaitlistsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const { toast } = useToast()
 
-  // Mock waitlist data
-  const mockEntries: WaitlistEntry[] = [
-    {
-      id: 1,
-      student_name: 'Sophie Turner',
-      student_email: 'sturner@university.edu',
-      student_id: 'STU003',
-      course_code: 'CS 301',
-      course_name: 'Data Structures',
-      section: '001',
-      position: 1,
-      added_at: '2025-01-10T09:30:00Z',
-      status: 'waiting',
-    },
-    {
-      id: 2,
-      student_name: 'James Wilson',
-      student_email: 'jwilson@university.edu',
-      student_id: 'STU004',
-      course_code: 'CS 301',
-      course_name: 'Data Structures',
-      section: '001',
-      position: 2,
-      added_at: '2025-01-10T10:15:00Z',
-      status: 'waiting',
-    },
-    {
-      id: 3,
-      student_name: 'Maria Rodriguez',
-      student_email: 'mrodriguez@university.edu',
-      student_id: 'STU001',
-      course_code: 'MATH 240',
-      course_name: 'Linear Algebra',
-      section: '002',
-      position: 1,
-      added_at: '2025-01-08T14:00:00Z',
-      status: 'offered',
-    },
-    {
-      id: 4,
-      student_name: 'David Park',
-      student_email: 'dpark@university.edu',
-      student_id: 'STU002',
-      course_code: 'CS 450',
-      course_name: 'Machine Learning',
-      section: '001',
-      position: 1,
-      added_at: '2025-01-05T11:00:00Z',
-      status: 'enrolled',
-    },
-  ]
+  const fetchWaitlist = useCallback(async () => {
+    setLoading(true)
+    try {
+      const response = await EnrollmentAPI.getWaitlist({
+        search: searchQuery || undefined,
+      })
+      setEntries(response.data || [])
+    } catch (error) {
+      console.error('Failed to fetch waitlist:', error)
+      toast({ title: 'Failed to load waitlist', variant: 'destructive' })
+    } finally {
+      setLoading(false)
+    }
+  }, [searchQuery, toast])
 
   useEffect(() => {
-    setTimeout(() => {
-      setEntries(mockEntries)
-      setLoading(false)
-    }, 500)
-  }, [])
+    fetchWaitlist()
+  }, [fetchWaitlist])
 
-  const handlePromote = (entry: WaitlistEntry) => {
-    toast({ title: `Offered spot to ${entry.student_name}` })
+  const handlePromote = async (entry: WaitlistEntry) => {
+    try {
+      await EnrollmentAPI.promoteFromWaitlist(entry.id)
+      toast({ title: `Enrolled ${getStudentName(entry)} in course` })
+      fetchWaitlist()
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Failed to promote student'
+      toast({ title: message, variant: 'destructive' })
+    }
   }
 
-  const handleRemove = (entry: WaitlistEntry) => {
-    setEntries(entries.filter(e => e.id !== entry.id))
-    toast({ title: 'Removed from waitlist' })
+  const handleRemove = async (entry: WaitlistEntry) => {
+    try {
+      await EnrollmentAPI.deleteEnrollment(entry.id)
+      setEntries(entries.filter(e => e.id !== entry.id))
+      toast({ title: 'Removed from waitlist' })
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Failed to remove from waitlist'
+      toast({ title: message, variant: 'destructive' })
+    }
   }
 
   const filteredEntries = entries.filter(e => {
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
-      if (!e.student_name.toLowerCase().includes(q) &&
-          !e.course_code.toLowerCase().includes(q) &&
-          !e.student_id.toLowerCase().includes(q)) {
+      const studentName = getStudentName(e).toLowerCase()
+      const courseCode = getCourseCode(e).toLowerCase()
+      const studentNumber = getStudentNumber(e).toLowerCase()
+      if (!studentName.includes(q) && !courseCode.includes(q) && !studentNumber.includes(q)) {
         return false
       }
     }
@@ -133,6 +148,7 @@ export default function WaitlistsPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
+      case 'waitlisted':
       case 'waiting':
         return <Badge className="bg-amber-100 text-amber-800">Waiting</Badge>
       case 'offered':
@@ -140,7 +156,8 @@ export default function WaitlistsPage() {
       case 'enrolled':
         return <Badge className="bg-green-100 text-green-800">Enrolled</Badge>
       case 'expired':
-        return <Badge className="bg-gray-100 text-gray-800">Expired</Badge>
+      case 'withdrawn':
+        return <Badge className="bg-gray-100 text-gray-800">{status}</Badge>
       default:
         return <Badge variant="secondary">{status}</Badge>
     }
@@ -149,7 +166,7 @@ export default function WaitlistsPage() {
   // Stats
   const stats = {
     total: entries.length,
-    waiting: entries.filter(e => e.status === 'waiting').length,
+    waiting: entries.filter(e => e.status === 'waitlisted' || e.status === 'waiting').length,
     offered: entries.filter(e => e.status === 'offered').length,
     enrolled: entries.filter(e => e.status === 'enrolled').length,
   }
@@ -173,7 +190,7 @@ export default function WaitlistsPage() {
               Manage course waitlists and promote students
             </p>
           </div>
-          <Button variant="outline">
+          <Button variant="outline" onClick={fetchWaitlist}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
@@ -290,38 +307,38 @@ export default function WaitlistsPage() {
                   <TableRow key={entry.id}>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <span className="text-lg font-bold">#{entry.position}</span>
+                        <span className="text-lg font-bold">#{entry.waitlist_position || '-'}</span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{entry.student_name}</p>
-                        <p className="text-xs text-muted-foreground">{entry.student_id}</p>
+                        <p className="font-medium">{getStudentName(entry)}</p>
+                        <p className="text-xs text-muted-foreground">{getStudentNumber(entry)}</p>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{entry.course_code}</p>
+                        <p className="font-medium">{getCourseCode(entry)}</p>
                         <p className="text-xs text-muted-foreground">
-                          {entry.course_name} - Sec {entry.section}
+                          {getCourseName(entry)} {getSectionNumber(entry) && `- Sec ${getSectionNumber(entry)}`}
                         </p>
                       </div>
                     </TableCell>
                     <TableCell>
-                      {format(new Date(entry.added_at), 'MMM d, h:mm a')}
+                      {format(new Date(entry.created_at), 'MMM d, h:mm a')}
                     </TableCell>
                     <TableCell>
                       {getStatusBadge(entry.status)}
                     </TableCell>
                     <TableCell className="text-right">
-                      {entry.status === 'waiting' && (
+                      {(entry.status === 'waitlisted' || entry.status === 'waiting') && (
                         <div className="flex justify-end gap-1">
                           <Button
                             size="sm"
                             onClick={() => handlePromote(entry)}
                           >
                             <UserPlus className="h-4 w-4 mr-1" />
-                            Offer Spot
+                            Enroll
                           </Button>
                           <Button
                             variant="ghost"

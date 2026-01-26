@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -26,24 +26,103 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
+import { AdmissionAPI } from '@/lib/api-client'
 import Link from 'next/link'
 
 interface Application {
   id: number
-  applicant_name: string
-  email: string
-  phone: string
-  date_of_birth: string
-  nationality: string
-  address: string
-  intended_major: string
-  term: string
-  gpa: number
-  test_scores: { sat?: number; act?: number }
-  submitted_at: string
-  status: 'submitted' | 'under_review' | 'accepted' | 'rejected'
+  student_id?: number
+  student?: {
+    id: number
+    first_name: string
+    last_name: string
+    date_of_birth?: string
+    nationality?: string
+    user?: { email: string }
+  }
+  term_id?: number
+  term?: { name: string }
+  program_choices?: Array<{
+    id: number
+    program?: { name: string; code: string }
+    preference_order: number
+  }>
+  status: string
+  submitted_at?: string
+  created_at: string
+  updated_at: string
   reviewer_notes?: string
-  documents: { name: string; status: 'verified' | 'pending' }[]
+  documents?: Array<{
+    id: number
+    document_type: string
+    file_name?: string
+    status: string
+  }>
+  academic_records?: Array<{
+    id: number
+    institution_name?: string
+    gpa?: number
+  }>
+}
+
+// Helper functions for displaying application data
+function getApplicantName(app: Application): string {
+  if (app.student) {
+    return `${app.student.first_name} ${app.student.last_name}`
+  }
+  return `Applicant #${app.id}`
+}
+
+function getApplicantEmail(app: Application): string {
+  return app.student?.user?.email || ''
+}
+
+function getApplicantInitials(app: Application): string {
+  if (app.student) {
+    return `${app.student.first_name[0] || ''}${app.student.last_name[0] || ''}`
+  }
+  return `A${app.id}`
+}
+
+function getDateOfBirth(app: Application): string {
+  return app.student?.date_of_birth || ''
+}
+
+function getNationality(app: Application): string {
+  return app.student?.nationality || ''
+}
+
+function getIntendedMajor(app: Application): string {
+  if (app.program_choices && app.program_choices.length > 0) {
+    const firstChoice = app.program_choices.find(pc => pc.preference_order === 1) || app.program_choices[0]
+    return firstChoice.program?.name || firstChoice.program?.code || ''
+  }
+  return ''
+}
+
+function getTermName(app: Application): string {
+  return app.term?.name || ''
+}
+
+function getGPA(app: Application): number | null {
+  if (app.academic_records && app.academic_records.length > 0) {
+    return app.academic_records[0].gpa || null
+  }
+  return null
+}
+
+function getSubmittedDate(app: Application): string {
+  return app.submitted_at || app.created_at
+}
+
+function getDocuments(app: Application): Array<{ name: string; status: 'verified' | 'pending' }> {
+  if (app.documents && app.documents.length > 0) {
+    return app.documents.map(doc => ({
+      name: doc.document_type || doc.file_name || 'Document',
+      status: doc.status === 'approved' || doc.status === 'verified' ? 'verified' : 'pending'
+    }))
+  }
+  return []
 }
 
 export default function ReviewQueuePage() {
@@ -53,99 +132,63 @@ export default function ReviewQueuePage() {
   const [showDecisionDialog, setShowDecisionDialog] = useState(false)
   const [decision, setDecision] = useState<'accept' | 'reject' | null>(null)
   const [notes, setNotes] = useState('')
+  const [processing, setProcessing] = useState(false)
   const { toast } = useToast()
 
-  // Mock applications for review
-  const mockApplications: Application[] = [
-    {
-      id: 1,
-      applicant_name: 'Alex Johnson',
-      email: 'alex.johnson@email.com',
-      phone: '(555) 234-5678',
-      date_of_birth: '2005-03-15',
-      nationality: 'United States',
-      address: '123 Main St, Springfield, IL 62701',
-      intended_major: 'Computer Science',
-      term: 'Fall 2025',
-      gpa: 3.85,
-      test_scores: { sat: 1420 },
-      submitted_at: '2025-01-05T10:30:00Z',
-      status: 'under_review',
-      documents: [
-        { name: 'Transcript', status: 'verified' },
-        { name: 'Recommendation Letter', status: 'verified' },
-        { name: 'Personal Statement', status: 'verified' },
-      ],
-    },
-    {
-      id: 2,
-      applicant_name: 'Sarah Chen',
-      email: 'sarah.chen@email.com',
-      phone: '(555) 345-6789',
-      date_of_birth: '2004-11-22',
-      nationality: 'Canada',
-      address: '456 Oak Ave, Toronto, ON M5V 2H1',
-      intended_major: 'Biology',
-      term: 'Fall 2025',
-      gpa: 3.92,
-      test_scores: { act: 32 },
-      submitted_at: '2025-01-03T14:15:00Z',
-      status: 'under_review',
-      documents: [
-        { name: 'Transcript', status: 'verified' },
-        { name: 'Recommendation Letter', status: 'pending' },
-        { name: 'Personal Statement', status: 'verified' },
-      ],
-    },
-    {
-      id: 3,
-      applicant_name: 'Michael Rodriguez',
-      email: 'michael.r@email.com',
-      phone: '(555) 456-7890',
-      date_of_birth: '2005-07-08',
-      nationality: 'Mexico',
-      address: '789 Elm St, Austin, TX 78701',
-      intended_major: 'Engineering',
-      term: 'Fall 2025',
-      gpa: 3.45,
-      test_scores: { sat: 1280 },
-      submitted_at: '2025-01-02T09:00:00Z',
-      status: 'under_review',
-      documents: [
-        { name: 'Transcript', status: 'verified' },
-        { name: 'Recommendation Letter', status: 'verified' },
-        { name: 'Personal Statement', status: 'verified' },
-      ],
-    },
-  ]
+  const fetchApplications = useCallback(async () => {
+    setLoading(true)
+    try {
+      // Fetch applications that are pending review (submitted or under_review)
+      const response = await AdmissionAPI.getApplications({
+        status: 'submitted',
+      })
+      setApplications(response.data || [])
+    } catch (error) {
+      console.error('Failed to fetch applications:', error)
+      toast({ title: 'Failed to load applications', variant: 'destructive' })
+    } finally {
+      setLoading(false)
+    }
+  }, [toast])
 
   useEffect(() => {
-    setTimeout(() => {
-      setApplications(mockApplications)
-      setLoading(false)
-    }, 500)
-  }, [])
+    fetchApplications()
+  }, [fetchApplications])
 
   const currentApp = applications[currentIndex]
 
-  const handleDecision = () => {
+  const handleDecision = async () => {
     if (!currentApp || !decision) return
 
-    toast({
-      title: decision === 'accept'
-        ? `Accepted ${currentApp.applicant_name}`
-        : `Rejected ${currentApp.applicant_name}`,
-    })
+    setProcessing(true)
+    try {
+      if (decision === 'accept') {
+        await AdmissionAPI.accept(currentApp.id, { notes: notes || undefined })
+      } else {
+        await AdmissionAPI.reject(currentApp.id, { notes: notes || undefined })
+      }
 
-    // Remove from queue and move to next
-    const newApps = applications.filter((_, i) => i !== currentIndex)
-    setApplications(newApps)
-    if (currentIndex >= newApps.length) {
-      setCurrentIndex(Math.max(0, newApps.length - 1))
+      toast({
+        title: decision === 'accept'
+          ? `Accepted ${getApplicantName(currentApp)}`
+          : `Rejected ${getApplicantName(currentApp)}`,
+      })
+
+      // Remove from queue and move to next
+      const newApps = applications.filter((_, i) => i !== currentIndex)
+      setApplications(newApps)
+      if (currentIndex >= newApps.length) {
+        setCurrentIndex(Math.max(0, newApps.length - 1))
+      }
+      setShowDecisionDialog(false)
+      setDecision(null)
+      setNotes('')
+    } catch (error: any) {
+      const message = error.response?.data?.message || `Failed to ${decision} application`
+      toast({ title: message, variant: 'destructive' })
+    } finally {
+      setProcessing(false)
     }
-    setShowDecisionDialog(false)
-    setDecision(null)
-    setNotes('')
   }
 
   const goToNext = () => {
@@ -258,15 +301,19 @@ export default function ReviewQueuePage() {
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16">
                     <AvatarFallback className="text-xl">
-                      {currentApp.applicant_name.split(' ').map(n => n[0]).join('')}
+                      {getApplicantInitials(currentApp)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <CardTitle>{currentApp.applicant_name}</CardTitle>
-                    <CardDescription>{currentApp.email}</CardDescription>
+                    <CardTitle>{getApplicantName(currentApp)}</CardTitle>
+                    <CardDescription>{getApplicantEmail(currentApp)}</CardDescription>
                     <div className="flex gap-2 mt-2">
-                      <Badge>{currentApp.intended_major}</Badge>
-                      <Badge variant="outline">{currentApp.term}</Badge>
+                      {getIntendedMajor(currentApp) && (
+                        <Badge>{getIntendedMajor(currentApp)}</Badge>
+                      )}
+                      {getTermName(currentApp) && (
+                        <Badge variant="outline">{getTermName(currentApp)}</Badge>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -276,75 +323,66 @@ export default function ReviewQueuePage() {
                 <div>
                   <h3 className="font-medium mb-3">Personal Information</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span>Born {format(new Date(currentApp.date_of_birth), 'MMM d, yyyy')}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span>{currentApp.nationality}</span>
-                    </div>
-                    <div className="col-span-2 text-sm text-muted-foreground">
-                      {currentApp.address}
-                    </div>
+                    {getDateOfBirth(currentApp) && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span>Born {format(new Date(getDateOfBirth(currentApp)), 'MMM d, yyyy')}</span>
+                      </div>
+                    )}
+                    {getNationality(currentApp) && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span>{getNationality(currentApp)}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Academic Info */}
-                <div>
-                  <h3 className="font-medium mb-3">Academic Profile</h3>
-                  <div className="grid grid-cols-3 gap-4">
-                    <Card>
-                      <CardContent className="pt-4 text-center">
-                        <p className="text-3xl font-bold">{currentApp.gpa.toFixed(2)}</p>
-                        <p className="text-xs text-muted-foreground">GPA</p>
-                      </CardContent>
-                    </Card>
-                    {currentApp.test_scores.sat && (
+                {getGPA(currentApp) !== null && (
+                  <div>
+                    <h3 className="font-medium mb-3">Academic Profile</h3>
+                    <div className="grid grid-cols-3 gap-4">
                       <Card>
                         <CardContent className="pt-4 text-center">
-                          <p className="text-3xl font-bold">{currentApp.test_scores.sat}</p>
-                          <p className="text-xs text-muted-foreground">SAT</p>
+                          <p className="text-3xl font-bold">{getGPA(currentApp)?.toFixed(2)}</p>
+                          <p className="text-xs text-muted-foreground">GPA</p>
                         </CardContent>
                       </Card>
-                    )}
-                    {currentApp.test_scores.act && (
-                      <Card>
-                        <CardContent className="pt-4 text-center">
-                          <p className="text-3xl font-bold">{currentApp.test_scores.act}</p>
-                          <p className="text-xs text-muted-foreground">ACT</p>
-                        </CardContent>
-                      </Card>
-                    )}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Documents */}
                 <div>
                   <h3 className="font-medium mb-3">Documents</h3>
                   <div className="space-y-2">
-                    {currentApp.documents.map((doc) => (
-                      <div
-                        key={doc.name}
-                        className="flex items-center justify-between p-3 rounded-lg border"
-                      >
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-muted-foreground" />
-                          <span>{doc.name}</span>
+                    {getDocuments(currentApp).length > 0 ? (
+                      getDocuments(currentApp).map((doc, index) => (
+                        <div
+                          key={`${doc.name}-${index}`}
+                          className="flex items-center justify-between p-3 rounded-lg border"
+                        >
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-muted-foreground" />
+                            <span>{doc.name}</span>
+                          </div>
+                          {doc.status === 'verified' ? (
+                            <Badge className="bg-green-100 text-green-800">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Verified
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-amber-100 text-amber-800">
+                              <Clock className="h-3 w-3 mr-1" />
+                              Pending
+                            </Badge>
+                          )}
                         </div>
-                        {doc.status === 'verified' ? (
-                          <Badge className="bg-green-100 text-green-800">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Verified
-                          </Badge>
-                        ) : (
-                          <Badge className="bg-amber-100 text-amber-800">
-                            <Clock className="h-3 w-3 mr-1" />
-                            Pending
-                          </Badge>
-                        )}
-                      </div>
-                    ))}
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No documents uploaded</p>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -359,21 +397,25 @@ export default function ReviewQueuePage() {
                 <CardContent className="space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Submitted</span>
-                    <span>{format(new Date(currentApp.submitted_at), 'MMM d, yyyy')}</span>
+                    <span>{format(new Date(getSubmittedDate(currentApp)), 'MMM d, yyyy')}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Major</span>
-                    <span>{currentApp.intended_major}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Term</span>
-                    <span>{currentApp.term}</span>
-                  </div>
+                  {getIntendedMajor(currentApp) && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Major</span>
+                      <span>{getIntendedMajor(currentApp)}</span>
+                    </div>
+                  )}
+                  {getTermName(currentApp) && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Term</span>
+                      <span>{getTermName(currentApp)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Documents</span>
                     <span>
-                      {currentApp.documents.filter(d => d.status === 'verified').length}/
-                      {currentApp.documents.length} verified
+                      {getDocuments(currentApp).filter(d => d.status === 'verified').length}/
+                      {getDocuments(currentApp).length} verified
                     </span>
                   </div>
                 </CardContent>
@@ -384,7 +426,7 @@ export default function ReviewQueuePage() {
                   <CardTitle className="text-base">Recommendation</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {currentApp.gpa >= 3.5 && (currentApp.test_scores.sat || 0) >= 1300 ? (
+                  {(getGPA(currentApp) || 0) >= 3.5 ? (
                     <div className="flex items-start gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
                       <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
                       <div>
@@ -430,7 +472,7 @@ export default function ReviewQueuePage() {
                 {decision === 'accept' ? 'Accept Application' : 'Reject Application'}
               </DialogTitle>
               <DialogDescription>
-                You are about to {decision} {currentApp?.applicant_name}'s application.
+                You are about to {decision} {currentApp ? getApplicantName(currentApp) : ''}'s application.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -445,14 +487,15 @@ export default function ReviewQueuePage() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowDecisionDialog(false)}>
+              <Button variant="outline" onClick={() => setShowDecisionDialog(false)} disabled={processing}>
                 Cancel
               </Button>
               <Button
                 onClick={handleDecision}
+                disabled={processing}
                 className={decision === 'accept' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}
               >
-                {decision === 'accept' ? 'Confirm Accept' : 'Confirm Reject'}
+                {processing ? 'Processing...' : decision === 'accept' ? 'Confirm Accept' : 'Confirm Reject'}
               </Button>
             </DialogFooter>
           </DialogContent>

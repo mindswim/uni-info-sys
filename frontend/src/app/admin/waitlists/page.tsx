@@ -34,47 +34,54 @@ import { EnrollmentAPI } from '@/lib/api-client'
 interface WaitlistEntry {
   id: number
   student_id: number
-  student?: any
+  student?: {
+    id: number
+    first_name: string
+    last_name: string
+    student_number: string
+    user?: { email: string }
+  }
   course_section_id: number
-  course_section?: any
+  course_section?: {
+    id: number
+    section_number: string
+    course?: {
+      course_code: string
+      title: string
+    }
+  }
   waitlist_position?: number
   status: string
   created_at: string
   updated_at: string
-  enrolled_at?: string
 }
 
-// Helper functions - defensive to handle various API response formats
+// Helper functions
 function getStudentName(entry: WaitlistEntry): string {
-  if (!entry?.student) return `Student #${entry?.student_id || 'Unknown'}`
-  const s = entry.student
-  // API may return 'name' (combined) or first_name/last_name (separate)
-  if (s.name) return s.name
-  if (s.first_name || s.last_name) return `${s.first_name || ''} ${s.last_name || ''}`.trim()
+  if (entry.student) {
+    return `${entry.student.first_name} ${entry.student.last_name}`
+  }
   return `Student #${entry.student_id}`
 }
 
 function getStudentEmail(entry: WaitlistEntry): string {
-  if (!entry?.student) return ''
-  return entry.student.email || entry.student.user?.email || ''
+  return entry.student?.user?.email || ''
 }
 
 function getStudentNumber(entry: WaitlistEntry): string {
-  if (!entry?.student) return `#${entry?.student_id || 'Unknown'}`
-  return entry.student.student_number || `#${entry.student_id}`
+  return entry.student?.student_number || `#${entry.student_id}`
 }
 
 function getCourseCode(entry: WaitlistEntry): string {
-  if (!entry?.course_section?.course) return `Section ${entry?.course_section_id || 'Unknown'}`
-  return entry.course_section.course.course_code || `Section ${entry.course_section_id}`
+  return entry.course_section?.course?.course_code || `Section ${entry.course_section_id}`
 }
 
 function getCourseName(entry: WaitlistEntry): string {
-  return entry?.course_section?.course?.title || ''
+  return entry.course_section?.course?.title || ''
 }
 
 function getSectionNumber(entry: WaitlistEntry): string {
-  return entry?.course_section?.section_number || ''
+  return entry.course_section?.section_number || ''
 }
 
 export default function WaitlistsPage() {

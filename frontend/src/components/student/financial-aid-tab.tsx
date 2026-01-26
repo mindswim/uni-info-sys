@@ -106,11 +106,22 @@ interface FinancialAidPackage {
   notes: string | null
 }
 
+interface ChecklistItem {
+  id: string
+  title: string
+  description: string
+  status: 'completed' | 'in_progress' | 'pending' | 'action_required'
+  action_url?: string
+  action_label?: string
+  due_date?: string
+}
+
 export function FinancialAidTab() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [aidPackage, setAidPackage] = useState<FinancialAidPackage | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [checklist, setChecklist] = useState<ChecklistItem[]>([])
 
   useEffect(() => {
     fetchFinancialAidData()
@@ -143,6 +154,67 @@ export function FinancialAidTab() {
 
       const data = await response.json()
       setAidPackage(data.data)
+
+      // Build checklist based on package status
+      const pkg = data.data as FinancialAidPackage
+      const items: ChecklistItem[] = []
+
+      // FAFSA completion
+      items.push({
+        id: 'fafsa',
+        title: 'Complete FAFSA',
+        description: 'Submit your Free Application for Federal Student Aid',
+        status: pkg ? 'completed' : 'pending',
+      })
+
+      // Verification documents
+      const hasVerificationHold = pkg?.notes?.toLowerCase().includes('verification')
+      items.push({
+        id: 'verification',
+        title: 'Submit Verification Documents',
+        description: 'Provide required tax documents and forms',
+        status: hasVerificationHold ? 'action_required' : (pkg ? 'completed' : 'pending'),
+        action_url: hasVerificationHold ? '/student/holds' : undefined,
+        action_label: hasVerificationHold ? 'Upload Documents' : undefined,
+      })
+
+      // Review award letter
+      items.push({
+        id: 'review',
+        title: 'Review Award Letter',
+        description: 'Review your financial aid package details',
+        status: pkg?.status === 'offered' || pkg?.status === 'accepted' ? 'completed' : 'pending',
+      })
+
+      // Accept/decline awards
+      items.push({
+        id: 'accept',
+        title: 'Accept or Decline Awards',
+        description: 'Choose which aid you want to receive',
+        status: pkg?.status === 'accepted' ? 'completed' : (pkg?.status === 'offered' ? 'action_required' : 'pending'),
+        action_url: pkg?.status === 'offered' ? '#' : undefined,
+        action_label: pkg?.status === 'offered' ? 'Accept Awards' : undefined,
+        due_date: pkg?.dates?.response_deadline || undefined,
+      })
+
+      // Complete loan counseling (if loans)
+      if (pkg?.aid_totals?.loans > 0) {
+        items.push({
+          id: 'counseling',
+          title: 'Complete Loan Entrance Counseling',
+          description: 'Required before loan funds can be disbursed',
+          status: pkg?.status === 'accepted' ? 'completed' : 'pending',
+        })
+
+        items.push({
+          id: 'mpn',
+          title: 'Sign Master Promissory Note',
+          description: 'Legal agreement to repay your student loans',
+          status: pkg?.status === 'accepted' ? 'completed' : 'pending',
+        })
+      }
+
+      setChecklist(items)
     } catch (error) {
       console.error('Error fetching financial aid data:', error)
       setError('Failed to load financial aid information')
@@ -248,8 +320,96 @@ export function FinancialAidTab() {
     ? Math.round((aid_totals.total_gift_aid / cost_of_attendance.total) * 100)
     : 0
 
+  const completedSteps = checklist.filter(c => c.status === 'completed').length
+  const actionRequired = checklist.filter(c => c.status === 'action_required').length
+
   return (
     <div className="space-y-6">
+      {/* Checklist Workflow */}
+      <Card className={actionRequired > 0 ? 'border-amber-200 dark:border-amber-800' : ''}>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5" />
+                Financial Aid Checklist
+              </CardTitle>
+              <CardDescription>
+                {completedSteps} of {checklist.length} steps completed
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              {actionRequired > 0 && (
+                <Badge variant="destructive" className="gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {actionRequired} action{actionRequired > 1 ? 's' : ''} needed
+                </Badge>
+              )}
+              {completedSteps === checklist.length && (
+                <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  All Complete
+                </Badge>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {checklist.map((item, index) => (
+              <div
+                key={item.id}
+                className={`flex items-start gap-3 p-3 rounded-lg border ${
+                  item.status === 'action_required'
+                    ? 'bg-amber-50/50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800'
+                    : item.status === 'completed'
+                      ? 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-800'
+                      : ''
+                }`}
+              >
+                <div className="mt-0.5">
+                  {item.status === 'completed' ? (
+                    <CheckCircle className="h-5 w-5 text-emerald-600" />
+                  ) : item.status === 'action_required' ? (
+                    <AlertCircle className="h-5 w-5 text-amber-600" />
+                  ) : item.status === 'in_progress' ? (
+                    <Clock className="h-5 w-5 text-blue-600" />
+                  ) : (
+                    <div className="h-5 w-5 rounded-full border-2 border-muted-foreground/30" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className={`font-medium ${item.status === 'completed' ? 'text-muted-foreground' : ''}`}>
+                      {index + 1}. {item.title}
+                    </span>
+                    {item.status === 'action_required' && (
+                      <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                        Action Required
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                  {item.due_date && item.status !== 'completed' && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                      Due by {formatDate(item.due_date)}
+                    </p>
+                  )}
+                </div>
+                {item.action_url && item.status === 'action_required' && (
+                  <a
+                    href={item.action_url}
+                    className="text-sm font-medium text-primary hover:underline"
+                  >
+                    {item.action_label || 'Take Action'}
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Package Status Header */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">

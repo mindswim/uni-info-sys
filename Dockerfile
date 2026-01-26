@@ -15,6 +15,9 @@ RUN apk add --no-cache \
     git \
     curl
 
+# Configure MySQL client to skip SSL verification (needed for schema loading)
+RUN mkdir -p /root && echo -e "[client]\nssl=0" > /root/.my.cnf
+
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo pdo_mysql gd zip bcmath opcache

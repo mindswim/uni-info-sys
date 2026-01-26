@@ -22,7 +22,6 @@ rsync -avz --progress \
     --exclude 'frontend/node_modules' \
     --exclude 'frontend/.next' \
     --exclude '.env' \
-    --exclude 'database/schema' \
     --exclude 'tests' \
     ./ ${SERVER}:${REMOTE_DIR}/
 

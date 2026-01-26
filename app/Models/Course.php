@@ -31,7 +31,7 @@ class Course extends Model
         return $this->belongsTo(Department::class);
     }
 
-    public function prerequisites()
+    public function prerequisiteCourses()
     {
         return $this->belongsToMany(Course::class, 'course_prerequisites', 'course_id', 'prerequisite_id');
     }

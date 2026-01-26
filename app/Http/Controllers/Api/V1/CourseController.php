@@ -66,7 +66,7 @@ class CourseController extends Controller
         }
 
         $courses = Cache::remember($cacheKey, 3600, function () use ($request) {
-            $query = Course::with(['department', 'prerequisites']);
+            $query = Course::with(['department', 'prerequisiteCourses']);
 
             if ($request->has('department_id')) {
                 $query->where('department_id', $request->department_id);

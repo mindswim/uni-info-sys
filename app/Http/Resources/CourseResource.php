@@ -50,7 +50,7 @@ class CourseResource extends JsonResource
             'credits' => $this->credits,
             'department_id' => $this->department_id,
             'department' => new DepartmentResource($this->whenLoaded('department')),
-            'prerequisites' => $this->when($this->relationLoaded('prerequisites'), fn() => CourseResource::collection($this->prerequisites)),
+            'prerequisite_courses' => $this->when($this->relationLoaded('prerequisiteCourses'), fn() => CourseResource::collection($this->prerequisiteCourses)),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

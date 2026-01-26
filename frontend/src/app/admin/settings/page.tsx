@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,8 @@ import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PageSkeleton } from '@/components/ui/page-skeleton'
+import { SettingsAPI } from '@/lib/api-client'
 import {
   Select,
   SelectContent,
@@ -19,15 +21,22 @@ import {
 } from '@/components/ui/select'
 import {
   Settings, Bell, Shield, Database, Mail, Calendar,
-  Clock, Save, RefreshCw, AlertCircle
+  Clock, Save, RefreshCw, AlertCircle, CheckCircle
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 export default function SettingsPage() {
   const [saving, setSaving] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [clearingCache, setClearingCache] = useState(false)
+  const [systemInfo, setSystemInfo] = useState({
+    version: '2.5.1',
+    environment: 'production',
+    database_connected: true,
+    maintenance_mode: false,
+  })
   const { toast } = useToast()
 
-  // Mock settings state
   const [settings, setSettings] = useState({
     registration: {
       enabled: true,
@@ -50,11 +59,106 @@ export default function SettingsPage() {
     },
   })
 
+  // Fetch all system settings
+  const fetchSettings = useCallback(async () => {
+    try {
+      const [settingsRes, infoRes] = await Promise.all([
+        SettingsAPI.getSystemSettings(),
+        SettingsAPI.getSystemInfo(),
+      ])
+
+      const data = settingsRes.data || {}
+
+      setSettings({
+        registration: {
+          enabled: data.registration?.enabled ?? true,
+          add_drop_enabled: data.registration?.add_drop_enabled ?? true,
+          waitlist_enabled: data.registration?.waitlist_enabled ?? true,
+          max_credits: data.registration?.max_credits ?? 18,
+          max_waitlist_per_student: data.registration?.max_waitlist_per_student ?? 3,
+        },
+        notifications: {
+          email_enabled: data.notifications?.email_enabled ?? true,
+          sms_enabled: data.notifications?.sms_enabled ?? false,
+          registration_alerts: data.notifications?.registration_alerts ?? true,
+          payment_reminders: data.notifications?.payment_reminders ?? true,
+          grade_notifications: data.notifications?.grade_notifications ?? true,
+        },
+        academic: {
+          current_term: data.academic?.current_term ?? 'Spring 2025',
+          grading_open: data.academic?.grading_open ?? true,
+          transcript_requests: data.academic?.transcript_requests ?? true,
+        },
+      })
+
+      if (infoRes.data) {
+        setSystemInfo({
+          version: infoRes.data.version || '2.5.1',
+          environment: infoRes.data.environment || 'production',
+          database_connected: infoRes.data.database_connected ?? true,
+          maintenance_mode: infoRes.data.maintenance_mode ?? false,
+        })
+      }
+    } catch (error) {
+      console.error('Failed to fetch settings:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchSettings()
+  }, [fetchSettings])
+
   const handleSave = async () => {
     setSaving(true)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setSaving(false)
-    toast({ title: 'Settings saved successfully' })
+    try {
+      // Save all groups
+      await Promise.all([
+        SettingsAPI.updateSettingsGroup('registration', settings.registration),
+        SettingsAPI.updateSettingsGroup('notifications', settings.notifications),
+        SettingsAPI.updateSettingsGroup('academic', settings.academic),
+      ])
+      toast({ title: 'Settings saved successfully' })
+    } catch (error) {
+      console.error('Failed to save settings:', error)
+      toast({ title: 'Failed to save settings', variant: 'destructive' })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleClearCache = async () => {
+    setClearingCache(true)
+    try {
+      await SettingsAPI.clearCache()
+      toast({ title: 'Cache cleared successfully' })
+    } catch (error) {
+      console.error('Failed to clear cache:', error)
+      toast({ title: 'Failed to clear cache', variant: 'destructive' })
+    } finally {
+      setClearingCache(false)
+    }
+  }
+
+  const handleToggleMaintenance = async () => {
+    try {
+      const newState = !systemInfo.maintenance_mode
+      await SettingsAPI.toggleMaintenance(newState)
+      setSystemInfo(prev => ({ ...prev, maintenance_mode: newState }))
+      toast({ title: newState ? 'Maintenance mode enabled' : 'Maintenance mode disabled' })
+    } catch (error) {
+      console.error('Failed to toggle maintenance:', error)
+      toast({ title: 'Failed to toggle maintenance mode', variant: 'destructive' })
+    }
+  }
+
+  if (loading) {
+    return (
+      <AppShell>
+        <PageSkeleton type="form" />
+      </AppShell>
+    )
   }
 
   return (
@@ -253,7 +357,12 @@ export default function SettingsPage() {
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label>Current Term</Label>
-                  <Select value={settings.academic.current_term}>
+                  <Select
+                    value={settings.academic.current_term}
+                    onValueChange={(value) =>
+                      setSettings(s => ({ ...s, academic: { ...s.academic, current_term: value } }))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -309,22 +418,33 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 rounded-lg border">
                     <p className="text-sm text-muted-foreground">Version</p>
-                    <p className="text-lg font-medium">2.5.1</p>
+                    <p className="text-lg font-medium">{systemInfo.version}</p>
                   </div>
                   <div className="p-4 rounded-lg border">
                     <p className="text-sm text-muted-foreground">Environment</p>
-                    <Badge>Production</Badge>
+                    <Badge>{systemInfo.environment}</Badge>
                   </div>
                   <div className="p-4 rounded-lg border">
                     <p className="text-sm text-muted-foreground">Database</p>
                     <div className="flex items-center gap-2">
-                      <Database className="h-4 w-4 text-green-600" />
-                      <span className="text-green-600 font-medium">Connected</span>
+                      {systemInfo.database_connected ? (
+                        <>
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <span className="text-green-600 font-medium">Connected</span>
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle className="h-4 w-4 text-red-600" />
+                          <span className="text-red-600 font-medium">Disconnected</span>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className="p-4 rounded-lg border">
-                    <p className="text-sm text-muted-foreground">Last Backup</p>
-                    <p className="font-medium">Jan 25, 2025 03:00 AM</p>
+                    <p className="text-sm text-muted-foreground">Maintenance Mode</p>
+                    <Badge variant={systemInfo.maintenance_mode ? 'destructive' : 'secondary'}>
+                      {systemInfo.maintenance_mode ? 'Enabled' : 'Disabled'}
+                    </Badge>
                   </div>
                 </div>
               </CardContent>
@@ -340,9 +460,9 @@ export default function SettingsPage() {
                     <p className="font-medium">Clear Cache</p>
                     <p className="text-sm text-muted-foreground">Clear system and application cache</p>
                   </div>
-                  <Button variant="outline">
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Clear Cache
+                  <Button variant="outline" onClick={handleClearCache} disabled={clearingCache}>
+                    <RefreshCw className={`h-4 w-4 mr-2 ${clearingCache ? 'animate-spin' : ''}`} />
+                    {clearingCache ? 'Clearing...' : 'Clear Cache'}
                   </Button>
                 </div>
                 <div className="flex items-center justify-between p-4 rounded-lg border">
@@ -350,9 +470,13 @@ export default function SettingsPage() {
                     <p className="font-medium">Maintenance Mode</p>
                     <p className="text-sm text-muted-foreground">Take system offline for maintenance</p>
                   </div>
-                  <Button variant="outline" className="text-amber-600">
+                  <Button
+                    variant="outline"
+                    className={systemInfo.maintenance_mode ? 'text-green-600' : 'text-amber-600'}
+                    onClick={handleToggleMaintenance}
+                  >
                     <AlertCircle className="h-4 w-4 mr-2" />
-                    Enable
+                    {systemInfo.maintenance_mode ? 'Disable' : 'Enable'}
                   </Button>
                 </div>
               </CardContent>

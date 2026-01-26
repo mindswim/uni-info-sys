@@ -82,9 +82,10 @@
 ### Advisor (`/student/advisor`) - NEW PAGE
 | Feature | Backend Status | Frontend Status | API Endpoint |
 |---------|---------------|-----------------|--------------|
-| Advisor info | [-] Missing | [ ] Mock | Need `advisor_id` on Student |
-| Appointments | [-] Missing | [ ] Mock | Need `Appointment` model |
-| Meeting history | [-] Missing | [ ] Mock | Need `Appointment` model |
+| Advisor info | [x] Exists | [x] Wired | `GET /api/v1/students/me/advisor` |
+| Appointments | [x] Exists | [x] Wired | `GET /api/v1/appointments/me` |
+| Book appointment | [x] Exists | [x] Wired | `POST /api/v1/appointments` |
+| Cancel appointment | [x] Exists | [x] Wired | `POST /api/v1/appointments/{id}/cancel` |
 
 ### Holds (`/student/holds`)
 | Feature | Backend Status | Frontend Status | API Endpoint |
@@ -114,8 +115,8 @@
 ### Advisees (`/faculty/advisees`) - NEW PAGE
 | Feature | Backend Status | Frontend Status | API Endpoint |
 |---------|---------------|-----------------|--------------|
-| Advisee list | [-] Missing | [ ] Mock | Need advisor relationship |
-| Student details | [x] Exists | [ ] Mock | Via StudentController |
+| Advisee list | [x] Exists | [x] Wired | `GET /api/v1/staff/me/advisees` |
+| Student details | [x] Exists | [x] Wired | Via student data in response |
 | Holds view | [x] Exists | [ ] Mock | Via HoldController |
 
 ### Appointments (`/faculty/appointments`) - NEW PAGE
@@ -185,9 +186,12 @@
 ### Settings (`/admin/settings`) - NEW PAGE
 | Feature | Backend Status | Frontend Status | API Endpoint |
 |---------|---------------|-----------------|--------------|
-| Registration toggle | [-] Missing | [ ] Mock | Need settings table |
-| Grading period | [~] Partial | [ ] Mock | Term has grade_deadline |
-| System config | [-] Missing | [ ] Mock | Need settings table |
+| Registration toggle | [x] Exists | [x] Wired | `GET/PATCH /api/v1/settings/system/registration` |
+| Notifications config | [x] Exists | [x] Wired | `GET/PATCH /api/v1/settings/system/notifications` |
+| Academic config | [x] Exists | [x] Wired | `GET/PATCH /api/v1/settings/system/academic` |
+| System info | [x] Exists | [x] Wired | `GET /api/v1/settings/system/info` |
+| Clear cache | [x] Exists | [x] Wired | `POST /api/v1/settings/system/cache/clear` |
+| Maintenance mode | [x] Exists | [x] Wired | `POST /api/v1/settings/system/maintenance` |
 
 ---
 
@@ -288,11 +292,11 @@ These require **zero backend changes** - just connect frontend to existing APIs:
 |------|---------|----------|-------|--------|
 | Wire existing APIs (P1/P2 priority) | 0h | 8-12h | 8-12h | DONE |
 | Wire remaining APIs (P3 priority) | 0h | 4-6h | 4-6h | TODO |
-| Appointment system | 4-6h | 4-6h | 8-12h | TODO |
-| Settings system | 2-3h | 3-4h | 5-7h | TODO |
-| Advisor relationship | 1-2h | 2-3h | 3-5h | TODO |
+| Appointment system | 4-6h | 4-6h | 8-12h | DONE |
+| Settings system | 2-3h | 3-4h | 5-7h | DONE |
+| Advisor relationship | 1-2h | 2-3h | 3-5h | DONE |
 | Payment gateway integration | 4-6h | 2-3h | 6-9h | TODO |
-| **Total Remaining** | ~12h | ~18h | ~30h | |
+| **Total Remaining** | ~6h | ~3h | ~9h | |
 
 ---
 

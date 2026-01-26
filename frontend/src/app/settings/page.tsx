@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { AppShell } from '@/components/layout/app-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,6 +11,8 @@ import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { PageSkeleton } from '@/components/ui/page-skeleton'
+import { SettingsAPI } from '@/lib/api-client'
 import {
   Shield, Key, Bell, Globe, Moon, Sun,
   Monitor, Mail, MessageSquare, CheckCircle,
@@ -24,6 +26,7 @@ const breadcrumbs = [
 
 export default function SettingsPage() {
   const { user } = useAuth()
+  const [loading, setLoading] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [notifications, setNotifications] = useState({
     emailGrades: true,
@@ -32,14 +35,82 @@ export default function SettingsPage() {
     pushNotifications: true,
     smsAlerts: false
   })
+  const [appearance, setAppearance] = useState({
+    theme: 'system' as 'light' | 'dark' | 'system',
+    compactMode: false,
+    animations: true
+  })
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
-  const handleSaveNotifications = () => {
+  // Fetch user settings from API
+  const fetchSettings = useCallback(async () => {
+    try {
+      const response = await SettingsAPI.getMySettings()
+      const data = response.data
+
+      if (data) {
+        setNotifications({
+          emailGrades: data.email_grades ?? true,
+          emailCourses: data.email_courses ?? true,
+          emailAnnouncements: data.email_announcements ?? false,
+          pushNotifications: data.push_notifications ?? true,
+          smsAlerts: data.sms_alerts ?? false,
+        })
+        setAppearance({
+          theme: data.theme || 'system',
+          compactMode: data.compact_mode ?? false,
+          animations: data.animations ?? true,
+        })
+      }
+    } catch (error) {
+      console.error('Failed to fetch settings:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchSettings()
+  }, [fetchSettings])
+
+  const handleSaveNotifications = async () => {
     setSaveStatus('saving')
-    setTimeout(() => {
+    try {
+      await SettingsAPI.updateNotifications({
+        email_grades: notifications.emailGrades,
+        email_courses: notifications.emailCourses,
+        email_announcements: notifications.emailAnnouncements,
+        push_notifications: notifications.pushNotifications,
+        sms_alerts: notifications.smsAlerts,
+      })
       setSaveStatus('saved')
       setTimeout(() => setSaveStatus('idle'), 2000)
-    }, 1000)
+    } catch (error) {
+      console.error('Failed to save notifications:', error)
+      setSaveStatus('error')
+      setTimeout(() => setSaveStatus('idle'), 3000)
+    }
+  }
+
+  const handleSaveAppearance = async (newAppearance: typeof appearance) => {
+    setAppearance(newAppearance)
+    try {
+      await SettingsAPI.updateAppearance({
+        theme: newAppearance.theme,
+        compact_mode: newAppearance.compactMode,
+        animations: newAppearance.animations,
+      })
+    } catch (error) {
+      console.error('Failed to save appearance:', error)
+    }
+  }
+
+  if (loading) {
+    return (
+      <AppShell breadcrumbs={breadcrumbs}>
+        <PageSkeleton type="form" />
+      </AppShell>
+    )
   }
 
   return (
@@ -54,6 +125,13 @@ export default function SettingsPage() {
           <Alert>
             <CheckCircle className="h-4 w-4" />
             <AlertDescription>Settings saved successfully!</AlertDescription>
+          </Alert>
+        )}
+
+        {saveStatus === 'error' && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>Failed to save settings. Please try again.</AlertDescription>
           </Alert>
         )}
 
@@ -320,15 +398,27 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-3">
-                  <Button variant="outline" className="h-24 flex-col gap-2">
+                  <Button
+                    variant={appearance.theme === 'light' ? 'default' : 'outline'}
+                    className="h-24 flex-col gap-2"
+                    onClick={() => handleSaveAppearance({ ...appearance, theme: 'light' })}
+                  >
                     <Sun className="h-6 w-6" />
                     Light
                   </Button>
-                  <Button variant="outline" className="h-24 flex-col gap-2">
+                  <Button
+                    variant={appearance.theme === 'dark' ? 'default' : 'outline'}
+                    className="h-24 flex-col gap-2"
+                    onClick={() => handleSaveAppearance({ ...appearance, theme: 'dark' })}
+                  >
                     <Moon className="h-6 w-6" />
                     Dark
                   </Button>
-                  <Button variant="outline" className="h-24 flex-col gap-2">
+                  <Button
+                    variant={appearance.theme === 'system' ? 'default' : 'outline'}
+                    className="h-24 flex-col gap-2"
+                    onClick={() => handleSaveAppearance({ ...appearance, theme: 'system' })}
+                  >
                     <Monitor className="h-6 w-6" />
                     System
                   </Button>
@@ -350,7 +440,12 @@ export default function SettingsPage() {
                     <Label>Compact Mode</Label>
                     <p className="text-sm text-muted-foreground">Show more content with reduced spacing</p>
                   </div>
-                  <Switch />
+                  <Switch
+                    checked={appearance.compactMode}
+                    onCheckedChange={(checked) =>
+                      handleSaveAppearance({ ...appearance, compactMode: checked })
+                    }
+                  />
                 </div>
                 <Separator />
                 <div className="flex items-center justify-between">
@@ -358,7 +453,12 @@ export default function SettingsPage() {
                     <Label>Animations</Label>
                     <p className="text-sm text-muted-foreground">Enable interface animations</p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch
+                    checked={appearance.animations}
+                    onCheckedChange={(checked) =>
+                      handleSaveAppearance({ ...appearance, animations: checked })
+                    }
+                  />
                 </div>
               </CardContent>
             </Card>

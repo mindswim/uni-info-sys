@@ -1,7 +1,9 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
+import { AppointmentAPI } from '@/lib/api-client'
+import { PageSkeleton } from '@/components/ui/page-skeleton'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -51,7 +53,40 @@ interface Appointment {
   time: string
   type: 'in-person' | 'virtual'
   topic: string
-  status: 'scheduled' | 'completed' | 'cancelled'
+  status: 'scheduled' | 'completed' | 'cancelled' | 'confirmed' | 'no_show'
+}
+
+// Helper functions to transform API data
+function getAdvisorName(advisor: any): string {
+  return advisor?.user?.name || 'Unknown Advisor'
+}
+
+function getAdvisorEmail(advisor: any): string {
+  return advisor?.user?.email || ''
+}
+
+function getAdvisorDepartment(advisor: any): string {
+  return advisor?.department?.name || 'Department'
+}
+
+function formatAppointmentTime(scheduledAt: string): string {
+  try {
+    return format(new Date(scheduledAt), 'h:mm a')
+  } catch {
+    return ''
+  }
+}
+
+function formatAppointmentDate(scheduledAt: string): string {
+  try {
+    return format(new Date(scheduledAt), 'yyyy-MM-dd')
+  } catch {
+    return ''
+  }
+}
+
+function getAppointmentType(apt: any): 'in-person' | 'virtual' {
+  return apt.meeting_link ? 'virtual' : 'in-person'
 }
 
 export default function AdvisorPage() {
@@ -61,69 +96,165 @@ export default function AdvisorPage() {
   const [appointmentType, setAppointmentType] = useState<'in-person' | 'virtual'>('in-person')
   const [topic, setTopic] = useState('')
   const [scheduling, setScheduling] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [advisor, setAdvisor] = useState<Advisor | null>(null)
+  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [pastAppointments, setPastAppointments] = useState<Appointment[]>([])
   const { toast } = useToast()
 
-  // Mock advisor data
-  const advisor: Advisor = {
-    id: 1,
-    name: 'Dr. Sarah Chen',
-    title: 'Associate Professor & Academic Advisor',
-    email: 'schen@university.edu',
-    phone: '(555) 123-4567',
-    office: 'Science Building, Room 312',
-    department: 'Computer Science',
-    officeHours: 'Mon/Wed 2:00-4:00 PM, Fri 10:00 AM-12:00 PM',
-    specializations: ['Undergraduate Advising', 'Pre-Graduate Planning', 'Internship Guidance'],
-  }
-
-  // Mock upcoming appointments
-  const appointments: Appointment[] = [
-    {
-      id: 1,
-      date: format(addDays(new Date(), 3), 'yyyy-MM-dd'),
-      time: '2:30 PM',
-      type: 'in-person',
-      topic: 'Course selection for next semester',
-      status: 'scheduled',
-    },
-  ]
-
-  // Mock past appointments
-  const pastAppointments: Appointment[] = [
-    {
-      id: 2,
-      date: format(addDays(new Date(), -14), 'yyyy-MM-dd'),
-      time: '3:00 PM',
-      type: 'virtual',
-      topic: 'Degree progress review',
-      status: 'completed',
-    },
-    {
-      id: 3,
-      date: format(addDays(new Date(), -45), 'yyyy-MM-dd'),
-      time: '10:30 AM',
-      type: 'in-person',
-      topic: 'Major declaration',
-      status: 'completed',
-    },
-  ]
-
-  // Available time slots (mock)
+  // Available time slots
   const availableSlots = [
-    '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM',
-    '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM'
+    '09:00', '09:30', '10:00', '10:30', '11:00',
+    '14:00', '14:30', '15:00', '15:30'
   ]
+
+  // Fetch advisor info
+  const fetchAdvisor = useCallback(async () => {
+    try {
+      const response = await AppointmentAPI.getMyAdvisor()
+      const data = response.data
+      if (data) {
+        setAdvisor({
+          id: data.id,
+          name: getAdvisorName(data),
+          title: data.job_title || 'Academic Advisor',
+          email: getAdvisorEmail(data),
+          phone: data.phone || '',
+          office: data.office_location || '',
+          department: getAdvisorDepartment(data),
+          officeHours: data.office_hours || 'Contact for availability',
+          specializations: data.specialization ? [data.specialization] : ['Academic Advising'],
+        })
+      }
+    } catch (error: any) {
+      // No advisor assigned is a valid state
+      if (error?.response?.status !== 404) {
+        console.error('Failed to fetch advisor:', error)
+      }
+    }
+  }, [])
+
+  // Fetch appointments
+  const fetchAppointments = useCallback(async () => {
+    try {
+      const response = await AppointmentAPI.getMyAppointments()
+      const allAppointments = response.data || []
+
+      const upcoming: Appointment[] = []
+      const past: Appointment[] = []
+
+      allAppointments.forEach((apt: any) => {
+        const appointment: Appointment = {
+          id: apt.id,
+          date: formatAppointmentDate(apt.scheduled_at),
+          time: formatAppointmentTime(apt.scheduled_at),
+          type: getAppointmentType(apt),
+          topic: apt.student_notes || apt.type || 'Advising',
+          status: apt.status,
+        }
+
+        if (['scheduled', 'confirmed'].includes(apt.status) && new Date(apt.scheduled_at) >= new Date()) {
+          upcoming.push(appointment)
+        } else {
+          past.push(appointment)
+        }
+      })
+
+      setAppointments(upcoming)
+      setPastAppointments(past.slice(0, 5)) // Show last 5 past appointments
+    } catch (error) {
+      console.error('Failed to fetch appointments:', error)
+    }
+  }, [])
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true)
+      await Promise.all([fetchAdvisor(), fetchAppointments()])
+      setLoading(false)
+    }
+    loadData()
+  }, [fetchAdvisor, fetchAppointments])
 
   const handleScheduleAppointment = async () => {
+    if (!advisor) return
+
     setScheduling(true)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setScheduling(false)
-    setShowScheduleDialog(false)
-    toast({ title: 'Appointment scheduled successfully' })
-    // Reset form
-    setSelectedDate('')
-    setSelectedTime('')
-    setTopic('')
+    try {
+      // Combine date and time into ISO format
+      const scheduledAt = `${selectedDate}T${selectedTime}:00`
+
+      await AppointmentAPI.bookAppointment({
+        advisor_id: advisor.id,
+        scheduled_at: scheduledAt,
+        type: 'advising',
+        location: appointmentType === 'in-person' ? advisor.office : undefined,
+        student_notes: topic,
+      })
+
+      toast({ title: 'Appointment scheduled successfully' })
+      setShowScheduleDialog(false)
+      setSelectedDate('')
+      setSelectedTime('')
+      setTopic('')
+
+      // Refresh appointments
+      fetchAppointments()
+    } catch (error: any) {
+      toast({
+        title: 'Failed to schedule appointment',
+        description: error?.response?.data?.message || 'Please try again',
+        variant: 'destructive'
+      })
+    } finally {
+      setScheduling(false)
+    }
+  }
+
+  const handleCancelAppointment = async (appointmentId: number) => {
+    try {
+      await AppointmentAPI.cancelAppointment(appointmentId)
+      toast({ title: 'Appointment cancelled' })
+      fetchAppointments()
+    } catch (error: any) {
+      toast({
+        title: 'Failed to cancel',
+        description: error?.response?.data?.message || 'Cannot cancel this appointment',
+        variant: 'destructive'
+      })
+    }
+  }
+
+  if (loading) {
+    return (
+      <AppShell>
+        <PageSkeleton type="detail" />
+      </AppShell>
+    )
+  }
+
+  if (!advisor) {
+    return (
+      <AppShell>
+        <div className="flex flex-col gap-4 p-6">
+          <div>
+            <h1 className="text-2xl font-bold">My Advisor</h1>
+            <p className="text-sm text-muted-foreground">
+              Connect with your academic advisor for guidance and support
+            </p>
+          </div>
+          <Card>
+            <CardContent className="py-12 text-center">
+              <User className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+              <h3 className="text-lg font-medium">No Advisor Assigned</h3>
+              <p className="text-muted-foreground mt-2">
+                You don't have an academic advisor assigned yet. Please contact the registrar's office.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </AppShell>
+    )
   }
 
   return (
@@ -148,7 +279,7 @@ export default function AdvisorPage() {
               <DialogHeader>
                 <DialogTitle>Schedule Appointment</DialogTitle>
                 <DialogDescription>
-                  Book a meeting with {advisor.name}
+                  Book a meeting with {advisor?.name}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
@@ -198,9 +329,14 @@ export default function AdvisorPage() {
                       <SelectValue placeholder="Select a time" />
                     </SelectTrigger>
                     <SelectContent>
-                      {availableSlots.map(slot => (
-                        <SelectItem key={slot} value={slot}>{slot}</SelectItem>
-                      ))}
+                      {availableSlots.map(slot => {
+                        const [h, m] = slot.split(':')
+                        const hour = parseInt(h)
+                        const displayTime = `${hour > 12 ? hour - 12 : hour}:${m} ${hour >= 12 ? 'PM' : 'AM'}`
+                        return (
+                          <SelectItem key={slot} value={slot}>{displayTime}</SelectItem>
+                        )
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
@@ -360,8 +496,14 @@ export default function AdvisorPage() {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">Reschedule</Button>
-                          <Button variant="ghost" size="sm" className="text-red-600">Cancel</Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-600"
+                            onClick={() => handleCancelAppointment(apt.id)}
+                          >
+                            Cancel
+                          </Button>
                         </div>
                       </div>
                     ))}

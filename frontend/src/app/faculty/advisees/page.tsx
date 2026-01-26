@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
+import { AppointmentAPI } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -53,6 +54,52 @@ interface Advisee {
   notes?: string
 }
 
+// Helper functions to transform API data
+function getAdviseeName(student: any): string {
+  if (student.first_name && student.last_name) {
+    return `${student.first_name} ${student.last_name}`
+  }
+  return student.user?.name || 'Unknown Student'
+}
+
+function getAdviseeEmail(student: any): string {
+  return student.user?.email || ''
+}
+
+function getMajorName(student: any): string {
+  return student.major_program?.name || student.majorProgram?.name || 'Undeclared'
+}
+
+function getMinorName(student: any): string | undefined {
+  return student.minor_program?.name || student.minorProgram?.name
+}
+
+function getClassification(student: any): 'Freshman' | 'Sophomore' | 'Junior' | 'Senior' {
+  const standing = student.class_standing?.toLowerCase()
+  if (standing === 'senior') return 'Senior'
+  if (standing === 'junior') return 'Junior'
+  if (standing === 'sophomore') return 'Sophomore'
+  return 'Freshman'
+}
+
+function getAcademicStanding(student: any): 'good' | 'warning' | 'probation' {
+  const status = student.academic_status?.toLowerCase()
+  if (status === 'academic_probation' || status === 'probation') return 'probation'
+  if (status === 'academic_warning' || status === 'warning') return 'warning'
+  return 'good'
+}
+
+function formatExpectedGraduation(date: string | null): string {
+  if (!date) return 'TBD'
+  try {
+    const d = new Date(date)
+    const month = d.toLocaleString('default', { month: 'long' })
+    return `${month} ${d.getFullYear()}`
+  } catch {
+    return 'TBD'
+  }
+}
+
 export default function AdviseesPage() {
   const [advisees, setAdvisees] = useState<Advisee[]>([])
   const [loading, setLoading] = useState(true)
@@ -60,95 +107,41 @@ export default function AdviseesPage() {
   const [selectedAdvisee, setSelectedAdvisee] = useState<Advisee | null>(null)
   const [showDetailDialog, setShowDetailDialog] = useState(false)
 
-  // Mock advisee data
-  const mockAdvisees: Advisee[] = [
-    {
-      id: 1,
-      student_id: 'STU001',
-      name: 'Maria Rodriguez',
-      email: 'mrodriguez@university.edu',
-      phone: '(555) 123-4567',
-      major: 'Computer Science',
-      minor: 'Mathematics',
-      classification: 'Junior',
-      gpa: 3.67,
-      credits_completed: 89,
-      credits_required: 120,
-      expected_graduation: 'May 2026',
-      holds: 0,
-      last_meeting: '2024-12-15',
-      academic_standing: 'good',
-    },
-    {
-      id: 2,
-      student_id: 'STU002',
-      name: 'David Park',
-      email: 'dpark@university.edu',
-      major: 'Computer Science',
-      classification: 'Senior',
-      gpa: 3.45,
-      credits_completed: 105,
-      credits_required: 120,
-      expected_graduation: 'May 2025',
-      holds: 1,
-      last_meeting: '2024-11-20',
-      academic_standing: 'good',
-    },
-    {
-      id: 3,
-      student_id: 'STU003',
-      name: 'Sophie Turner',
-      email: 'sturner@university.edu',
-      major: 'Computer Science',
-      classification: 'Sophomore',
-      gpa: 2.15,
-      credits_completed: 45,
-      credits_required: 120,
-      expected_graduation: 'May 2027',
-      holds: 2,
-      last_meeting: '2024-10-10',
-      academic_standing: 'probation',
-      notes: 'Struggling with core courses. Needs tutoring referral.',
-    },
-    {
-      id: 4,
-      student_id: 'STU004',
-      name: 'James Wilson',
-      email: 'jwilson@university.edu',
-      major: 'Computer Science',
-      minor: 'Business',
-      classification: 'Junior',
-      gpa: 2.85,
-      credits_completed: 75,
-      credits_required: 120,
-      expected_graduation: 'May 2026',
-      holds: 0,
-      academic_standing: 'warning',
-    },
-    {
-      id: 5,
-      student_id: 'STU005',
-      name: 'Emma Johnson',
-      email: 'ejohnson@university.edu',
-      major: 'Computer Science',
-      classification: 'Freshman',
-      gpa: 3.92,
-      credits_completed: 28,
-      credits_required: 120,
-      expected_graduation: 'May 2028',
-      holds: 0,
-      last_meeting: '2025-01-05',
-      academic_standing: 'good',
-    },
-  ]
+  // Fetch advisees from API
+  const fetchAdvisees = useCallback(async () => {
+    try {
+      const response = await AppointmentAPI.getMyAdvisees()
+      const data = response.data || []
+
+      const mapped: Advisee[] = data.map((student: any) => ({
+        id: student.id,
+        student_id: student.student_number || `STU${student.id}`,
+        name: getAdviseeName(student),
+        email: getAdviseeEmail(student),
+        phone: student.phone,
+        major: getMajorName(student),
+        minor: getMinorName(student),
+        classification: getClassification(student),
+        gpa: parseFloat(student.gpa) || 0,
+        credits_completed: student.total_credits_earned || 0,
+        credits_required: 120, // Standard requirement
+        expected_graduation: formatExpectedGraduation(student.expected_graduation_date),
+        holds: 0, // Would need separate API call
+        academic_standing: getAcademicStanding(student),
+      }))
+
+      setAdvisees(mapped)
+    } catch (error) {
+      console.error('Failed to fetch advisees:', error)
+      setAdvisees([])
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
-    // Simulate API fetch
-    setTimeout(() => {
-      setAdvisees(mockAdvisees)
-      setLoading(false)
-    }, 500)
-  }, [])
+    fetchAdvisees()
+  }, [fetchAdvisees])
 
   const filteredAdvisees = advisees.filter(a =>
     a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

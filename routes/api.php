@@ -1,41 +1,40 @@
 <?php
 
-use App\Http\Controllers\Api\V1\StudentController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
-use App\Http\Controllers\Api\V1\FacultyController;
-use App\Http\Controllers\Api\V1\DepartmentController;
-use App\Http\Controllers\Api\V1\ProgramController;
-use App\Http\Controllers\Api\V1\CourseController;
-use App\Http\Controllers\Api\V1\StaffController;
-use App\Http\Controllers\Api\V1\TermController;
-use App\Http\Controllers\Api\V1\BuildingController;
-use App\Http\Controllers\Api\V1\RoomController;
-use App\Http\Controllers\Api\V1\CourseSectionController;
-use App\Http\Controllers\Api\V1\EnrollmentController;
-use App\Http\Controllers\Api\V1\NotificationController;
-use App\Http\Controllers\Api\V1\CourseImportController;
-use App\Http\Controllers\Api\V1\GradeImportController;
-use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
-use App\Http\Controllers\Api\V1\InvoiceController;
-use App\Http\Controllers\Api\V1\PaymentController;
-use App\Http\Controllers\Api\V1\AttendanceController;
-use App\Http\Controllers\Api\V1\ClassSessionController;
+use App\Http\Controllers\Api\V1\ActionItemController;
+use App\Http\Controllers\Api\V1\AnnouncementController;
+use App\Http\Controllers\Api\V1\AppointmentController;
 use App\Http\Controllers\Api\V1\AssignmentController;
 use App\Http\Controllers\Api\V1\AssignmentSubmissionController;
-use App\Http\Controllers\Api\V1\GradebookController;
+use App\Http\Controllers\Api\V1\AttendanceController;
+use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
+use App\Http\Controllers\Api\V1\BuildingController;
+use App\Http\Controllers\Api\V1\ClassSessionController;
+use App\Http\Controllers\Api\V1\CourseController;
+use App\Http\Controllers\Api\V1\CourseImportController;
 use App\Http\Controllers\Api\V1\CourseMaterialController;
-use App\Http\Controllers\Api\V1\AnnouncementController;
-use App\Http\Controllers\Api\V1\FinancialAidController;
+use App\Http\Controllers\Api\V1\CourseSectionController;
+use App\Http\Controllers\Api\V1\DepartmentController;
 use App\Http\Controllers\Api\V1\EventController;
-use App\Http\Controllers\Api\V1\MessageController;
-use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\FacultyController;
+use App\Http\Controllers\Api\V1\FinancialAidController;
+use App\Http\Controllers\Api\V1\GradebookController;
+use App\Http\Controllers\Api\V1\GradeImportController;
 use App\Http\Controllers\Api\V1\HoldController;
-use App\Http\Controllers\Api\V1\ActionItemController;
-use App\Http\Controllers\Api\V1\AppointmentController;
+use App\Http\Controllers\Api\V1\InvoiceController;
+use App\Http\Controllers\Api\V1\MessageController;
+use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\ProgramController;
+use App\Http\Controllers\Api\V1\RoomController;
 use App\Http\Controllers\Api\V1\SettingController;
+use App\Http\Controllers\Api\V1\StaffController;
+use App\Http\Controllers\Api\V1\StudentController;
+use App\Http\Controllers\Api\V1\TermController;
+use App\Http\Controllers\Api\V1\UserController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
 /**
  * @OA\Get(
@@ -43,20 +42,26 @@ use App\Http\Controllers\Api\V1\SettingController;
  *     summary="Check application health",
  *     description="Provides the health status of the application and its connected services (database, cache).",
  *     tags={"System"},
+ *
  *     @OA\Response(
  *         response=200,
  *         description="System is healthy",
+ *
  *         @OA\JsonContent(
+ *
  *             @OA\Property(property="status", type="string", example="healthy"),
  *             @OA\Property(property="timestamp", type="string", format="date-time"),
  *             @OA\Property(property="services", type="object"),
  *             @OA\Property(property="application", type="object")
  *         )
  *     ),
+ *
  *     @OA\Response(
  *         response=503,
  *         description="System is unhealthy",
+ *
  *         @OA\JsonContent(
+ *
  *             @OA\Property(property="status", type="string", example="unhealthy"),
  *             @OA\Property(property="timestamp", type="string", format="date-time"),
  *             @OA\Property(property="services", type="object"),
@@ -76,28 +81,28 @@ Route::get('/health', function () {
         DB::connection()->getPdo();
         $services['database'] = [
             'status' => 'healthy',
-            'message' => 'Database connection successful'
+            'message' => 'Database connection successful',
         ];
     } catch (Exception $e) {
         $status = 'unhealthy';
         $httpCode = 503;
         $services['database'] = [
             'status' => 'unhealthy',
-            'message' => 'Database connection failed: ' . $e->getMessage()
+            'message' => 'Database connection failed: '.$e->getMessage(),
         ];
     }
 
     // Check Cache Connection
     try {
-        $testKey = 'health_check_' . time();
+        $testKey = 'health_check_'.time();
         Cache::put($testKey, 'test', 10);
         $retrievedValue = Cache::get($testKey);
         Cache::forget($testKey);
-        
+
         if ($retrievedValue === 'test') {
             $services['cache'] = [
                 'status' => 'healthy',
-                'message' => 'Cache connection successful'
+                'message' => 'Cache connection successful',
             ];
         } else {
             throw new Exception('Cache write/read test failed');
@@ -107,7 +112,7 @@ Route::get('/health', function () {
         $httpCode = 503;
         $services['cache'] = [
             'status' => 'unhealthy',
-            'message' => 'Cache connection failed: ' . $e->getMessage()
+            'message' => 'Cache connection failed: '.$e->getMessage(),
         ];
     }
 
@@ -118,13 +123,16 @@ Route::get('/health', function () {
         'application' => [
             'name' => config('app.name'),
             'environment' => config('app.env'),
-            'version' => '1.0.0'
-        ]
+            'version' => '1.0.0',
+        ],
     ], $httpCode);
 })->middleware('throttle:100,1'); // Allow 100 requests per minute for health checks
 
 Route::get('/user', function (Request $request) {
-    return $request->user();
+    $user = $request->user();
+    $user->load('roles.permissions');
+
+    return new \App\Http\Resources\UserResource($user);
 })->middleware(['auth:sanctum', 'throttle:api']);
 
 // API routes for students that return JSON resources
@@ -143,7 +151,6 @@ Route::post('/v1/forgot-password', [PasswordResetController::class, 'sendResetLi
 Route::post('/v1/reset-password', [PasswordResetController::class, 'reset'])
     ->middleware('throttle:api')
     ->name('api.password.update');
-
 
 Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     // Auth routes
@@ -226,15 +233,18 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::post('admission-applications/{admission_application}/reject', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'reject'])->middleware('permission:update_applications');
     Route::post('admission-applications/{admission_application}/waitlist', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'waitlist'])->middleware('permission:update_applications');
     Route::post('admission-applications/{admission_application}/enroll', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'enroll'])->middleware('permission:update_applications');
-    
+
     // Nested ProgramChoice routes - both nested and shallow for RESTful best practices
     Route::apiResource('admission-applications.program-choices', \App\Http\Controllers\Api\V1\ProgramChoiceController::class)->scoped()->shallow();
-    
+
     // Role and Permission management resources (admin-only)
     Route::middleware('role.admin')->group(function () {
         Route::apiResource('roles', \App\Http\Controllers\Api\V1\RoleController::class);
         Route::post('roles/{role}/permissions', [\App\Http\Controllers\Api\V1\RoleController::class, 'syncPermissions']);
         Route::apiResource('permissions', \App\Http\Controllers\Api\V1\PermissionController::class)->only(['index', 'show']);
+
+        // Admin dashboard endpoints
+        Route::get('admin/dashboard/holds-summary', [HoldController::class, 'adminSummary']);
     });
 
     // User management (for admin to list users without student records)
@@ -280,7 +290,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::delete('academic-records/{academic_record}', [\App\Http\Controllers\Api\V1\AcademicRecordController::class, 'destroy'])->middleware('permission:update_grades');
     Route::apiResource('students.documents', \App\Http\Controllers\Api\V1\DocumentController::class)->scoped()->shallow();
     Route::get('students/{student}/documents/all-versions', [\App\Http\Controllers\Api\V1\DocumentController::class, 'allVersions']);
-    
+
     // Document restore routes
     Route::post('documents/{document}/restore', [\App\Http\Controllers\Api\V1\DocumentController::class, 'restore'])->withTrashed();
     Route::delete('documents/{document}/force', [\App\Http\Controllers\Api\V1\DocumentController::class, 'forceDelete'])->withTrashed();
@@ -314,14 +324,14 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     // Admission application restore routes
     Route::post('admission-applications/{admission_application}/restore', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'restore'])->withTrashed();
     Route::delete('admission-applications/{admission_application}/force', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'forceDelete'])->withTrashed();
-    
+
     // Enrollment swap endpoint
     Route::post('enrollments/swap', [\App\Http\Controllers\Api\V1\EnrollmentSwapController::class, 'store']);
-    
+
     // Notification routes
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
-    
+
     // Grade management routes
     Route::put('enrollments/{enrollment}/grade', [\App\Http\Controllers\Api\V1\GradeController::class, 'submitGrade']);
     Route::post('course-sections/{courseSection}/grades/bulk', [\App\Http\Controllers\Api\V1\GradeController::class, 'bulkSubmitGrades']);
@@ -573,10 +583,8 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::post('settings/system/cache/clear', [SettingController::class, 'clearCache']);
     Route::post('settings/system/maintenance', [SettingController::class, 'toggleMaintenance']);
 
-}); 
+});
 
 // Prometheus metrics endpoint (unauthenticated for monitoring systems)
 Route::get('/metrics', [\App\Http\Controllers\Api\V1\MetricsController::class, 'index'])
     ->middleware('throttle:60,1'); // Allow 60 requests per minute for metrics scraping
-
- 

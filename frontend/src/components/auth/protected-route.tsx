@@ -34,13 +34,10 @@ export function ProtectedRoute({
       return
     }
 
-    // Check role requirement
+    // Check role requirement (case-insensitive)
     if (requiredRole && user) {
-      const userRole = typeof user.roles?.[0] === 'string'
-        ? user.roles[0]
-        : user.roles?.[0]?.name
-
-      if (userRole !== requiredRole) {
+      const userRole = user.roles?.[0]?.name?.toLowerCase()
+      if (userRole !== requiredRole.toLowerCase()) {
         // Unauthorized - redirect to dashboard
         router.push('/')
         return
@@ -72,13 +69,10 @@ export function ProtectedRoute({
     return null
   }
 
-  // Role check failed
+  // Role check failed (case-insensitive)
   if (requiredRole && user) {
-    const userRole = typeof user.roles?.[0] === 'string'
-      ? user.roles[0]
-      : user.roles?.[0]?.name
-
-    if (userRole !== requiredRole) {
+    const userRole = user.roles?.[0]?.name?.toLowerCase()
+    if (userRole !== requiredRole.toLowerCase()) {
       return null
     }
   }

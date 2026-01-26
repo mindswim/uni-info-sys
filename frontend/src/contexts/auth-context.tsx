@@ -3,13 +3,20 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 
 // Type definitions
+export interface Role {
+  id: number
+  name: string
+  permissions: string[]
+}
+
 export interface User {
   id: number
   name: string
   email: string
-  role?: string
-  roles?: Array<{ name: string }>
+  roles?: Role[]
   permissions?: string[]
+  student_id?: number
+  staff_id?: number
 }
 
 interface AuthContextType {
@@ -143,39 +150,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Cookie is already set by the API route for middleware
       storage.setToken(data.token)
 
-      // Set token first so refreshUser can use it
-      setToken(data.token)
-      setUser(data.user)
-      storage.setUser(data.user)
-
-      // Fetch real roles and permissions from backend
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost'
-      const rolesResponse = await fetch(`${apiUrl}/api/v1/users/${data.user.id}/roles`, {
-        headers: {
-          'Authorization': `Bearer ${data.token}`,
-          'Accept': 'application/json',
-        },
-      }).catch(() => null)
-
-      if (rolesResponse && rolesResponse.ok) {
-        const rolesData = await rolesResponse.json()
-        const enrichedUser = {
-          ...data.user,
-          roles: rolesData.data || rolesData,
-        }
-
-        // Extract all permissions from roles
-        const permissions = new Set<string>()
-        enrichedUser.roles?.forEach((role: any) => {
-          role.permissions?.forEach((permission: any) => {
-            permissions.add(permission.name || permission)
-          })
+      // Extract all permissions from roles (backend now returns roles with permissions)
+      const permissions = new Set<string>()
+      data.user.roles?.forEach((role: Role) => {
+        role.permissions?.forEach((permission: string) => {
+          permissions.add(permission)
         })
-        enrichedUser.permissions = Array.from(permissions)
+      })
 
-        storage.setUser(enrichedUser)
-        setUser(enrichedUser)
+      const enrichedUser: User = {
+        ...data.user,
+        permissions: Array.from(permissions),
       }
+
+      storage.setUser(enrichedUser)
+      setToken(data.token)
+      setUser(enrichedUser)
     } catch (error) {
       console.error('Login error:', error)
       throw error
@@ -207,8 +197,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost'
 
-      // Fetch user data with roles and permissions
-      const response = await fetch(`${apiUrl}/api/v1/user`, {
+      // Fetch user data with roles and permissions (backend now includes roles)
+      const response = await fetch(`${apiUrl}/api/v1/auth/user`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
@@ -217,32 +207,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (response.ok) {
         const userData = await response.json()
-        let user = userData.data || userData
 
-        // Fetch user's roles with permissions
-        const rolesResponse = await fetch(`${apiUrl}/api/v1/users/${user.id}/roles`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-          },
-        }).catch(() => null)
-
-        if (rolesResponse && rolesResponse.ok) {
-          const rolesData = await rolesResponse.json()
-          user.roles = rolesData.data || rolesData
-
-          // Extract all permissions from roles
-          const permissions = new Set<string>()
-          user.roles?.forEach((role: any) => {
-            role.permissions?.forEach((permission: any) => {
-              permissions.add(permission.name || permission)
-            })
+        // Extract all permissions from roles
+        const permissions = new Set<string>()
+        userData.roles?.forEach((role: Role) => {
+          role.permissions?.forEach((permission: string) => {
+            permissions.add(permission)
           })
-          user.permissions = Array.from(permissions)
+        })
+
+        const enrichedUser: User = {
+          ...userData,
+          permissions: Array.from(permissions),
         }
 
-        storage.setUser(user)
-        setUser(user)
+        storage.setUser(enrichedUser)
+        setUser(enrichedUser)
       } else if (response.status === 401) {
         // Token invalid, logout
         logout()
@@ -285,19 +265,12 @@ export function usePermission(permission: string): boolean {
   return user.permissions.includes(permission)
 }
 
-// Helper hook for checking roles
+// Helper hook for checking roles (case-insensitive comparison)
 export function useRole(role: string): boolean {
   const { user } = useAuth()
 
-  if (!user) return false
+  if (!user || !user.roles) return false
 
-  // Check direct role property
-  if (user.role === role) return true
-
-  // Check roles array
-  if (user.roles) {
-    return user.roles.some(r => r.name === role)
-  }
-
-  return false
+  const normalizedRole = role.toLowerCase()
+  return user.roles.some(r => r.name.toLowerCase() === normalizedRole)
 }

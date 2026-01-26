@@ -10,42 +10,42 @@ use Illuminate\Validation\ValidationException;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(
-    name: "Authentication",
-    description: "Authentication endpoints for obtaining API tokens."
+    name: 'Authentication',
+    description: 'Authentication endpoints for obtaining API tokens.'
 )]
 class AuthController extends Controller
 {
     #[OA\Post(
-        path: "/api/v1/tokens/create",
-        summary: "Login and obtain API token",
-        description: "Authenticate with email and password to receive an API token for subsequent requests.",
-        tags: ["Authentication"],
+        path: '/api/v1/tokens/create',
+        summary: 'Login and obtain API token',
+        description: 'Authenticate with email and password to receive an API token for subsequent requests.',
+        tags: ['Authentication'],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ["email", "password", "device_name"],
+                required: ['email', 'password', 'device_name'],
                 properties: [
-                    new OA\Property(property: "email", type: "string", format: "email", example: "user@university.edu"),
-                    new OA\Property(property: "password", type: "string", format: "password", example: "password123"),
-                    new OA\Property(property: "device_name", type: "string", example: "Mobile App"),
+                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'user@university.edu'),
+                    new OA\Property(property: 'password', type: 'string', format: 'password', example: 'password123'),
+                    new OA\Property(property: 'device_name', type: 'string', example: 'Mobile App'),
                 ]
             )
         ),
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Login successful, token returned.",
+                description: 'Login successful, token returned.',
                 content: new OA\JsonContent(
-                    properties: [new OA\Property(property: "token", type: "string", example: "1|abc123def456...")]
+                    properties: [new OA\Property(property: 'token', type: 'string', example: '1|abc123def456...')]
                 )
             ),
             new OA\Response(
                 response: 422,
-                description: "Invalid credentials or validation error.",
+                description: 'Invalid credentials or validation error.',
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "message", type: "string"),
-                        new OA\Property(property: "errors", type: "object"),
+                        new OA\Property(property: 'message', type: 'string'),
+                        new OA\Property(property: 'errors', type: 'object'),
                     ]
                 )
             ),
@@ -72,31 +72,40 @@ class AuthController extends Controller
 
         $token = $user->createToken($request->device_name)->plainTextToken;
 
+        // Build roles array with full permission details
+        $roles = $user->roles->map(function ($role) {
+            return [
+                'id' => $role->id,
+                'name' => $role->name,
+                'permissions' => $role->permissions->pluck('name'),
+            ];
+        });
+
         return response()->json([
             'token' => $token,
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'roles' => $user->roles->pluck('name'),
+                'roles' => $roles,
                 'student_id' => $user->student?->id,
                 'staff_id' => $user->staff?->id,
-            ]
+            ],
         ]);
     }
 
     #[OA\Post(
-        path: "/api/v1/auth/logout",
-        summary: "Logout and revoke current token",
-        description: "Revoke the current authentication token.",
-        tags: ["Authentication"],
-        security: [["sanctum" => []]],
+        path: '/api/v1/auth/logout',
+        summary: 'Logout and revoke current token',
+        description: 'Revoke the current authentication token.',
+        tags: ['Authentication'],
+        security: [['sanctum' => []]],
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Successfully logged out.",
+                description: 'Successfully logged out.',
                 content: new OA\JsonContent(
-                    properties: [new OA\Property(property: "message", type: "string")]
+                    properties: [new OA\Property(property: 'message', type: 'string')]
                 )
             ),
         ]
@@ -109,23 +118,23 @@ class AuthController extends Controller
     }
 
     #[OA\Get(
-        path: "/api/v1/auth/user",
-        summary: "Get current user information",
+        path: '/api/v1/auth/user',
+        summary: 'Get current user information',
         description: "Get the authenticated user's profile information.",
-        tags: ["Authentication"],
-        security: [["sanctum" => []]],
+        tags: ['Authentication'],
+        security: [['sanctum' => []]],
         responses: [
             new OA\Response(
                 response: 200,
-                description: "User information retrieved.",
+                description: 'User information retrieved.',
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "id", type: "integer"),
-                        new OA\Property(property: "name", type: "string"),
-                        new OA\Property(property: "email", type: "string"),
-                        new OA\Property(property: "roles", type: "array", items: new OA\Items(type: "string")),
-                        new OA\Property(property: "student_id", type: "integer", nullable: true),
-                        new OA\Property(property: "staff_id", type: "integer", nullable: true),
+                        new OA\Property(property: 'id', type: 'integer'),
+                        new OA\Property(property: 'name', type: 'string'),
+                        new OA\Property(property: 'email', type: 'string'),
+                        new OA\Property(property: 'roles', type: 'array', items: new OA\Items(type: 'string')),
+                        new OA\Property(property: 'student_id', type: 'integer', nullable: true),
+                        new OA\Property(property: 'staff_id', type: 'integer', nullable: true),
                     ]
                 )
             ),
@@ -136,11 +145,20 @@ class AuthController extends Controller
         $user = $request->user();
         $user->load(['student', 'staff', 'roles.permissions']);
 
+        // Build roles array with full permission details
+        $roles = $user->roles->map(function ($role) {
+            return [
+                'id' => $role->id,
+                'name' => $role->name,
+                'permissions' => $role->permissions->pluck('name'),
+            ];
+        });
+
         return response()->json([
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
-            'roles' => $user->roles->pluck('name'),
+            'roles' => $roles,
             'student_id' => $user->student?->id,
             'staff_id' => $user->staff?->id,
         ]);

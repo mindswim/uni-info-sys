@@ -486,8 +486,8 @@ export function GlobalSearch() {
   const router = useRouter()
   const { user, logout } = useAuth()
 
-  const firstRole = user?.roles?.[0]
-  const userRole = (typeof firstRole === 'string' ? firstRole : firstRole?.name)?.toLowerCase() || 'student'
+  // Roles are now always objects with {id, name, permissions}
+  const userRole = user?.roles?.[0]?.name?.toLowerCase() || 'student'
   const navigationItems = getNavigationItems(userRole)
 
   // Keyboard shortcut

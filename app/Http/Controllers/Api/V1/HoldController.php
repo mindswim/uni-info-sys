@@ -76,10 +76,10 @@ class HoldController extends Controller
     {
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
-            'type' => 'required|string|in:' . implode(',', Hold::TYPES),
+            'type' => 'required|string|in:'.implode(',', Hold::TYPES),
             'reason' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'severity' => 'sometimes|string|in:' . implode(',', Hold::SEVERITIES),
+            'severity' => 'sometimes|string|in:'.implode(',', Hold::SEVERITIES),
             'prevents_registration' => 'sometimes|boolean',
             'prevents_transcript' => 'sometimes|boolean',
             'prevents_graduation' => 'sometimes|boolean',
@@ -105,10 +105,10 @@ class HoldController extends Controller
     public function update(Request $request, Hold $hold): JsonResponse
     {
         $validated = $request->validate([
-            'type' => 'sometimes|string|in:' . implode(',', Hold::TYPES),
+            'type' => 'sometimes|string|in:'.implode(',', Hold::TYPES),
             'reason' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
-            'severity' => 'sometimes|string|in:' . implode(',', Hold::SEVERITIES),
+            'severity' => 'sometimes|string|in:'.implode(',', Hold::SEVERITIES),
             'prevents_registration' => 'sometimes|boolean',
             'prevents_transcript' => 'sometimes|boolean',
             'prevents_graduation' => 'sometimes|boolean',
@@ -159,7 +159,7 @@ class HoldController extends Controller
     {
         $student = Student::where('user_id', $request->user()->id)->first();
 
-        if (!$student) {
+        if (! $student) {
             return response()->json([
                 'data' => [
                     'total_active' => 0,
@@ -180,6 +180,42 @@ class HoldController extends Controller
                 'prevents_registration' => $activeHolds->where('prevents_registration', true)->isNotEmpty(),
                 'critical_count' => $activeHolds->where('severity', Hold::SEVERITY_CRITICAL)->count(),
                 'holds' => $activeHolds,
+            ],
+        ]);
+    }
+
+    /**
+     * Get aggregated hold summary for admin dashboard.
+     * Returns system-wide hold statistics across all students.
+     */
+    public function adminSummary(Request $request): JsonResponse
+    {
+        // Get counts by type using a single query
+        $byType = Hold::active()
+            ->selectRaw('type, COUNT(*) as count')
+            ->groupBy('type')
+            ->pluck('count', 'type')
+            ->toArray();
+
+        // Get total active holds count
+        $total = array_sum($byType);
+
+        // Get critical holds count
+        $critical = Hold::active()
+            ->where('severity', Hold::SEVERITY_CRITICAL)
+            ->count();
+
+        // Get holds preventing registration
+        $preventingRegistration = Hold::active()
+            ->where('prevents_registration', true)
+            ->count();
+
+        return response()->json([
+            'data' => [
+                'total' => $total,
+                'by_type' => $byType,
+                'critical' => $critical,
+                'preventing_registration' => $preventingRegistration,
             ],
         ]);
     }

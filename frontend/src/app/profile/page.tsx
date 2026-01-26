@@ -228,7 +228,7 @@ export default function ProfilePage() {
                   <div>
                     <Label className="text-muted-foreground">Role</Label>
                     <Badge variant="secondary">
-                      {user.roles?.[0]?.name || user.role || 'User'}
+                      {user.roles?.[0]?.name || 'User'}
                     </Badge>
                   </div>
                 </div>

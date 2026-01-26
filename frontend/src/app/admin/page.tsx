@@ -86,7 +86,7 @@ export default function AdminOverviewPage() {
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/course-sections?per_page=1`, { headers }),
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/terms`, { headers }),
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/health`).catch(() => null),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/holds/summary`, { headers }).catch(() => null),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/admin/dashboard/holds-summary`, { headers }).catch(() => null),
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/enrollments?per_page=1`, { headers }).catch(() => null),
         ])
 
@@ -112,18 +112,12 @@ export default function AdminOverviewPage() {
         const enrolled = appStats.data?.enrolled || 0
         const yieldRate = accepted > 0 ? Math.round((enrolled / accepted) * 100) : 0
 
-        // Mock holds data if not available from API or if structure doesn't match
-        // The API returns a student-focused summary, so we need to provide admin-focused mock data
-        const holdsSummary: HoldsSummary = (holdsData?.data?.by_type) ? holdsData.data : {
-          total: 12,
-          by_type: {
-            financial: 5,
-            registration: 3,
-            academic: 2,
-            immunization: 2
-          },
-          critical: 3,
-          preventing_registration: 8
+        // Use real holds data from admin endpoint, with fallback for edge cases
+        const holdsSummary: HoldsSummary = holdsData?.data ?? {
+          total: 0,
+          by_type: {},
+          critical: 0,
+          preventing_registration: 0
         }
 
         // Mock enrollment stats

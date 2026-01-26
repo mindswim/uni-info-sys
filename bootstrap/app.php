@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\HandleCors;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -11,6 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Remove Laravel's default CORS middleware - we use our custom CorsHeaders
+        // which runs earlier and ensures CORS headers on ALL responses (including errors)
+        $middleware->remove(HandleCors::class);
+
         // CORS must run first to add headers to ALL responses (including errors)
         $middleware->prepend(\App\Http\Middleware\CorsHeaders::class);
 
@@ -49,6 +54,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     detail: 'Authentication is required to access this resource.',
                     extensions: ['error_code' => 'UNAUTHENTICATED']
                 );
+
                 return $problem->toResponse();
             }
         });
@@ -62,7 +68,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
-                    
+
                     $problem = new App\Exceptions\ProblemDetails(
                         type: 'https://university-admissions.com/problems/enrollment-capacity-exceeded',
                         title: 'Enrollment Capacity Exceeded',
@@ -70,7 +76,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         detail: $e->getMessage(),
                         extensions: ['error_code' => 'ENROLLMENT_CAPACITY_EXCEEDED']
                     );
-                    
+
                     return $problem->toResponse();
                 } elseif ($e instanceof App\Exceptions\DuplicateEnrollmentException) {
                     \Log::warning('Duplicate enrollment attempt', [
@@ -78,7 +84,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
-                    
+
                     $problem = new App\Exceptions\ProblemDetails(
                         type: 'https://university-admissions.com/problems/duplicate-enrollment',
                         title: 'Duplicate Enrollment',
@@ -86,7 +92,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         detail: $e->getMessage(),
                         extensions: ['error_code' => 'DUPLICATE_ENROLLMENT']
                     );
-                    
+
                     return $problem->toResponse();
                 } elseif ($e instanceof App\Exceptions\StudentNotActiveException) {
                     \Log::warning('Inactive student enrollment attempt', [
@@ -94,7 +100,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
-                    
+
                     $problem = new App\Exceptions\ProblemDetails(
                         type: 'https://university-admissions.com/problems/student-not-active',
                         title: 'Student Not Active',
@@ -102,7 +108,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         detail: $e->getMessage(),
                         extensions: ['error_code' => 'STUDENT_NOT_ACTIVE']
                     );
-                    
+
                     return $problem->toResponse();
                 } elseif ($e instanceof App\Exceptions\CourseSectionUnavailableException) {
                     \Log::warning('Course section unavailable', [
@@ -110,7 +116,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
-                    
+
                     $problem = new App\Exceptions\ProblemDetails(
                         type: 'https://university-admissions.com/problems/course-section-unavailable',
                         title: 'Course Section Unavailable',
@@ -118,7 +124,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         detail: $e->getMessage(),
                         extensions: ['error_code' => 'COURSE_SECTION_UNAVAILABLE']
                     );
-                    
+
                     return $problem->toResponse();
                 } elseif ($e instanceof App\Exceptions\PrerequisiteNotMetException) {
                     \Log::warning('Course prerequisites not met', [
@@ -126,7 +132,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
-                    
+
                     $problem = new App\Exceptions\ProblemDetails(
                         type: 'https://university-admissions.com/problems/prerequisite-not-met',
                         title: 'Prerequisite Not Met',
@@ -134,7 +140,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         detail: $e->getMessage(),
                         extensions: ['error_code' => 'PREREQUISITE_NOT_MET']
                     );
-                    
+
                     return $problem->toResponse();
                 } elseif ($e instanceof App\Exceptions\InvalidApplicationStatusException) {
                     \Log::warning('Invalid application status transition', [
@@ -142,7 +148,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
-                    
+
                     $problem = new App\Exceptions\ProblemDetails(
                         type: 'https://university-admissions.com/problems/invalid-application-status',
                         title: 'Invalid Application Status',
@@ -150,7 +156,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         detail: $e->getMessage(),
                         extensions: ['error_code' => 'INVALID_APPLICATION_STATUS']
                     );
-                    
+
                     return $problem->toResponse();
                 } elseif ($e instanceof App\Exceptions\ResourceNotFoundException) {
                     \Log::info('Resource not found', [
@@ -158,7 +164,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
-                    
+
                     $problem = new App\Exceptions\ProblemDetails(
                         type: 'https://university-admissions.com/problems/resource-not-found',
                         title: 'Resource Not Found',
@@ -166,7 +172,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         detail: $e->getMessage(),
                         extensions: ['error_code' => 'RESOURCE_NOT_FOUND']
                     );
-                    
+
                     return $problem->toResponse();
                 } elseif ($e instanceof App\Exceptions\InsufficientPermissionsException) {
                     \Log::warning('Insufficient permissions', [
@@ -174,7 +180,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
-                    
+
                     $problem = new App\Exceptions\ProblemDetails(
                         type: 'https://university-admissions.com/problems/insufficient-permissions',
                         title: 'Insufficient Permissions',
@@ -182,7 +188,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         detail: $e->getMessage(),
                         extensions: ['error_code' => 'INSUFFICIENT_PERMISSIONS']
                     );
-                    
+
                     return $problem->toResponse();
                 } elseif ($e instanceof App\Exceptions\BusinessRuleViolationException) {
                     \Log::warning('Business rule violation', [
@@ -190,7 +196,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         'user_id' => $request->user()?->id,
                         'url' => $request->url(),
                     ]);
-                    
+
                     $problem = new App\Exceptions\ProblemDetails(
                         type: 'https://university-admissions.com/problems/business-rule-violation',
                         title: 'Business Rule Violation',
@@ -198,7 +204,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         detail: $e->getMessage(),
                         extensions: ['error_code' => 'BUSINESS_RULE_VIOLATION']
                     );
-                    
+
                     return $problem->toResponse();
                 } elseif ($e instanceof Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException) {
                     $problem = new App\Exceptions\ProblemDetails(
@@ -208,7 +214,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         detail: 'Too many requests. Please try again later.',
                         extensions: ['error_code' => 'RATE_LIMIT_EXCEEDED']
                     );
-                    
+
                     return $problem->toResponse();
                 } elseif ($e instanceof Illuminate\Database\Eloquent\ModelNotFoundException) {
                     $problem = new App\Exceptions\ProblemDetails(
@@ -218,13 +224,13 @@ return Application::configure(basePath: dirname(__DIR__))
                         detail: 'The requested resource was not found.',
                         extensions: ['error_code' => 'MODEL_NOT_FOUND']
                     );
-                    
+
                     return $problem->toResponse();
                 } else {
                     // For all other exceptions, use the standard RFC 7807 handler
                     // but add debug information if needed
                     $problem = App\Exceptions\ProblemDetails::fromException($e);
-                    
+
                     // Log unexpected errors
                     if ($problem->status >= 500) {
                         \Log::error('Unexpected API error', [
@@ -237,7 +243,7 @@ return Application::configure(basePath: dirname(__DIR__))
                             'request_data' => $request->except(['password', 'password_confirmation']),
                         ]);
                     }
-                    
+
                     // Include debug information in development
                     if (config('app.debug') && $problem->status >= 500) {
                         $problem = $problem->withExtensions([
@@ -252,10 +258,10 @@ return Application::configure(basePath: dirname(__DIR__))
                                         'function' => $trace['function'] ?? 'Unknown',
                                     ];
                                 })->all(),
-                            ]
+                            ],
                         ]);
                     }
-                    
+
                     return $problem->toResponse();
                 }
             }

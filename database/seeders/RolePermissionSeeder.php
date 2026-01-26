@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Role;
 use App\Models\Permission;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
 
 class RolePermissionSeeder extends Seeder
@@ -18,34 +18,34 @@ class RolePermissionSeeder extends Seeder
             // Role & Permission Management
             ['name' => 'roles.manage', 'description' => 'Create, read, update, delete, and assign roles'],
             ['name' => 'permissions.view', 'description' => 'View available permissions in the system'],
-            
+
             // User Management
             ['name' => 'users.manage', 'description' => 'Manage user accounts'],
-            
+
             // Academic Hierarchy Management
             ['name' => 'hierarchy.manage', 'description' => 'Manage Faculties, Departments, and Programs'],
-            
+
             // Course Management
             ['name' => 'courses.manage', 'description' => 'CRUD operations for courses and their prerequisites'],
             ['name' => 'course-sections.manage', 'description' => 'CRUD operations for course sections, including assigning instructors'],
-            
+
             // Student Management
             ['name' => 'students.manage', 'description' => 'Access and manage student data'],
-            
+
             // Enrollment Management
             ['name' => 'enrollments.manage', 'description' => 'Admin-level management of all student enrollments'],
             ['name' => 'enrollments.manage.own', 'description' => 'Student-level ability to enroll in or drop courses'],
-            
+
             // Grade Management
             ['name' => 'grades.upload', 'description' => 'Ability to upload grades for an assigned course section (Faculty)'],
-            
+
             // Application Management
             ['name' => 'applications.manage', 'description' => 'Manage admission applications'],
-            
+
             // Document Management
             ['name' => 'documents.manage', 'description' => 'Admin-level access to all user documents'],
             ['name' => 'documents.manage.own', 'description' => 'Student-level access to their own documents'],
-            
+
             // Legacy permissions (for backward compatibility)
             ['name' => 'manage-applications', 'description' => 'Can manage student applications'],
             ['name' => 'submit-documents', 'description' => 'Can submit documents'],
@@ -60,54 +60,43 @@ class RolePermissionSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permission['name']], $permission);
         }
 
-        // Create roles based on the Advanced Features Implementation Plan
+        // Create roles with standardized lowercase names
         $superAdminRole = Role::firstOrCreate(
-            ['name' => 'Super Admin'],
+            ['name' => 'super-admin'],
             ['description' => 'Full system access, including the ability to manage other admins and system-level settings']
         );
 
         $adminRole = Role::firstOrCreate(
-            ['name' => 'Admin'],
+            ['name' => 'admin'],
             ['description' => 'Manages core academic structure, courses, terms, staff, and student records']
         );
 
         $admissionsOfficerRole = Role::firstOrCreate(
-            ['name' => 'Admissions Officer'],
+            ['name' => 'admissions-officer'],
             ['description' => 'Manages admission applications, reviews submitted documents, and updates application statuses']
         );
 
         $facultyRole = Role::firstOrCreate(
-            ['name' => 'Faculty'],
+            ['name' => 'faculty'],
             ['description' => 'Manages course sections they are assigned to, including uploading grades and viewing enrollments']
         );
 
         $studentRole = Role::firstOrCreate(
-            ['name' => 'Student'],
+            ['name' => 'student'],
             ['description' => 'Manages their own profile, applications, documents, and course enrollments']
         );
 
-        // Legacy roles (for backward compatibility)
-        $legacyAdminRole = Role::firstOrCreate(
-            ['name' => 'admin'],
-            ['description' => 'Administrator with full system access (legacy)']
-        );
-
-        $legacyStaffRole = Role::firstOrCreate(
+        $staffRole = Role::firstOrCreate(
             ['name' => 'staff'],
-            ['description' => 'Staff member with moderate access (legacy)']
+            ['description' => 'Staff member with moderate access']
         );
 
-        $legacyStudentRole = Role::firstOrCreate(
-            ['name' => 'student'],
-            ['description' => 'Student with limited access to own data (legacy)']
-        );
-
-        $legacyModeratorRole = Role::firstOrCreate(
+        $moderatorRole = Role::firstOrCreate(
             ['name' => 'moderator'],
-            ['description' => 'Moderator with application review access (legacy)']
+            ['description' => 'Moderator with application review access']
         );
 
-        // Assign permissions to new roles
+        // Assign permissions to roles
         // Super Admin gets all permissions
         $allPermissions = Permission::all();
         $superAdminRole->permissions()->sync($allPermissions);
@@ -124,7 +113,6 @@ class RolePermissionSeeder extends Seeder
             'enrollments.manage',
             'applications.manage',
             'documents.manage',
-            // Legacy permissions
             'manage-applications',
             'view-reports',
             'manage-programs',
@@ -137,7 +125,6 @@ class RolePermissionSeeder extends Seeder
             'applications.manage',
             'documents.manage',
             'students.manage',
-            // Legacy permissions
             'manage-applications',
             'approve-applications',
             'verify-documents',
@@ -148,8 +135,8 @@ class RolePermissionSeeder extends Seeder
         // Faculty permissions
         $facultyPermissions = Permission::whereIn('name', [
             'grades.upload',
-            'enrollments.manage', // For their own course sections
-            'course-sections.manage', // For their own sections
+            'enrollments.manage',
+            'course-sections.manage',
         ])->get();
         $facultyRole->permissions()->sync($facultyPermissions);
 
@@ -157,16 +144,13 @@ class RolePermissionSeeder extends Seeder
         $studentPermissions = Permission::whereIn('name', [
             'enrollments.manage.own',
             'documents.manage.own',
-            // Legacy permissions
             'submit-documents',
             'view-own-data',
         ])->get();
         $studentRole->permissions()->sync($studentPermissions);
 
-        // Assign permissions to legacy roles for backward compatibility
-        $legacyAdminRole->permissions()->sync($allPermissions);
-
-        $legacyStaffPermissions = Permission::whereIn('name', [
+        // Staff permissions
+        $staffPermissions = Permission::whereIn('name', [
             'manage-applications',
             'view-reports',
             'verify-documents',
@@ -176,22 +160,15 @@ class RolePermissionSeeder extends Seeder
             'course-sections.manage',
             'students.manage',
         ])->get();
-        $legacyStaffRole->permissions()->sync($legacyStaffPermissions);
+        $staffRole->permissions()->sync($staffPermissions);
 
-        $legacyStudentPermissions = Permission::whereIn('name', [
-            'submit-documents',
-            'view-own-data',
-            'enrollments.manage.own',
-            'documents.manage.own',
-        ])->get();
-        $legacyStudentRole->permissions()->sync($legacyStudentPermissions);
-
-        $legacyModeratorPermissions = Permission::whereIn('name', [
+        // Moderator permissions
+        $moderatorPermissions = Permission::whereIn('name', [
             'approve-applications',
             'view-reports',
             'verify-documents',
             'applications.manage',
         ])->get();
-        $legacyModeratorRole->permissions()->sync($legacyModeratorPermissions);
+        $moderatorRole->permissions()->sync($moderatorPermissions);
     }
 }

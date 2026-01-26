@@ -272,29 +272,23 @@ class AuthService {
   }
 
   /**
-   * Check if user has a specific role
+   * Check if user has a specific role (case-insensitive)
    */
   hasRole(roleName: string): boolean {
     const user = this.getUser();
-    if (!user || !user.roles) return false;
-    // Handle both string array and object array formats
-    if (typeof user.roles[0] === 'string') {
-      return (user.roles as string[]).includes(roleName);
-    }
-    return user.roles.some(role => role.name === roleName);
+    if (!user || !user.roles || !user.roles.length) return false;
+    const normalizedRole = roleName.toLowerCase();
+    return user.roles.some(role => role.name.toLowerCase() === normalizedRole);
   }
 
   /**
-   * Check if user has any of the specified roles
+   * Check if user has any of the specified roles (case-insensitive)
    */
   hasAnyRole(roleNames: string[]): boolean {
     const user = this.getUser();
     if (!user || !user.roles || !user.roles.length) return false;
-    // Handle both string array and object array formats
-    if (typeof user.roles[0] === 'string') {
-      return (user.roles as string[]).some(role => roleNames.includes(role));
-    }
-    return user.roles.some(role => roleNames.includes(role.name));
+    const normalizedRoles = roleNames.map(r => r.toLowerCase());
+    return user.roles.some(role => normalizedRoles.includes(role.name.toLowerCase()));
   }
 
   /**

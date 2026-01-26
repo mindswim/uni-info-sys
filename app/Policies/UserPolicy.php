@@ -7,13 +7,21 @@ use App\Models\User;
 class UserPolicy
 {
     /**
+     * Check if user has admin role (case-insensitive).
+     */
+    private function isAdmin(User $user): bool
+    {
+        $userRoles = $user->roles()->pluck('name')->map(fn($r) => strtolower($r))->toArray();
+        return in_array('admin', $userRoles) || in_array('super admin', $userRoles);
+    }
+
+    /**
      * Determine whether the user can view any models.
      * Only admin can list all users.
      */
     public function viewAny(User $user): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        return in_array('admin', $userRoles);
+        return $this->isAdmin($user);
     }
 
     /**
@@ -22,8 +30,7 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        return in_array('admin', $userRoles) || $user->id === $model->id;
+        return $this->isAdmin($user) || $user->id === $model->id;
     }
 
     /**
@@ -31,8 +38,7 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        return in_array('admin', $userRoles);
+        return $this->isAdmin($user);
     }
 
     /**
@@ -40,8 +46,7 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
-        return in_array('admin', $userRoles) || $user->id === $model->id;
+        return $this->isAdmin($user) || $user->id === $model->id;
     }
 
     /**
@@ -49,8 +54,7 @@ class UserPolicy
      */
     public function delete(User $user, User $model): bool
     {
-        $userRoles = $user->roles()->pluck('name')->toArray();
         // Only admin can delete, and can't delete themselves
-        return in_array('admin', $userRoles) && $user->id !== $model->id;
+        return $this->isAdmin($user) && $user->id !== $model->id;
     }
 }

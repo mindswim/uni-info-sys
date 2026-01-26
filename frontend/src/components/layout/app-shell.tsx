@@ -45,12 +45,8 @@ export function AppShell({ children, breadcrumbs }: AppShellProps) {
           sidebarCollapsed={sidebarCollapsed}
           onSidebarToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="p-4 h-full">
-            <div className="rounded-xl bg-muted/50 p-6">
-              {children}
-            </div>
-          </div>
+        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-muted/30">
+          {children}
         </main>
       </div>
     </div>

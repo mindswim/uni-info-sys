@@ -238,6 +238,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     });
 
     // User management (for admin to list users without student records)
+    Route::get('users/{user}/roles', [UserController::class, 'roles']);
     Route::apiResource('users', UserController::class)->only(['index', 'show']);
 
     // Holds management

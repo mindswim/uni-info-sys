@@ -58,4 +58,16 @@ class UserController extends Controller
             'data' => $user->load('roles')
         ]);
     }
+
+    /**
+     * Get roles for a specific user.
+     */
+    public function roles(User $user): JsonResponse
+    {
+        $this->authorize('view', $user);
+
+        return response()->json([
+            'data' => $user->roles()->with('permissions')->get()
+        ]);
+    }
 }

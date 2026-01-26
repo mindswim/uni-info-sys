@@ -60,85 +60,85 @@ interface AppSidebarProps {
 const navigationItems = {
   student: [
     {
-      title: "Dashboard",
+      title: "Home",
       items: [
-        { title: "Overview", url: "/student", icon: Home }
+        { title: "Dashboard", url: "/student", icon: Home }
       ]
     },
     {
-      title: "Academic",
+      title: "Registration",
       items: [
-        { title: "Academic Records", url: "/student/academic-records", icon: Award },
-        { title: "Calendar", url: "/student/calendar", icon: Calendar },
-        { title: "Schedule", url: "/student/schedule", icon: Calendar },
+        { title: "Register for Classes", url: "/student/registration", icon: ClipboardCheck },
+        { title: "My Schedule", url: "/student/schedule", icon: Calendar },
+        { title: "Drop/Add", url: "/student/drop-add", icon: Edit2 }
+      ]
+    },
+    {
+      title: "Academics",
+      items: [
         { title: "Grades", url: "/student/grades", icon: Award },
+        { title: "Degree Audit", url: "/student/degree-audit", icon: Target },
         { title: "Transcripts", url: "/student/transcripts", icon: FileText }
-      ]
-    },
-    {
-      title: "Courses",
-      items: [
-        { title: "Enrollments", url: "/student/enrollments", icon: BookOpen },
-        { title: "Registration", url: "/student/registration", icon: ClipboardCheck },
-        { title: "Assignments", url: "/student/assignments", icon: PenTool },
-        { title: "Materials", url: "/student/materials", icon: FolderOpen },
-        { title: "Announcements", url: "/student/announcements", icon: Megaphone }
       ]
     },
     {
       title: "Financial",
       items: [
-        { title: "Financial Aid", url: "/student/financial-aid", icon: Award },
-        { title: "Billing", url: "/student/billing", icon: DollarSign }
+        { title: "Account Summary", url: "/student/billing", icon: DollarSign },
+        { title: "Make Payment", url: "/student/payment", icon: CreditCard },
+        { title: "Financial Aid", url: "/student/financial-aid", icon: Award }
       ]
     },
     {
-      title: "Applications",
+      title: "My Info",
       items: [
-        { title: "Apply", url: "/student/apply", icon: FileText },
-        { title: "Application Status", url: "/student/admissions", icon: ClipboardCheck }
+        { title: "Holds & To-Do", url: "/student/holds", icon: AlertCircle },
+        { title: "Advisor", url: "/student/advisor", icon: Users },
+        { title: "Profile", url: "/profile", icon: User }
       ]
     },
     {
-      title: "Other",
+      title: "Resources",
       items: [
         { title: "Messages", url: "/messages", icon: MessageSquare },
-        { title: "Profile", url: "/profile", icon: User }
+        { title: "Announcements", url: "/student/announcements", icon: Megaphone },
+        { title: "Academic Calendar", url: "/student/calendar", icon: Calendar }
       ]
     }
   ],
   staff: [
     {
-      title: "Dashboard",
+      title: "Home",
       items: [
-        { title: "Overview", url: "/faculty", icon: Home }
+        { title: "Dashboard", url: "/faculty", icon: Home }
       ]
     },
     {
-      title: "Students",
+      title: "My Classes",
       items: [
-        { title: "My Students", url: "/faculty/students", icon: Users }
+        { title: "Current Sections", url: "/faculty/sections", icon: BookOpen },
+        { title: "Rosters", url: "/faculty/students", icon: Users },
+        { title: "Attendance", url: "/faculty/attendance", icon: ClipboardCheck },
+        { title: "Gradebook", url: "/faculty/grades", icon: Award }
       ]
     },
     {
-      title: "Teaching",
+      title: "Course Content",
       items: [
-        { title: "Sections", url: "/faculty/sections", icon: BookOpen },
-        { title: "Course Management", url: "/faculty/courses", icon: Settings },
         { title: "Assignments", url: "/faculty/assignments", icon: PenTool },
         { title: "Materials", url: "/faculty/materials", icon: FolderOpen },
         { title: "Announcements", url: "/faculty/announcements", icon: Megaphone }
       ]
     },
     {
-      title: "Grading",
+      title: "Advising",
       items: [
-        { title: "Grades", url: "/faculty/grades", icon: Award },
-        { title: "Attendance", url: "/faculty/attendance", icon: ClipboardCheck }
+        { title: "My Advisees", url: "/faculty/advisees", icon: Users },
+        { title: "Appointments", url: "/faculty/appointments", icon: Calendar }
       ]
     },
     {
-      title: "Other",
+      title: "Resources",
       items: [
         { title: "Messages", url: "/messages", icon: MessageSquare },
         { title: "Profile", url: "/profile", icon: User }
@@ -154,59 +154,64 @@ const navigationItems = {
       ]
     },
     {
-      title: "Users",
+      title: "People",
       items: [
         { title: "Students", url: "/admin/students", icon: Users },
-        { title: "Faculty", url: "/admin/faculty", icon: UserCheck },
-        { title: "Staff", url: "/admin/staff", icon: Shield }
+        { title: "Faculty & Staff", url: "/admin/faculty", icon: UserCheck },
+        { title: "User Accounts", url: "/admin/system", icon: Shield }
       ]
     },
     {
-      title: "Academic Structure",
+      title: "Academics",
       items: [
-        { title: "Faculties", url: "/admin/faculties", icon: Building2 },
-        { title: "Departments", url: "/admin/departments", icon: Building },
         { title: "Programs", url: "/admin/programs", icon: GraduationCap },
+        { title: "Courses", url: "/admin/courses", icon: BookOpen },
+        { title: "Sections", url: "/admin/sections", icon: Calendar },
         { title: "Terms", url: "/admin/terms", icon: Calendar }
       ]
     },
     {
-      title: "Curriculum",
+      title: "Enrollment",
       items: [
-        { title: "Courses", url: "/admin/courses", icon: BookOpen },
-        { title: "Sections", url: "/admin/sections", icon: Calendar }
-      ]
-    },
-    {
-      title: "Student Management",
-      items: [
-        { title: "Enrollments", url: "/admin/enrollments", icon: ClipboardCheck },
+        { title: "Registration", url: "/admin/enrollments", icon: ClipboardCheck },
+        { title: "Holds Management", url: "/admin/holds", icon: AlertCircle },
+        { title: "Waitlists", url: "/admin/waitlists", icon: Users },
         { title: "Grades", url: "/admin/grades", icon: Award }
       ]
     },
     {
       title: "Admissions",
       items: [
-        { title: "Applications", url: "/admin/admissions", icon: FileText }
+        { title: "Applications", url: "/admin/admissions", icon: FileText },
+        { title: "Review Queue", url: "/admin/admissions/review", icon: ClipboardCheck }
+      ]
+    },
+    {
+      title: "Financials",
+      items: [
+        { title: "Billing", url: "/admin/billing", icon: DollarSign },
+        { title: "Financial Aid", url: "/admin/financial-aid", icon: Award }
+      ]
+    },
+    {
+      title: "Structure",
+      items: [
+        { title: "Faculties", url: "/admin/faculties", icon: Building2 },
+        { title: "Departments", url: "/admin/departments", icon: Building },
+        { title: "Buildings", url: "/admin/buildings", icon: Building2 }
       ]
     },
     {
       title: "Communications",
       items: [
-        { title: "Announcements", url: "/admin/announcements", icon: Megaphone }
+        { title: "Announcements", url: "/admin/announcements", icon: Megaphone },
+        { title: "Messages", url: "/messages", icon: MessageSquare }
       ]
     },
     {
       title: "System",
       items: [
-        { title: "User Management", url: "/admin/system", icon: Shield },
-        { title: "Buildings", url: "/admin/buildings", icon: Building2 }
-      ]
-    },
-    {
-      title: "Other",
-      items: [
-        { title: "Messages", url: "/messages", icon: MessageSquare },
+        { title: "Settings", url: "/admin/settings", icon: Settings },
         { title: "Profile", url: "/profile", icon: User }
       ]
     }

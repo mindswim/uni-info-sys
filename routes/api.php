@@ -32,6 +32,8 @@ use App\Http\Controllers\Api\V1\FinancialAidController;
 use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\MessageController;
 use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\HoldController;
+use App\Http\Controllers\Api\V1\ActionItemController;
 
 /**
  * @OA\Get(
@@ -235,7 +237,18 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
 
     // User management (for admin to list users without student records)
     Route::apiResource('users', UserController::class)->only(['index', 'show']);
-    
+
+    // Holds management
+    Route::get('holds/summary', [HoldController::class, 'summary']); // Student's own holds summary
+    Route::post('holds/{hold}/resolve', [HoldController::class, 'resolve']);
+    Route::apiResource('holds', HoldController::class);
+
+    // Action items (to-do list)
+    Route::get('action-items/dashboard', [ActionItemController::class, 'dashboard']); // Student's dashboard summary
+    Route::post('action-items/{actionItem}/complete', [ActionItemController::class, 'complete']);
+    Route::post('action-items/{actionItem}/dismiss', [ActionItemController::class, 'dismiss']);
+    Route::apiResource('action-items', ActionItemController::class);
+
     // Student-centric resources (protected by student role middleware)
     Route::middleware('role.student')->group(function () {
         Route::get('students/me', [\App\Http\Controllers\Api\V1\StudentController::class, 'me']);

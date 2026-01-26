@@ -87,6 +87,31 @@ class Student extends Model implements Auditable
         return $this->hasMany(Enrollment::class);
     }
 
+    public function holds()
+    {
+        return $this->hasMany(Hold::class);
+    }
+
+    public function activeHolds()
+    {
+        return $this->hasMany(Hold::class)->active();
+    }
+
+    public function actionItems()
+    {
+        return $this->hasMany(ActionItem::class);
+    }
+
+    public function pendingActionItems()
+    {
+        return $this->hasMany(ActionItem::class)->incomplete()->orderByPriority()->orderByDueDate();
+    }
+
+    public function hasRegistrationHold(): bool
+    {
+        return $this->activeHolds()->where('prevents_registration', true)->exists();
+    }
+
     public function invoices()
     {
         return $this->hasMany(Invoice::class);

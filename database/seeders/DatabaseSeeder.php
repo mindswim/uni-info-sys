@@ -100,6 +100,11 @@ class DatabaseSeeder extends Seeder
             BillingSeeder::class,
         ]);
 
+        // Step 17: Create holds and action items for demo
+        $this->call([
+            HoldsAndActionItemsSeeder::class,
+        ]);
+
         Log::info('Database seeding completed successfully!');
     }
     

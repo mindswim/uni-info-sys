@@ -1,0 +1,45 @@
+# Git
+.git
+.gitignore
+
+# Dependencies (will be installed in container)
+vendor
+node_modules
+frontend/node_modules
+frontend/.next
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+.env.docker
+
+# Logs and cache
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/debugbar
+
+# Testing
+tests
+phpunit.xml
+.phpunit.result.cache
+
+# Documentation
+*.md
+!README.md
+
+# Docker
+docker-compose.yml
+docker-compose.override.yml
+Dockerfile.dev
+
+# Misc
+.DS_Store
+*.log

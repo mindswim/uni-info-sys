@@ -705,3 +705,73 @@ export interface ClassGradebookResponse {
     completion_rate: number
   }
 }
+
+// Hold Types
+export interface Hold {
+  id: number
+  student_id: number
+  type: 'registration' | 'financial' | 'academic' | 'administrative' | 'immunization' | 'library' | 'parking'
+  reason: string
+  description?: string
+  severity: 'info' | 'warning' | 'critical'
+  prevents_registration: boolean
+  prevents_transcript: boolean
+  prevents_graduation: boolean
+  placed_by?: number
+  department?: string
+  placed_at: string
+  resolved_at?: string
+  resolved_by?: number
+  resolution_notes?: string
+
+  // Relationships
+  student?: Student
+  placed_by_user?: User
+  resolved_by_user?: User
+
+  // Timestamps
+  created_at: string
+  updated_at: string
+}
+
+export interface HoldSummary {
+  total: number
+  active: number
+  has_registration_hold: boolean
+  has_transcript_hold: boolean
+  has_graduation_hold: boolean
+  holds: Hold[]
+}
+
+// Action Item / To-Do Types
+export interface ActionItem {
+  id: number
+  student_id: number
+  type: 'registration' | 'financial_aid' | 'payment' | 'document' | 'advising' | 'course_eval' | 'immunization' | 'orientation' | 'graduation'
+  title: string
+  description?: string
+  status: 'pending' | 'in_progress' | 'completed' | 'dismissed'
+  priority: 'low' | 'normal' | 'high' | 'urgent'
+  action_url?: string
+  action_label?: string
+  due_date?: string
+  completed_at?: string
+  is_system_generated: boolean
+  source?: string
+  metadata?: Record<string, any>
+
+  // Relationships
+  student?: Student
+
+  // Timestamps
+  created_at: string
+  updated_at: string
+}
+
+export interface ActionItemDashboard {
+  total_pending: number
+  overdue_count: number
+  due_this_week: number
+  urgent_count: number
+  items: ActionItem[]
+}

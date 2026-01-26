@@ -341,6 +341,64 @@ export class MessageAPI {
   }
 }
 
+// Holds API methods
+export class HoldsAPI {
+  // Get holds summary for current student
+  static async getSummary(): Promise<any> {
+    return await ApiClient.get('/holds/summary')
+  }
+
+  // Get all holds for a student
+  static async getHolds(params?: { student_id?: number; status?: string }): Promise<any> {
+    const queryParams = new URLSearchParams()
+    if (params?.student_id) queryParams.append('student_id', params.student_id.toString())
+    if (params?.status) queryParams.append('status', params.status)
+    const url = `/holds${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+    return await ApiClient.get(url)
+  }
+
+  // Resolve a hold (admin only)
+  static async resolveHold(holdId: number, notes?: string): Promise<any> {
+    return await ApiClient.post(`/holds/${holdId}/resolve`, { resolution_notes: notes })
+  }
+}
+
+// Action Items / To-Do API methods
+export class ActionItemsAPI {
+  // Get dashboard summary for current student
+  static async getDashboard(): Promise<any> {
+    return await ApiClient.get('/action-items/dashboard')
+  }
+
+  // Get all action items
+  static async getItems(params?: {
+    student_id?: number
+    status?: string
+    type?: string
+    overdue?: boolean
+    due_within_days?: number
+  }): Promise<any> {
+    const queryParams = new URLSearchParams()
+    if (params?.student_id) queryParams.append('student_id', params.student_id.toString())
+    if (params?.status) queryParams.append('status', params.status)
+    if (params?.type) queryParams.append('type', params.type)
+    if (params?.overdue) queryParams.append('overdue', 'true')
+    if (params?.due_within_days) queryParams.append('due_within_days', params.due_within_days.toString())
+    const url = `/action-items${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+    return await ApiClient.get(url)
+  }
+
+  // Mark action item as complete
+  static async complete(itemId: number): Promise<any> {
+    return await ApiClient.post(`/action-items/${itemId}/complete`)
+  }
+
+  // Dismiss action item
+  static async dismiss(itemId: number): Promise<any> {
+    return await ApiClient.post(`/action-items/${itemId}/dismiss`)
+  }
+}
+
 // System/Admin API methods
 export class SystemAPI {
   // Health check

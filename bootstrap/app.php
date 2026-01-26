@@ -35,6 +35,20 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
+        // Handle unauthenticated API requests - return 401 JSON instead of redirect
+        $exceptions->render(function (Illuminate\Auth\AuthenticationException $e, Illuminate\Http\Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                $problem = new App\Exceptions\ProblemDetails(
+                    type: 'https://tools.ietf.org/html/rfc7235#section-3.1',
+                    title: 'Unauthenticated',
+                    status: 401,
+                    detail: 'Authentication is required to access this resource.',
+                    extensions: ['error_code' => 'UNAUTHENTICATED']
+                );
+                return $problem->toResponse();
+            }
+        });
+
         $exceptions->render(function (Throwable $e, Illuminate\Http\Request $request) {
             if ($request->is('api/*') || $request->expectsJson()) {
                 // Handle our custom domain exceptions first

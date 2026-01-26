@@ -57,8 +57,28 @@ class ProcessAttendanceImport extends AbstractCsvImportJob
         ];
     }
 
-    protected function processRow(array $data): void
+    protected function getValidationMessages(): array
     {
+        return [
+            'enrollment_id.required' => 'Enrollment ID is required',
+            'enrollment_id.exists' => 'Enrollment ID does not exist',
+            'course_section_id.required' => 'Course section ID is required',
+            'course_section_id.exists' => 'Course section ID does not exist',
+            'student_id.required' => 'Student ID is required',
+            'student_id.exists' => 'Student ID does not exist',
+            'attendance_date.required' => 'Attendance date is required',
+            'attendance_date.date' => 'Attendance date must be a valid date',
+            'status.required' => 'Status is required',
+            'status.in' => 'Status must be one of: present, absent, late, excused',
+        ];
+    }
+
+    protected function processRow(array $data, int $rowNumber, array &$stats): void
+    {
+        $existingRecord = AttendanceRecord::where('enrollment_id', $data['enrollment_id'])
+            ->where('attendance_date', $data['attendance_date'])
+            ->first();
+
         AttendanceRecord::updateOrCreate(
             [
                 'enrollment_id' => $data['enrollment_id'],
@@ -74,5 +94,12 @@ class ProcessAttendanceImport extends AbstractCsvImportJob
                 'recorded_by' => $data['recorded_by'] ?? null,
             ]
         );
+
+        if ($existingRecord) {
+            $stats['updated']++;
+        } else {
+            $stats['created']++;
+        }
+        $stats['successful']++;
     }
 }

@@ -49,8 +49,24 @@ class ProcessEnrollmentImport extends AbstractCsvImportJob
         ];
     }
 
-    protected function processRow(array $data): void
+    protected function getValidationMessages(): array
     {
+        return [
+            'student_id.required' => 'Student ID is required',
+            'student_id.exists' => 'Student ID does not exist',
+            'course_section_id.required' => 'Course section ID is required',
+            'course_section_id.exists' => 'Course section ID does not exist',
+            'status.in' => 'Status must be one of: enrolled, dropped, withdrawn, completed, waitlisted',
+        ];
+    }
+
+    protected function processRow(array $data, int $rowNumber, array &$stats): void
+    {
+        $existingEnrollment = Enrollment::where('student_id', $data['student_id'])
+            ->where('course_section_id', $data['course_section_id'])
+            ->first();
+        $isUpdate = $existingEnrollment !== null;
+
         Enrollment::updateOrCreate(
             [
                 'student_id' => $data['student_id'],
@@ -60,8 +76,14 @@ class ProcessEnrollmentImport extends AbstractCsvImportJob
                 'enrollment_date' => $data['enrollment_date'] ?? now(),
                 'status' => $data['status'] ?? 'enrolled',
                 'grade' => $data['grade'] ?? null,
-                'grade_date' => $data['grade_date'] ?? null,
             ]
         );
+
+        if ($isUpdate) {
+            $stats['updated']++;
+        } else {
+            $stats['created']++;
+        }
+        $stats['successful']++;
     }
 }

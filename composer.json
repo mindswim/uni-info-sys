@@ -12,6 +12,7 @@
         "laravel/tinker": "^2.9",
         "owen-it/laravel-auditing": "^14.0",
         "promphp/prometheus_client_php": "^2.14",
+        "swagger-api/swagger-ui": "^5.0",
         "tightenco/ziggy": "^2.3"
     },
     "require-dev": {

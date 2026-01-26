@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -33,6 +31,7 @@ services:
     image: mysql:8.0
     container_name: sis-mysql
     restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password --require-secure-transport=OFF
     environment:
       - MYSQL_DATABASE=university_sis
       - MYSQL_USER=sis_user

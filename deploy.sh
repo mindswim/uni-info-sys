@@ -22,6 +22,8 @@ rsync -avz --progress \
     --exclude 'frontend/node_modules' \
     --exclude 'frontend/.next' \
     --exclude '.env' \
+    --exclude 'database/schema' \
+    --exclude 'tests' \
     ./ ${SERVER}:${REMOTE_DIR}/
 
 # 2. Run deployment commands on server
@@ -47,8 +49,8 @@ fi
 # Source docker env
 export $(cat .env.docker | xargs)
 
-# Build and start
-docker compose -f docker-compose.prod.yml build
+# Build and start (no-cache to ensure fresh image)
+docker compose -f docker-compose.prod.yml build --no-cache
 docker compose -f docker-compose.prod.yml up -d
 
 # Wait for MySQL to be ready

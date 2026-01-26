@@ -14,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // CORS must run first to add headers to ALL responses (including errors)
         $middleware->prepend(\App\Http\Middleware\CorsHeaders::class);
 
+        // For API requests, return null (no redirect) so AuthenticationException is thrown
+        // This allows the exception handler to return a proper 401 JSON response
+        $middleware->redirectGuestsTo(fn ($request) => $request->expectsJson() ? null : '/');
+
         // Add security headers to all responses (web and API)
         $middleware->append(\App\Http\Middleware\AddSecurityHeaders::class);
 

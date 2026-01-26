@@ -1,22 +1,20 @@
 # Production Dockerfile for Laravel API
-FROM php:8.2-fpm-alpine
+FROM php:8.2-fpm
 
 # Install system dependencies
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx \
     supervisor \
-    mysql-client \
+    default-mysql-client \
     libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
     libzip-dev \
     zip \
     unzip \
     git \
-    curl
-
-# Configure MySQL client to skip SSL verification (needed for schema loading)
-RUN mkdir -p /root && echo -e "[client]\nssl=0" > /root/.my.cnf
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -45,8 +43,8 @@ RUN composer dump-autoload --optimize \
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Copy nginx config
-COPY docker/nginx.conf /etc/nginx/http.d/default.conf
+# Copy nginx config (Debian uses sites-available)
+COPY docker/nginx.conf /etc/nginx/sites-available/default
 
 # Copy supervisor config
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf

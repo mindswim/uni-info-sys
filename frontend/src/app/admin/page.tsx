@@ -112,8 +112,9 @@ export default function AdminOverviewPage() {
         const enrolled = appStats.data?.enrolled || 0
         const yieldRate = accepted > 0 ? Math.round((enrolled / accepted) * 100) : 0
 
-        // Mock holds data if not available from API
-        const holdsSummary: HoldsSummary = holdsData?.data || {
+        // Mock holds data if not available from API or if structure doesn't match
+        // The API returns a student-focused summary, so we need to provide admin-focused mock data
+        const holdsSummary: HoldsSummary = (holdsData?.data?.by_type) ? holdsData.data : {
           total: 12,
           by_type: {
             financial: 5,
@@ -528,7 +529,7 @@ export default function AdminOverviewPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               {/* Hold Type Breakdown */}
-              {Object.entries(holds.by_type).map(([type, count]) => (
+              {holds.by_type && Object.entries(holds.by_type).map(([type, count]) => (
                 <div key={type} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="p-1.5 rounded bg-muted">

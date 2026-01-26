@@ -36,9 +36,11 @@ interface WaitlistEntry {
   student_id: number
   student?: {
     id: number
-    first_name: string
-    last_name: string
+    name?: string
+    first_name?: string
+    last_name?: string
     student_number: string
+    email?: string
     user?: { email: string }
   }
   course_section_id: number
@@ -59,13 +61,14 @@ interface WaitlistEntry {
 // Helper functions
 function getStudentName(entry: WaitlistEntry): string {
   if (entry.student) {
-    return `${entry.student.first_name} ${entry.student.last_name}`
+    // API returns 'name' as combined field
+    return entry.student.name || `${entry.student.first_name || ''} ${entry.student.last_name || ''}`.trim() || `Student #${entry.student_id}`
   }
   return `Student #${entry.student_id}`
 }
 
 function getStudentEmail(entry: WaitlistEntry): string {
-  return entry.student?.user?.email || ''
+  return entry.student?.email || entry.student?.user?.email || ''
 }
 
 function getStudentNumber(entry: WaitlistEntry): string {

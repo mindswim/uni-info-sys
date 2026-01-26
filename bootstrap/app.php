@@ -11,6 +11,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // CORS must run first to add headers to ALL responses (including errors)
+        $middleware->prepend(\App\Http\Middleware\CorsHeaders::class);
+
         // Add security headers to all responses (web and API)
         $middleware->append(\App\Http\Middleware\AddSecurityHeaders::class);
 

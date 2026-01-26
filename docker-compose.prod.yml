@@ -28,15 +28,14 @@ services:
       - sis-network
 
   mysql:
-    image: mysql:8.0
+    image: mariadb:11
     container_name: sis-mysql
     restart: unless-stopped
-    command: --default-authentication-plugin=mysql_native_password --require-secure-transport=OFF
     environment:
-      - MYSQL_DATABASE=university_sis
-      - MYSQL_USER=sis_user
-      - MYSQL_PASSWORD=${DB_PASSWORD:-changeme}
-      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-rootchangeme}
+      - MARIADB_DATABASE=university_sis
+      - MARIADB_USER=sis_user
+      - MARIADB_PASSWORD=${DB_PASSWORD:-changeme}
+      - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-rootchangeme}
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:

@@ -1,14 +1,19 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect, useRef, useMemo } from "react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useToast } from "@/hooks/use-toast"
-import { Download, Save, CheckCircle2, Clock } from "lucide-react"
+import {
+  Download, Save, CheckCircle2, Clock, Search, ArrowUpDown, ArrowUp, ArrowDown,
+  RotateCcw, ChevronDown, AlertCircle
+} from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
 interface CourseSection {
@@ -63,6 +68,9 @@ const GRADE_COLORS: Record<string, string> = {
   'F': '#ef4444'
 }
 
+type SortField = 'name' | 'student_id' | 'grade'
+type SortDirection = 'asc' | 'desc'
+
 export function GradesTab() {
   const [sections, setSections] = useState<CourseSection[]>([])
   const [selectedSection, setSelectedSection] = useState<string>("")
@@ -70,9 +78,23 @@ export function GradesTab() {
   const [progress, setProgress] = useState<GradingProgress | null>(null)
   const [distribution, setDistribution] = useState<GradeDistribution | null>(null)
   const [grades, setGrades] = useState<Record<number, string>>({})
+  const [originalGrades, setOriginalGrades] = useState<Record<number, string>>({})
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortField, setSortField] = useState<SortField>('name')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+  const [showQuickGrades, setShowQuickGrades] = useState<number | null>(null)
   const { toast } = useToast()
+  const inputRefs = useRef<Record<number, HTMLInputElement | null>>({})
+
+  // Track if there are unsaved changes
+  const hasUnsavedChanges = useMemo(() => {
+    return Object.entries(grades).some(([id, grade]) => {
+      const original = originalGrades[parseInt(id)] || ''
+      return grade !== original
+    })
+  }, [grades, originalGrades])
 
   useEffect(() => {
     fetchSections()
@@ -135,6 +157,7 @@ export function GradesTab() {
         }
       })
       setGrades(initialGrades)
+      setOriginalGrades(initialGrades)
     } catch (err) {
       console.error(err)
     } finally {
@@ -303,6 +326,101 @@ export function GradesTab() {
              (distribution.distribution[`${grade}-`]?.count || 0)
     })).filter(d => d.count > 0) : []
 
+  // Filter and sort enrollments
+  const filteredEnrollments = useMemo(() => {
+    let result = [...enrollments]
+
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      result = result.filter(e =>
+        e.student.user.name.toLowerCase().includes(query) ||
+        e.student.student_id.toLowerCase().includes(query) ||
+        e.student.user.email.toLowerCase().includes(query)
+      )
+    }
+
+    // Sort
+    result.sort((a, b) => {
+      let comparison = 0
+      switch (sortField) {
+        case 'name':
+          comparison = a.student.user.name.localeCompare(b.student.user.name)
+          break
+        case 'student_id':
+          comparison = a.student.student_id.localeCompare(b.student.student_id)
+          break
+        case 'grade':
+          const gradeA = grades[a.id] || a.grade || 'ZZ'
+          const gradeB = grades[b.id] || b.grade || 'ZZ'
+          comparison = gradeA.localeCompare(gradeB)
+          break
+      }
+      return sortDirection === 'asc' ? comparison : -comparison
+    })
+
+    return result
+  }, [enrollments, searchQuery, sortField, sortDirection, grades])
+
+  // Handle sort toggle
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(d => d === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortDirection('asc')
+    }
+  }
+
+  // Handle keyboard navigation
+  const handleKeyDown = (e: React.KeyboardEvent, currentId: number, index: number) => {
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault()
+      const nextIndex = index + 1
+      if (nextIndex < filteredEnrollments.length) {
+        const nextId = filteredEnrollments[nextIndex].id
+        inputRefs.current[nextId]?.focus()
+        inputRefs.current[nextId]?.select()
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      const nextIndex = index + 1
+      if (nextIndex < filteredEnrollments.length) {
+        const nextId = filteredEnrollments[nextIndex].id
+        inputRefs.current[nextId]?.focus()
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      const prevIndex = index - 1
+      if (prevIndex >= 0) {
+        const prevId = filteredEnrollments[prevIndex].id
+        inputRefs.current[prevId]?.focus()
+      }
+    }
+  }
+
+  // Quick grade selection
+  const applyQuickGrade = (enrollmentId: number, grade: string) => {
+    setGrades(prev => ({
+      ...prev,
+      [enrollmentId]: grade
+    }))
+    setShowQuickGrades(null)
+  }
+
+  // Reset all grades to original
+  const handleResetGrades = () => {
+    setGrades(originalGrades)
+  }
+
+  // Get sort icon
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) return <ArrowUpDown className="h-3 w-3 ml-1 text-muted-foreground" />
+    return sortDirection === 'asc'
+      ? <ArrowUp className="h-3 w-3 ml-1" />
+      : <ArrowDown className="h-3 w-3 ml-1" />
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -346,23 +464,18 @@ export function GradesTab() {
       {selectedSection && (
         <>
           {/* Stats Row */}
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-4">
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Total Students</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{progress?.total || 0}</div>
+              <CardContent className="pt-4">
+                <div className="text-2xl font-bold tabular-nums">{progress?.total || 0}</div>
+                <p className="text-xs text-muted-foreground">Total Students</p>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Grading Progress</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-3">
-                  <div className="text-3xl font-bold">{progress?.graded || 0}/{progress?.total || 0}</div>
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="text-2xl font-bold tabular-nums">{progress?.graded || 0}/{progress?.total || 0}</div>
                   {progress?.is_complete ? (
                     <Badge className="bg-green-500 gap-1">
                       <CheckCircle2 className="h-3 w-3" />
@@ -371,21 +484,40 @@ export function GradesTab() {
                   ) : (
                     <Badge variant="secondary" className="gap-1">
                       <Clock className="h-3 w-3" />
-                      {progress?.pending || 0} pending
+                      {progress?.pending || 0} left
                     </Badge>
                   )}
                 </div>
+                <Progress value={progress?.percentage || 0} className="h-2" />
+                <p className="text-xs text-muted-foreground mt-1">Grading Progress</p>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Average GPA</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">
-                  {distribution?.average_gpa ? distribution.average_gpa.toFixed(2) : '—'}
+              <CardContent className="pt-4">
+                <div className="text-2xl font-bold tabular-nums">
+                  {distribution?.average_gpa ? distribution.average_gpa.toFixed(2) : '--'}
                 </div>
+                <p className="text-xs text-muted-foreground">Class Average GPA</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2">
+                  {hasUnsavedChanges ? (
+                    <>
+                      <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                      <span className="text-lg font-medium text-amber-600">Unsaved</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <span className="text-lg font-medium text-green-600">Saved</span>
+                    </>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">Changes Status</p>
               </CardContent>
             </Card>
           </div>
@@ -415,73 +547,181 @@ export function GradesTab() {
 
           {/* Gradebook Table */}
           <Card>
-            <CardHeader>
-              <CardTitle>Student Grades</CardTitle>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Student Grades</CardTitle>
+                  <CardDescription>
+                    {filteredEnrollments.length} students
+                    {hasUnsavedChanges && (
+                      <span className="ml-2 text-amber-600">
+                        (unsaved changes)
+                      </span>
+                    )}
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  {hasUnsavedChanges && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleResetGrades}
+                      className="text-muted-foreground"
+                    >
+                      <RotateCcw className="h-4 w-4 mr-1" />
+                      Reset
+                    </Button>
+                  )}
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search students..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9 w-48"
+                    />
+                  </div>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               {loading ? (
                 <div className="text-center py-8 text-muted-foreground">Loading...</div>
               ) : enrollments.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">No students enrolled</div>
+              ) : filteredEnrollments.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">No matching students</div>
               ) : (
                 <div className="border rounded-lg">
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/50">
-                        <TableHead className="w-32">Student ID</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead className="w-32">Current</TableHead>
-                        <TableHead className="w-32">New Grade</TableHead>
+                        <TableHead
+                          className="w-32 cursor-pointer select-none"
+                          onClick={() => toggleSort('student_id')}
+                        >
+                          <span className="flex items-center">
+                            Student ID
+                            {getSortIcon('student_id')}
+                          </span>
+                        </TableHead>
+                        <TableHead
+                          className="cursor-pointer select-none"
+                          onClick={() => toggleSort('name')}
+                        >
+                          <span className="flex items-center">
+                            Name
+                            {getSortIcon('name')}
+                          </span>
+                        </TableHead>
+                        <TableHead
+                          className="w-32 cursor-pointer select-none"
+                          onClick={() => toggleSort('grade')}
+                        >
+                          <span className="flex items-center">
+                            Grade
+                            {getSortIcon('grade')}
+                          </span>
+                        </TableHead>
                         <TableHead className="w-24 text-center">Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {enrollments.map((enrollment) => (
-                        <TableRow key={enrollment.id} className="hover:bg-muted/30 transition-colors">
-                          <TableCell className="font-mono text-sm">
-                            {enrollment.student.student_id}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {enrollment.student.user.name}
-                          </TableCell>
-                          <TableCell>
-                            {enrollment.grade ? (
+                      {filteredEnrollments.map((enrollment, index) => {
+                        const currentGrade = grades[enrollment.id] || ''
+                        const originalGrade = originalGrades[enrollment.id] || ''
+                        const isChanged = currentGrade !== originalGrade
+                        const isInvalid = currentGrade && !VALID_GRADES.includes(currentGrade.toUpperCase())
+
+                        return (
+                          <TableRow
+                            key={enrollment.id}
+                            className={`hover:bg-muted/30 transition-colors ${isChanged ? 'bg-amber-50/50 dark:bg-amber-950/20' : ''}`}
+                          >
+                            <TableCell className="font-mono text-sm">
+                              {enrollment.student.student_id}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              <div>
+                                {enrollment.student.user.name}
+                                <p className="text-xs text-muted-foreground font-normal">
+                                  {enrollment.student.user.email}
+                                </p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Popover
+                                  open={showQuickGrades === enrollment.id}
+                                  onOpenChange={(open) => setShowQuickGrades(open ? enrollment.id : null)}
+                                >
+                                  <PopoverTrigger asChild>
+                                    <div className="relative flex-1">
+                                      <Input
+                                        ref={(el) => { inputRefs.current[enrollment.id] = el }}
+                                        value={currentGrade}
+                                        onChange={(e) => handleGradeChange(enrollment.id, e.target.value)}
+                                        onKeyDown={(e) => handleKeyDown(e, enrollment.id, index)}
+                                        placeholder="--"
+                                        className={`w-20 uppercase font-mono text-center ${
+                                          isInvalid ? 'border-red-500 focus-visible:ring-red-500' : ''
+                                        } ${currentGrade ? '' : 'text-muted-foreground'}`}
+                                        style={currentGrade && GRADE_COLORS[currentGrade.toUpperCase()] ? {
+                                          color: GRADE_COLORS[currentGrade.toUpperCase()],
+                                          fontWeight: 600,
+                                        } : undefined}
+                                        maxLength={3}
+                                      />
+                                      {isInvalid && (
+                                        <AlertCircle className="h-4 w-4 absolute right-2 top-1/2 -translate-y-1/2 text-red-500" />
+                                      )}
+                                    </div>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-2" align="start">
+                                    <div className="grid grid-cols-5 gap-1">
+                                      {VALID_GRADES.map(grade => (
+                                        <Button
+                                          key={grade}
+                                          variant="ghost"
+                                          size="sm"
+                                          className="h-8 w-10 font-mono text-sm"
+                                          style={{ color: GRADE_COLORS[grade] }}
+                                          onClick={() => applyQuickGrade(enrollment.id, grade)}
+                                        >
+                                          {grade}
+                                        </Button>
+                                      ))}
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
+                                {isChanged && (
+                                  <Badge variant="outline" className="text-xs bg-amber-100 text-amber-700 border-amber-300">
+                                    changed
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-center">
                               <Badge
-                                variant="outline"
-                                className="font-mono"
-                                style={{
-                                  borderColor: GRADE_COLORS[enrollment.grade],
-                                  color: GRADE_COLORS[enrollment.grade]
-                                }}
+                                variant={enrollment.status === 'completed' ? 'default' : 'secondary'}
+                                className="text-xs"
                               >
-                                {enrollment.grade}
+                                {enrollment.status}
                               </Badge>
-                            ) : (
-                              <span className="text-muted-foreground text-sm">—</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <Input
-                              value={grades[enrollment.id] || ''}
-                              onChange={(e) => handleGradeChange(enrollment.id, e.target.value)}
-                              placeholder="A, B+..."
-                              className="w-24 uppercase font-mono"
-                              maxLength={3}
-                            />
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Badge
-                              variant={enrollment.status === 'completed' ? 'default' : 'secondary'}
-                              className="text-xs"
-                            >
-                              {enrollment.status}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
                     </TableBody>
                   </Table>
                 </div>
+              )}
+
+              {/* Keyboard hints */}
+              {filteredEnrollments.length > 0 && (
+                <p className="text-xs text-muted-foreground mt-3">
+                  Tip: Use Enter or Tab to move to the next student. Click on a grade field to see quick grade options.
+                </p>
               )}
             </CardContent>
           </Card>

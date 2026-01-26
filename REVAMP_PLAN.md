@@ -349,10 +349,10 @@ Frontend:
 - [x] Mobile responsive pass (touch targets, scrollbars)
 
 ### Phase 4: Admin & Faculty (Week 4)
-- [ ] Admin dashboard KPIs
-- [ ] Holds management interface
-- [ ] Faculty gradebook improvements
-- [ ] Bulk action improvements
+- [x] Admin dashboard KPIs
+- [x] Holds management interface
+- [x] Faculty gradebook improvements
+- [ ] Bulk action improvements (deferred)
 
 ---
 

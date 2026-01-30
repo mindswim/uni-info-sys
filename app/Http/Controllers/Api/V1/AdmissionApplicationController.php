@@ -868,6 +868,26 @@ class AdmissionApplicationController extends Controller
     }
 
     /**
+     * Student confirms their own enrollment from an accepted application
+     */
+    public function confirmEnrollment(AdmissionApplication $admissionApplication): JsonResponse
+    {
+        $user = auth()->user();
+
+        // Only the student who owns the application can confirm
+        if (!$admissionApplication->student || $admissionApplication->student->user_id !== $user->id) {
+            return response()->json(['message' => 'You can only confirm enrollment for your own application.'], 403);
+        }
+
+        $application = $this->admissionService->matriculateStudent($admissionApplication);
+
+        return response()->json([
+            'message' => 'Enrollment confirmed successfully.',
+            'data' => new AdmissionApplicationResource($application)
+        ]);
+    }
+
+    /**
      * Perform bulk actions on applications
      */
     #[OA\Post(

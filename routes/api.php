@@ -146,6 +146,10 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 Route::post('/v1/tokens/create', [\App\Http\Controllers\Api\V1\Auth\AuthController::class, 'login'])
     ->middleware('throttle:api');
 
+// Public registration endpoint
+Route::post('/v1/auth/register', [\App\Http\Controllers\Api\V1\Auth\AuthController::class, 'register'])
+    ->middleware('throttle:api');
+
 // Password reset routes (unauthenticated)
 Route::post('/v1/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])
     ->middleware('throttle:api')
@@ -246,6 +250,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::post('admission-applications/{admission_application}/reject', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'reject'])->middleware('permission:update_applications');
     Route::post('admission-applications/{admission_application}/waitlist', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'waitlist'])->middleware('permission:update_applications');
     Route::post('admission-applications/{admission_application}/enroll', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'enroll'])->middleware('permission:update_applications');
+    Route::post('admission-applications/{admission_application}/confirm-enrollment', [\App\Http\Controllers\Api\V1\AdmissionApplicationController::class, 'confirmEnrollment']);
 
     // Nested ProgramChoice routes - both nested and shallow for RESTful best practices
     Route::apiResource('admission-applications.program-choices', \App\Http\Controllers\Api\V1\ProgramChoiceController::class)->scoped()->shallow();

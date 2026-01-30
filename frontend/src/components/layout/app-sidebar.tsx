@@ -51,6 +51,7 @@ import {
   PenTool,
   FileCheck,
   CalendarDays,
+  Clock,
   History,
   ScrollText
 } from "lucide-react"
@@ -83,7 +84,9 @@ const navigationItems = {
       items: [
         { title: "Grades", url: "/student/grades", icon: Award },
         { title: "Degree Audit", url: "/student/degree-audit", icon: Target },
+        { title: "Academic Planner", url: "/student/academic-planner", icon: CalendarDays },
         { title: "Transcripts", url: "/student/transcripts", icon: FileText },
+        { title: "Evaluations", url: "/student/evaluations", icon: ScrollText },
         { title: "Graduation", url: "/student/graduation", icon: GraduationCap }
       ]
     },
@@ -140,7 +143,14 @@ const navigationItems = {
       title: "Advising",
       items: [
         { title: "My Advisees", url: "/faculty/advisees", icon: Users },
+        { title: "Approval Requests", url: "/faculty/approvals", icon: ClipboardCheck },
         { title: "Appointments", url: "/faculty/appointments", icon: Calendar }
+      ]
+    },
+    {
+      title: "Feedback",
+      items: [
+        { title: "Evaluations", url: "/faculty/evaluations", icon: ScrollText }
       ]
     },
     {
@@ -180,8 +190,11 @@ const navigationItems = {
       title: "Enrollment",
       items: [
         { title: "Registration", url: "/admin/enrollments", icon: ClipboardCheck },
+        { title: "Time Tickets", url: "/admin/registration-time-tickets", icon: Clock },
+        { title: "Academic Standings", url: "/admin/academic-standings", icon: TrendingUp },
         { title: "Holds Management", url: "/admin/holds", icon: AlertCircle },
         { title: "Waitlists", url: "/admin/waitlists", icon: Users },
+        { title: "Evaluations", url: "/admin/evaluations", icon: ScrollText },
         { title: "Grades", url: "/admin/grades", icon: Award },
         { title: "Graduation", url: "/admin/graduation", icon: GraduationCap }
       ]

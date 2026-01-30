@@ -7,12 +7,15 @@ use App\Exceptions\CreditLimitExceededException;
 use App\Exceptions\DuplicateEnrollmentException;
 use App\Exceptions\EnrollmentCapacityExceededException;
 use App\Exceptions\RegistrationHoldException;
+use App\Exceptions\RegistrationNotOpenException;
 use App\Exceptions\RepeatCourseException;
 use App\Exceptions\StudentNotActiveException;
 use App\Jobs\SendEnrollmentConfirmation;
 use App\Jobs\ProcessWaitlistPromotion;
 use App\Models\CourseSection;
 use App\Models\Enrollment;
+use App\Models\EnrollmentApproval;
+use App\Models\RegistrationTimeTicket;
 use App\Models\Student;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -36,11 +39,19 @@ class EnrollmentService
             $courseSectionId = $data['course_section_id'];
             $requestedStatus = $data['status'] ?? null;
 
+            // Check registration time ticket
+            $this->validateRegistrationTimeTicket($studentId, $courseSectionId);
+
             // Check for registration holds before anything else
             $this->validateNoRegistrationHold($studentId);
 
             // Validate student is active
             $this->validateStudentActive($studentId);
+
+            // Check if advisor approval is required
+            if ($this->requiresAdvisorApproval($studentId, $courseSectionId)) {
+                return $this->createPendingApproval($studentId, $courseSectionId);
+            }
 
             // Validate course section is available
             $this->validateCourseSectionAvailable($courseSectionId);
@@ -464,6 +475,107 @@ class EnrollmentService
                 $maxCredits
             );
         }
+    }
+
+    /**
+     * Validate registration time ticket allows enrollment now
+     */
+    private function validateRegistrationTimeTicket(int $studentId, int $courseSectionId): void
+    {
+        $courseSection = CourseSection::find($courseSectionId);
+        if (!$courseSection || !$courseSection->term_id) {
+            return;
+        }
+
+        $ticket = RegistrationTimeTicket::where('student_id', $studentId)
+            ->where('term_id', $courseSection->term_id)
+            ->first();
+
+        // If no ticket exists, allow enrollment (tickets are optional)
+        if (!$ticket) {
+            return;
+        }
+
+        if (!$ticket->canRegisterNow()) {
+            throw new RegistrationNotOpenException(
+                $ticket->start_time->format('M j, Y g:i A')
+            );
+        }
+    }
+
+    /**
+     * Check if the student requires advisor approval for registration
+     */
+    private function requiresAdvisorApproval(int $studentId, int $courseSectionId): bool
+    {
+        $student = Student::find($studentId);
+        return $student && $student->requires_advisor_approval && $student->advisor_id;
+    }
+
+    /**
+     * Create a pending enrollment approval instead of direct enrollment
+     */
+    private function createPendingApproval(int $studentId, int $courseSectionId): Enrollment
+    {
+        $student = Student::find($studentId);
+
+        EnrollmentApproval::create([
+            'student_id' => $studentId,
+            'advisor_id' => $student->advisor_id,
+            'course_section_id' => $courseSectionId,
+            'status' => 'pending',
+            'requested_at' => now(),
+        ]);
+
+        // Return a temporary enrollment object with pending_approval status
+        // The actual enrollment is created when the advisor approves
+        $enrollment = new Enrollment([
+            'student_id' => $studentId,
+            'course_section_id' => $courseSectionId,
+            'status' => 'pending_approval',
+        ]);
+        $enrollment->id = 0; // Sentinel value indicating no real enrollment yet
+
+        Log::info('Enrollment requires advisor approval', [
+            'student_id' => $studentId,
+            'course_section_id' => $courseSectionId,
+        ]);
+
+        return $enrollment;
+    }
+
+    /**
+     * Enroll a student from an approved enrollment approval
+     */
+    public function enrollFromApproval(EnrollmentApproval $approval): Enrollment
+    {
+        // Bypass the advisor approval check by calling the core enrollment logic
+        return DB::transaction(function () use ($approval) {
+            $studentId = $approval->student_id;
+            $courseSectionId = $approval->course_section_id;
+
+            $this->validateNoRegistrationHold($studentId);
+            $this->validateStudentActive($studentId);
+            $this->validateCourseSectionAvailable($courseSectionId);
+            $this->validateNoDuplicateEnrollment($studentId, $courseSectionId);
+            $this->checkRepeatCoursePolicy($studentId, $courseSectionId);
+            $this->checkPrerequisites($studentId, $courseSectionId);
+            $this->checkScheduleConflicts($studentId, $courseSectionId);
+            $this->checkCreditHourLimit($studentId, $courseSectionId);
+
+            $status = $this->determineEnrollmentStatus($courseSectionId, null);
+
+            $enrollment = Enrollment::create([
+                'student_id' => $studentId,
+                'course_section_id' => $courseSectionId,
+                'status' => $status,
+            ]);
+
+            $confirmationType = $status === 'waitlisted' ? 'waitlisted' : 'enrolled';
+            SendEnrollmentConfirmation::dispatch($enrollment, $confirmationType);
+
+            return $enrollment;
+        });
     }
 
     /**

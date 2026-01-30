@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Schedule waitlist promotion checks every 5 minutes during peak registration periods
 Schedule::command('waitlists:check')->everyFiveMinutes();
+
+// Process overdue invoices and manage financial holds daily
+Schedule::job(new \App\Jobs\ProcessOverdueInvoices)->daily();

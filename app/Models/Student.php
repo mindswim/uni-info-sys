@@ -21,7 +21,7 @@ class Student extends Model implements Auditable
         // Academic Performance
         'gpa', 'semester_gpa',
         // Academic Standing
-        'class_standing', 'enrollment_status', 'academic_status',
+        'class_standing', 'enrollment_status', 'academic_status', 'requires_advisor_approval',
         // Program Information
         'major_program_id', 'minor_program_id', 'advisor_id',
         // Academic Timeline
@@ -47,6 +47,7 @@ class Student extends Model implements Auditable
         'sat_score' => 'integer',
         'act_score' => 'integer',
         'high_school_graduation_year' => 'integer',
+        'requires_advisor_approval' => 'boolean',
     ];
 
     public function user()

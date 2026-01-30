@@ -20,6 +20,32 @@ use OpenApi\Attributes as OA;
 class ProgramController extends Controller
 {
     use HandlesCsvImportExport;
+    /**
+     * Public program directory - no authentication required
+     */
+    public function publicIndex(Request $request)
+    {
+        $query = Program::with(['department.faculty']);
+
+        if ($request->filled('degree_level')) {
+            $query->where('degree_level', $request->degree_level);
+        }
+
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        return ProgramResource::collection($query->paginate(20));
+    }
+
     #[OA\Get(
         path: '/api/v1/programs',
         summary: 'List all programs',

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AcademicStandingController;
 use App\Http\Controllers\Api\V1\ActionItemController;
 use App\Http\Controllers\Api\V1\AuditController;
 use App\Http\Controllers\Api\V1\AnnouncementController;
@@ -8,6 +9,15 @@ use App\Http\Controllers\Api\V1\AssignmentController;
 use App\Http\Controllers\Api\V1\AssignmentSubmissionController;
 use App\Http\Controllers\Api\V1\AttendanceController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
+use App\Http\Controllers\Api\V1\Auth\VerificationController;
+use App\Http\Controllers\Api\V1\DegreeAuditController;
+use App\Http\Controllers\Api\V1\EnrollmentApprovalController;
+use App\Http\Controllers\Api\V1\EvaluationFormController;
+use App\Http\Controllers\Api\V1\EvaluationResponseController;
+use App\Http\Controllers\Api\V1\PaymentPlanController;
+use App\Http\Controllers\Api\V1\PlannedCourseController;
+use App\Http\Controllers\Api\V1\RegistrationTimeTicketController;
+use App\Http\Controllers\Api\V1\TranscriptController;
 use App\Http\Controllers\Api\V1\BuildingController;
 use App\Http\Controllers\Api\V1\DegreeRequirementController;
 use App\Http\Controllers\Api\V1\TuitionRateController;
@@ -158,6 +168,18 @@ Route::post('/v1/forgot-password', [PasswordResetController::class, 'sendResetLi
 Route::post('/v1/reset-password', [PasswordResetController::class, 'reset'])
     ->middleware('throttle:api')
     ->name('api.password.update');
+
+// Public program directory (E22) - no auth required
+Route::get('/v1/public/programs', [ProgramController::class, 'publicIndex'])
+    ->middleware('throttle:api');
+
+// Email verification routes (E21)
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
+    Route::post('/v1/email/verification-notification', [VerificationController::class, 'send'])
+        ->middleware('throttle:6,1');
+    Route::get('/v1/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
+        ->middleware('signed');
+});
 
 Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     // Auth routes
@@ -601,6 +623,65 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::post('messages/conversations/{conversation}/archive', [MessageController::class, 'archive']);
     Route::get('messages/unread-count', [MessageController::class, 'unreadCount']);
     Route::get('messages/search-users', [MessageController::class, 'searchUsers']);
+
+    // Transcript routes (E13)
+    Route::get('students/{student}/transcript', [TranscriptController::class, 'show']);
+    Route::get('students/{student}/transcript/pdf', [TranscriptController::class, 'download']);
+
+    // Degree audit routes (E14)
+    Route::get('students/{student}/degree-audit', [DegreeAuditController::class, 'current']);
+    Route::post('students/{student}/degree-audit/what-if', [DegreeAuditController::class, 'whatIf']);
+
+    // Payment plans (E17)
+    Route::apiResource('payment-plans', PaymentPlanController::class)->only(['index', 'store', 'show']);
+    Route::post('payment-plans/{paymentPlan}/installments/{installment}/pay', [PaymentPlanController::class, 'payInstallment']);
+
+    // Registration time tickets (E11)
+    Route::middleware('role.admin')->group(function () {
+        Route::get('registration-time-tickets', [RegistrationTimeTicketController::class, 'index']);
+        Route::post('registration-time-tickets', [RegistrationTimeTicketController::class, 'store']);
+        Route::post('registration-time-tickets/bulk-assign', [RegistrationTimeTicketController::class, 'bulkAssign']);
+    });
+    Route::middleware('role.student')->group(function () {
+        Route::get('registration-time-tickets/me', [RegistrationTimeTicketController::class, 'myTicket']);
+    });
+
+    // Enrollment approvals (E12)
+    Route::get('enrollment-approvals', [EnrollmentApprovalController::class, 'index']);
+    Route::middleware('role.student')->group(function () {
+        Route::post('enrollment-approvals', [EnrollmentApprovalController::class, 'store']);
+    });
+    Route::middleware('role.staff')->group(function () {
+        Route::get('enrollment-approvals/pending', [EnrollmentApprovalController::class, 'pending']);
+        Route::post('enrollment-approvals/{enrollmentApproval}/approve', [EnrollmentApprovalController::class, 'approve']);
+        Route::post('enrollment-approvals/{enrollmentApproval}/deny', [EnrollmentApprovalController::class, 'deny']);
+    });
+
+    // Course evaluations (E15)
+    Route::middleware('role.admin')->group(function () {
+        Route::apiResource('evaluation-forms', EvaluationFormController::class);
+    });
+    Route::middleware('role.student')->group(function () {
+        Route::get('evaluations/pending', [EvaluationResponseController::class, 'pending']);
+        Route::post('evaluations', [EvaluationResponseController::class, 'store']);
+    });
+    Route::get('evaluations/results/{courseSectionId}', [EvaluationResponseController::class, 'results']);
+
+    // Academic planner (E16)
+    Route::middleware('role.student')->group(function () {
+        Route::get('planned-courses', [PlannedCourseController::class, 'index']);
+        Route::post('planned-courses', [PlannedCourseController::class, 'store']);
+        Route::put('planned-courses/{plannedCourse}', [PlannedCourseController::class, 'update']);
+        Route::delete('planned-courses/{plannedCourse}', [PlannedCourseController::class, 'destroy']);
+        Route::get('planned-courses/term/{termId}', [PlannedCourseController::class, 'byTerm']);
+        Route::get('planned-courses/suggest', [PlannedCourseController::class, 'suggest']);
+    });
+
+    // Academic standings (E19)
+    Route::middleware('role.admin')->group(function () {
+        Route::post('academic-standings/recalculate', [AcademicStandingController::class, 'recalculate']);
+        Route::get('academic-standings/summary', [AcademicStandingController::class, 'summary']);
+    });
 
     // User Settings routes
     Route::get('settings/me', [SettingController::class, 'mySettings']);

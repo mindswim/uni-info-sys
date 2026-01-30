@@ -472,18 +472,18 @@ These are features found in production SIS platforms (Banner, PeopleSoft, Workda
 
 | # | Feature | Domain | Backend | Frontend | Effort |
 |---|---------|--------|---------|----------|--------|
-| E11 | Registration time tickets | Registration | Missing | Missing | Medium |
-| E12 | Advisor approval for registration | Registration | Missing | Missing | Medium |
-| E13 | Transcript PDF generation | Records | Missing | Page exists | Medium |
-| E14 | What-if degree audit | Academics | Missing | Missing | Large |
-| E15 | Course evaluation submissions | Academics | Missing | Missing | Medium |
-| E16 | Academic plan / 4-year planner | Advising | Missing | Missing | Large |
-| E17 | Payment plan / installments | Financial | Missing | Missing | Medium |
-| E18 | Automated financial holds on balance | Financial | Partial | Missing | Small |
-| E19 | Batch academic standing update | Admin | Missing | Missing | Medium |
-| E20 | Academic calendar builder | Admin | Missing | Missing | Medium |
-| E21 | Email verification flow page | Auth | Partial | Missing | Small |
-| E22 | Public program directory | Marketing | Missing | Missing | Small |
+| E11 | Registration time tickets | Registration | Done | Done | Medium |
+| E12 | Advisor approval for registration | Registration | Done | Done | Medium |
+| E13 | Transcript PDF generation | Records | Done | Done | Medium |
+| E14 | What-if degree audit | Academics | Done | Done | Large |
+| E15 | Course evaluation submissions | Academics | Done | Done | Medium |
+| E16 | Academic plan / 4-year planner | Advising | Done | Done | Large |
+| E17 | Payment plan / installments | Financial | Done | Done | Medium |
+| E18 | Automated financial holds on balance | Financial | Done | N/A (job) | Small |
+| E19 | Batch academic standing update | Admin | Done | Done | Medium |
+| E20 | Academic calendar builder | Admin | Done (Tier 1) | Done (Tier 1) | Medium |
+| E21 | Email verification flow page | Auth | Done | Done | Small |
+| E22 | Public program directory | Marketing | Done | Done | Small |
 
 ### Tier 3: Advanced / Enterprise (Future)
 

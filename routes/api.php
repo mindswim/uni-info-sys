@@ -298,10 +298,14 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
         // Audit log
         Route::get('audits', [AuditController::class, 'index']);
 
-        // Graduation applications (admin review)
+        // Graduation applications (admin review + clearance workflow)
         Route::get('graduation-applications', [\App\Http\Controllers\Api\V1\GraduationApplicationController::class, 'index']);
         Route::post('graduation-applications/{graduationApplication}/approve', [\App\Http\Controllers\Api\V1\GraduationApplicationController::class, 'approve']);
         Route::post('graduation-applications/{graduationApplication}/deny', [\App\Http\Controllers\Api\V1\GraduationApplicationController::class, 'deny']);
+        Route::get('graduation-applications/{graduationApplication}/clearance', [\App\Http\Controllers\Api\V1\GraduationApplicationController::class, 'clearanceStatus']);
+        Route::post('graduation-applications/{graduationApplication}/clear/{department}', [\App\Http\Controllers\Api\V1\GraduationApplicationController::class, 'clearDepartment']);
+        Route::post('graduation-applications/{graduationApplication}/block/{department}', [\App\Http\Controllers\Api\V1\GraduationApplicationController::class, 'blockDepartment']);
+        Route::post('graduation-applications/{graduationApplication}/final-approve', [\App\Http\Controllers\Api\V1\GraduationApplicationController::class, 'finalApprove']);
     });
 
     // User management (for admin to list users without student records)

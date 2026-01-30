@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\V1\AssignmentSubmissionController;
 use App\Http\Controllers\Api\V1\AttendanceController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\BuildingController;
+use App\Http\Controllers\Api\V1\DegreeRequirementController;
+use App\Http\Controllers\Api\V1\TuitionRateController;
 use App\Http\Controllers\Api\V1\ClassSessionController;
 use App\Http\Controllers\Api\V1\CourseController;
 use App\Http\Controllers\Api\V1\CourseImportController;
@@ -174,6 +176,17 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::post('programs/csv/import', [ProgramController::class, 'importCsv']);
     Route::get('programs/csv/export', [ProgramController::class, 'exportCsv']);
     Route::get('programs/csv/template', [ProgramController::class, 'downloadTemplate']);
+
+    // Degree Requirements (nested under programs for list/create, standalone for show/update/delete)
+    Route::get('programs/{program}/degree-requirements', [DegreeRequirementController::class, 'index']);
+    Route::post('programs/{program}/degree-requirements', [DegreeRequirementController::class, 'store']);
+    Route::get('degree-requirements/{degreeRequirement}', [DegreeRequirementController::class, 'show']);
+    Route::put('degree-requirements/{degreeRequirement}', [DegreeRequirementController::class, 'update']);
+    Route::delete('degree-requirements/{degreeRequirement}', [DegreeRequirementController::class, 'destroy']);
+
+    // Tuition Rates
+    Route::apiResource('tuition-rates', TuitionRateController::class);
+
     Route::get('course-catalog', [CourseController::class, 'catalog']);
     // Course CSV operations
     Route::post('courses/csv/import', [CourseController::class, 'importCsv'])->middleware('permission:create_courses');
@@ -292,6 +305,9 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::get('students/{student}/documents/all-versions', [\App\Http\Controllers\Api\V1\DocumentController::class, 'allVersions']);
 
     // Document restore routes
+    Route::post('students/{student}/documents/{document}/verify', [\App\Http\Controllers\Api\V1\DocumentController::class, 'verify']);
+    Route::post('students/{student}/documents/{document}/reject', [\App\Http\Controllers\Api\V1\DocumentController::class, 'reject']);
+
     Route::post('documents/{document}/restore', [\App\Http\Controllers\Api\V1\DocumentController::class, 'restore'])->withTrashed();
     Route::delete('documents/{document}/force', [\App\Http\Controllers\Api\V1\DocumentController::class, 'forceDelete'])->withTrashed();
 

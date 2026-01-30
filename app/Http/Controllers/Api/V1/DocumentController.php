@@ -266,6 +266,62 @@ class DocumentController extends Controller
     }
 
     /**
+     * Mark a document as verified
+     */
+    public function verify(Request $request, Student $student, Document $document): JsonResponse
+    {
+        $user = auth()->user();
+        if (!($user->hasRole('Admin') || $user->hasRole('admin') || $user->hasRole('staff'))) {
+            return response()->json(['message' => 'Only admins and staff can verify documents.'], 403);
+        }
+
+        if ($document->student_id !== $student->id) {
+            return response()->json(['message' => 'Document does not belong to this student.'], 404);
+        }
+
+        $document->update([
+            'status' => 'approved',
+            'verified' => true,
+            'verified_at' => now(),
+        ]);
+
+        return response()->json([
+            'message' => 'Document verified successfully.',
+            'data' => new DocumentResource($document),
+        ]);
+    }
+
+    /**
+     * Mark a document as rejected
+     */
+    public function reject(Request $request, Student $student, Document $document): JsonResponse
+    {
+        $user = auth()->user();
+        if (!($user->hasRole('Admin') || $user->hasRole('admin') || $user->hasRole('staff'))) {
+            return response()->json(['message' => 'Only admins and staff can reject documents.'], 403);
+        }
+
+        if ($document->student_id !== $student->id) {
+            return response()->json(['message' => 'Document does not belong to this student.'], 404);
+        }
+
+        $request->validate([
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        $document->update([
+            'status' => 'rejected',
+            'verified' => false,
+            'verified_at' => null,
+        ]);
+
+        return response()->json([
+            'message' => 'Document rejected.',
+            'data' => new DocumentResource($document),
+        ]);
+    }
+
+    /**
      * Restore a soft-deleted document
      */
     #[OA\Post(

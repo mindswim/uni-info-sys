@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\CourseSectionUnavailableException;
 use App\Exceptions\DuplicateEnrollmentException;
 use App\Exceptions\EnrollmentCapacityExceededException;
+use App\Exceptions\RegistrationHoldException;
 use App\Exceptions\StudentNotActiveException;
 use App\Jobs\SendEnrollmentConfirmation;
 use App\Jobs\ProcessWaitlistPromotion;
@@ -21,6 +22,7 @@ class EnrollmentService
      *
      * @param array $data
      * @return Enrollment
+     * @throws RegistrationHoldException
      * @throws StudentNotActiveException
      * @throws CourseSectionUnavailableException
      * @throws DuplicateEnrollmentException
@@ -31,6 +33,9 @@ class EnrollmentService
             $studentId = $data['student_id'];
             $courseSectionId = $data['course_section_id'];
             $requestedStatus = $data['status'] ?? null;
+
+            // Check for registration holds before anything else
+            $this->validateNoRegistrationHold($studentId);
 
             // Validate student is active
             $this->validateStudentActive($studentId);
@@ -161,6 +166,39 @@ class EnrollmentService
     }
 
     /**
+     * Validate that the student has no active registration holds
+     *
+     * @param int $studentId
+     * @throws RegistrationHoldException
+     */
+    private function validateNoRegistrationHold(int $studentId): void
+    {
+        $student = Student::with(['activeHolds' => function ($query) {
+            $query->where('prevents_registration', true);
+        }])->find($studentId);
+
+        if (!$student) {
+            return; // Will be caught by validateStudentActive
+        }
+
+        $registrationHolds = $student->activeHolds;
+
+        if ($registrationHolds->isNotEmpty()) {
+            $holdDetails = $registrationHolds->map(fn ($hold) => [
+                'id' => $hold->id,
+                'type' => $hold->type,
+                'reason' => $hold->reason,
+                'placed_at' => $hold->placed_at?->toIso8601String() ?? $hold->created_at->toIso8601String(),
+            ])->all();
+
+            throw new RegistrationHoldException(
+                'Cannot enroll: student has ' . $registrationHolds->count() . ' active registration hold(s). Resolve holds before registering.',
+                $holdDetails
+            );
+        }
+    }
+
+    /**
      * Validate that the student is active and can enroll
      *
      * @param int $studentId
@@ -272,7 +310,7 @@ class EnrollmentService
      */
     private function checkPrerequisites(int $studentId, int $courseSectionId): void
     {
-        $courseSection = CourseSection::with('course.prerequisites')->find($courseSectionId);
+        $courseSection = CourseSection::with('course.prerequisiteCourses')->find($courseSectionId);
         $student = Student::find($studentId);
         
         if (!$courseSection || !$student) {
@@ -280,7 +318,7 @@ class EnrollmentService
         }
         
         $course = $courseSection->course;
-        $prerequisites = $course->prerequisites;
+        $prerequisites = $course->prerequisiteCourses;
         
         if ($prerequisites->isEmpty()) {
             return; // No prerequisites required

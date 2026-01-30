@@ -62,7 +62,27 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (Throwable $e, Illuminate\Http\Request $request) {
             if ($request->is('api/*') || $request->expectsJson()) {
                 // Handle our custom domain exceptions first
-                if ($e instanceof App\Exceptions\EnrollmentCapacityExceededException) {
+                if ($e instanceof App\Exceptions\RegistrationHoldException) {
+                    \Log::warning('Registration hold blocks enrollment', [
+                        'message' => $e->getMessage(),
+                        'holds' => $e->getHolds(),
+                        'user_id' => $request->user()?->id,
+                        'url' => $request->url(),
+                    ]);
+
+                    $problem = new App\Exceptions\ProblemDetails(
+                        type: 'https://university-admissions.com/problems/registration-hold',
+                        title: 'Registration Hold',
+                        status: 422,
+                        detail: $e->getMessage(),
+                        extensions: [
+                            'error_code' => 'REGISTRATION_HOLD',
+                            'holds' => $e->getHolds(),
+                        ]
+                    );
+
+                    return $problem->toResponse();
+                } elseif ($e instanceof App\Exceptions\EnrollmentCapacityExceededException) {
                     \Log::warning('Enrollment capacity exceeded', [
                         'message' => $e->getMessage(),
                         'user_id' => $request->user()?->id,

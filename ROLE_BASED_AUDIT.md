@@ -10,12 +10,12 @@
 
 | Layer | Count |
 |-------|-------|
-| API Routes | 200+ endpoints |
-| Controllers | 43 |
-| Services | 9 (with deep business logic) |
-| Models | 30+ |
-| Frontend Pages | 63 |
-| Frontend Components | 135 |
+| API Routes | 340+ endpoints |
+| Controllers | 51 |
+| Services | 14 (with deep business logic) |
+| Models | 41+ |
+| Frontend Pages | 76+ |
+| Frontend Components | 150+ |
 | Background Jobs | 16 |
 | Policy Classes | 20 |
 | Custom Exceptions | 14 |
@@ -32,7 +32,7 @@
 | 1.1 | I visit the university landing page | [x] | `/` |
 | 1.2 | I register for an account | [x] | `/auth/register` + API |
 | 1.3 | I log in | [x] | `/auth/login` + API |
-| 1.4 | I reset a forgotten password | [B] | API exists (`/forgot-password`, `/reset-password`). **Missing: frontend page** |
+| 1.4 | I reset a forgotten password | [x] | `/auth/forgot-password` + API (E1) |
 | 1.5 | I browse the course catalog | [x] | `/apply` + `GET /course-catalog` |
 | 1.6 | I start an admission application | [x] | `/student/apply` + API |
 | 1.7 | I select programs by preference order | [x] | apply-tab.tsx + program-choices API |
@@ -44,10 +44,10 @@
 | 1.13 | I am waitlisted and get notified when promoted | [x] | Waitlist UI + background job notifications |
 
 **Gaps:**
-- [ ] `/auth/forgot-password` page (backend ready)
-- [ ] Public-facing program directory page (browse programs without logging in)
 - [ ] Application fee payment during submission
-- [ ] Email verification flow UI (backend sends email, no frontend confirmation page)
+- ~~Forgot password page~~ Done (E1)
+- ~~Public program directory~~ Done (E22)
+- ~~Email verification flow UI~~ Done (E21)
 
 ---
 
@@ -72,10 +72,10 @@
 | 2.13 | I receive enrollment confirmation email | [x] | SendEnrollmentConfirmation job |
 
 **Gaps:**
-- [ ] Registration appointment/time ticket system (students register in assigned windows)
-- [ ] Advisor approval required before registration (advisor hold)
-- [ ] Repeat course policy enforcement (retake limits, grade replacement)
-- [ ] Credit hour limit enforcement per term (e.g., max 18 credits without override)
+- ~~Registration time ticket system~~ Done (E11)
+- ~~Advisor approval before registration~~ Done (E12)
+- ~~Repeat course policy~~ Done (E9)
+- ~~Credit hour limit per term~~ Done (E8)
 - [ ] Cross-listed course handling (same course, different department codes)
 
 ### 2b. Academics & Coursework
@@ -89,17 +89,17 @@
 | 2.18 | I view course materials / syllabus | [x] | `/student/materials` |
 | 2.19 | I check my class schedule / sessions | [x] | `/student/calendar` |
 | 2.20 | I view my attendance record | [x] | Attendance student report API |
-| 2.21 | I request a transcript | [x] | `/student/transcripts` page exists |
+| 2.21 | I request a transcript | [x] | `/student/transcripts` with PDF generation (E13) |
 | 2.22 | I check GPA (semester + cumulative) | [x] | StudentService GPA calculations |
 | 2.23 | I see my academic standing | [x] | Good standing / probation / dean's list logic |
 | 2.24 | I see my class standing (freshman-senior) | [x] | Credit-based calculation in Student model |
 
 **Gaps:**
-- [ ] Transcript PDF generation API (page exists but no document generation)
-- [ ] What-if degree audit (simulate changing major)
-- [ ] Course evaluation / instructor rating submission
-- [ ] Academic plan / 4-year planner
-- [ ] Transfer credit evaluation display
+- ~~Transcript PDF generation~~ Done (E13)
+- ~~What-if degree audit~~ Done (E14)
+- ~~Course evaluation submissions~~ Done (E15)
+- ~~Academic plan / 4-year planner~~ Done (E16)
+- ~~Transfer credit display~~ Done (E24)
 - [ ] Incomplete grade resolution workflow (student side)
 
 ### 2c. Financial
@@ -113,12 +113,12 @@
 | 2.29 | I view payment history | [x] | Payments listing |
 
 **Gaps:**
-- [ ] Payment plan setup (installment agreements)
-- [ ] 1098-T tax form generation
+- ~~Payment plan setup~~ Done (E17)
+- ~~1098-T tax form~~ Done (E30)
 - [ ] Financial aid application/FAFSA status tracking
 - [ ] Scholarship application submission
 - [ ] Refund request for dropped courses
-- [ ] Account balance prevents registration (financial hold -- exists but no explicit balance-to-hold automation)
+- ~~Automated financial holds~~ Done (E18)
 
 ### 2d. Student Life & Support
 
@@ -139,7 +139,7 @@
 - [ ] Campus map / building directory (public)
 - [ ] Emergency contact management
 - [ ] Address / contact info self-service update
-- [ ] Graduation application submission
+- ~~Graduation application~~ Done (E10)
 - [ ] Diploma / commencement status tracking
 
 ---
@@ -174,7 +174,7 @@
 | 3.17 | I export gradebook | [x] | Export endpoint |
 | 3.18 | I view grade distribution | [x] | Distribution endpoint |
 | 3.19 | I view grading progress (% complete) | [x] | Progress endpoint |
-| 3.20 | I request a grade change after finalization | [B] | API exists. **Missing: faculty-facing UI** |
+| 3.20 | I request a grade change after finalization | [x] | API + faculty UI (E3) |
 
 ### 3c. Course Content
 
@@ -201,14 +201,14 @@
 | 3.29 | I update my profile/settings | [x] | `/profile`, `/settings` |
 
 **Gaps:**
-- [ ] Grade change request UI for faculty (backend ready)
-- [ ] Office hours management (recurring availability slots)
+- ~~Grade change request UI~~ Done (E3)
+- ~~Office hours management~~ Done (E28)
 - [ ] Course section request / preference submission (for next term scheduling)
-- [ ] Student early alert / concern reporting system
+- ~~Student early alert system~~ Done (E25)
 - [ ] Syllabus template / builder
 - [ ] Peer review assignment type
-- [ ] Discussion forums / threaded discussions
-- [ ] Rubric creation and rubric-based grading
+- ~~Discussion forums~~ Done (E26)
+- ~~Rubric-based grading~~ Done (E27)
 
 ---
 
@@ -242,7 +242,7 @@
 | 4.11 | I manage courses (with prerequisites) | [x] | `/admin/courses` |
 | 4.12 | I manage course sections | [x] | `/admin/sections` |
 | 4.13 | I manage academic terms | [x] | `/admin/terms` |
-| 4.14 | I manage degree requirements | [B] | API exists. **Missing: admin UI** |
+| 4.14 | I manage degree requirements | [x] | API + admin UI (E2) |
 | 4.15 | I manage buildings | [x] | `/admin/buildings` |
 | 4.16 | I manage rooms | [x] | Rooms API (part of buildings) |
 
@@ -254,8 +254,8 @@
 | 4.18 | I manage holds (create, resolve) | [x] | `/admin/holds` |
 | 4.19 | I manage waitlists | [x] | `/admin/waitlists` |
 | 4.20 | I manage grades | [x] | `/admin/grades` |
-| 4.21 | I review/approve grade change requests | [B] | API exists. **Missing: admin UI** |
-| 4.22 | I generate class sessions for a term | [B] | API exists. **Missing: UI trigger button** |
+| 4.21 | I review/approve grade change requests | [x] | API + admin UI (E3) |
+| 4.22 | I generate class sessions for a term | [x] | API + UI trigger (E4) |
 
 ### 4e. Admissions
 
@@ -266,7 +266,7 @@
 | 4.25 | I bulk accept/reject/waitlist | [x] | Bulk actions API |
 | 4.26 | I view admission statistics | [x] | Stats endpoint |
 | 4.27 | I enroll accepted students | [x] | Enroll endpoint |
-| 4.28 | I verify student documents | [B] | Verify/reject API exists. **Missing: document review queue UI** |
+| 4.28 | I verify student documents | [x] | Document verification queue UI (E5) |
 
 ### 4f. Financial
 
@@ -284,7 +284,7 @@
 |---|-----------|--------|-------|
 | 4.34 | I create university-wide announcements | [x] | `/admin/announcements` |
 | 4.35 | I send/receive messages | [x] | `/messages` |
-| 4.36 | I manage events/calendar | [B] | CRUD API exists. **Missing: admin events page** |
+| 4.36 | I manage events/calendar | [x] | `/admin/events` (E6) |
 
 ### 4h. System Configuration
 
@@ -306,16 +306,16 @@
 | 4.45 | I import grades from file for a section | [x] | `POST /course-sections/{id}/import-grades` (GradeImportController) |
 
 **Gaps:**
-- [ ] Degree requirements admin UI
-- [ ] Grade change request review UI
-- [ ] Session generation UI trigger
-- [ ] Admin events/calendar management page
-- [ ] Document verification queue UI
-- [ ] Audit log viewer (audit trail exists in DB, no UI to browse it)
+- ~~Degree requirements admin UI~~ Done (E2)
+- ~~Grade change request review UI~~ Done (E3)
+- ~~Session generation UI trigger~~ Done (E4)
+- ~~Admin events/calendar page~~ Done (E6)
+- ~~Document verification queue UI~~ Done (E5)
+- ~~Audit log viewer~~ Done (E7)
 - [ ] Automated report generation / scheduled reports
 - [ ] User activity log / login history
-- [ ] Batch student status updates (e.g., end-of-term academic standing)
-- [ ] Academic calendar builder (define registration windows, holidays, deadlines)
+- ~~Batch academic standing updates~~ Done (E19)
+- ~~Academic calendar builder~~ Done (E20)
 - [ ] Notification template management
 - [ ] Email template management
 
@@ -328,32 +328,32 @@
 | # | User Story | Status | Notes |
 |---|-----------|--------|-------|
 | 5.1 | I process admission applications | [x] | Via admin pages |
-| 5.2 | I verify student documents | [B] | API exists, no queue UI |
+| 5.2 | I verify student documents | [x] | Document verification queue (E5) |
 | 5.3 | I manage enrollment overrides | [x] | Via admin pages |
 | 5.4 | I generate invoices for students | [x] | Via admin billing |
-| 5.5 | I process transcript requests | [ ] | No workflow exists |
-| 5.6 | I handle enrollment verifications | [ ] | No workflow exists |
-| 5.7 | I manage commencement / graduation clearance | [ ] | No workflow exists |
+| 5.5 | I process transcript requests | [x] | Transcript PDF generation (E13) |
+| 5.6 | I handle enrollment verifications | [x] | Enrollment verification letter PDF (E29) |
+| 5.7 | I manage commencement / graduation clearance | [B] | Graduation application exists (E10), clearance workflow partial |
 
 **Gaps:**
 - [ ] Dedicated registrar dashboard (not same as admin)
-- [ ] Transcript request processing queue
-- [ ] Enrollment verification letter generation
-- [ ] Graduation clearance workflow
+- ~~Transcript request processing~~ Done (E13)
+- ~~Enrollment verification letter generation~~ Done (E29)
+- [ ] Full graduation clearance workflow (multi-step approval -- E32)
 - [ ] FERPA compliance tools (access restrictions, disclosure logging)
 
 ---
 
-## 6. Department Chair (Not Yet a Distinct Role)
+## 6. Department Chair
 
-> This role does not exist in the current system but is standard in enterprise SIS.
+> Role added via E23 with `department-chair` role, `EnsureIsDepartmentChair` middleware, and scoped dashboard/views.
 
 | # | User Story | Status | Notes |
 |---|-----------|--------|-------|
-| 6.1 | I view my department's courses and sections | [ ] | No role or scoped view |
+| 6.1 | I view my department's courses and sections | [x] | `/chair/sections` + DepartmentChairController (E23) |
 | 6.2 | I approve course section offerings for next term | [ ] | No approval workflow |
 | 6.3 | I assign instructors to sections | [ ] | Sections have instructor_id but no assignment workflow |
-| 6.4 | I review grade distributions for my department | [ ] | Data exists, no scoped view |
+| 6.4 | I review grade distributions for my department | [x] | `/chair/grades` + gradeDistribution() (E23) |
 | 6.5 | I approve enrollment overrides / capacity increases | [ ] | No approval workflow |
 | 6.6 | I approve grade change requests for my department | [ ] | No department-scoped review |
 | 6.7 | I review faculty performance data | [ ] | No analytics scoped to department |
@@ -367,9 +367,9 @@
 | Concern | Status | Details |
 |---------|--------|---------|
 | Authentication (token-based) | [x] | Sanctum |
-| Role-based access control | [x] | 20 policy classes, 3 role middleware |
+| Role-based access control | [x] | 20 policy classes, 4 role middleware (admin, staff, student, chair) |
 | Permission-based access | [x] | HasPermission middleware, role-permission sync |
-| Audit trail | [x] | Laravel Auditing on critical models |
+| Audit trail | [x] | Laravel Auditing on critical models + audit log viewer (E7) |
 | Background job processing | [x] | 16 jobs (waitlist, notifications, CSV imports) |
 | Prometheus metrics | [x] | Request tracking, duration observability |
 | Request tracing | [x] | AddTraceIdToLogs middleware |
@@ -407,7 +407,7 @@
 
 | API Domain | Endpoints | Covered In |
 |-----------|-----------|------------|
-| Auth (register, login, logout, user, forgot/reset password) | 6 | Section 1 |
+| Auth (register, login, logout, user, forgot/reset password, email verify) | 8 | Section 1 |
 | Students (CRUD, /me, restore, force-delete, CSV) | 10 | Sections 2, 4b |
 | Staff (CRUD, /me, sections, students, CSV) | 9 | Sections 3, 4b |
 | Academic Hierarchy (faculties, departments, programs + CSV) | 18 | Section 4c |
@@ -445,7 +445,26 @@
 | Users (list, show, roles) | 3 | Section 4b |
 | Notifications (list, mark-read) | 2 | Section 2d |
 | Health + Metrics | 2 | Section 7a |
-| **Total** | **~290** | **All mapped** |
+| Department Chair (dashboard, faculty, sections, grades) | 4 | Section 6 (E23) |
+| Office Hours (CRUD, available) | 5 | Section 3 (E28) |
+| Enrollment Verification (generate PDF) | 1 | Section 5 (E29) |
+| Tax Forms 1098-T (index, generate, download) | 3 | Section 2c (E30) |
+| Early Alerts (CRUD, comments, my-alerts) | 6 | Sections 3, 4 (E25) |
+| Transfer Credits (CRUD, evaluate, equivalencies) | 6 | Sections 2b, 4e (E24) |
+| Rubrics (CRUD, templates, duplicate, score, results) | 7 | Section 3b (E27) |
+| Discussion Forums (topics, replies, pin, lock) | 6 | Sections 2d, 3c (E26) |
+| Registration Time Tickets (CRUD, assign, check) | 5 | Section 2a (E11) |
+| Advisor Registration Approval (request, approve, deny) | 3 | Section 2a (E12) |
+| Course Evaluations (submit, view, stats) | 4 | Section 2b (E15) |
+| Academic Planner (CRUD, templates) | 5 | Section 2b (E16) |
+| Payment Plans (create, installments, status) | 4 | Section 2c (E17) |
+| Academic Standing (batch update, history) | 3 | Section 4d (E19) |
+| Academic Calendar (CRUD, events) | 4 | Section 4c (E20) |
+| Graduation Application (submit, status, clearance) | 4 | Section 2d (E10) |
+| Transcript PDF (generate, download) | 2 | Section 2b (E13) |
+| What-if Degree Audit (simulate) | 2 | Section 2b (E14) |
+| Audit Log (view, filter) | 3 | Section 4h (E7) |
+| **Total** | **~340** | **All mapped** |
 
 ---
 
@@ -453,50 +472,55 @@
 
 These are features found in production SIS platforms (Banner, PeopleSoft, Workday Student) that are not yet in this system. Organized by domain and priority.
 
-### Tier 1: Important for Completeness (Recommended)
+### Tier 1: Important for Completeness -- All Done
 
-| # | Feature | Domain | Backend | Frontend | Effort |
+| # | Feature | Domain | Backend | Frontend | Status |
 |---|---------|--------|---------|----------|--------|
-| E1 | Forgot password page | Auth | Ready | Missing | Small |
-| E2 | Degree requirements admin UI | Academics | Ready | Missing | Small |
-| E3 | Grade change request UI (faculty + admin) | Grading | Ready | Missing | Small |
-| E4 | Session generation trigger | Scheduling | Ready | Missing | Tiny |
-| E5 | Document verification queue | Admissions | Ready | Missing | Small |
-| E6 | Admin events/calendar page | Admin | Ready | Missing | Small |
-| E7 | Audit log viewer | System | Data exists | Missing | Medium |
-| E8 | Credit hour limit per term | Enrollment | Missing | Missing | Small |
-| E9 | Repeat course policy | Enrollment | Missing | Missing | Small |
-| E10 | Graduation application | Student Life | Missing | Missing | Medium |
+| E1 | Forgot password page | Auth | Done | Done | Done |
+| E2 | Degree requirements admin UI | Academics | Done | Done | Done |
+| E3 | Grade change request UI (faculty + admin) | Grading | Done | Done | Done |
+| E4 | Session generation trigger | Scheduling | Done | Done | Done |
+| E5 | Document verification queue | Admissions | Done | Done | Done |
+| E6 | Admin events/calendar page | Admin | Done | Done | Done |
+| E7 | Audit log viewer | System | Done | Done | Done |
+| E8 | Credit hour limit per term | Enrollment | Done | Done | Done |
+| E9 | Repeat course policy | Enrollment | Done | Done | Done |
+| E10 | Graduation application | Student Life | Done | Done | Done |
 
-### Tier 2: Nice to Have (Polish)
+### Tier 2: Nice to Have -- All Done
 
-| # | Feature | Domain | Backend | Frontend | Effort |
+| # | Feature | Domain | Backend | Frontend | Status |
 |---|---------|--------|---------|----------|--------|
-| E11 | Registration time tickets | Registration | Done | Done | Medium |
-| E12 | Advisor approval for registration | Registration | Done | Done | Medium |
-| E13 | Transcript PDF generation | Records | Done | Done | Medium |
-| E14 | What-if degree audit | Academics | Done | Done | Large |
-| E15 | Course evaluation submissions | Academics | Done | Done | Medium |
-| E16 | Academic plan / 4-year planner | Advising | Done | Done | Large |
-| E17 | Payment plan / installments | Financial | Done | Done | Medium |
-| E18 | Automated financial holds on balance | Financial | Done | N/A (job) | Small |
-| E19 | Batch academic standing update | Admin | Done | Done | Medium |
-| E20 | Academic calendar builder | Admin | Done (Tier 1) | Done (Tier 1) | Medium |
-| E21 | Email verification flow page | Auth | Done | Done | Small |
-| E22 | Public program directory | Marketing | Done | Done | Small |
+| E11 | Registration time tickets | Registration | Done | Done | Done |
+| E12 | Advisor approval for registration | Registration | Done | Done | Done |
+| E13 | Transcript PDF generation | Records | Done | Done | Done |
+| E14 | What-if degree audit | Academics | Done | Done | Done |
+| E15 | Course evaluation submissions | Academics | Done | Done | Done |
+| E16 | Academic plan / 4-year planner | Advising | Done | Done | Done |
+| E17 | Payment plan / installments | Financial | Done | Done | Done |
+| E18 | Automated financial holds on balance | Financial | Done | N/A (job) | Done |
+| E19 | Batch academic standing update | Admin | Done | Done | Done |
+| E20 | Academic calendar builder | Admin | Done | Done | Done |
+| E21 | Email verification flow page | Auth | Done | Done | Done |
+| E22 | Public program directory | Marketing | Done | Done | Done |
 
-### Tier 3: Advanced / Enterprise (Future)
+### Tier 3: Advanced / Enterprise -- All Done
 
-| # | Feature | Domain | Backend | Frontend | Notes |
-|---|---------|--------|---------|----------|-------|
-| E23 | Department Chair role | Governance | Done | Done | New role with scoped views |
-| E24 | Transfer credit evaluation | Admissions | Done | Done | Complex mapping logic |
-| E25 | Student early alert system | Retention | Done | Done | Faculty flags at-risk students |
-| E26 | Discussion forums | LMS | Done | Done | Threaded course discussions |
-| E27 | Rubric-based grading | LMS | Done | Done | Structured grading criteria |
-| E28 | Office hours management | Faculty | Done | Done | Recurring availability slots |
-| E29 | Enrollment verification letters | Registrar | Done | N/A | PDF generation |
-| E30 | 1098-T tax form | Financial | Done | Done | Regulatory compliance |
+| # | Feature | Domain | Backend | Frontend | Status |
+|---|---------|--------|---------|----------|--------|
+| E23 | Department Chair role | Governance | Done | Done | Done |
+| E24 | Transfer credit evaluation | Admissions | Done | Done | Done |
+| E25 | Student early alert system | Retention | Done | Done | Done |
+| E26 | Discussion forums | LMS | Done | Done | Done |
+| E27 | Rubric-based grading | LMS | Done | Done | Done |
+| E28 | Office hours management | Faculty | Done | Done | Done |
+| E29 | Enrollment verification letters | Registrar | Done | Done | Done |
+| E30 | 1098-T tax form | Financial | Done | Done | Done |
+
+### Tier 4: Remaining Enterprise Gaps (Not Built)
+
+| # | Feature | Domain | Notes |
+|---|---------|--------|-------|
 | E31 | FERPA compliance tools | Compliance | Access logging, disclosure tracking |
 | E32 | Graduation clearance workflow | Registrar | Multi-step approval |
 | E33 | Course section request workflow | Scheduling | Faculty preference submission |
@@ -511,27 +535,25 @@ These are features found in production SIS platforms (Banner, PeopleSoft, Workda
 
 | Domain | Stories | Built | Backend Only | Not Built | Coverage |
 |--------|---------|-------|-------------|-----------|----------|
-| Prospective Student | 13 | 11 | 1 | 1 | 85% |
+| Prospective Student | 13 | 13 | 0 | 0 | 100% |
 | Student: Registration | 13 | 13 | 0 | 0 | 100% |
 | Student: Academics | 11 | 11 | 0 | 0 | 100% |
 | Student: Financial | 5 | 5 | 0 | 0 | 100% |
 | Student: Life/Support | 9 | 9 | 0 | 0 | 100% |
 | Faculty: Course Delivery | 7 | 7 | 0 | 0 | 100% |
-| Faculty: Grading | 13 | 12 | 1 | 0 | 92% |
+| Faculty: Grading | 13 | 13 | 0 | 0 | 100% |
 | Faculty: Content | 4 | 4 | 0 | 0 | 100% |
 | Faculty: Advising | 3 | 3 | 0 | 0 | 100% |
 | Faculty: Communication | 2 | 2 | 0 | 0 | 100% |
-| Admin: All | 46 | 40 | 5 | 1 | 87% |
-| Staff / Registrar | 7 | 4 | 1 | 2 | 57% |
-| Department Chair | 7 | 0 | 0 | 7 | 0% |
-| **Totals** | **140** | **121** | **8** | **11** | **86%** |
+| Admin: All | 46 | 46 | 0 | 0 | 100% |
+| Staff / Registrar | 7 | 6 | 1 | 0 | 86% |
+| Department Chair | 7 | 2 | 0 | 5 | 29% |
+| **Totals** | **140** | **134** | **1** | **5** | **96%** |
 
 ### Key Takeaway
 
-The system has **86% coverage** across 135 user stories spanning 5 active roles. The core student, faculty, and admin journeys are essentially complete. The primary gaps are:
+The system has **96% coverage** across 140 user stories spanning 6 active roles (prospective student, enrolled student, faculty, admin, staff/registrar, department chair). All core student, faculty, and admin journeys are complete. All 30 enterprise gap features (E1-E30) across Tiers 1-3 have been implemented. The remaining gaps are:
 
-1. **8 features with backend ready but no frontend** -- small effort to close
-2. **11 features not yet built** -- mostly registrar workflows and the department chair role
-3. **15 enterprise-tier features** (Tier 3) that would bring this to full parity with commercial SIS platforms
-
-The recommended path forward is to close Tier 1 (10 items), then selectively implement Tier 2 based on which areas best demonstrate depth for the portfolio.
+1. **1 backend-only feature** -- graduation clearance workflow (partial)
+2. **5 department chair stories** -- approval workflows for sections, instructors, overrides, grade changes, and faculty analytics
+3. **7 Tier 4 enterprise features** (E31-E37) -- FERPA compliance, graduation clearance, section requests, notification templates, WebSockets, peer review, multi-tenancy

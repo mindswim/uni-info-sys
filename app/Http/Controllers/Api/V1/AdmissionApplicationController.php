@@ -859,25 +859,11 @@ class AdmissionApplicationController extends Controller
     {
         $this->authorize('update', $admissionApplication);
 
-        if ($admissionApplication->status !== 'accepted') {
-            return response()->json([
-                'message' => 'Application must be accepted before enrollment.'
-            ], 400);
-        }
-
-        $admissionApplication->update([
-            'status' => 'enrolled'
-        ]);
-
-        $admissionApplication->load([
-            'student.user',
-            'term',
-            'programChoices.program'
-        ]);
+        $application = $this->admissionService->matriculateStudent($admissionApplication);
 
         return response()->json([
             'message' => 'Student enrolled successfully.',
-            'data' => new AdmissionApplicationResource($admissionApplication)
+            'data' => new AdmissionApplicationResource($application)
         ]);
     }
 

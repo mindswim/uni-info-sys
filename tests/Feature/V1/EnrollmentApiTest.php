@@ -8,7 +8,6 @@ use App\Models\CourseSection;
 use App\Models\Department;
 use App\Models\Enrollment;
 use App\Models\Faculty;
-use App\Models\Role;
 use App\Models\Room;
 use App\Models\Staff;
 use App\Models\Student;
@@ -21,12 +20,16 @@ use Tests\Traits\CreatesUsersWithRoles;
 
 class EnrollmentApiTest extends TestCase
 {
-    use RefreshDatabase, CreatesUsersWithRoles;
+    use CreatesUsersWithRoles, RefreshDatabase;
 
     private Student $student;
+
     private CourseSection $courseSection;
+
     private CourseSection $fullCourseSection;
+
     private Term $term;
+
     private Course $course;
 
     protected function setUp(): void
@@ -46,7 +49,7 @@ class EnrollmentApiTest extends TestCase
         // Create faculty and department
         $faculty = Faculty::factory()->create();
         $department = Department::factory()->create(['faculty_id' => $faculty->id]);
-        
+
         // Create term with future add_drop_deadline
         $this->term = Term::factory()->create([
             'name' => 'Fall 2024',
@@ -56,25 +59,25 @@ class EnrollmentApiTest extends TestCase
             'end_date' => now()->addDays(120),
             'add_drop_deadline' => now()->addDays(60),
         ]);
-        
+
         // Create course
         $this->course = Course::factory()->create(['department_id' => $department->id]);
-        
+
         // Create building and room
         $building = Building::factory()->create();
         $room = Room::factory()->create(['building_id' => $building->id]);
-        
+
         // Create instructor
         $instructorUser = User::factory()->create();
         $instructor = Staff::factory()->create([
             'user_id' => $instructorUser->id,
             'department_id' => $department->id,
         ]);
-        
+
         // Create student
         $studentUser = User::factory()->create(['email_verified_at' => now()]);
         $this->student = Student::factory()->create(['user_id' => $studentUser->id]);
-        
+
         // Create course sections
         $this->courseSection = CourseSection::factory()->create([
             'course_id' => $this->course->id,
@@ -84,7 +87,7 @@ class EnrollmentApiTest extends TestCase
             'section_number' => '001',
             'capacity' => 30,
         ]);
-        
+
         // Create a full course section for capacity testing
         $this->fullCourseSection = CourseSection::factory()->create([
             'course_id' => $this->course->id,
@@ -94,7 +97,7 @@ class EnrollmentApiTest extends TestCase
             'section_number' => '002',
             'capacity' => 2,
         ]);
-        
+
         // Fill the course section to capacity
         $students = Student::factory()->count(2)->create();
         foreach ($students as $student) {
@@ -182,7 +185,7 @@ class EnrollmentApiTest extends TestCase
     public function it_automatically_waitlists_when_course_section_is_full()
     {
         $newStudent = Student::factory()->create();
-        
+
         $enrollmentData = [
             'student_id' => $newStudent->id,
             'course_section_id' => $this->fullCourseSection->id,
@@ -224,7 +227,7 @@ class EnrollmentApiTest extends TestCase
 
         $response->assertUnprocessable()
             ->assertJson([
-                'detail' => 'Student is already enrolled or waitlisted for this course section'
+                'detail' => 'Student is already enrolled or waitlisted for this course section',
             ]);
     }
 
@@ -408,13 +411,13 @@ class EnrollmentApiTest extends TestCase
     public function it_can_filter_enrollments_by_student()
     {
         $otherStudent = Student::factory()->create();
-        
+
         // Create enrollments for both students
         Enrollment::factory()->create([
             'student_id' => $this->student->id,
             'course_section_id' => $this->courseSection->id,
         ]);
-        
+
         Enrollment::factory()->create([
             'student_id' => $otherStudent->id,
             'course_section_id' => $this->courseSection->id,
@@ -423,7 +426,7 @@ class EnrollmentApiTest extends TestCase
         $response = $this->getJson("/api/v1/enrollments?student_id={$this->student->id}");
 
         $response->assertOk();
-        
+
         $data = $response->json('data');
         $this->assertCount(1, $data);
         $this->assertEquals($this->student->id, $data[0]['student']['id']);
@@ -438,7 +441,7 @@ class EnrollmentApiTest extends TestCase
             'term_id' => $this->term->id,
             'section_number' => '003',
         ]);
-        
+
         $courseSection3 = CourseSection::factory()->create([
             'course_id' => $this->course->id,
             'term_id' => $this->term->id,
@@ -565,4 +568,4 @@ class EnrollmentApiTest extends TestCase
         $response->assertUnprocessable()
             ->assertJsonValidationErrors(['course_section_id']);
     }
-} 
+}

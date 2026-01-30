@@ -2,21 +2,30 @@
 
 namespace Tests\Feature\Api\V1;
 
+use App\Models\Role;
+use App\Models\Student;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 use Tests\Traits\CreatesUsersWithRoles;
-use App\Models\User;
-use App\Models\Student;
-use App\Models\Role;
-use Laravel\Sanctum\Sanctum;
 
 class StudentApiTest extends TestCase
 {
-    use RefreshDatabase, WithFaker, CreatesUsersWithRoles;
+    use CreatesUsersWithRoles, RefreshDatabase, WithFaker;
 
-    private $adminUser, $staffUser, $studentUser1, $studentUser2;
-    private $student1, $student2;
+    private $adminUser;
+
+    private $staffUser;
+
+    private $studentUser1;
+
+    private $studentUser2;
+
+    private $student1;
+
+    private $student2;
 
     protected function setUp(): void
     {
@@ -73,7 +82,7 @@ class StudentApiTest extends TestCase
         $response = $this->getJson('/api/v1/students')
             ->assertStatus(200)
             ->assertJsonCount(1, 'data');
-        
+
         $this->assertEquals($this->student1->id, $response->json('data.0.id'));
     }
 
@@ -102,9 +111,9 @@ class StudentApiTest extends TestCase
                     '*' => [
                         'id',
                         'student_number',
-                        'user' => ['id', 'name', 'email']
-                    ]
-                ]
+                        'user' => ['id', 'name', 'email'],
+                    ],
+                ],
             ]);
     }
 
@@ -117,19 +126,19 @@ class StudentApiTest extends TestCase
                 'data' => [
                     'id',
                     'student_number',
-                    'user' => ['id', 'name', 'email']
-                ]
+                    'user' => ['id', 'name', 'email'],
+                ],
             ]);
     }
 
     public function test_admin_can_create_student()
     {
         Sanctum::actingAs($this->adminUser);
-        
+
         $newUser = User::factory()->create();
         $studentData = [
             'user_id' => $newUser->id,
-            'student_number' => 'STU' . $this->faker->unique()->numerify('####'),
+            'student_number' => 'STU'.$this->faker->unique()->numerify('####'),
             'first_name' => $this->faker->firstName,
             'last_name' => $this->faker->lastName,
             'date_of_birth' => $this->faker->date(),
@@ -153,26 +162,26 @@ class StudentApiTest extends TestCase
                     'id',
                     'student_number',
                     'first_name',
-                    'last_name'
-                ]
+                    'last_name',
+                ],
             ]);
 
         $this->assertDatabaseHas('students', [
             'user_id' => $newUser->id,
             'student_number' => $studentData['student_number'],
             'first_name' => $studentData['first_name'],
-            'last_name' => $studentData['last_name']
+            'last_name' => $studentData['last_name'],
         ]);
     }
 
     public function test_admin_can_update_student()
     {
         Sanctum::actingAs($this->adminUser);
-        
+
         $updateData = [
             'first_name' => 'Updated',
             'last_name' => 'Name',
-            'phone' => '555-UPDATED'
+            'phone' => '555-UPDATED',
         ];
 
         $this->putJson("/api/v1/students/{$this->student1->id}", $updateData)
@@ -182,43 +191,41 @@ class StudentApiTest extends TestCase
                 'data' => [
                     'id',
                     'first_name',
-                    'last_name'
-                ]
+                    'last_name',
+                ],
             ]);
 
         $this->assertDatabaseHas('students', [
             'id' => $this->student1->id,
             'first_name' => 'Updated',
             'last_name' => 'Name',
-            'phone' => '555-UPDATED'
+            'phone' => '555-UPDATED',
         ]);
     }
 
     public function test_admin_can_delete_student()
     {
         Sanctum::actingAs($this->adminUser);
-        
+
         $this->deleteJson("/api/v1/students/{$this->student1->id}")
             ->assertStatus(204);
 
         $this->assertSoftDeleted('students', [
-            'id' => $this->student1->id
+            'id' => $this->student1->id,
         ]);
     }
 
     public function test_store_requires_validation()
     {
         Sanctum::actingAs($this->adminUser);
-        
+
         $this->postJson('/api/v1/students', [])
             ->assertStatus(422)
             ->assertJsonValidationErrors([
-                'user_id', 'student_number', 'first_name', 'last_name', 
-                'date_of_birth', 'gender', 'nationality', 'address', 
+                'user_id', 'student_number', 'first_name', 'last_name',
+                'date_of_birth', 'gender', 'nationality', 'address',
                 'city', 'state', 'postal_code', 'country', 'phone',
-                'emergency_contact_name', 'emergency_contact_phone'
+                'emergency_contact_name', 'emergency_contact_phone',
             ]);
     }
-
-
 }

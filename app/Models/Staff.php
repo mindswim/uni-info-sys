@@ -8,17 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class Staff extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
-        'user_id', 
-        'department_id', 
-        'job_title', 
+        'user_id',
+        'department_id',
+        'job_title',
         'bio',
-        'office_location', 
-        'phone', 
+        'office_location',
+        'phone',
         'specialization',
         'education',
-        'office_hours'
+        'office_hours',
     ];
 
     public function user()

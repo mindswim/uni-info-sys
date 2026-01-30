@@ -42,7 +42,7 @@ class GradeChangeRequestRequest extends FormRequest
             'enrollment_id.required' => 'Enrollment ID is required',
             'enrollment_id.exists' => 'Enrollment not found',
             'new_grade.required' => 'New grade is required',
-            'new_grade.in' => 'Invalid grade. Must be one of: ' . implode(', ', GradeService::getValidGrades()),
+            'new_grade.in' => 'Invalid grade. Must be one of: '.implode(', ', GradeService::getValidGrades()),
             'reason.required' => 'Reason for grade change is required',
             'reason.min' => 'Reason must be at least 10 characters',
             'reason.max' => 'Reason must not exceed 1000 characters',

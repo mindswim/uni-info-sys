@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\AdmissionApplication;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class AdmissionApplicationPolicy
 {
@@ -14,6 +13,7 @@ class AdmissionApplicationPolicy
     public function viewAny(User $user): bool
     {
         $userRoles = array_map('strtolower', $user->roles()->pluck('name')->toArray());
+
         // Admin/staff can view all applications, students can view their own
         return in_array('admin', $userRoles) || in_array('staff', $userRoles) || in_array('student', $userRoles);
     }
@@ -24,6 +24,7 @@ class AdmissionApplicationPolicy
     public function view(User $user, AdmissionApplication $admissionApplication): bool
     {
         $userRoles = array_map('strtolower', $user->roles()->pluck('name')->toArray());
+
         // Admin/staff can view any application, student can view their own
         return in_array('admin', $userRoles) ||
                in_array('staff', $userRoles) ||
@@ -36,6 +37,7 @@ class AdmissionApplicationPolicy
     public function create(User $user): bool
     {
         $userRoles = array_map('strtolower', $user->roles()->pluck('name')->toArray());
+
         // Admin, staff, and students can create applications
         return in_array('admin', $userRoles) || in_array('staff', $userRoles) || in_array('student', $userRoles);
     }
@@ -81,6 +83,7 @@ class AdmissionApplicationPolicy
     {
         // Only admin can restore
         $userRoles = array_map('strtolower', $user->roles()->pluck('name')->toArray());
+
         return in_array('admin', $userRoles);
     }
 
@@ -91,6 +94,7 @@ class AdmissionApplicationPolicy
     {
         // Only admin can force delete
         $userRoles = array_map('strtolower', $user->roles()->pluck('name')->toArray());
+
         return in_array('admin', $userRoles);
     }
 

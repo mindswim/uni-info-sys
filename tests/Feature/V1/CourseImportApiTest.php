@@ -4,8 +4,8 @@ namespace Tests\Feature\Api\V1;
 
 use App\Jobs\ProcessCourseImport;
 use App\Models\Department;
-use App\Models\Role;
 use App\Models\Permission;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -21,7 +21,7 @@ class CourseImportApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create departments for testing
         Department::factory()->create(['code' => 'CS', 'name' => 'Computer Science']);
         Department::factory()->create(['code' => 'MATH', 'name' => 'Mathematics']);
@@ -33,27 +33,27 @@ class CourseImportApiTest extends TestCase
     private function createUserWithCoursesManagePermission(): User
     {
         $user = User::factory()->create();
-        
+
         // Create permission if it doesn't exist
         $permission = Permission::firstOrCreate([
             'name' => 'courses.manage',
-            'description' => 'Manage courses'
+            'description' => 'Manage courses',
         ]);
-        
+
         // Create role if it doesn't exist
         $role = Role::firstOrCreate([
             'name' => 'admin',
-            'description' => 'Administrator'
+            'description' => 'Administrator',
         ]);
-        
+
         // Attach permission to role
-        if (!$role->permissions()->where('name', 'courses.manage')->exists()) {
+        if (! $role->permissions()->where('name', 'courses.manage')->exists()) {
             $role->permissions()->attach($permission);
         }
-        
+
         // Attach role to user
         $user->roles()->attach($role);
-        
+
         return $user;
     }
 
@@ -63,7 +63,7 @@ class CourseImportApiTest extends TestCase
         $file = UploadedFile::fake()->create('courses.csv', 100, 'text/csv');
 
         $response = $this->postJson('/api/v1/imports/courses', [
-            'file' => $file
+            'file' => $file,
         ]);
 
         $response->assertStatus(401);
@@ -81,12 +81,12 @@ class CourseImportApiTest extends TestCase
         $file = UploadedFile::fake()->create('courses.csv', 100, 'text/csv');
 
         $response = $this->postJson('/api/v1/imports/courses', [
-            'file' => $file
+            'file' => $file,
         ]);
 
         $response->assertStatus(403)
             ->assertJson([
-                'message' => 'You do not have permission to import courses.'
+                'message' => 'You do not have permission to import courses.',
             ]);
 
         Queue::assertNotPushed(ProcessCourseImport::class);
@@ -109,7 +109,7 @@ class CourseImportApiTest extends TestCase
         $file = UploadedFile::fake()->createWithContent('courses.csv', $csvContent);
 
         $response = $this->postJson('/api/v1/imports/courses', [
-            'file' => $file
+            'file' => $file,
         ]);
 
         $response->assertStatus(202)
@@ -117,11 +117,11 @@ class CourseImportApiTest extends TestCase
                 'message',
                 'import_id',
                 'file_name',
-                'estimated_processing_time'
+                'estimated_processing_time',
             ])
             ->assertJson([
                 'message' => 'Course import has been started. You will be notified when the process is complete.',
-                'file_name' => 'courses.csv'
+                'file_name' => 'courses.csv',
             ]);
 
         // Assert job was dispatched
@@ -130,6 +130,7 @@ class CourseImportApiTest extends TestCase
             $userIdProperty = $reflection->getProperty('userId');
             $userIdProperty->setAccessible(true);
             $userId = $userIdProperty->getValue($job);
+
             return $userId === $user->id;
         });
     }
@@ -154,7 +155,7 @@ class CourseImportApiTest extends TestCase
         $file = UploadedFile::fake()->create('document.pdf', 100, 'application/pdf');
 
         $response = $this->postJson('/api/v1/imports/courses', [
-            'file' => $file
+            'file' => $file,
         ]);
 
         $response->assertStatus(422)
@@ -170,7 +171,7 @@ class CourseImportApiTest extends TestCase
         $file = UploadedFile::fake()->create('large_courses.csv', 20000, 'text/csv');
 
         $response = $this->postJson('/api/v1/imports/courses', [
-            'file' => $file
+            'file' => $file,
         ]);
 
         $response->assertStatus(422)
@@ -191,7 +192,7 @@ class CourseImportApiTest extends TestCase
         $file = UploadedFile::fake()->createWithContent('courses.csv', $csvContent);
 
         $response = $this->postJson('/api/v1/imports/courses', [
-            'file' => $file
+            'file' => $file,
         ]);
 
         $response->assertStatus(202);
@@ -203,7 +204,7 @@ class CourseImportApiTest extends TestCase
             $property = $reflection->getProperty('filePath');
             $property->setAccessible(true);
             $filePath = $property->getValue($job);
-            
+
             return str_starts_with($filePath, 'imports/courses/import_courses_');
         });
     }
@@ -222,7 +223,7 @@ class CourseImportApiTest extends TestCase
         $file = UploadedFile::fake()->createWithContent('test_courses.csv', $csvContent);
 
         $response = $this->postJson('/api/v1/imports/courses', [
-            'file' => $file
+            'file' => $file,
         ]);
 
         $response->assertStatus(202);
@@ -249,7 +250,7 @@ class CourseImportApiTest extends TestCase
         $file = UploadedFile::fake()->createWithContent('my_courses.csv', $csvContent);
 
         $response = $this->postJson('/api/v1/imports/courses', [
-            'file' => $file
+            'file' => $file,
         ]);
 
         $response->assertStatus(202);
@@ -257,23 +258,23 @@ class CourseImportApiTest extends TestCase
         // Assert job was dispatched with correct parameters
         Queue::assertPushed(ProcessCourseImport::class, function ($job) use ($user) {
             $reflection = new \ReflectionClass($job);
-            
+
             // Check userId
             $userIdProperty = $reflection->getProperty('userId');
             $userIdProperty->setAccessible(true);
             $userId = $userIdProperty->getValue($job);
-            
+
             // Check originalFileName
             $fileNameProperty = $reflection->getProperty('originalFileName');
             $fileNameProperty->setAccessible(true);
             $originalFileName = $fileNameProperty->getValue($job);
-            
+
             // Check importId
             $importIdProperty = $reflection->getProperty('importId');
             $importIdProperty->setAccessible(true);
             $importId = $importIdProperty->getValue($job);
-            
-            return $userId === $user->id 
+
+            return $userId === $user->id
                 && $originalFileName === 'my_courses.csv'
                 && str_starts_with($importId, 'import_courses_');
         });
@@ -297,7 +298,7 @@ class CourseImportApiTest extends TestCase
             $file = UploadedFile::fake()->createWithContent('courses.csv', $csvContent, $mimeType);
 
             $response = $this->postJson('/api/v1/imports/courses', [
-                'file' => $file
+                'file' => $file,
             ]);
 
             $response->assertStatus(202);
@@ -318,10 +319,10 @@ class CourseImportApiTest extends TestCase
         $file = UploadedFile::fake()->createWithContent('courses.csv', $csvContent);
 
         $response = $this->postJson('/api/v1/imports/courses', [
-            'file' => $file
+            'file' => $file,
         ]);
 
         // Should not be throttled on first request
         $response->assertStatus(202);
     }
-} 
+}

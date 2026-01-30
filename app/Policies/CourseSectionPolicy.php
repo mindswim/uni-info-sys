@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\CourseSection;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class CourseSectionPolicy
 {
@@ -78,7 +77,7 @@ class CourseSectionPolicy
     public function uploadGrades(User $user, CourseSection $courseSection): bool
     {
         // Check if user has grades.upload permission
-        if (!$user->hasPermission('grades.upload')) {
+        if (! $user->hasPermission('grades.upload')) {
             return false;
         }
 

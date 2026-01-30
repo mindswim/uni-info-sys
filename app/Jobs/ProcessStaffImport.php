@@ -2,9 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Models\Department;
 use App\Models\Staff;
 use App\Models\User;
-use App\Models\Department;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -62,7 +62,7 @@ class ProcessStaffImport extends AbstractCsvImportJob
     {
         // Find department if provided
         $departmentId = null;
-        if (!empty($data['department_code'])) {
+        if (! empty($data['department_code'])) {
             $department = Department::where('code', $data['department_code'])->first();
             if ($department) {
                 $departmentId = $department->id;
@@ -75,11 +75,11 @@ class ProcessStaffImport extends AbstractCsvImportJob
 
         // Create or update user
         $userAttributes = [
-            'name' => trim($data['first_name'] . ' ' . $data['last_name']),
+            'name' => trim($data['first_name'].' '.$data['last_name']),
             'email' => $data['email'],
         ];
 
-        if (!$isUpdate) {
+        if (! $isUpdate) {
             $userAttributes['password'] = Hash::make(Str::random(16));
         }
 
@@ -89,7 +89,7 @@ class ProcessStaffImport extends AbstractCsvImportJob
         );
 
         // Assign Staff role
-        if (!$user->hasRole('Staff')) {
+        if (! $user->hasRole('Staff')) {
             $staffRole = \App\Models\Role::where('name', 'Staff')->first();
             if ($staffRole) {
                 $user->roles()->syncWithoutDetaching([$staffRole->id]);

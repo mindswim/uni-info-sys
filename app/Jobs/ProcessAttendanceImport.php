@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Models\AttendanceRecord;
 use App\Models\Enrollment;
-use App\Models\CourseSection;
 use App\Models\Student;
 
 /**

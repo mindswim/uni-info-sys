@@ -66,4 +66,4 @@ return [
         'time' => env('ARGON2ID_TIME', 4),
     ],
 
-]; 
+];

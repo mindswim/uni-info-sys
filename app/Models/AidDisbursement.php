@@ -93,6 +93,6 @@ class AidDisbursement extends Model
     public function scopeUpcoming($query)
     {
         return $query->whereIn('status', ['scheduled', 'pending'])
-                     ->where('scheduled_date', '>=', now());
+            ->where('scheduled_date', '>=', now());
     }
 }

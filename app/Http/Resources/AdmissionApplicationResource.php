@@ -7,82 +7,82 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: "AdmissionApplicationResource",
-    title: "Admission Application Resource",
-    description: "Admission application resource representation",
+    schema: 'AdmissionApplicationResource',
+    title: 'Admission Application Resource',
+    description: 'Admission application resource representation',
     properties: [
         new OA\Property(
-            property: "id",
-            type: "integer",
-            description: "Unique identifier of the admission application",
+            property: 'id',
+            type: 'integer',
+            description: 'Unique identifier of the admission application',
             example: 1
         ),
         new OA\Property(
-            property: "student_id",
-            type: "integer",
-            description: "ID of the student who submitted the application",
+            property: 'student_id',
+            type: 'integer',
+            description: 'ID of the student who submitted the application',
             example: 1
         ),
         new OA\Property(
-            property: "term_id",
-            type: "integer",
-            description: "ID of the term for which the application is submitted",
+            property: 'term_id',
+            type: 'integer',
+            description: 'ID of the term for which the application is submitted',
             example: 1
         ),
         new OA\Property(
-            property: "status",
-            type: "string",
-            description: "Current status of the application",
-            enum: ["draft", "submitted", "under_review", "accepted", "rejected", "waitlisted", "enrolled"],
-            example: "submitted"
+            property: 'status',
+            type: 'string',
+            description: 'Current status of the application',
+            enum: ['draft', 'submitted', 'under_review', 'accepted', 'rejected', 'waitlisted', 'enrolled'],
+            example: 'submitted'
         ),
         new OA\Property(
-            property: "application_date",
-            type: "string",
-            format: "date-time",
-            description: "Date and time when the application was created",
-            example: "2024-01-15 10:30:00"
+            property: 'application_date',
+            type: 'string',
+            format: 'date-time',
+            description: 'Date and time when the application was created',
+            example: '2024-01-15 10:30:00'
         ),
         new OA\Property(
-            property: "decision_date",
-            type: "string",
-            format: "date-time",
-            description: "Date and time when the decision was made",
-            example: "2024-02-15 14:20:00",
+            property: 'decision_date',
+            type: 'string',
+            format: 'date-time',
+            description: 'Date and time when the decision was made',
+            example: '2024-02-15 14:20:00',
             nullable: true
         ),
         new OA\Property(
-            property: "decision_status",
-            type: "string",
-            description: "Additional information about the decision",
-            example: "Accepted with conditions",
+            property: 'decision_status',
+            type: 'string',
+            description: 'Additional information about the decision',
+            example: 'Accepted with conditions',
             nullable: true
         ),
         new OA\Property(
-            property: "comments",
-            type: "string",
-            description: "Additional comments or notes about the application",
-            example: "Looking forward to joining the program",
+            property: 'comments',
+            type: 'string',
+            description: 'Additional comments or notes about the application',
+            example: 'Looking forward to joining the program',
             nullable: true
         ),
         new OA\Property(
-            property: "student",
-            type: "object",
-            description: "Student information (when loaded)",
+            property: 'student',
+            type: 'object',
+            description: 'Student information (when loaded)',
             nullable: true
         ),
         new OA\Property(
-            property: "term",
-            type: "object",
-            description: "Term information (when loaded)",
+            property: 'term',
+            type: 'object',
+            description: 'Term information (when loaded)',
             nullable: true
         ),
         new OA\Property(
-            property: "program_choices",
-            type: "array",
-            items: new OA\Items(ref: "#/components/schemas/ProgramChoiceResource"),
-            description: "List of program choices for this application (when loaded)"
-        )
+            property: 'program_choices',
+            type: 'array',
+            items: new OA\Items(ref: '#/components/schemas/ProgramChoiceResource'),
+            description: 'List of program choices for this application (when loaded)'
+        ),
     ]
 )]
 class AdmissionApplicationResource extends JsonResource

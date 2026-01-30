@@ -17,19 +17,24 @@ class EnrollmentSwapApiTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private Student $student;
+
     private Term $term;
+
     private CourseSection $fromCourseSection;
+
     private CourseSection $toCourseSection;
+
     private Enrollment $enrollment;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create test data
         $this->createTestData();
-        
+
         // Authenticate as a student user for API tests
         $studentRole = Role::factory()->create(['name' => 'student']);
         $this->user->roles()->attach($studentRole);
@@ -113,7 +118,7 @@ class EnrollmentSwapApiTest extends TestCase
     {
         // Fill target section to capacity
         $this->toCourseSection->update(['capacity' => 1]);
-        
+
         // Create another student to fill the capacity
         $otherStudent = Student::factory()->create();
         Enrollment::factory()->create([
@@ -210,20 +215,20 @@ class EnrollmentSwapApiTest extends TestCase
         $enrollment = Enrollment::factory()->create([
             'student_id' => $otherStudent->id,
             'course_section_id' => $this->fromCourseSection->id,
-            'status' => 'enrolled'
+            'status' => 'enrolled',
         ]);
 
         // Create target section with unique section number
         $targetSection = CourseSection::factory()->create([
             'course_id' => $this->fromCourseSection->course_id,
             'term_id' => $this->term->id,
-            'section_number' => 'UNIQUE-' . uniqid(), // Ensure unique section number
-            'capacity' => 30
+            'section_number' => 'UNIQUE-'.uniqid(), // Ensure unique section number
+            'capacity' => 30,
         ]);
 
         $swapData = [
             'from_enrollment_id' => $enrollment->id,
-            'to_course_section_id' => $targetSection->id
+            'to_course_section_id' => $targetSection->id,
         ];
 
         // Act as the original user (not the owner)

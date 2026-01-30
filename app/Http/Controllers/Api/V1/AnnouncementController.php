@@ -63,7 +63,7 @@ class AnnouncementController extends Controller
             'author_id' => 'required|integer|exists:staff,id',
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'priority' => 'sometimes|string|in:' . implode(',', Announcement::PRIORITIES),
+            'priority' => 'sometimes|string|in:'.implode(',', Announcement::PRIORITIES),
             'is_published' => 'sometimes|boolean',
             'published_at' => 'nullable|date',
             'expires_at' => 'nullable|date|after:published_at',
@@ -71,9 +71,9 @@ class AnnouncementController extends Controller
         ]);
 
         // Validate target exists
-        if (!empty($validated['target_type'])) {
+        if (! empty($validated['target_type'])) {
             $targetClass = Announcement::TARGET_TYPES[$validated['target_type']] ?? null;
-            if ($targetClass && !$targetClass::find($validated['target_id'])) {
+            if ($targetClass && ! $targetClass::find($validated['target_id'])) {
                 return response()->json([
                     'message' => 'Target not found.',
                 ], 422);
@@ -93,7 +93,7 @@ class AnnouncementController extends Controller
         ];
 
         // Set polymorphic relationship
-        if (!empty($validated['target_type'])) {
+        if (! empty($validated['target_type'])) {
             $announcementData['announceable_type'] = Announcement::TARGET_TYPES[$validated['target_type']];
             $announcementData['announceable_id'] = $validated['target_id'];
         }
@@ -132,7 +132,7 @@ class AnnouncementController extends Controller
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
             'content' => 'sometimes|string',
-            'priority' => 'sometimes|string|in:' . implode(',', Announcement::PRIORITIES),
+            'priority' => 'sometimes|string|in:'.implode(',', Announcement::PRIORITIES),
             'is_published' => 'sometimes|boolean',
             'published_at' => 'nullable|date',
             'expires_at' => 'nullable|date',
@@ -239,12 +239,12 @@ class AnnouncementController extends Controller
                     // Or for enrolled course sections
                     ->orWhere(function ($q2) use ($courseSectionIds) {
                         $q2->where('announceable_type', CourseSection::class)
-                           ->whereIn('announceable_id', $courseSectionIds);
+                            ->whereIn('announceable_id', $courseSectionIds);
                     })
                     // Or for student's departments
                     ->orWhere(function ($q2) use ($departmentIds) {
                         $q2->where('announceable_type', Department::class)
-                           ->whereIn('announceable_id', $departmentIds);
+                            ->whereIn('announceable_id', $departmentIds);
                     });
             })
             ->ordered()

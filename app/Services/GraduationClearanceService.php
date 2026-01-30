@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\GraduationApplication;
 use App\Models\Hold;
-use App\Models\Student;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -214,7 +213,7 @@ class GraduationClearanceService
 
     public function finalApprove(GraduationApplication $application, int $userId): GraduationApplication
     {
-        if (!$application->isFullyCleared()) {
+        if (! $application->isFullyCleared()) {
             throw new \RuntimeException('Cannot final-approve: not all departments have cleared');
         }
 
@@ -241,9 +240,9 @@ class GraduationClearanceService
 
     private function validateDepartment(string $department): void
     {
-        if (!in_array($department, GraduationApplication::CLEARANCE_DEPARTMENTS)) {
+        if (! in_array($department, GraduationApplication::CLEARANCE_DEPARTMENTS)) {
             throw new \InvalidArgumentException(
-                "Invalid department: {$department}. Must be one of: " . implode(', ', GraduationApplication::CLEARANCE_DEPARTMENTS)
+                "Invalid department: {$department}. Must be one of: ".implode(', ', GraduationApplication::CLEARANCE_DEPARTMENTS)
             );
         }
     }

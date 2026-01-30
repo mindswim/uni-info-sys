@@ -5,10 +5,10 @@ namespace Tests\Feature\Api\V1;
 use App\Models\AdmissionApplication;
 use App\Models\Program;
 use App\Models\ProgramChoice;
+use App\Models\Role;
 use App\Models\Student;
 use App\Models\Term;
 use App\Models\User;
-use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,13 +17,21 @@ class ProgramChoiceApiTest extends TestCase
     use RefreshDatabase;
 
     protected $admin;
+
     protected $staff;
+
     protected $student;
+
     protected $otherStudent;
+
     protected $term;
+
     protected $program;
+
     protected $otherProgram;
+
     protected $application;
+
     protected $otherApplication;
 
     protected function setUp(): void
@@ -61,13 +69,13 @@ class ProgramChoiceApiTest extends TestCase
         $this->application = AdmissionApplication::factory()->create([
             'student_id' => $studentRecord->id,
             'term_id' => $this->term->id,
-            'status' => 'draft'
+            'status' => 'draft',
         ]);
 
         $this->otherApplication = AdmissionApplication::factory()->create([
             'student_id' => $otherStudentRecord->id,
             'term_id' => $this->term->id,
-            'status' => 'draft'
+            'status' => 'draft',
         ]);
     }
 
@@ -85,13 +93,13 @@ class ProgramChoiceApiTest extends TestCase
         ProgramChoice::factory()->create([
             'application_id' => $this->application->id,
             'program_id' => $this->program->id,
-            'preference_order' => 1
+            'preference_order' => 1,
         ]);
 
         ProgramChoice::factory()->create([
             'application_id' => $this->otherApplication->id,
             'program_id' => $this->program->id,
-            'preference_order' => 1
+            'preference_order' => 1,
         ]);
 
         // Admin can access any application's choices
@@ -99,11 +107,11 @@ class ProgramChoiceApiTest extends TestCase
         $response = $this->getJson("/api/v1/admission-applications/{$this->application->id}/program-choices");
 
         $response->assertStatus(200)
-                 ->assertJsonCount(1);
+            ->assertJsonCount(1);
 
         $response = $this->getJson("/api/v1/admission-applications/{$this->otherApplication->id}/program-choices");
         $response->assertStatus(200)
-                 ->assertJsonCount(1);
+            ->assertJsonCount(1);
     }
 
     /** @test */
@@ -112,13 +120,13 @@ class ProgramChoiceApiTest extends TestCase
         ProgramChoice::factory()->create([
             'application_id' => $this->application->id,
             'program_id' => $this->program->id,
-            'preference_order' => 1
+            'preference_order' => 1,
         ]);
 
         ProgramChoice::factory()->create([
             'application_id' => $this->otherApplication->id,
             'program_id' => $this->program->id,
-            'preference_order' => 1
+            'preference_order' => 1,
         ]);
 
         $this->actingAs($this->student, 'sanctum');
@@ -126,7 +134,7 @@ class ProgramChoiceApiTest extends TestCase
         // Can access own application's choices
         $response = $this->getJson("/api/v1/admission-applications/{$this->application->id}/program-choices");
         $response->assertStatus(200)
-                 ->assertJsonCount(1);
+            ->assertJsonCount(1);
 
         // Cannot access other student's application choices
         $response = $this->getJson("/api/v1/admission-applications/{$this->otherApplication->id}/program-choices");
@@ -139,24 +147,24 @@ class ProgramChoiceApiTest extends TestCase
         // Create program choices with different preference orders
         $program1 = Program::factory()->create();
         $program2 = Program::factory()->create();
-        
+
         ProgramChoice::factory()->create([
             'application_id' => $this->application->id,
             'program_id' => $program2->id,
-            'preference_order' => 2
+            'preference_order' => 2,
         ]);
-        
+
         ProgramChoice::factory()->create([
             'application_id' => $this->application->id,
             'program_id' => $program1->id,
-            'preference_order' => 1
+            'preference_order' => 1,
         ]);
 
         $this->actingAs($this->admin, 'sanctum');
         $response = $this->getJson("/api/v1/admission-applications/{$this->application->id}/program-choices");
 
         $response->assertStatus(200)
-                 ->assertJsonCount(2, 'data');
+            ->assertJsonCount(2, 'data');
 
         $choices = $response->json('data');
         $this->assertEquals(1, $choices[0]['preference_order']);
@@ -171,31 +179,31 @@ class ProgramChoiceApiTest extends TestCase
         $data = [
             'program_id' => $this->program->id,
             'preference_order' => 1,
-            'status' => 'pending'
+            'status' => 'pending',
         ];
 
         $response = $this->postJson("/api/v1/admission-applications/{$this->application->id}/program-choices", $data);
 
         $response->assertStatus(201)
-                 ->assertJsonFragment(['preference_order' => 1])
-                 ->assertJsonFragment(['status' => 'pending'])
-                 ->assertJsonStructure([
-                     'message',
-                     'data' => [
-                         'id',
-                         'application_id',
-                         'program_id',
-                         'preference_order',
-                         'status',
-                         'program'
-                     ]
-                 ]);
+            ->assertJsonFragment(['preference_order' => 1])
+            ->assertJsonFragment(['status' => 'pending'])
+            ->assertJsonStructure([
+                'message',
+                'data' => [
+                    'id',
+                    'application_id',
+                    'program_id',
+                    'preference_order',
+                    'status',
+                    'program',
+                ],
+            ]);
 
         $this->assertDatabaseHas('program_choices', [
             'application_id' => $this->application->id,
             'program_id' => $this->program->id,
             'preference_order' => 1,
-            'status' => 'pending'
+            'status' => 'pending',
         ]);
     }
 
@@ -206,7 +214,7 @@ class ProgramChoiceApiTest extends TestCase
 
         $data = [
             'program_id' => $this->program->id,
-            'preference_order' => 1
+            'preference_order' => 1,
         ];
 
         $response = $this->postJson("/api/v1/admission-applications/{$this->otherApplication->id}/program-choices", $data);
@@ -220,7 +228,7 @@ class ProgramChoiceApiTest extends TestCase
 
         $data = [
             'program_id' => $this->program->id,
-            'preference_order' => 1
+            'preference_order' => 1,
         ];
 
         $response = $this->postJson("/api/v1/admission-applications/{$this->otherApplication->id}/program-choices", $data);
@@ -235,7 +243,7 @@ class ProgramChoiceApiTest extends TestCase
         $response = $this->postJson("/api/v1/admission-applications/{$this->application->id}/program-choices", []);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['program_id', 'preference_order']);
+            ->assertJsonValidationErrors(['program_id', 'preference_order']);
     }
 
     /** @test */
@@ -245,12 +253,12 @@ class ProgramChoiceApiTest extends TestCase
 
         $data = [
             'program_id' => 99999,
-            'preference_order' => 1
+            'preference_order' => 1,
         ];
 
         $response = $this->postJson("/api/v1/admission-applications/{$this->application->id}/program-choices", $data);
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['program_id']);
+            ->assertJsonValidationErrors(['program_id']);
     }
 
     /** @test */
@@ -260,19 +268,19 @@ class ProgramChoiceApiTest extends TestCase
         ProgramChoice::factory()->create([
             'application_id' => $this->application->id,
             'program_id' => $this->program->id,
-            'preference_order' => 1
+            'preference_order' => 1,
         ]);
 
         $this->actingAs($this->student, 'sanctum');
 
         $data = [
             'program_id' => $this->otherProgram->id,
-            'preference_order' => 1 // Same as existing
+            'preference_order' => 1, // Same as existing
         ];
 
         $response = $this->postJson("/api/v1/admission-applications/{$this->application->id}/program-choices", $data);
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['preference_order']);
+            ->assertJsonValidationErrors(['preference_order']);
     }
 
     /** @test */
@@ -281,24 +289,24 @@ class ProgramChoiceApiTest extends TestCase
         $choice = ProgramChoice::factory()->create([
             'application_id' => $this->application->id,
             'program_id' => $this->program->id,
-            'preference_order' => 1
+            'preference_order' => 1,
         ]);
 
         $this->actingAs($this->student, 'sanctum');
         $response = $this->getJson("/api/v1/program-choices/{$choice->id}");
 
         $response->assertStatus(200)
-                 ->assertJsonStructure([
-                     'data' => [
-                         'id',
-                         'application_id',
-                         'program_id',
-                         'preference_order',
-                         'status',
-                         'program',
-                         'admission_application'
-                     ]
-                 ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'application_id',
+                    'program_id',
+                    'preference_order',
+                    'status',
+                    'program',
+                    'admission_application',
+                ],
+            ]);
     }
 
     /** @test */
@@ -307,7 +315,7 @@ class ProgramChoiceApiTest extends TestCase
         $choice = ProgramChoice::factory()->create([
             'application_id' => $this->otherApplication->id,
             'program_id' => $this->program->id,
-            'preference_order' => 1
+            'preference_order' => 1,
         ]);
 
         $this->actingAs($this->student, 'sanctum');
@@ -322,7 +330,7 @@ class ProgramChoiceApiTest extends TestCase
             'application_id' => $this->application->id,
             'program_id' => $this->program->id,
             'preference_order' => 1,
-            'status' => 'pending'
+            'status' => 'pending',
         ]);
 
         $this->actingAs($this->student, 'sanctum');
@@ -332,11 +340,11 @@ class ProgramChoiceApiTest extends TestCase
         $response = $this->putJson("/api/v1/program-choices/{$choice->id}", $updateData);
 
         $response->assertStatus(200)
-                 ->assertJsonFragment(['preference_order' => 2]);
+            ->assertJsonFragment(['preference_order' => 2]);
 
         $this->assertDatabaseHas('program_choices', [
             'id' => $choice->id,
-            'preference_order' => 2
+            'preference_order' => 2,
         ]);
     }
 
@@ -349,7 +357,7 @@ class ProgramChoiceApiTest extends TestCase
         $choice = ProgramChoice::factory()->create([
             'application_id' => $this->application->id,
             'program_id' => $this->program->id,
-            'preference_order' => 1
+            'preference_order' => 1,
         ]);
 
         $this->actingAs($this->student, 'sanctum');
@@ -365,7 +373,7 @@ class ProgramChoiceApiTest extends TestCase
             'application_id' => $this->application->id,
             'program_id' => $this->program->id,
             'preference_order' => 1,
-            'status' => 'pending'
+            'status' => 'pending',
         ]);
 
         $this->actingAs($this->student, 'sanctum');
@@ -376,7 +384,7 @@ class ProgramChoiceApiTest extends TestCase
         $response->assertStatus(200);
         $this->assertDatabaseHas('program_choices', [
             'id' => $choice->id,
-            'status' => 'pending' // Should remain unchanged
+            'status' => 'pending', // Should remain unchanged
         ]);
     }
 
@@ -387,21 +395,21 @@ class ProgramChoiceApiTest extends TestCase
             'application_id' => $this->application->id,
             'program_id' => $this->program->id,
             'preference_order' => 1,
-            'status' => 'pending'
+            'status' => 'pending',
         ]);
 
         $this->actingAs($this->admin, 'sanctum');
 
         $updateData = [
             'preference_order' => 2,
-            'status' => 'accepted'
+            'status' => 'accepted',
         ];
 
         $response = $this->putJson("/api/v1/program-choices/{$choice->id}", $updateData);
 
         $response->assertStatus(200)
-                 ->assertJsonFragment(['preference_order' => 2])
-                 ->assertJsonFragment(['status' => 'accepted']);
+            ->assertJsonFragment(['preference_order' => 2])
+            ->assertJsonFragment(['status' => 'accepted']);
     }
 
     /** @test */
@@ -411,13 +419,13 @@ class ProgramChoiceApiTest extends TestCase
         $choice1 = ProgramChoice::factory()->create([
             'application_id' => $this->application->id,
             'program_id' => $this->program->id,
-            'preference_order' => 1
+            'preference_order' => 1,
         ]);
 
         $choice2 = ProgramChoice::factory()->create([
             'application_id' => $this->application->id,
             'program_id' => $this->otherProgram->id,
-            'preference_order' => 2
+            'preference_order' => 2,
         ]);
 
         $this->actingAs($this->student, 'sanctum');
@@ -425,7 +433,7 @@ class ProgramChoiceApiTest extends TestCase
         // Try to update choice2 to have same preference order as choice1
         $response = $this->putJson("/api/v1/program-choices/{$choice2->id}", ['preference_order' => 1]);
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['preference_order']);
+            ->assertJsonValidationErrors(['preference_order']);
     }
 
     /** @test */
@@ -434,7 +442,7 @@ class ProgramChoiceApiTest extends TestCase
         $choice = ProgramChoice::factory()->create([
             'application_id' => $this->application->id,
             'program_id' => $this->program->id,
-            'preference_order' => 1
+            'preference_order' => 1,
         ]);
 
         $this->actingAs($this->student, 'sanctum');
@@ -442,7 +450,7 @@ class ProgramChoiceApiTest extends TestCase
         $response = $this->deleteJson("/api/v1/program-choices/{$choice->id}");
 
         $response->assertStatus(200)
-                 ->assertJsonFragment(['message' => 'Program choice deleted successfully.']);
+            ->assertJsonFragment(['message' => 'Program choice deleted successfully.']);
 
         $this->assertDatabaseMissing('program_choices', ['id' => $choice->id]);
     }
@@ -456,7 +464,7 @@ class ProgramChoiceApiTest extends TestCase
         $choice = ProgramChoice::factory()->create([
             'application_id' => $this->application->id,
             'program_id' => $this->program->id,
-            'preference_order' => 1
+            'preference_order' => 1,
         ]);
 
         $this->actingAs($this->student, 'sanctum');
@@ -471,7 +479,7 @@ class ProgramChoiceApiTest extends TestCase
         $choice = ProgramChoice::factory()->create([
             'application_id' => $this->otherApplication->id,
             'program_id' => $this->program->id,
-            'preference_order' => 1
+            'preference_order' => 1,
         ]);
 
         $this->actingAs($this->admin, 'sanctum');
@@ -497,14 +505,14 @@ class ProgramChoiceApiTest extends TestCase
         ProgramChoice::factory()->create([
             'application_id' => $this->application->id,
             'program_id' => $this->program->id,
-            'preference_order' => 1
+            'preference_order' => 1,
         ]);
 
         $this->actingAs($this->staff, 'sanctum');
         $response = $this->getJson("/api/v1/admission-applications/{$this->application->id}/program-choices");
 
         $response->assertStatus(200)
-                 ->assertJsonCount(1);
+            ->assertJsonCount(1);
     }
 
     /** @test */
@@ -514,7 +522,7 @@ class ProgramChoiceApiTest extends TestCase
             'application_id' => $this->application->id,
             'program_id' => $this->program->id,
             'preference_order' => 1,
-            'status' => 'pending'
+            'status' => 'pending',
         ]);
 
         $this->actingAs($this->staff, 'sanctum');
@@ -522,6 +530,6 @@ class ProgramChoiceApiTest extends TestCase
         $response = $this->putJson("/api/v1/program-choices/{$choice->id}", ['status' => 'accepted']);
 
         $response->assertStatus(200)
-                 ->assertJsonFragment(['status' => 'accepted']);
+            ->assertJsonFragment(['status' => 'accepted']);
     }
 }

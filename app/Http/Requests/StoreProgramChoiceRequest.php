@@ -13,18 +13,19 @@ class StoreProgramChoiceRequest extends FormRequest
     {
         $user = $this->user();
         $userRoles = $user->roles()->pluck('name')->toArray();
-        
+
         // Admin/staff can create program choices for any application
         if (in_array('admin', $userRoles) || in_array('staff', $userRoles)) {
             return true;
         }
-        
+
         // Students can only create program choices for their own applications
         if (in_array('student', $userRoles)) {
             $application = $this->route('admission_application');
+
             return $application && $user->id === $application->student->user_id;
         }
-        
+
         return false;
     }
 
@@ -36,7 +37,7 @@ class StoreProgramChoiceRequest extends FormRequest
     public function rules(): array
     {
         $application = $this->route('admission_application');
-        
+
         return [
             'program_id' => 'required|exists:programs,id',
             'preference_order' => [
@@ -49,7 +50,7 @@ class StoreProgramChoiceRequest extends FormRequest
                     if ($application && $application->programChoices()->where('preference_order', $value)->exists()) {
                         $fail('A program choice with this preference order already exists for this application.');
                     }
-                }
+                },
             ],
             'status' => 'sometimes|string|in:pending,accepted,rejected',
         ];

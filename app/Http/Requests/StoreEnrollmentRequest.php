@@ -7,13 +7,13 @@ use Illuminate\Validation\Rule;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    title: "Store Enrollment Request",
-    description: "Request body for enrolling a student in a course section.",
-    required: ["student_id", "course_section_id"],
+    title: 'Store Enrollment Request',
+    description: 'Request body for enrolling a student in a course section.',
+    required: ['student_id', 'course_section_id'],
     properties: [
-        new OA\Property(property: "student_id", type: "integer", description: "The ID of the student to enroll.", example: 1),
-        new OA\Property(property: "course_section_id", type: "integer", description: "The ID of the course section to enroll in.", example: 1),
-        new OA\Property(property: "status", type: "string", enum: ["enrolled", "waitlisted"], description: "Optional status, defaults to logic in EnrollmentService.", example: "enrolled"),
+        new OA\Property(property: 'student_id', type: 'integer', description: 'The ID of the student to enroll.', example: 1),
+        new OA\Property(property: 'course_section_id', type: 'integer', description: 'The ID of the course section to enroll in.', example: 1),
+        new OA\Property(property: 'status', type: 'string', enum: ['enrolled', 'waitlisted'], description: 'Optional status, defaults to logic in EnrollmentService.', example: 'enrolled'),
     ]
 )]
 class StoreEnrollmentRequest extends FormRequest

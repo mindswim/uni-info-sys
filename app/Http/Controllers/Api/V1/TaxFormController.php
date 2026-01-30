@@ -27,7 +27,7 @@ class TaxFormController extends Controller
     public function generate(Request $request, Student $student): JsonResponse
     {
         $request->validate([
-            'year' => ['required', 'integer', 'min:2000', 'max:' . date('Y')],
+            'year' => ['required', 'integer', 'min:2000', 'max:'.date('Y')],
         ]);
 
         $form = $this->service->calculate1098T($student, $request->year);

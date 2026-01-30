@@ -13,15 +13,15 @@ class HoldsAndActionItemsSeeder extends Seeder
     public function run(): void
     {
         // Get demo students
-        $maria = Student::whereHas('user', fn($q) => $q->where('email', 'maria@demo.com'))->first();
-        $david = Student::whereHas('user', fn($q) => $q->where('email', 'david@demo.com'))->first();
-        $sophie = Student::whereHas('user', fn($q) => $q->where('email', 'sophie@demo.com'))->first();
+        $maria = Student::whereHas('user', fn ($q) => $q->where('email', 'maria@demo.com'))->first();
+        $david = Student::whereHas('user', fn ($q) => $q->where('email', 'david@demo.com'))->first();
+        $sophie = Student::whereHas('user', fn ($q) => $q->where('email', 'sophie@demo.com'))->first();
 
         // Get admin user for placing holds
         $admin = User::where('email', 'admin@demo.com')->first();
 
-        if (!$admin) {
-            $admin = User::whereHas('roles', fn($q) => $q->where('name', 'admin'))->first();
+        if (! $admin) {
+            $admin = User::whereHas('roles', fn ($q) => $q->where('name', 'admin'))->first();
         }
 
         // Create holds for demo students

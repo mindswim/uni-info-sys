@@ -11,7 +11,7 @@ class ProgramFactory extends Factory
     {
         $degree = $this->faker->randomElement(['B.Sc.', 'B.A.', 'M.Sc.', 'M.A.', 'Ph.D.']);
         $subject = $this->faker->jobTitle(); // Using jobTitle for more variety
-        
+
         return [
             'name' => $this->faker->unique()->name(),
             'department_id' => Department::factory(),
@@ -19,7 +19,7 @@ class ProgramFactory extends Factory
             'duration' => $this->faker->numberBetween(1, 5),
             'description' => $this->faker->paragraph(),
             'requirements' => $this->faker->paragraph(),
-            'capacity' => $this->faker->numberBetween(30, 200)
+            'capacity' => $this->faker->numberBetween(30, 200),
         ];
     }
 }

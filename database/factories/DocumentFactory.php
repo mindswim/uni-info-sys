@@ -12,10 +12,10 @@ class DocumentFactory extends Factory
         return [
             'student_id' => Student::factory(),
             'document_type' => $this->faker->randomElement([
-                'passport', 
-                'transcript', 
-                'recommendation_letter', 
-                'cv'
+                'passport',
+                'transcript',
+                'recommendation_letter',
+                'cv',
             ]),
             'file_path' => 'documents/test.pdf',
             'original_filename' => 'test.pdf',
@@ -24,7 +24,7 @@ class DocumentFactory extends Factory
             'status' => $this->faker->randomElement([
                 'pending',
                 'approved',
-                'rejected'
+                'rejected',
             ]),
             'version' => 1,
             'is_active' => true,

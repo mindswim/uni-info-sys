@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Api\V1;
 
+use App\Models\Role;
 use App\Models\Term;
 use App\Models\User;
-use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -18,12 +18,12 @@ class TermApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create admin role
         $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
-        
+
         $this->admin = User::factory()->create();
-        
+
         // Assign admin role
         $this->admin->roles()->attach($adminRole);
     }
@@ -31,6 +31,7 @@ class TermApiTest extends TestCase
     private function getTermData(array $overrides = []): array
     {
         $year = $this->faker->numberBetween(2025, 2035);
+
         return array_merge([
             'name' => "Fall {$year}",
             'academic_year' => $year,
@@ -39,19 +40,19 @@ class TermApiTest extends TestCase
             'end_date' => "{$year}-12-20",
         ], $overrides);
     }
-    
+
     public function test_can_get_all_terms_paginated()
     {
         // Create specific terms to avoid unique constraint violations
         $years = range(2024, 2028);
         $semesters = ['Fall', 'Spring', 'Summer'];
-        
+
         foreach ($years as $year) {
             foreach ($semesters as $semester) {
                 Term::factory()->create([
                     'name' => "{$semester} {$year}",
                     'academic_year' => $year,
-                    'semester' => $semester
+                    'semester' => $semester,
                 ]);
             }
         }
@@ -61,7 +62,7 @@ class TermApiTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'name', 'academic_year', 'semester', 'start_date', 'end_date']
+                    '*' => ['id', 'name', 'academic_year', 'semester', 'start_date', 'end_date'],
                 ],
                 'links',
                 'meta',
@@ -87,9 +88,9 @@ class TermApiTest extends TestCase
     public function test_can_create_a_term()
     {
         $data = $this->getTermData();
-        
+
         $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/terms', $data);
-        
+
         $response->assertStatus(201)
             ->assertJsonFragment([
                 'name' => $data['name'],
@@ -110,7 +111,7 @@ class TermApiTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/terms', $data);
-        
+
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['academic_year']);
     }
@@ -131,14 +132,14 @@ class TermApiTest extends TestCase
     public function test_can_update_a_term()
     {
         $term = Term::factory()->create();
-        
+
         $updateData = [
             'name' => 'Updated Term Name',
             'end_date' => '2099-12-31',
         ];
 
         $response = $this->actingAs($this->admin, 'sanctum')->putJson("/api/v1/terms/{$term->id}", $updateData);
-        
+
         $response->assertStatus(200)
             ->assertJsonFragment([
                 'name' => 'Updated Term Name',
@@ -151,7 +152,7 @@ class TermApiTest extends TestCase
     public function test_can_delete_a_term()
     {
         $term = Term::factory()->create();
-        
+
         $response = $this->actingAs($this->admin, 'sanctum')->deleteJson("/api/v1/terms/{$term->id}");
 
         $response->assertStatus(204);

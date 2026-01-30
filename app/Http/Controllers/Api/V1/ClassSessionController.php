@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\ClassSession;
 use App\Models\CourseSection;
-use App\Models\Student;
 use App\Models\Staff;
+use App\Models\Student;
 use App\Models\Term;
 use App\Services\ClassSessionService;
 use Illuminate\Http\JsonResponse;
@@ -177,8 +177,8 @@ class ClassSessionController extends Controller
         }
 
         $sessions = $query->orderBy('session_date')
-                          ->orderBy('start_time')
-                          ->paginate($request->get('per_page', 50));
+            ->orderBy('start_time')
+            ->paginate($request->get('per_page', 50));
 
         return response()->json($sessions);
     }

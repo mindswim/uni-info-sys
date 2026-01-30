@@ -2,25 +2,23 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\User;
-use App\Models\Student;
-use App\Models\Staff;
-use App\Models\Role;
-use App\Models\Term;
-use App\Models\Faculty;
-use App\Models\Department;
-use App\Models\Program;
+use App\Models\AcademicRecord;
+use App\Models\AdmissionApplication;
+use App\Models\Building;
 use App\Models\Course;
 use App\Models\CourseSection;
-use App\Models\Building;
-use App\Models\Room;
-use App\Models\AdmissionApplication;
-use App\Models\ProgramChoice;
+use App\Models\Department;
 use App\Models\Enrollment;
-use App\Models\AcademicRecord;
-use Carbon\Carbon;
+use App\Models\Faculty;
+use App\Models\Program;
+use App\Models\ProgramChoice;
+use App\Models\Role;
+use App\Models\Room;
+use App\Models\Staff;
+use App\Models\Student;
+use App\Models\Term;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class DemoSeeder extends Seeder
 {
@@ -100,7 +98,7 @@ class DemoSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
         $instructorUser->roles()->attach($instructorRole);
-        
+
         $instructor = Staff::create([
             'user_id' => $instructorUser->id,
             'department_id' => $csDepartment->id,

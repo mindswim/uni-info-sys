@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -12,7 +14,7 @@ class Document extends Model
     protected $fillable = [
         'student_id', 'document_type', 'file_path', 'original_filename',
         'mime_type', 'file_size', 'status', 'version', 'is_active', 'uploaded_at',
-        'verified', 'verified_at'
+        'verified', 'verified_at',
     ];
 
     protected $casts = [
@@ -40,7 +42,7 @@ class Document extends Model
     public function scopeForStudentAndType($query, $studentId, $documentType)
     {
         return $query->where('student_id', $studentId)
-                    ->where('document_type', $documentType);
+            ->where('document_type', $documentType);
     }
 
     /**
@@ -49,6 +51,7 @@ class Document extends Model
     public static function getNextVersionNumber($studentId, $documentType): int
     {
         $maxVersion = static::query()->forStudentAndType($studentId, $documentType)->max('version');
+
         return ($maxVersion ?? 0) + 1;
     }
 
@@ -58,6 +61,6 @@ class Document extends Model
     public static function deactivatePreviousVersions($studentId, $documentType): void
     {
         static::query()->forStudentAndType($studentId, $documentType)
-              ->update(['is_active' => false]);
+            ->update(['is_active' => false]);
     }
 }

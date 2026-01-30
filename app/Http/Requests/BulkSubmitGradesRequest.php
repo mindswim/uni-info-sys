@@ -41,7 +41,7 @@ class BulkSubmitGradesRequest extends FormRequest
             'grades.required' => 'Grades array is required',
             'grades.array' => 'Grades must be provided as an array',
             'grades.min' => 'At least one grade must be provided',
-            'grades.*.in' => 'Invalid grade value. Must be one of: ' . implode(', ', GradeService::getValidGrades()),
+            'grades.*.in' => 'Invalid grade value. Must be one of: '.implode(', ', GradeService::getValidGrades()),
         ];
     }
 }

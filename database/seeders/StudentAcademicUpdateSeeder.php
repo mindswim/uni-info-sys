@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Student;
-use App\Models\Enrollment;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
 
@@ -14,7 +13,7 @@ class StudentAcademicUpdateSeeder extends Seeder
         'B+' => 3.3, 'B' => 3.0, 'B-' => 2.7,
         'C+' => 2.3, 'C' => 2.0, 'C-' => 1.7,
         'D+' => 1.3, 'D' => 1.0, 'D-' => 0.7,
-        'F' => 0.0
+        'F' => 0.0,
     ];
 
     /**
@@ -63,7 +62,7 @@ class StudentAcademicUpdateSeeder extends Seeder
     {
         $completedEnrollments = $student->enrollments
             ->where('status', 'completed')
-            ->filter(fn($e) => !empty($e->grade) && isset($this->gradePoints[$e->grade]));
+            ->filter(fn ($e) => ! empty($e->grade) && isset($this->gradePoints[$e->grade]));
 
         $inProgressEnrollments = $student->enrollments
             ->where('status', 'enrolled');
@@ -117,7 +116,7 @@ class StudentAcademicUpdateSeeder extends Seeder
             ->orderBy('updated_at', 'desc')
             ->take(5) // Approximate a semester's worth
             ->get()
-            ->filter(fn($e) => isset($this->gradePoints[$e->grade]));
+            ->filter(fn ($e) => isset($this->gradePoints[$e->grade]));
 
         if ($recentCompletedEnrollments->isEmpty()) {
             return null;

@@ -4,12 +4,11 @@ namespace Database\Seeders;
 
 use App\Models\Conversation;
 use App\Models\Message;
-use App\Models\User;
 use App\Models\Staff;
 use App\Models\Student;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 class MessageSeeder extends Seeder
 {
@@ -25,14 +24,17 @@ class MessageSeeder extends Seeder
         $students = Student::with('user')->take(10)->get();
         $staff = Staff::with('user')->take(5)->get();
 
-        if (!$admin || $students->isEmpty()) {
+        if (! $admin || $students->isEmpty()) {
             Log::warning('Missing users for message seeding');
+
             return;
         }
 
         // Create admin support conversations with students
         foreach ($students->take(5) as $student) {
-            if (!$student->user) continue;
+            if (! $student->user) {
+                continue;
+            }
 
             $conversation = Conversation::create([
                 'type' => Conversation::TYPE_DIRECT,
@@ -136,10 +138,14 @@ class MessageSeeder extends Seeder
         // Create staff-to-student conversations (academic advising)
         if ($staff->isNotEmpty() && $students->isNotEmpty()) {
             foreach ($staff->take(2) as $staffMember) {
-                if (!$staffMember->user) continue;
+                if (! $staffMember->user) {
+                    continue;
+                }
 
                 foreach ($students->take(3) as $student) {
-                    if (!$student->user) continue;
+                    if (! $student->user) {
+                        continue;
+                    }
 
                     $conversation = Conversation::create([
                         'type' => Conversation::TYPE_DIRECT,
@@ -159,11 +165,11 @@ class MessageSeeder extends Seeder
                         ],
                         [
                             'from' => 'student',
-                            'body' => "Yes, thank you for the information! I have a question about the research requirement.",
+                            'body' => 'Yes, thank you for the information! I have a question about the research requirement.',
                         ],
                         [
                             'from' => 'staff',
-                            'body' => "Of course, what would you like to know?",
+                            'body' => 'Of course, what would you like to know?',
                         ],
                     ];
 

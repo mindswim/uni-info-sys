@@ -17,10 +17,11 @@ class CsvImportExportService
     /**
      * Parse CSV file and return validated rows
      *
-     * @param string $filePath Storage path to CSV file
-     * @param array $requiredHeaders Expected headers in CSV
-     * @param array $optionalHeaders Headers that can be missing
+     * @param  string  $filePath  Storage path to CSV file
+     * @param  array  $requiredHeaders  Expected headers in CSV
+     * @param  array  $optionalHeaders  Headers that can be missing
      * @return array ['headers' => array, 'rows' => array, 'headerMap' => array]
+     *
      * @throws \Exception
      */
     public function parseCsv(string $filePath, array $requiredHeaders, array $optionalHeaders = []): array
@@ -44,8 +45,8 @@ class CsvImportExportService
 
         // Validate headers
         $missingHeaders = array_diff($requiredHeaders, $headers);
-        if (!empty($missingHeaders)) {
-            throw new \Exception('Missing required headers: ' . implode(', ', $missingHeaders));
+        if (! empty($missingHeaders)) {
+            throw new \Exception('Missing required headers: '.implode(', ', $missingHeaders));
         }
 
         // Create header mapping (header name => column index)
@@ -54,16 +55,16 @@ class CsvImportExportService
         return [
             'headers' => $headers,
             'rows' => $lines,
-            'headerMap' => $headerMap
+            'headerMap' => $headerMap,
         ];
     }
 
     /**
      * Extract data from CSV row using header mapping
      *
-     * @param array $row CSV row data
-     * @param array $headerMap Header to index mapping
-     * @param array $fields Fields to extract (header names)
+     * @param  array  $row  CSV row data
+     * @param  array  $headerMap  Header to index mapping
+     * @param  array  $fields  Fields to extract (header names)
      * @return array Extracted data
      */
     public function extractRowData(array $row, array $headerMap, array $fields): array
@@ -82,10 +83,9 @@ class CsvImportExportService
     /**
      * Validate row data against validation rules
      *
-     * @param array $data Data to validate
-     * @param array $rules Laravel validation rules
-     * @param array $messages Custom error messages
-     * @return \Illuminate\Validation\Validator
+     * @param  array  $data  Data to validate
+     * @param  array  $rules  Laravel validation rules
+     * @param  array  $messages  Custom error messages
      */
     public function validateRow(array $data, array $rules, array $messages = []): \Illuminate\Validation\Validator
     {
@@ -95,8 +95,8 @@ class CsvImportExportService
     /**
      * Generate CSV template with headers
      *
-     * @param array $headers CSV headers
-     * @param array $sampleData Optional sample data row
+     * @param  array  $headers  CSV headers
+     * @param  array  $sampleData  Optional sample data row
      * @return string CSV content
      */
     public function generateTemplate(array $headers, array $sampleData = []): string
@@ -107,7 +107,7 @@ class CsvImportExportService
         fputcsv($output, $headers);
 
         // Add sample data if provided
-        if (!empty($sampleData)) {
+        if (! empty($sampleData)) {
             fputcsv($output, $sampleData);
         }
 
@@ -121,9 +121,9 @@ class CsvImportExportService
     /**
      * Export collection to CSV
      *
-     * @param Collection $data Data to export
-     * @param array $headers CSV headers (column names)
-     * @param callable $transformer Function to transform each row
+     * @param  Collection  $data  Data to export
+     * @param  array  $headers  CSV headers (column names)
+     * @param  callable  $transformer  Function to transform each row
      * @return string CSV content
      */
     public function exportToCsv(Collection $data, array $headers, callable $transformer): string
@@ -149,9 +149,9 @@ class CsvImportExportService
     /**
      * Save CSV content to storage
      *
-     * @param string $content CSV content
-     * @param string $directory Storage directory
-     * @param string $filename File name
+     * @param  string  $content  CSV content
+     * @param  string  $directory  Storage directory
+     * @param  string  $filename  File name
      * @return string Full storage path
      */
     public function saveCsv(string $content, string $directory, string $filename): string
@@ -176,19 +176,18 @@ class CsvImportExportService
             'created' => 0,
             'updated' => 0,
             'skipped' => 0,
-            'errors' => []
+            'errors' => [],
         ];
     }
 
     /**
      * Log error to stats and file
      *
-     * @param array $stats Stats array (passed by reference)
-     * @param string $logFile Log file path
-     * @param int $rowNumber Row number
-     * @param string $type Error type
-     * @param mixed $details Error details
-     * @return void
+     * @param  array  $stats  Stats array (passed by reference)
+     * @param  string  $logFile  Log file path
+     * @param  int  $rowNumber  Row number
+     * @param  string  $type  Error type
+     * @param  mixed  $details  Error details
      */
     public function logError(array &$stats, string $logFile, int $rowNumber, string $type, $details): void
     {
@@ -202,17 +201,17 @@ class CsvImportExportService
         $stats['errors'][] = [
             'row' => $rowNumber,
             'type' => $type,
-            'details' => $details
+            'details' => $details,
         ];
     }
 
     /**
      * Format import completion message
      *
-     * @param string $entityName Entity type (e.g., 'Students', 'Courses')
-     * @param string $importId Import identifier
-     * @param string $fileName Original file name
-     * @param array $stats Statistics
+     * @param  string  $entityName  Entity type (e.g., 'Students', 'Courses')
+     * @param  string  $importId  Import identifier
+     * @param  string  $fileName  Original file name
+     * @param  array  $stats  Statistics
      * @return string Formatted message
      */
     public function formatCompletionMessage(string $entityName, string $importId, string $fileName, array $stats): string

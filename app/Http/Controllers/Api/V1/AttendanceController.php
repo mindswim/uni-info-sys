@@ -79,7 +79,7 @@ class AttendanceController extends Controller
 
         return response()->json([
             'message' => 'Attendance recorded successfully.',
-            'data' => $attendance->load(['student.user', 'courseSection.course'])
+            'data' => $attendance->load(['student.user', 'courseSection.course']),
         ], 201);
     }
 
@@ -122,18 +122,18 @@ class AttendanceController extends Controller
             } catch (\Exception $e) {
                 $errors[] = [
                     'enrollment_id' => $record['enrollment_id'],
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ];
             }
         }
 
         return response()->json([
-            'message' => count($createdRecords) . ' attendance records saved successfully.',
+            'message' => count($createdRecords).' attendance records saved successfully.',
             'data' => [
                 'created' => count($createdRecords),
                 'failed' => count($errors),
-                'errors' => $errors
-            ]
+                'errors' => $errors,
+            ],
         ], 201);
     }
 
@@ -145,7 +145,7 @@ class AttendanceController extends Controller
         $attendanceRecord->load(['student.user', 'courseSection.course', 'enrollment', 'recordedBy.user']);
 
         return response()->json([
-            'data' => $attendanceRecord
+            'data' => $attendanceRecord,
         ]);
     }
 
@@ -165,7 +165,7 @@ class AttendanceController extends Controller
 
         return response()->json([
             'message' => 'Attendance record updated successfully.',
-            'data' => $attendanceRecord->fresh(['student.user', 'courseSection.course'])
+            'data' => $attendanceRecord->fresh(['student.user', 'courseSection.course']),
         ]);
     }
 
@@ -177,7 +177,7 @@ class AttendanceController extends Controller
         $attendanceRecord->delete();
 
         return response()->json([
-            'message' => 'Attendance record deleted successfully.'
+            'message' => 'Attendance record deleted successfully.',
         ]);
     }
 
@@ -213,7 +213,7 @@ class AttendanceController extends Controller
         ];
 
         return response()->json([
-            'data' => $statistics
+            'data' => $statistics,
         ]);
     }
 
@@ -249,8 +249,9 @@ class AttendanceController extends Controller
                 : 0,
             'by_course' => $records->groupBy('course_section_id')->map(function ($courseRecords) {
                 $first = $courseRecords->first();
+
                 return [
-                    'course' => $first->courseSection->course->code . ' - ' . $first->courseSection->course->name,
+                    'course' => $first->courseSection->course->code.' - '.$first->courseSection->course->name,
                     'present' => $courseRecords->where('status', 'present')->count(),
                     'total' => $courseRecords->count(),
                     'rate' => $courseRecords->count() > 0
@@ -261,7 +262,7 @@ class AttendanceController extends Controller
         ];
 
         return response()->json([
-            'data' => $statistics
+            'data' => $statistics,
         ]);
     }
 

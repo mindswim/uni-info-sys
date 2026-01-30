@@ -78,7 +78,7 @@ class ProcessStudentImport extends AbstractCsvImportJob
             'emergency_contact_name' => 'nullable|string|max:255',
             'emergency_contact_phone' => 'nullable|string|max:20',
             'high_school' => 'nullable|string|max:255',
-            'high_school_graduation_year' => 'nullable|integer|min:1900|max:' . (date('Y') + 10),
+            'high_school_graduation_year' => 'nullable|integer|min:1900|max:'.(date('Y') + 10),
             'sat_score' => 'nullable|integer|min:400|max:1600',
             'act_score' => 'nullable|integer|min:1|max:36',
         ];
@@ -109,7 +109,7 @@ class ProcessStudentImport extends AbstractCsvImportJob
 
         // Find program if provided
         $programId = null;
-        if (!empty($data['program_code'])) {
+        if (! empty($data['program_code'])) {
             $program = Program::where('code', $data['program_code'])->first();
             if ($program) {
                 $programId = $program->id;
@@ -118,11 +118,11 @@ class ProcessStudentImport extends AbstractCsvImportJob
 
         // Create or update user account
         $userAttributes = [
-            'name' => trim($data['first_name'] . ' ' . $data['last_name']),
+            'name' => trim($data['first_name'].' '.$data['last_name']),
             'email' => $data['email'],
         ];
 
-        if (!$isUpdate) {
+        if (! $isUpdate) {
             // Generate password for new users (they should reset it)
             $userAttributes['password'] = Hash::make(Str::random(16));
         }
@@ -133,7 +133,7 @@ class ProcessStudentImport extends AbstractCsvImportJob
         );
 
         // Assign Student role if not already assigned
-        if (!$user->hasRole('Student')) {
+        if (! $user->hasRole('Student')) {
             $studentRole = \App\Models\Role::where('name', 'Student')->first();
             if ($studentRole) {
                 $user->roles()->syncWithoutDetaching([$studentRole->id]);

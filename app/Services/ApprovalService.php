@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Log;
 
 class ApprovalService
 {
-
     public function createRequest(
         string $type,
         Model $requestable,
@@ -88,7 +87,7 @@ class ApprovalService
     private function handleEnrollmentOverrideApproval(ApprovalRequest $request): void
     {
         $metadata = $request->metadata;
-        if (!$metadata || !isset($metadata['course_section_id'])) {
+        if (! $metadata || ! isset($metadata['course_section_id'])) {
             return;
         }
 

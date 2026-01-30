@@ -30,8 +30,8 @@ class CourseMaterialFactory extends Factory
             'description' => fake()->optional(0.7)->sentence(),
             'type' => $type,
             'content' => $type === 'lecture_notes' ? fake()->paragraphs(3, true) : null,
-            'file_path' => in_array($type, ['file', 'reading']) ? '/uploads/materials/' . fake()->uuid() . '.pdf' : null,
-            'file_name' => in_array($type, ['file', 'reading']) ? fake()->word() . '.pdf' : null,
+            'file_path' => in_array($type, ['file', 'reading']) ? '/uploads/materials/'.fake()->uuid().'.pdf' : null,
+            'file_name' => in_array($type, ['file', 'reading']) ? fake()->word().'.pdf' : null,
             'file_size' => in_array($type, ['file', 'reading']) ? fake()->numberBetween(100000, 5000000) : null,
             'mime_type' => in_array($type, ['file', 'reading']) ? 'application/pdf' : null,
             'url' => in_array($type, ['link', 'video']) ? fake()->url() : null,
@@ -53,25 +53,25 @@ class CourseMaterialFactory extends Factory
                 'Course Overview and Syllabus',
             ],
             'reading' => [
-                'Chapter ' . fake()->numberBetween(1, 20) . ' Reading',
-                'Required Reading: ' . fake()->words(3, true),
+                'Chapter '.fake()->numberBetween(1, 20).' Reading',
+                'Required Reading: '.fake()->words(3, true),
                 'Supplementary Reading Material',
-                'Article: ' . fake()->sentence(4),
+                'Article: '.fake()->sentence(4),
             ],
             'lecture_notes' => [
-                'Lecture ' . fake()->numberBetween(1, 30) . ' Notes',
-                'Week ' . fake()->numberBetween(1, 15) . ' Lecture Notes',
-                fake()->words(3, true) . ' - Lecture Notes',
+                'Lecture '.fake()->numberBetween(1, 30).' Notes',
+                'Week '.fake()->numberBetween(1, 15).' Lecture Notes',
+                fake()->words(3, true).' - Lecture Notes',
             ],
             'video' => [
-                'Lecture Video: ' . fake()->words(3, true),
-                'Tutorial: ' . fake()->words(2, true),
-                'Recorded Session ' . fake()->numberBetween(1, 20),
+                'Lecture Video: '.fake()->words(3, true),
+                'Tutorial: '.fake()->words(2, true),
+                'Recorded Session '.fake()->numberBetween(1, 20),
             ],
             'link' => [
-                'External Resource: ' . fake()->words(3, true),
-                'Online Tool: ' . fake()->word(),
-                'Reference: ' . fake()->words(2, true),
+                'External Resource: '.fake()->words(3, true),
+                'Online Tool: '.fake()->word(),
+                'Reference: '.fake()->words(2, true),
             ],
             'file' => [
                 'Assignment Template',
@@ -155,8 +155,8 @@ class CourseMaterialFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'type' => 'reading',
             'title' => $this->generateTitle('reading'),
-            'file_path' => '/uploads/materials/' . fake()->uuid() . '.pdf',
-            'file_name' => fake()->word() . '_reading.pdf',
+            'file_path' => '/uploads/materials/'.fake()->uuid().'.pdf',
+            'file_name' => fake()->word().'_reading.pdf',
             'file_size' => fake()->numberBetween(500000, 2000000),
             'mime_type' => 'application/pdf',
         ]);
@@ -182,7 +182,7 @@ class CourseMaterialFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'type' => 'video',
             'title' => $this->generateTitle('video'),
-            'url' => 'https://youtube.com/watch?v=' . fake()->regexify('[A-Za-z0-9]{11}'),
+            'url' => 'https://youtube.com/watch?v='.fake()->regexify('[A-Za-z0-9]{11}'),
             'file_path' => null,
         ]);
     }

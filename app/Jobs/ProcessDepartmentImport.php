@@ -45,7 +45,7 @@ class ProcessDepartmentImport extends AbstractCsvImportJob
     {
         $faculty = Faculty::where('name', $data['faculty_name'])->first();
 
-        if (!$faculty) {
+        if (! $faculty) {
             throw new \Exception("Faculty '{$data['faculty_name']}' not found");
         }
 

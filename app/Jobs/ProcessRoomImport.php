@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Models\Room;
 use App\Models\Building;
+use App\Models\Room;
 
 class ProcessRoomImport extends AbstractCsvImportJob
 {
@@ -47,7 +47,7 @@ class ProcessRoomImport extends AbstractCsvImportJob
     {
         $building = Building::where('code', $data['building_code'])->first();
 
-        if (!$building) {
+        if (! $building) {
             throw new \Exception("Building '{$data['building_code']}' not found");
         }
 

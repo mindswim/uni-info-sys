@@ -8,7 +8,6 @@ use App\Models\CourseSection;
 use App\Models\Department;
 use App\Models\Enrollment;
 use App\Models\EvaluationAnswer;
-use App\Models\EvaluationResponse;
 use App\Models\GradeChangeRequest;
 use App\Models\Staff;
 use App\Models\Term;
@@ -28,14 +27,16 @@ class DepartmentChairController extends Controller
     {
         $staff = Staff::where('user_id', $request->user()->id)->firstOrFail();
         $department = Department::where('chair_id', $staff->id)->firstOrFail();
+
         return [$staff, $department];
     }
 
     private function getDepartmentSectionIds(Department $department, ?Term $term): \Illuminate\Support\Collection
     {
-        if (!$term) {
+        if (! $term) {
             return collect();
         }
+
         return CourseSection::whereHas('course', function ($q) use ($department) {
             $q->where('department_id', $department->id);
         })->where('term_id', $term->id)->pluck('id');
@@ -106,7 +107,7 @@ class DepartmentChairController extends Controller
         [$staff, $department] = $this->getChairContext($request);
         $currentTerm = Term::where('is_current', true)->first();
 
-        if (!$currentTerm) {
+        if (! $currentTerm) {
             return response()->json(['data' => []]);
         }
 
@@ -140,7 +141,7 @@ class DepartmentChairController extends Controller
         [$staff, $department] = $this->getChairContext($request);
         $currentTerm = Term::where('is_current', true)->first();
 
-        if (!$currentTerm) {
+        if (! $currentTerm) {
             return response()->json(['data' => []]);
         }
 
@@ -353,8 +354,8 @@ class DepartmentChairController extends Controller
             ->get()
             ->map(function ($member) use ($currentTerm) {
                 $sections = $member->courseSections()
-                    ->when($currentTerm, fn($q) => $q->where('term_id', $currentTerm->id))
-                    ->withCount(['enrollments' => fn($q) => $q->where('status', 'enrolled')])
+                    ->when($currentTerm, fn ($q) => $q->where('term_id', $currentTerm->id))
+                    ->withCount(['enrollments' => fn ($q) => $q->where('status', 'enrolled')])
                     ->get();
 
                 $sectionIds = $sections->pluck('id');

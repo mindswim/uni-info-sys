@@ -34,22 +34,23 @@ class CheckWaitlists extends Command
         $sectionsToCheck = CourseSection::whereHas('enrollments', function ($query) {
             $query->where('status', 'waitlisted');
         })
-        ->withCount([
-            'enrollments as enrolled_count' => function ($query) {
-                $query->where('status', 'enrolled');
-            },
-            'enrollments as waitlisted_count' => function ($query) {
-                $query->where('status', 'waitlisted');
-            }
-        ])
-        ->get()
-        ->filter(function ($section) {
-            // Only sections that have available capacity
-            return $section->enrolled_count < $section->capacity;
-        });
+            ->withCount([
+                'enrollments as enrolled_count' => function ($query) {
+                    $query->where('status', 'enrolled');
+                },
+                'enrollments as waitlisted_count' => function ($query) {
+                    $query->where('status', 'waitlisted');
+                },
+            ])
+            ->get()
+            ->filter(function ($section) {
+                // Only sections that have available capacity
+                return $section->enrolled_count < $section->capacity;
+            });
 
         if ($sectionsToCheck->isEmpty()) {
             $this->info('No course sections found with available capacity and waitlisted students.');
+
             return Command::SUCCESS;
         }
 
@@ -58,10 +59,10 @@ class CheckWaitlists extends Command
         foreach ($sectionsToCheck as $section) {
             ProcessWaitlistPromotion::dispatch($section);
             $jobsDispatched++;
-            
+
             $courseName = $section->course ? $section->course->name : 'Unknown Course';
             $this->line("Dispatched waitlist promotion job for section {$section->id} ({$courseName})");
-            
+
             Log::info('Waitlist promotion job dispatched by scheduled command', [
                 'course_section_id' => $section->id,
                 'enrolled_count' => $section->enrolled_count,
@@ -71,7 +72,7 @@ class CheckWaitlists extends Command
         }
 
         $this->info("Completed. Dispatched {$jobsDispatched} waitlist promotion jobs.");
-        
+
         Log::info('CheckWaitlists command completed', [
             'jobs_dispatched' => $jobsDispatched,
         ]);

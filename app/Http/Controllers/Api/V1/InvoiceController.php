@@ -74,12 +74,12 @@ class InvoiceController extends Controller
 
             return response()->json([
                 'message' => 'Invoice generated successfully.',
-                'data' => $invoice
+                'data' => $invoice,
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to generate invoice.',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 400);
         }
     }
@@ -92,7 +92,7 @@ class InvoiceController extends Controller
         $invoice->load(['student.user', 'term', 'lineItems', 'payments']);
 
         return response()->json([
-            'data' => $invoice
+            'data' => $invoice,
         ]);
     }
 
@@ -111,7 +111,7 @@ class InvoiceController extends Controller
 
         return response()->json([
             'message' => 'Invoice updated successfully.',
-            'data' => $invoice->fresh(['student.user', 'term', 'lineItems', 'payments'])
+            'data' => $invoice->fresh(['student.user', 'term', 'lineItems', 'payments']),
         ]);
     }
 
@@ -122,14 +122,14 @@ class InvoiceController extends Controller
     {
         if ($invoice->payments()->completed()->exists()) {
             return response()->json([
-                'message' => 'Cannot delete invoice with completed payments.'
+                'message' => 'Cannot delete invoice with completed payments.',
             ], 400);
         }
 
         $invoice->delete();
 
         return response()->json([
-            'message' => 'Invoice deleted successfully.'
+            'message' => 'Invoice deleted successfully.',
         ]);
     }
 
@@ -152,12 +152,12 @@ class InvoiceController extends Controller
 
             return response()->json([
                 'message' => 'Discount added successfully.',
-                'data' => $invoice->fresh(['lineItems'])
+                'data' => $invoice->fresh(['lineItems']),
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to add discount.',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 400);
         }
     }
@@ -183,12 +183,12 @@ class InvoiceController extends Controller
 
             return response()->json([
                 'message' => 'Adjustment added successfully.',
-                'data' => $invoice->fresh(['lineItems'])
+                'data' => $invoice->fresh(['lineItems']),
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to add adjustment.',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 400);
         }
     }
@@ -206,7 +206,7 @@ class InvoiceController extends Controller
         $summary = $this->billingService->getStudentInvoicesSummary($student);
 
         return response()->json([
-            'data' => $summary
+            'data' => $summary,
         ]);
     }
 }

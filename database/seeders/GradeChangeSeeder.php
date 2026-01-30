@@ -20,6 +20,7 @@ class GradeChangeSeeder extends Seeder
 
         if ($enrollments->isEmpty()) {
             $this->command->warn('No graded enrollments found. Run other seeders first.');
+
             return;
         }
 

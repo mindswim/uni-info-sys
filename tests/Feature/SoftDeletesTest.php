@@ -2,28 +2,29 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Student;
+use App\Models\AdmissionApplication;
 use App\Models\Course;
 use App\Models\CourseSection;
-use App\Models\Enrollment;
 use App\Models\Document;
-use App\Models\AdmissionApplication;
+use App\Models\Enrollment;
+use App\Models\Student;
 use App\Models\Term;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
 use Laravel\Sanctum\Sanctum;
-use App\Models\Role;
+use Tests\TestCase;
 use Tests\Traits\CreatesUsersWithRoles;
 
 class SoftDeletesTest extends TestCase
 {
-    use RefreshDatabase, WithFaker, CreatesUsersWithRoles;
+    use CreatesUsersWithRoles, RefreshDatabase, WithFaker;
 
     protected $adminUser;
+
     protected $studentUser;
+
     protected $student;
+
     protected $term;
 
     protected function setUp(): void
@@ -52,7 +53,7 @@ class SoftDeletesTest extends TestCase
         // Restore student
         $response = $this->postJson("/api/v1/students/{$this->student->id}/restore");
         $response->assertStatus(200)
-                 ->assertJsonFragment(['message' => 'Student restored successfully']);
+            ->assertJsonFragment(['message' => 'Student restored successfully']);
 
         // Verify student is restored
         $this->assertDatabaseHas('students', ['id' => $this->student->id, 'deleted_at' => null]);
@@ -91,7 +92,7 @@ class SoftDeletesTest extends TestCase
         // Restore course
         $response = $this->postJson("/api/v1/courses/{$course->id}/restore");
         $response->assertStatus(200)
-                 ->assertJsonFragment(['message' => 'Course restored successfully']);
+            ->assertJsonFragment(['message' => 'Course restored successfully']);
 
         // Verify course is restored
         $this->assertDatabaseHas('courses', ['id' => $course->id, 'deleted_at' => null]);
@@ -108,11 +109,11 @@ class SoftDeletesTest extends TestCase
             'end_date' => now()->addMonths(4)->toDateString(),
             'add_drop_deadline' => now()->addWeeks(4), // Future deadline to allow withdrawal
         ]);
-        
+
         $courseSection = CourseSection::factory()->create(['term_id' => $term->id]);
         $enrollment = Enrollment::factory()->create([
             'student_id' => $this->student->id,
-            'course_section_id' => $courseSection->id
+            'course_section_id' => $courseSection->id,
         ]);
 
         // "Soft delete" enrollment (sets status to withdrawn)
@@ -121,9 +122,9 @@ class SoftDeletesTest extends TestCase
 
         // Verify enrollment status is withdrawn (not soft deleted)
         $this->assertDatabaseHas('enrollments', [
-            'id' => $enrollment->id, 
+            'id' => $enrollment->id,
             'status' => 'withdrawn',
-            'deleted_at' => null
+            'deleted_at' => null,
         ]);
 
         // For enrollment, restore means changing status back to enrolled
@@ -135,7 +136,7 @@ class SoftDeletesTest extends TestCase
         // Restore enrollment
         $response = $this->postJson("/api/v1/enrollments/{$enrollment->id}/restore");
         $response->assertStatus(200)
-                 ->assertJsonFragment(['message' => 'Enrollment restored successfully']);
+            ->assertJsonFragment(['message' => 'Enrollment restored successfully']);
 
         // Verify enrollment is restored
         $this->assertDatabaseHas('enrollments', ['id' => $enrollment->id, 'deleted_at' => null]);
@@ -158,7 +159,7 @@ class SoftDeletesTest extends TestCase
         // Restore document
         $response = $this->postJson("/api/v1/documents/{$document->id}/restore");
         $response->assertStatus(200)
-                 ->assertJsonFragment(['message' => 'Document restored successfully']);
+            ->assertJsonFragment(['message' => 'Document restored successfully']);
 
         // Verify document is restored
         $this->assertDatabaseHas('documents', ['id' => $document->id, 'deleted_at' => null]);
@@ -171,7 +172,7 @@ class SoftDeletesTest extends TestCase
 
         $application = AdmissionApplication::factory()->create([
             'student_id' => $this->student->id,
-            'term_id' => $this->term->id
+            'term_id' => $this->term->id,
         ]);
 
         // Soft delete application
@@ -184,7 +185,7 @@ class SoftDeletesTest extends TestCase
         // Restore application
         $response = $this->postJson("/api/v1/admission-applications/{$application->id}/restore");
         $response->assertStatus(200)
-                 ->assertJsonFragment(['message' => 'Admission application restored successfully']);
+            ->assertJsonFragment(['message' => 'Admission application restored successfully']);
 
         // Verify application is restored
         $this->assertDatabaseHas('admission_applications', ['id' => $application->id, 'deleted_at' => null]);
@@ -221,19 +222,19 @@ class SoftDeletesTest extends TestCase
     {
         Sanctum::actingAs($this->adminUser);
 
-        $response = $this->postJson("/api/v1/students/999/restore");
+        $response = $this->postJson('/api/v1/students/999/restore');
         $response->assertStatus(404);
 
-        $response = $this->postJson("/api/v1/courses/999/restore");
+        $response = $this->postJson('/api/v1/courses/999/restore');
         $response->assertStatus(404);
 
-        $response = $this->postJson("/api/v1/enrollments/999/restore");
+        $response = $this->postJson('/api/v1/enrollments/999/restore');
         $response->assertStatus(404);
 
-        $response = $this->postJson("/api/v1/documents/999/restore");
+        $response = $this->postJson('/api/v1/documents/999/restore');
         $response->assertStatus(404);
 
-        $response = $this->postJson("/api/v1/admission-applications/999/restore");
+        $response = $this->postJson('/api/v1/admission-applications/999/restore');
         $response->assertStatus(404);
     }
 
@@ -242,19 +243,19 @@ class SoftDeletesTest extends TestCase
     {
         Sanctum::actingAs($this->adminUser);
 
-        $response = $this->deleteJson("/api/v1/students/999/force");
+        $response = $this->deleteJson('/api/v1/students/999/force');
         $response->assertStatus(404);
 
-        $response = $this->deleteJson("/api/v1/courses/999/force");
+        $response = $this->deleteJson('/api/v1/courses/999/force');
         $response->assertStatus(404);
 
-        $response = $this->deleteJson("/api/v1/enrollments/999/force");
+        $response = $this->deleteJson('/api/v1/enrollments/999/force');
         $response->assertStatus(404);
 
-        $response = $this->deleteJson("/api/v1/documents/999/force");
+        $response = $this->deleteJson('/api/v1/documents/999/force');
         $response->assertStatus(404);
 
-        $response = $this->deleteJson("/api/v1/admission-applications/999/force");
+        $response = $this->deleteJson('/api/v1/admission-applications/999/force');
         $response->assertStatus(404);
     }
 
@@ -267,7 +268,7 @@ class SoftDeletesTest extends TestCase
         $document = Document::factory()->create(['student_id' => $this->student->id]);
         $application = AdmissionApplication::factory()->create([
             'student_id' => $this->student->id,
-            'term_id' => $this->term->id
+            'term_id' => $this->term->id,
         ]);
 
         // Soft delete all resources (except enrollment which uses business logic)
@@ -300,4 +301,4 @@ class SoftDeletesTest extends TestCase
         $this->assertTrue(in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses(Document::class)));
         $this->assertTrue(in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses(AdmissionApplication::class)));
     }
-} 
+}

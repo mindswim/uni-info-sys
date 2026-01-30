@@ -12,7 +12,9 @@ class Message extends Model
     use SoftDeletes;
 
     public const TYPE_TEXT = 'text';
+
     public const TYPE_FILE = 'file';
+
     public const TYPE_SYSTEM = 'system';
 
     protected $fillable = [
@@ -79,7 +81,7 @@ class Message extends Model
         $this->reads()->firstOrCreate([
             'user_id' => $user->id,
         ], [
-            'read_at' => now()
+            'read_at' => now(),
         ]);
     }
 
@@ -88,7 +90,7 @@ class Message extends Model
         static::created(function (Message $message) {
             // Update conversation's last_message_at
             $message->conversation->update([
-                'last_message_at' => $message->created_at
+                'last_message_at' => $message->created_at,
             ]);
         });
     }

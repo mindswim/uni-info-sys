@@ -6,12 +6,12 @@ use Illuminate\Foundation\Http\FormRequest;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    title: "Store Enrollment Swap Request",
-    description: "Request body for swapping a student from one course section to another.",
-    required: ["from_enrollment_id", "to_course_section_id"],
+    title: 'Store Enrollment Swap Request',
+    description: 'Request body for swapping a student from one course section to another.',
+    required: ['from_enrollment_id', 'to_course_section_id'],
     properties: [
-        new OA\Property(property: "from_enrollment_id", type: "integer", description: "The ID of the enrollment to withdraw from.", example: 1),
-        new OA\Property(property: "to_course_section_id", type: "integer", description: "The ID of the course section to enroll in.", example: 2),
+        new OA\Property(property: 'from_enrollment_id', type: 'integer', description: 'The ID of the enrollment to withdraw from.', example: 1),
+        new OA\Property(property: 'to_course_section_id', type: 'integer', description: 'The ID of the course section to enroll in.', example: 2),
     ]
 )]
 class StoreEnrollmentSwapRequest extends FormRequest
@@ -61,7 +61,7 @@ class StoreEnrollmentSwapRequest extends FormRequest
         $fromEnrollmentId = $this->input('from_enrollment_id');
         $toCourseSection = $this->input('to_course_section_id');
 
-        if (!$fromEnrollmentId || !$toCourseSection) {
+        if (! $fromEnrollmentId || ! $toCourseSection) {
             return; // Basic validation will handle this
         }
 
@@ -75,7 +75,7 @@ class StoreEnrollmentSwapRequest extends FormRequest
         }
 
         // Check if enrollment is in a swappable status
-        if ($fromEnrollment && !in_array($fromEnrollment->status, ['enrolled', 'waitlisted'])) {
+        if ($fromEnrollment && ! in_array($fromEnrollment->status, ['enrolled', 'waitlisted'])) {
             $validator->errors()->add(
                 'from_enrollment_id',
                 'Can only swap from enrolled or waitlisted enrollments.'

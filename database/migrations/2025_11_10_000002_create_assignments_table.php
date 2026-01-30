@@ -27,7 +27,7 @@ return new class extends Migration
                 'presentation',
                 'lab',
                 'participation',
-                'other'
+                'other',
             ])->default('homework');
             $table->dateTime('due_date');
             $table->dateTime('available_from')->nullable();

@@ -29,19 +29,19 @@ class ProcessGradeImportTest extends TestCase
         $user = User::factory()->create();
         $course = Course::factory()->create(['course_code' => 'CS101']);
         $courseSection = CourseSection::factory()->create(['course_id' => $course->id]);
-        
+
         $student1 = Student::factory()->create(['id' => 1]);
         $student2 = Student::factory()->create(['id' => 2]);
-        
+
         $enrollment1 = Enrollment::factory()->create([
             'student_id' => $student1->id,
             'course_section_id' => $courseSection->id,
-            'grade' => null
+            'grade' => null,
         ]);
         $enrollment2 = Enrollment::factory()->create([
             'student_id' => $student2->id,
             'course_section_id' => $courseSection->id,
-            'grade' => null
+            'grade' => null,
         ]);
 
         // Create CSV content
@@ -56,10 +56,10 @@ class ProcessGradeImportTest extends TestCase
         // Assert grades were updated
         $enrollment1->refresh();
         $enrollment2->refresh();
-        
+
         $this->assertEquals('A', $enrollment1->grade);
         $this->assertEquals('B+', $enrollment2->grade);
-        
+
         // Assert file was cleaned up
         $this->assertFalse(Storage::disk('local')->exists($filePath));
     }
@@ -71,12 +71,12 @@ class ProcessGradeImportTest extends TestCase
         $user = User::factory()->create();
         $course = Course::factory()->create(['course_code' => 'CS101']);
         $courseSection = CourseSection::factory()->create(['course_id' => $course->id]);
-        
+
         $student1 = Student::factory()->create(['id' => 1]);
         $enrollment1 = Enrollment::factory()->create([
             'student_id' => $student1->id,
             'course_section_id' => $courseSection->id,
-            'grade' => null
+            'grade' => null,
         ]);
 
         // CSV with invalid student ID
@@ -91,7 +91,7 @@ class ProcessGradeImportTest extends TestCase
         // Assert valid grade was updated
         $enrollment1->refresh();
         $this->assertEquals('A', $enrollment1->grade);
-        
+
         // Assert error log was created
         $this->assertTrue(Storage::disk('local')->exists('imports/logs/test_import_errors.log'));
         $errorLog = Storage::disk('local')->get('imports/logs/test_import_errors.log');
@@ -105,12 +105,12 @@ class ProcessGradeImportTest extends TestCase
         $user = User::factory()->create();
         $course = Course::factory()->create(['course_code' => 'CS101']);
         $courseSection = CourseSection::factory()->create(['course_id' => $course->id]);
-        
+
         $student1 = Student::factory()->create(['id' => 1]);
         $enrollment1 = Enrollment::factory()->create([
             'student_id' => $student1->id,
             'course_section_id' => $courseSection->id,
-            'grade' => null
+            'grade' => null,
         ]);
 
         // CSV with invalid grade
@@ -125,7 +125,7 @@ class ProcessGradeImportTest extends TestCase
         // Assert grade was not updated
         $enrollment1->refresh();
         $this->assertNull($enrollment1->grade);
-        
+
         // Assert error log was created
         $this->assertTrue(Storage::disk('local')->exists('imports/logs/test_import_errors.log'));
         $errorLog = Storage::disk('local')->get('imports/logs/test_import_errors.log');
@@ -139,12 +139,12 @@ class ProcessGradeImportTest extends TestCase
         $user = User::factory()->create();
         $course = Course::factory()->create(['course_code' => 'CS101']);
         $courseSection = CourseSection::factory()->create(['course_id' => $course->id]);
-        
+
         $student1 = Student::factory()->create(['id' => 1]);
         $enrollment1 = Enrollment::factory()->create([
             'student_id' => $student1->id,
             'course_section_id' => $courseSection->id,
-            'grade' => 'A' // Already has grade A
+            'grade' => 'A', // Already has grade A
         ]);
 
         // CSV with same grade
@@ -193,7 +193,7 @@ class ProcessGradeImportTest extends TestCase
         $courseSection = CourseSection::factory()->create(['course_id' => $course->id]);
 
         // Empty CSV
-        $csvContent = "";
+        $csvContent = '';
         $filePath = 'imports/grades/test.csv';
         Storage::disk('local')->put($filePath, $csvContent);
 
@@ -214,19 +214,19 @@ class ProcessGradeImportTest extends TestCase
         $user = User::factory()->create();
         $course = Course::factory()->create(['course_code' => 'CS101']);
         $courseSection = CourseSection::factory()->create(['course_id' => $course->id]);
-        
+
         $student1 = Student::factory()->create(['id' => 1]);
         $student2 = Student::factory()->create(['id' => 2]);
-        
+
         $enrollment1 = Enrollment::factory()->create([
             'student_id' => $student1->id,
             'course_section_id' => $courseSection->id,
-            'grade' => null
+            'grade' => null,
         ]);
         $enrollment2 = Enrollment::factory()->create([
             'student_id' => $student2->id,
             'course_section_id' => $courseSection->id,
-            'grade' => null
+            'grade' => null,
         ]);
 
         // CSV with mixed valid/invalid data
@@ -241,14 +241,14 @@ class ProcessGradeImportTest extends TestCase
         // Assert valid grades were updated
         $enrollment1->refresh();
         $enrollment2->refresh();
-        
+
         $this->assertEquals('A', $enrollment1->grade);
         $this->assertEquals('C', $enrollment2->grade);
-        
+
         // Assert error log contains failed rows
         $this->assertTrue(Storage::disk('local')->exists('imports/logs/test_import_errors.log'));
         $errorLog = Storage::disk('local')->get('imports/logs/test_import_errors.log');
         $this->assertStringContainsString('Student ID 999 is not enrolled', $errorLog);
         $this->assertStringContainsString('Student ID must be a number', $errorLog);
     }
-} 
+}

@@ -4,15 +4,14 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\HandlesCsvImportExport;
-use App\Models\Course;
-use App\Models\CourseSection;
-use App\Http\Resources\CourseResource;
 use App\Http\Requests\StoreCourseRequest;
 use App\Http\Requests\UpdateCourseRequest;
+use App\Http\Resources\CourseResource;
+use App\Models\Course;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use OpenApi\Attributes as OA;
-use Illuminate\Http\JsonResponse;
 
 #[OA\Tag(
     name: 'Courses',
@@ -62,7 +61,7 @@ class CourseController extends Controller
         // Create cache key based on filters
         $cacheKey = 'courses.all';
         if ($request->has('department_id')) {
-            $cacheKey = 'courses.department.' . $request->department_id;
+            $cacheKey = 'courses.department.'.$request->department_id;
         }
 
         $courses = Cache::remember($cacheKey, 3600, function () use ($request) {
@@ -102,18 +101,18 @@ class CourseController extends Controller
         $this->authorize('create', Course::class);
 
         $validated = $request->validated();
-        
+
         $course = Course::create($validated);
 
         if (isset($validated['prerequisites'])) {
             $course->prerequisiteCourses()->sync($validated['prerequisites']);
         }
-        
+
         $course->load(['department', 'prerequisiteCourses']);
 
         // Clear courses cache (all and department-specific)
         Cache::forget('courses.all');
-        Cache::forget('courses.department.' . $validated['department_id']);
+        Cache::forget('courses.department.'.$validated['department_id']);
 
         return new CourseResource($course);
     }
@@ -145,9 +144,9 @@ class CourseController extends Controller
     public function show(Course $course)
     {
         $this->authorize('view', $course);
-        
+
         $course->load(['department', 'prerequisiteCourses']);
-        
+
         return new CourseResource($course);
     }
 
@@ -185,18 +184,18 @@ class CourseController extends Controller
         $this->authorize('update', $course);
 
         $validated = $request->validated();
-        
+
         $course->update($validated);
 
         if (isset($validated['prerequisites'])) {
             $course->prerequisiteCourses()->sync($validated['prerequisites']);
         }
-        
+
         $course->load(['department', 'prerequisiteCourses']);
 
         // Clear courses cache
         Cache::forget('courses.all');
-        Cache::forget('courses.department.' . $course->department_id);
+        Cache::forget('courses.department.'.$course->department_id);
 
         return new CourseResource($course);
     }
@@ -224,13 +223,13 @@ class CourseController extends Controller
     public function destroy(Course $course)
     {
         $this->authorize('delete', $course);
-        
+
         // Clear courses cache
         Cache::forget('courses.all');
-        Cache::forget('courses.department.' . $course->department_id);
-        
+        Cache::forget('courses.department.'.$course->department_id);
+
         $course->delete();
-        
+
         return response()->noContent();
     }
 
@@ -258,16 +257,16 @@ class CourseController extends Controller
     {
         $course = Course::withTrashed()->findOrFail($id);
         $this->authorize('restore', $course);
-        
+
         $course->restore();
-        
+
         // Clear courses cache
         Cache::forget('courses.all');
-        Cache::forget('courses.department.' . $course->department_id);
-        
+        Cache::forget('courses.department.'.$course->department_id);
+
         return response()->json([
             'message' => 'Course restored successfully',
-            'data' => new CourseResource($course)
+            'data' => new CourseResource($course),
         ], 200);
     }
 
@@ -291,11 +290,11 @@ class CourseController extends Controller
     {
         $course = Course::withTrashed()->findOrFail($id);
         $this->authorize('forceDelete', $course);
-        
+
         // Clear courses cache
         Cache::forget('courses.all');
-        Cache::forget('courses.department.' . $course->department_id);
-        
+        Cache::forget('courses.department.'.$course->department_id);
+
         $course->forceDelete();
 
         return response()->json(null, 204);
@@ -375,7 +374,7 @@ class CourseController extends Controller
                         $q->where('is_current', true);
                     });
                 }
-            }
+            },
         ]);
 
         // Filter by department
@@ -393,8 +392,8 @@ class CourseController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('code', 'like', "%{$search}%")
-                  ->orWhere('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -416,7 +415,7 @@ class CourseController extends Controller
                 'last' => $courses->url($courses->lastPage()),
                 'prev' => $courses->previousPageUrl(),
                 'next' => $courses->nextPageUrl(),
-            ]
+            ],
         ], 200);
     }
 

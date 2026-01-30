@@ -38,7 +38,7 @@ class SubmitGradeRequest extends FormRequest
     {
         return [
             'grade.required' => 'A grade is required',
-            'grade.in' => 'Invalid grade. Must be one of: ' . implode(', ', GradeService::getValidGrades()),
+            'grade.in' => 'Invalid grade. Must be one of: '.implode(', ', GradeService::getValidGrades()),
         ];
     }
 }

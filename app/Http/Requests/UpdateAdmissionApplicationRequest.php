@@ -14,7 +14,7 @@ class UpdateAdmissionApplicationRequest extends FormRequest
     {
         // Get the admission application from route
         $admissionApplication = $this->route('admission_application');
-        
+
         // Check if user can update this specific admission application
         return $this->user()->can('update', $admissionApplication);
     }
@@ -28,40 +28,40 @@ class UpdateAdmissionApplicationRequest extends FormRequest
     {
         $admissionApplication = $this->route('admission_application');
         $user = $this->user();
-        
+
         $rules = [
             'term_id' => [
                 'sometimes',
                 'integer',
-                'exists:terms,id'
+                'exists:terms,id',
             ],
             'comments' => [
                 'sometimes',
                 'nullable',
                 'string',
-                'max:1000'
-            ]
+                'max:1000',
+            ],
         ];
 
         // Only admin/staff can change status and decision-related fields
         $userRoles = $user->roles()->pluck('name')->toArray();
-        
+
         if (in_array('admin', $userRoles) || in_array('staff', $userRoles)) {
             $rules['status'] = [
                 'sometimes',
                 'string',
-                Rule::in(['draft', 'submitted', 'under_review', 'accepted', 'rejected', 'waitlisted', 'enrolled'])
+                Rule::in(['draft', 'submitted', 'under_review', 'accepted', 'rejected', 'waitlisted', 'enrolled']),
             ];
             $rules['decision_date'] = [
                 'sometimes',
                 'nullable',
-                'date'
+                'date',
             ];
             $rules['decision_status'] = [
                 'sometimes',
                 'nullable',
                 'string',
-                'max:255'
+                'max:255',
             ];
         } else {
             // Students can only update status if application is still in draft
@@ -69,7 +69,7 @@ class UpdateAdmissionApplicationRequest extends FormRequest
                 $rules['status'] = [
                     'sometimes',
                     'string',
-                    Rule::in(['draft', 'submitted'])
+                    Rule::in(['draft', 'submitted']),
                 ];
             }
         }
@@ -89,7 +89,7 @@ class UpdateAdmissionApplicationRequest extends FormRequest
             'status.in' => 'Invalid status value.',
             'comments.max' => 'Comments cannot exceed 1000 characters.',
             'decision_date.date' => 'Decision date must be a valid date.',
-            'decision_status.max' => 'Decision status cannot exceed 255 characters.'
+            'decision_status.max' => 'Decision status cannot exceed 255 characters.',
         ];
     }
 }

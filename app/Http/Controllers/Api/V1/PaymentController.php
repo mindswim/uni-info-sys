@@ -85,12 +85,12 @@ class PaymentController extends Controller
 
             return response()->json([
                 'message' => 'Payment processed successfully.',
-                'data' => $payment
+                'data' => $payment,
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to process payment.',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 400);
         }
     }
@@ -103,7 +103,7 @@ class PaymentController extends Controller
         $payment->load(['invoice.lineItems', 'student.user']);
 
         return response()->json([
-            'data' => $payment
+            'data' => $payment,
         ]);
     }
 
@@ -121,7 +121,7 @@ class PaymentController extends Controller
 
         return response()->json([
             'message' => 'Payment updated successfully.',
-            'data' => $payment->fresh(['invoice', 'student.user'])
+            'data' => $payment->fresh(['invoice', 'student.user']),
         ]);
     }
 
@@ -142,12 +142,12 @@ class PaymentController extends Controller
 
             return response()->json([
                 'message' => 'Payment refunded successfully.',
-                'data' => $refundedPayment
+                'data' => $refundedPayment,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to refund payment.',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 400);
         }
     }
@@ -159,14 +159,14 @@ class PaymentController extends Controller
     {
         if ($payment->status === 'completed') {
             return response()->json([
-                'message' => 'Cannot delete completed payment. Please refund instead.'
+                'message' => 'Cannot delete completed payment. Please refund instead.',
             ], 400);
         }
 
         $payment->delete();
 
         return response()->json([
-            'message' => 'Payment deleted successfully.'
+            'message' => 'Payment deleted successfully.',
         ]);
     }
 }

@@ -32,17 +32,17 @@ class DepartmentFactory extends Factory
             'English Literature' => 'ENGL',
             'Business Administration' => 'BUS',
             'Marketing' => 'MKT',
-            'Finance' => 'FIN'
+            'Finance' => 'FIN',
         ];
-        
+
         $keys = array_keys($departments);
         $name = $keys[$departmentIndex % count($keys)];
-        $code = $departments[$name] . ($departmentIndex > 13 ? '_' . ($departmentIndex - 13) : '');
+        $code = $departments[$name].($departmentIndex > 13 ? '_'.($departmentIndex - 13) : '');
         $departmentIndex++;
-        
+
         return [
             'faculty_id' => Faculty::factory(),
-            'name' => $name . ($departmentIndex > 14 ? ' ' . ($departmentIndex - 14) : ''),
+            'name' => $name.($departmentIndex > 14 ? ' '.($departmentIndex - 14) : ''),
             'code' => $code,
         ];
     }

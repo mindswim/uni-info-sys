@@ -17,23 +17,23 @@ class EnsureIsStudent
     {
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
-                'message' => 'Unauthenticated.'
+                'message' => 'Unauthenticated.',
             ], 401);
         }
 
         // Check if user has student role
-        if (!$user->hasRole('student')) {
+        if (! $user->hasRole('student')) {
             return response()->json([
-                'message' => 'Forbidden. This action requires student role.'
+                'message' => 'Forbidden. This action requires student role.',
             ], 403);
         }
 
         // Check if user has an associated student record
-        if (!$user->student) {
+        if (! $user->student) {
             return response()->json([
-                'message' => 'No student profile found for this user.'
+                'message' => 'No student profile found for this user.',
             ], 403);
         }
 

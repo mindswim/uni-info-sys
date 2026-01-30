@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
-use App\Models\Student;
 use App\Models\Staff;
+use App\Models\Student;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -64,7 +64,7 @@ class AppointmentController extends Controller
     {
         $student = Student::where('user_id', $request->user()->id)->first();
 
-        if (!$student) {
+        if (! $student) {
             return response()->json(['message' => 'Student profile not found'], 404);
         }
 
@@ -90,11 +90,11 @@ class AppointmentController extends Controller
             ->where('user_id', $request->user()->id)
             ->first();
 
-        if (!$student) {
+        if (! $student) {
             return response()->json(['message' => 'Student profile not found'], 404);
         }
 
-        if (!$student->advisor) {
+        if (! $student->advisor) {
             return response()->json(['message' => 'No advisor assigned'], 404);
         }
 
@@ -110,7 +110,7 @@ class AppointmentController extends Controller
     {
         $staff = Staff::where('user_id', $request->user()->id)->first();
 
-        if (!$staff) {
+        if (! $staff) {
             return response()->json(['message' => 'Staff profile not found'], 404);
         }
 
@@ -128,7 +128,7 @@ class AppointmentController extends Controller
     {
         $staff = Staff::where('user_id', $request->user()->id)->first();
 
-        if (!$staff) {
+        if (! $staff) {
             return response()->json(['message' => 'Staff profile not found'], 404);
         }
 
@@ -177,7 +177,7 @@ class AppointmentController extends Controller
             $studentId = $request->student_id;
         } else {
             $student = Student::where('user_id', $request->user()->id)->first();
-            if (!$student) {
+            if (! $student) {
                 return response()->json(['message' => 'Student profile not found'], 404);
             }
             $studentId = $student->id;
@@ -246,7 +246,7 @@ class AppointmentController extends Controller
      */
     public function cancel(Request $request, Appointment $appointment): JsonResponse
     {
-        if (!$appointment->canBeCancelled()) {
+        if (! $appointment->canBeCancelled()) {
             return response()->json([
                 'message' => 'This appointment cannot be cancelled',
             ], 422);
@@ -269,7 +269,7 @@ class AppointmentController extends Controller
      */
     public function confirm(Appointment $appointment): JsonResponse
     {
-        if (!$appointment->isUpcoming() || $appointment->status !== 'scheduled') {
+        if (! $appointment->isUpcoming() || $appointment->status !== 'scheduled') {
             return response()->json([
                 'message' => 'This appointment cannot be confirmed',
             ], 422);

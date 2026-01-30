@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\UserSetting;
 use App\Models\SystemSetting;
+use App\Models\UserSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 
 class SettingController extends Controller
@@ -123,7 +122,7 @@ class SettingController extends Controller
     {
         $validGroups = ['registration', 'notifications', 'academic', 'system'];
 
-        if (!in_array($group, $validGroups)) {
+        if (! in_array($group, $validGroups)) {
             return response()->json([
                 'message' => 'Invalid settings group',
             ], 400);
@@ -143,7 +142,7 @@ class SettingController extends Controller
     {
         $validGroups = ['registration', 'notifications', 'academic', 'system'];
 
-        if (!in_array($group, $validGroups)) {
+        if (! in_array($group, $validGroups)) {
             return response()->json([
                 'message' => 'Invalid settings group',
             ], 400);
@@ -309,6 +308,7 @@ class SettingController extends Controller
     {
         try {
             \DB::connection()->getPdo();
+
             return true;
         } catch (\Exception $e) {
             return false;

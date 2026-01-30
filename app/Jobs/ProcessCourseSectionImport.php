@@ -2,11 +2,11 @@
 
 namespace App\Jobs;
 
-use App\Models\CourseSection;
 use App\Models\Course;
-use App\Models\Term;
-use App\Models\Staff;
+use App\Models\CourseSection;
 use App\Models\Room;
+use App\Models\Staff;
+use App\Models\Term;
 
 class ProcessCourseSectionImport extends AbstractCsvImportJob
 {
@@ -73,19 +73,19 @@ class ProcessCourseSectionImport extends AbstractCsvImportJob
     {
         // Find course
         $course = Course::where('course_code', $data['course_code'])->first();
-        if (!$course) {
+        if (! $course) {
             throw new \Exception("Course '{$data['course_code']}' not found");
         }
 
         // Find term
         $term = Term::where('code', $data['term_code'])->first();
-        if (!$term) {
+        if (! $term) {
             throw new \Exception("Term '{$data['term_code']}' not found");
         }
 
         // Find instructor if provided
         $instructorId = null;
-        if (!empty($data['instructor_email'])) {
+        if (! empty($data['instructor_email'])) {
             $user = \App\Models\User::where('email', $data['instructor_email'])->first();
             if ($user) {
                 $staff = Staff::where('user_id', $user->id)->first();
@@ -97,7 +97,7 @@ class ProcessCourseSectionImport extends AbstractCsvImportJob
 
         // Find room if provided
         $roomId = null;
-        if (!empty($data['room_code'])) {
+        if (! empty($data['room_code'])) {
             // room_code format: "BUILDING-ROOM" e.g. "SCI-101"
             $parts = explode('-', $data['room_code']);
             if (count($parts) === 2) {

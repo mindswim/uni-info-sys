@@ -44,8 +44,7 @@ class ClassSessionService
     /**
      * Generate all class sessions for a course section based on its schedule
      *
-     * @param CourseSection $courseSection
-     * @param array $excludeDates Dates to skip (holidays, breaks)
+     * @param  array  $excludeDates  Dates to skip (holidays, breaks)
      * @return Collection<ClassSession>
      */
     public function generateSessionsForSection(
@@ -54,11 +53,11 @@ class ClassSessionService
     ): Collection {
         $courseSection->load('term', 'course');
 
-        if (!$courseSection->term) {
+        if (! $courseSection->term) {
             throw new \InvalidArgumentException('Course section must have an associated term.');
         }
 
-        if (!$courseSection->schedule_days || !$courseSection->start_time || !$courseSection->end_time) {
+        if (! $courseSection->schedule_days || ! $courseSection->start_time || ! $courseSection->end_time) {
             throw new \InvalidArgumentException('Course section must have complete schedule information.');
         }
 
@@ -84,7 +83,7 @@ class ClassSessionService
                     $dateString = $currentDate->toDateString();
 
                     // Skip excluded dates (holidays, breaks)
-                    if (!in_array($dateString, $excludeDates)) {
+                    if (! in_array($dateString, $excludeDates)) {
                         $session = ClassSession::create([
                             'course_section_id' => $courseSection->id,
                             'session_number' => $sessionNumber,
@@ -116,8 +115,6 @@ class ClassSessionService
     /**
      * Generate sessions for all course sections in a term
      *
-     * @param Term $term
-     * @param array $excludeDates
      * @return array Summary of generation results
      */
     public function generateSessionsForTerm(Term $term, array $excludeDates = []): array
@@ -154,7 +151,6 @@ class ClassSessionService
     /**
      * Get all sessions for a specific date across all sections
      *
-     * @param string $date
      * @return Collection<ClassSession>
      */
     public function getSessionsForDate(string $date): Collection
@@ -168,8 +164,6 @@ class ClassSessionService
     /**
      * Get a student's sessions for a specific date
      *
-     * @param int $studentId
-     * @param string $date
      * @return Collection<ClassSession>
      */
     public function getStudentSessionsForDate(int $studentId, string $date): Collection
@@ -178,7 +172,7 @@ class ClassSessionService
             ->forDate($date)
             ->whereHas('courseSection.enrollments', function ($query) use ($studentId) {
                 $query->where('student_id', $studentId)
-                      ->whereIn('status', ['enrolled', 'waitlisted']);
+                    ->whereIn('status', ['enrolled', 'waitlisted']);
             })
             ->orderBy('start_time')
             ->get();
@@ -187,8 +181,6 @@ class ClassSessionService
     /**
      * Get an instructor's sessions for a specific date
      *
-     * @param int $staffId
-     * @param string $date
      * @return Collection<ClassSession>
      */
     public function getInstructorSessionsForDate(int $staffId, string $date): Collection
@@ -199,7 +191,7 @@ class ClassSessionService
                 $query->whereHas('courseSection', function ($q) use ($staffId) {
                     $q->where('instructor_id', $staffId);
                 })
-                ->orWhere('substitute_instructor_id', $staffId);
+                    ->orWhere('substitute_instructor_id', $staffId);
             })
             ->orderBy('start_time')
             ->get();
@@ -208,9 +200,7 @@ class ClassSessionService
     /**
      * Mark a session as completed
      *
-     * @param ClassSession $session
-     * @param string|null $description What was covered
-     * @return ClassSession
+     * @param  string|null  $description  What was covered
      */
     public function markSessionComplete(ClassSession $session, ?string $description = null): ClassSession
     {
@@ -230,10 +220,6 @@ class ClassSessionService
 
     /**
      * Cancel a session
-     *
-     * @param ClassSession $session
-     * @param string $reason
-     * @return ClassSession
      */
     public function cancelSession(ClassSession $session, string $reason): ClassSession
     {
@@ -254,13 +240,6 @@ class ClassSessionService
 
     /**
      * Reschedule a session to a new date/time
-     *
-     * @param ClassSession $session
-     * @param string $newDate
-     * @param string|null $newStartTime
-     * @param string|null $newEndTime
-     * @param string|null $newLocation
-     * @return ClassSession
      */
     public function rescheduleSession(
         ClassSession $session,
@@ -298,10 +277,6 @@ class ClassSessionService
 
     /**
      * Assign a substitute instructor to a session
-     *
-     * @param ClassSession $session
-     * @param int $substituteStaffId
-     * @return ClassSession
      */
     public function assignSubstitute(ClassSession $session, int $substituteStaffId): ClassSession
     {
@@ -319,9 +294,6 @@ class ClassSessionService
 
     /**
      * Get session statistics for a course section
-     *
-     * @param CourseSection $courseSection
-     * @return array
      */
     public function getSectionSessionStats(CourseSection $courseSection): array
     {
@@ -344,7 +316,7 @@ class ClassSessionService
     /**
      * Normalize schedule days to Carbon day constants
      *
-     * @param array|string $scheduleDays
+     * @param  array|string  $scheduleDays
      * @return array Carbon day constants (0-6)
      */
     private function normalizeScheduleDays($scheduleDays): array
@@ -353,7 +325,7 @@ class ClassSessionService
             $scheduleDays = json_decode($scheduleDays, true) ?? [$scheduleDays];
         }
 
-        if (!is_array($scheduleDays)) {
+        if (! is_array($scheduleDays)) {
             return [];
         }
 

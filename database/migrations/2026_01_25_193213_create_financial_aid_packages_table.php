@@ -64,7 +64,7 @@ return new class extends Migration
                 'work_study',      // Federal Work-Study
                 'external',        // External scholarships
                 'tuition_waiver',  // Staff/faculty tuition waivers
-                'other'
+                'other',
             ]);
 
             $table->string('name'); // e.g., "Presidential Scholarship", "Federal Pell Grant"

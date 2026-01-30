@@ -1,8 +1,9 @@
 <?php
+
 namespace Database\Seeders;
 
-use App\Models\Student;
 use App\Models\Document;
+use App\Models\Student;
 use Illuminate\Database\Seeder;
 
 class DocumentSeeder extends Seeder
@@ -10,9 +11,9 @@ class DocumentSeeder extends Seeder
     public function run(): void
     {
         $documentTypes = ['passport', 'transcript', 'recommendation_letter', 'cv'];
-        
+
         Student::all()->each(function ($student) use ($documentTypes) {
-            foreach($documentTypes as $type) {
+            foreach ($documentTypes as $type) {
                 Document::create([
                     'student_id' => $student->id,
                     'document_type' => $type,

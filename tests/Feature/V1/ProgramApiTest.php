@@ -2,14 +2,14 @@
 
 namespace Tests\Feature\Api\V1;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Faculty;
 use App\Models\Department;
+use App\Models\Faculty;
+use App\Models\Permission;
 use App\Models\Program;
 use App\Models\Role;
-use App\Models\Permission;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ProgramApiTest extends TestCase
 {
@@ -20,17 +20,17 @@ class ProgramApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create admin role
         $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
-        
+
         // Create program permissions
         $viewAnyPermission = Permission::create(['name' => 'view-any-program', 'description' => 'Can view any program']);
         $viewPermission = Permission::create(['name' => 'view-program', 'description' => 'Can view program']);
         $createPermission = Permission::create(['name' => 'create-program', 'description' => 'Can create program']);
         $updatePermission = Permission::create(['name' => 'update-program', 'description' => 'Can update program']);
         $deletePermission = Permission::create(['name' => 'delete-program', 'description' => 'Can delete program']);
-        
+
         // Assign permissions to admin role
         $adminRole->permissions()->attach([
             $viewAnyPermission->id,
@@ -39,9 +39,9 @@ class ProgramApiTest extends TestCase
             $updatePermission->id,
             $deletePermission->id,
         ]);
-        
+
         $this->admin = User::factory()->create();
-        
+
         // Assign admin role
         $this->admin->roles()->attach($adminRole);
     }
@@ -67,7 +67,7 @@ class ProgramApiTest extends TestCase
         Program::factory()->count(2)->create(['department_id' => $department2->id]);
 
         $response = $this->actingAs($this->admin, 'sanctum')->getJson("/api/v1/programs?department_id={$department1->id}");
-        
+
         $response->assertStatus(200)->assertJsonCount(3, 'data');
     }
 
@@ -84,7 +84,7 @@ class ProgramApiTest extends TestCase
                     'id' => $program->id,
                     'name' => $program->name,
                     'department_id' => $program->department->id,
-                ]
+                ],
             ]);
     }
 
@@ -93,7 +93,7 @@ class ProgramApiTest extends TestCase
     {
         $faculty = Faculty::factory()->create();
         $department = Department::factory()->create(['faculty_id' => $faculty->id]);
-        
+
         $programData = [
             'name' => 'B.Sc. in Extraordinary Gastronomy',
             'department_id' => $department->id,
@@ -101,7 +101,7 @@ class ProgramApiTest extends TestCase
             'duration' => 4,
             'description' => 'A unique program focusing on molecular cuisine and food science',
             'requirements' => 'High school diploma with science background',
-            'capacity' => 50
+            'capacity' => 50,
         ];
 
         $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/programs', $programData);

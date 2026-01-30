@@ -29,7 +29,7 @@ class ProcessOverdueInvoices implements ShouldQueue
             }
 
             $student = $invoice->student;
-            if (!$student) {
+            if (! $student) {
                 continue;
             }
 
@@ -39,12 +39,12 @@ class ProcessOverdueInvoices implements ShouldQueue
                 ->active()
                 ->first();
 
-            if (!$existingHold) {
+            if (! $existingHold) {
                 Hold::create([
                     'student_id' => $student->id,
                     'type' => Hold::TYPE_FINANCIAL,
-                    'reason' => 'Overdue invoice #' . $invoice->invoice_number,
-                    'description' => 'Automatically placed due to overdue balance of $' . number_format($invoice->balance_due, 2),
+                    'reason' => 'Overdue invoice #'.$invoice->invoice_number,
+                    'description' => 'Automatically placed due to overdue balance of $'.number_format($invoice->balance_due, 2),
                     'severity' => Hold::SEVERITY_CRITICAL,
                     'prevents_registration' => true,
                     'prevents_transcript' => true,
@@ -68,7 +68,7 @@ class ProcessOverdueInvoices implements ShouldQueue
                 ->overdue()
                 ->exists();
 
-            if (!$hasOverdue) {
+            if (! $hasOverdue) {
                 $hold->update([
                     'resolved_at' => now(),
                     'resolution_notes' => 'Automatically resolved - no overdue invoices remaining',

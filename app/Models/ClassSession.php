@@ -82,7 +82,7 @@ class ClassSession extends Model
 
         $room = $this->courseSection->room;
         if ($room) {
-            return $room->building->code . ' ' . $room->room_number;
+            return $room->building->code.' '.$room->room_number;
         }
 
         return null;
@@ -126,11 +126,12 @@ class ClassSession extends Model
      */
     public function isNow(): bool
     {
-        if (!$this->session_date->isToday()) {
+        if (! $this->session_date->isToday()) {
             return false;
         }
 
         $now = now()->format('H:i');
+
         return $now >= $this->start_time->format('H:i') && $now <= $this->end_time->format('H:i');
     }
 
@@ -164,9 +165,9 @@ class ClassSession extends Model
     public function scopeUpcoming($query)
     {
         return $query->where('session_date', '>=', now()->toDateString())
-                     ->where('status', 'scheduled')
-                     ->orderBy('session_date')
-                     ->orderBy('start_time');
+            ->where('status', 'scheduled')
+            ->orderBy('session_date')
+            ->orderBy('start_time');
     }
 
     /**
@@ -175,7 +176,7 @@ class ClassSession extends Model
     public function scopePast($query)
     {
         return $query->where('session_date', '<', now()->toDateString())
-                     ->orderBy('session_date', 'desc')
-                     ->orderBy('start_time', 'desc');
+            ->orderBy('session_date', 'desc')
+            ->orderBy('start_time', 'desc');
     }
 }

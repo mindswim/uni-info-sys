@@ -6,16 +6,16 @@ use Illuminate\Foundation\Http\FormRequest;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: "StoreGradeImportRequest",
-    title: "Store Grade Import Request",
-    required: ["file"],
+    schema: 'StoreGradeImportRequest',
+    title: 'Store Grade Import Request',
+    required: ['file'],
     properties: [
         new OA\Property(
-            property: "file",
-            type: "string",
-            format: "binary",
-            description: "CSV file containing grade data with headers: student_id, grade"
-        )
+            property: 'file',
+            type: 'string',
+            format: 'binary',
+            description: 'CSV file containing grade data with headers: student_id, grade'
+        ),
     ]
 )]
 class StoreGradeImportRequest extends FormRequest

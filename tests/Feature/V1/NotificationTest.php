@@ -2,12 +2,12 @@
 
 namespace Tests\Feature\Api\V1;
 
-use App\Models\User;
-use App\Models\Student;
+use App\Jobs\SendApplicationStatusNotification;
 use App\Models\AdmissionApplication;
+use App\Models\Student;
+use App\Models\User;
 use App\Notifications\ApplicationStatusUpdated;
 use App\Services\AdmissionService;
-use App\Jobs\SendApplicationStatusNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
@@ -18,18 +18,21 @@ class NotificationTest extends TestCase
     use RefreshDatabase;
 
     protected $user;
+
     protected $student;
+
     protected $application;
+
     protected $admissionService;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->user = User::factory()->create();
         $this->student = Student::factory()->create(['user_id' => $this->user->id]);
         $this->application = AdmissionApplication::factory()->create(['student_id' => $this->student->id, 'status' => 'submitted']);
-        $this->admissionService = new AdmissionService();
+        $this->admissionService = new AdmissionService;
     }
 
     public function test_notification_is_created_when_application_status_is_updated()
@@ -50,7 +53,7 @@ class NotificationTest extends TestCase
         Notification::fake();
 
         $currentStatus = $this->application->status;
-        
+
         // Update with the same status
         $this->admissionService->updateApplicationStatus($this->application, $currentStatus);
 
@@ -62,7 +65,7 @@ class NotificationTest extends TestCase
     {
         // Create some notifications for the user
         $this->user->notify(new ApplicationStatusUpdated($this->application));
-        
+
         // Create another application and notification
         $anotherApplication = AdmissionApplication::factory()->create(['student_id' => $this->student->id]);
         $this->user->notify(new ApplicationStatusUpdated($anotherApplication));
@@ -79,14 +82,14 @@ class NotificationTest extends TestCase
                         'data',
                         'read_at',
                         'created_at',
-                        'updated_at'
-                    ]
-                ]
+                        'updated_at',
+                    ],
+                ],
             ]);
 
         $data = $response->json('data');
         $this->assertCount(2, $data);
-        
+
         // Verify notification data structure
         $this->assertArrayHasKey('application_id', $data[0]['data']);
         $this->assertArrayHasKey('status', $data[0]['data']);
@@ -97,7 +100,7 @@ class NotificationTest extends TestCase
     {
         // Create a notification
         $this->user->notify(new ApplicationStatusUpdated($this->application));
-        
+
         $notification = $this->user->unreadNotifications->first();
         $this->assertNotNull($notification);
         $this->assertNull($notification->read_at);
@@ -115,13 +118,13 @@ class NotificationTest extends TestCase
     public function test_cannot_mark_nonexistent_notification_as_read()
     {
         $fakeId = '12345678-1234-1234-1234-123456789012';
-        
+
         $response = $this->actingAs($this->user, 'sanctum')
             ->postJson("/api/v1/notifications/{$fakeId}/read");
-        
+
         $response->assertStatus(404)
             ->assertJson([
-                'detail' => 'No query results for model [Illuminate\\Notifications\\DatabaseNotification] ' . $fakeId
+                'detail' => 'No query results for model [Illuminate\\Notifications\\DatabaseNotification] '.$fakeId,
             ]);
     }
 
@@ -133,13 +136,13 @@ class NotificationTest extends TestCase
             'type' => ApplicationStatusUpdated::class,
             'data' => ['message' => 'Other user notification'],
         ]);
-        
+
         $response = $this->actingAs($this->user, 'sanctum')
             ->postJson("/api/v1/notifications/{$otherNotification->id}/read");
-        
+
         $response->assertStatus(404)
             ->assertJsonFragment([
-                'status' => 404
+                'status' => 404,
             ]);
     }
 
@@ -149,14 +152,14 @@ class NotificationTest extends TestCase
         $response = $this->getJson('/api/v1/notifications');
         $response->assertStatus(401)
             ->assertJson([
-                'detail' => 'Authentication is required to access this resource.'
+                'detail' => 'Authentication is required to access this resource.',
             ]);
 
         // Test marking notification as read without authentication
         $response = $this->postJson('/api/v1/notifications/fake-id/read');
         $response->assertStatus(401)
             ->assertJson([
-                'detail' => 'Authentication is required to access this resource.'
+                'detail' => 'Authentication is required to access this resource.',
             ]);
     }
 
@@ -168,7 +171,7 @@ class NotificationTest extends TestCase
         $this->user->refresh();
         $notification = $this->user->unreadNotifications->first();
         $this->assertNotNull($notification);
-        
+
         $data = $notification->data;
         $this->assertEquals($this->application->id, $data['application_id']);
         $this->assertEquals('rejected', $data['status']);
@@ -179,7 +182,7 @@ class NotificationTest extends TestCase
     {
         // Create two notifications
         $this->user->notify(new ApplicationStatusUpdated($this->application));
-        
+
         $anotherApplication = AdmissionApplication::factory()->create(['student_id' => $this->student->id]);
         $this->user->notify(new ApplicationStatusUpdated($anotherApplication));
 
@@ -193,7 +196,7 @@ class NotificationTest extends TestCase
 
         // Refresh the user to clear any cached relationships
         $this->user->refresh();
-        
+
         // Verify we now have 1 unread notification
         $this->assertEquals(1, $this->user->unreadNotifications->count());
 
@@ -203,9 +206,9 @@ class NotificationTest extends TestCase
 
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         // Should only return 1 unread notification
         $this->assertCount(1, $data);
         $this->assertNotEquals($firstNotificationId, $data[0]['id']);
     }
-} 
+}

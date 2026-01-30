@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Models\Enrollment;
 use App\Models\Student;
-use App\Models\CourseSection;
 
 /**
  * Process Enrollment CSV Import

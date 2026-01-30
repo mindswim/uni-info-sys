@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\ProgramChoice;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ProgramChoicePolicy
 {
@@ -14,6 +13,7 @@ class ProgramChoicePolicy
     public function viewAny(User $user): bool
     {
         $userRoles = $user->roles()->pluck('name')->toArray();
+
         // Admin/staff can view all program choices, students can view their own
         return in_array('admin', $userRoles) || in_array('staff', $userRoles) || in_array('student', $userRoles);
     }
@@ -24,9 +24,10 @@ class ProgramChoicePolicy
     public function view(User $user, ProgramChoice $programChoice): bool
     {
         $userRoles = $user->roles()->pluck('name')->toArray();
+
         // Admin/staff can view any program choice, student can view their own
-        return in_array('admin', $userRoles) || 
-               in_array('staff', $userRoles) || 
+        return in_array('admin', $userRoles) ||
+               in_array('staff', $userRoles) ||
                (in_array('student', $userRoles) && $user->id === $programChoice->admissionApplication->student->user_id);
     }
 
@@ -36,6 +37,7 @@ class ProgramChoicePolicy
     public function create(User $user): bool
     {
         $userRoles = $user->roles()->pluck('name')->toArray();
+
         // Admin, staff, and students can create program choices
         return in_array('admin', $userRoles) || in_array('staff', $userRoles) || in_array('student', $userRoles);
     }
@@ -50,9 +52,9 @@ class ProgramChoicePolicy
         if (in_array('admin', $userRoles) || in_array('staff', $userRoles)) {
             return true;
         }
-        
+
         // Student can only update their own program choices if the application is still a draft
-        return in_array('student', $userRoles) && 
+        return in_array('student', $userRoles) &&
                $user->id === $programChoice->admissionApplication->student->user_id &&
                $programChoice->admissionApplication->status === 'draft';
     }
@@ -67,9 +69,9 @@ class ProgramChoicePolicy
         if (in_array('admin', $userRoles)) {
             return true;
         }
-        
+
         // Student can only delete their own program choices if the application is still a draft
-        return in_array('student', $userRoles) && 
+        return in_array('student', $userRoles) &&
                $user->id === $programChoice->admissionApplication->student->user_id &&
                $programChoice->admissionApplication->status === 'draft';
     }

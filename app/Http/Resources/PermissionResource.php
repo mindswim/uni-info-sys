@@ -7,49 +7,49 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: "PermissionResource",
-    title: "Permission Resource",
-    description: "Permission resource representation",
+    schema: 'PermissionResource',
+    title: 'Permission Resource',
+    description: 'Permission resource representation',
     properties: [
         new OA\Property(
-            property: "id",
-            type: "integer",
-            description: "Unique identifier of the permission",
+            property: 'id',
+            type: 'integer',
+            description: 'Unique identifier of the permission',
             example: 1
         ),
         new OA\Property(
-            property: "name",
-            type: "string",
-            description: "Name of the permission",
-            example: "view-students"
+            property: 'name',
+            type: 'string',
+            description: 'Name of the permission',
+            example: 'view-students'
         ),
         new OA\Property(
-            property: "description",
-            type: "string",
-            description: "Description of the permission",
-            example: "Can view student information",
+            property: 'description',
+            type: 'string',
+            description: 'Description of the permission',
+            example: 'Can view student information',
             nullable: true
         ),
         new OA\Property(
-            property: "created_at",
-            type: "string",
-            format: "date-time",
-            description: "When the permission was created",
-            example: "2024-01-15T08:30:00Z"
+            property: 'created_at',
+            type: 'string',
+            format: 'date-time',
+            description: 'When the permission was created',
+            example: '2024-01-15T08:30:00Z'
         ),
         new OA\Property(
-            property: "updated_at",
-            type: "string",
-            format: "date-time",
-            description: "When the permission was last updated",
-            example: "2024-01-15T08:30:00Z"
+            property: 'updated_at',
+            type: 'string',
+            format: 'date-time',
+            description: 'When the permission was last updated',
+            example: '2024-01-15T08:30:00Z'
         ),
         new OA\Property(
-            property: "roles",
-            type: "array",
-            description: "Roles that have this permission",
-            items: new OA\Items(ref: "#/components/schemas/RoleResource")
-        )
+            property: 'roles',
+            type: 'array',
+            description: 'Roles that have this permission',
+            items: new OA\Items(ref: '#/components/schemas/RoleResource')
+        ),
     ]
 )]
 class PermissionResource extends JsonResource

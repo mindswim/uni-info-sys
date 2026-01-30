@@ -18,6 +18,7 @@ class ClassSessionTest extends TestCase
     use RefreshDatabase;
 
     protected User $adminUser;
+
     protected ClassSessionService $service;
 
     protected function setUp(): void

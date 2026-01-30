@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::table('staff', function (Blueprint $table) {
             $table->string('phone')->nullable()->after('office_location');
             $table->text('specialization')->nullable()->after('bio')
-                  ->comment('Academic specialization areas');
+                ->comment('Academic specialization areas');
             $table->string('education')->nullable()->after('specialization')
-                  ->comment('Highest degree and institution');
+                ->comment('Highest degree and institution');
             $table->string('office_hours')->nullable()->after('education')
-                  ->comment('Weekly office hours schedule');
+                ->comment('Weekly office hours schedule');
         });
     }
 

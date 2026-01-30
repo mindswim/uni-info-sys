@@ -18,8 +18,8 @@ class AuditController extends Controller
         if ($request->filled('auditable_type')) {
             $type = $request->input('auditable_type');
             // Allow short names like "Student" -> "App\Models\Student"
-            if (!str_contains($type, '\\')) {
-                $type = 'App\\Models\\' . $type;
+            if (! str_contains($type, '\\')) {
+                $type = 'App\\Models\\'.$type;
             }
             $query->where('auditable_type', $type);
         }

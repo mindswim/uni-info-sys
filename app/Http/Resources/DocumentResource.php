@@ -7,25 +7,25 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: "DocumentResource",
-    title: "Document Resource",
-    description: "Represents a document uploaded by a student, such as a transcript or essay.",
+    schema: 'DocumentResource',
+    title: 'Document Resource',
+    description: 'Represents a document uploaded by a student, such as a transcript or essay.',
     properties: [
-        new OA\Property(property: "id", type: "integer", description: "The unique identifier for the document."),
-        new OA\Property(property: "student_id", type: "integer", description: "The ID of the student who owns this document."),
-        new OA\Property(property: "document_type", type: "string", description: "The type of the document.", example: "transcript"),
-        new OA\Property(property: "file_path", type: "string", description: "The storage path of the document file."),
-        new OA\Property(property: "original_filename", type: "string", description: "The original name of the document file."),
-        new OA\Property(property: "mime_type", type: "string", description: "The MIME type of the document file."),
-        new OA\Property(property: "file_size", type: "integer", description: "The size of the document file in bytes."),
-        new OA\Property(property: "status", type: "string", description: "The status of the document.", example: "pending"),
-        new OA\Property(property: "version", type: "integer", description: "The version number of the document.", example: 1),
-        new OA\Property(property: "is_active", type: "boolean", description: "Whether this is the active version of the document."),
-        new OA\Property(property: "verified", type: "boolean", description: "Whether the document has been verified."),
-        new OA\Property(property: "uploaded_at", type: "string", format: "date-time", description: "When the document was uploaded."),
-        new OA\Property(property: "verified_at", type: "string", format: "date-time", description: "When the document was verified by an administrator.", nullable: true),
-        new OA\Property(property: "created_at", type: "string", format: "date-time"),
-        new OA\Property(property: "updated_at", type: "string", format: "date-time"),
+        new OA\Property(property: 'id', type: 'integer', description: 'The unique identifier for the document.'),
+        new OA\Property(property: 'student_id', type: 'integer', description: 'The ID of the student who owns this document.'),
+        new OA\Property(property: 'document_type', type: 'string', description: 'The type of the document.', example: 'transcript'),
+        new OA\Property(property: 'file_path', type: 'string', description: 'The storage path of the document file.'),
+        new OA\Property(property: 'original_filename', type: 'string', description: 'The original name of the document file.'),
+        new OA\Property(property: 'mime_type', type: 'string', description: 'The MIME type of the document file.'),
+        new OA\Property(property: 'file_size', type: 'integer', description: 'The size of the document file in bytes.'),
+        new OA\Property(property: 'status', type: 'string', description: 'The status of the document.', example: 'pending'),
+        new OA\Property(property: 'version', type: 'integer', description: 'The version number of the document.', example: 1),
+        new OA\Property(property: 'is_active', type: 'boolean', description: 'Whether this is the active version of the document.'),
+        new OA\Property(property: 'verified', type: 'boolean', description: 'Whether the document has been verified.'),
+        new OA\Property(property: 'uploaded_at', type: 'string', format: 'date-time', description: 'When the document was uploaded.'),
+        new OA\Property(property: 'verified_at', type: 'string', format: 'date-time', description: 'When the document was verified by an administrator.', nullable: true),
+        new OA\Property(property: 'created_at', type: 'string', format: 'date-time'),
+        new OA\Property(property: 'updated_at', type: 'string', format: 'date-time'),
     ]
 )]
 class DocumentResource extends JsonResource

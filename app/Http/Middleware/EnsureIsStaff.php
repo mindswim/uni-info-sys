@@ -17,9 +17,9 @@ class EnsureIsStaff
     {
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
-                'message' => 'Unauthenticated.'
+                'message' => 'Unauthenticated.',
             ], 401);
         }
 
@@ -34,16 +34,16 @@ class EnsureIsStaff
             }
         }
 
-        if (!$hasStaffRole) {
+        if (! $hasStaffRole) {
             return response()->json([
-                'message' => 'Forbidden. This action requires staff, faculty, or instructor role.'
+                'message' => 'Forbidden. This action requires staff, faculty, or instructor role.',
             ], 403);
         }
 
         // Check if user has an associated staff record
-        if (!$user->staff) {
+        if (! $user->staff) {
             return response()->json([
-                'message' => 'No staff profile found for this user.'
+                'message' => 'No staff profile found for this user.',
             ], 403);
         }
 

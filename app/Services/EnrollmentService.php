@@ -10,8 +10,8 @@ use App\Exceptions\RegistrationHoldException;
 use App\Exceptions\RegistrationNotOpenException;
 use App\Exceptions\RepeatCourseException;
 use App\Exceptions\StudentNotActiveException;
-use App\Jobs\SendEnrollmentConfirmation;
 use App\Jobs\ProcessWaitlistPromotion;
+use App\Jobs\SendEnrollmentConfirmation;
 use App\Models\CourseSection;
 use App\Models\Enrollment;
 use App\Models\EnrollmentApproval;
@@ -25,8 +25,6 @@ class EnrollmentService
     /**
      * Enroll a student in a course section with business rule validation
      *
-     * @param array $data
-     * @return Enrollment
      * @throws RegistrationHoldException
      * @throws StudentNotActiveException
      * @throws CourseSectionUnavailableException
@@ -98,9 +96,6 @@ class EnrollmentService
 
     /**
      * Promote the next student from waitlist to enrolled
-     *
-     * @param CourseSection $courseSection
-     * @return Enrollment|null
      */
     public function promoteFromWaitlist(CourseSection $courseSection): ?Enrollment
     {
@@ -114,6 +109,7 @@ class EnrollmentService
                     'enrolled_count' => $enrolledCount,
                     'capacity' => $courseSection->capacity,
                 ]);
+
                 return null; // No capacity available
             }
 
@@ -145,22 +141,20 @@ class EnrollmentService
     /**
      * Withdraw a student from a course section
      *
-     * @param Enrollment $enrollment
-     * @return bool
      * @throws CourseSectionUnavailableException
      */
     public function withdrawStudent(Enrollment $enrollment): bool
     {
         return DB::transaction(function () use ($enrollment) {
             $courseSection = $enrollment->courseSection;
-            
+
             // Check if withdrawal is within the add/drop deadline
-            if ($courseSection->term && !$courseSection->term->isWithinAddDropPeriod()) {
+            if ($courseSection->term && ! $courseSection->term->isWithinAddDropPeriod()) {
                 throw new CourseSectionUnavailableException('The add/drop deadline for this term has passed. Withdrawal is no longer allowed.');
             }
-            
+
             $wasEnrolled = $enrollment->status === 'enrolled';
-            
+
             // Update enrollment status to withdrawn
             $enrollment->update(['status' => 'withdrawn']);
 
@@ -174,7 +168,7 @@ class EnrollmentService
             // If student was enrolled (not waitlisted), try to promote someone from waitlist
             if ($wasEnrolled) {
                 ProcessWaitlistPromotion::dispatch($courseSection);
-                
+
                 Log::info('Waitlist promotion job dispatched', [
                     'course_section_id' => $courseSection->id,
                 ]);
@@ -187,7 +181,6 @@ class EnrollmentService
     /**
      * Validate that the student has no active registration holds
      *
-     * @param int $studentId
      * @throws RegistrationHoldException
      */
     private function validateNoRegistrationHold(int $studentId): void
@@ -196,7 +189,7 @@ class EnrollmentService
             $query->where('prevents_registration', true);
         }])->find($studentId);
 
-        if (!$student) {
+        if (! $student) {
             return; // Will be caught by validateStudentActive
         }
 
@@ -211,7 +204,7 @@ class EnrollmentService
             ])->all();
 
             throw new RegistrationHoldException(
-                'Cannot enroll: student has ' . $registrationHolds->count() . ' active registration hold(s). Resolve holds before registering.',
+                'Cannot enroll: student has '.$registrationHolds->count().' active registration hold(s). Resolve holds before registering.',
                 $holdDetails
             );
         }
@@ -220,19 +213,18 @@ class EnrollmentService
     /**
      * Validate that the student is active and can enroll
      *
-     * @param int $studentId
      * @throws StudentNotActiveException
      */
     private function validateStudentActive(int $studentId): void
     {
         $student = Student::with('user')->find($studentId);
 
-        if (!$student) {
+        if (! $student) {
             throw new StudentNotActiveException('The selected student does not exist.');
         }
 
         // Check if student's user account is active
-        if (!$student->user || !$student->user->email_verified_at) {
+        if (! $student->user || ! $student->user->email_verified_at) {
             throw new StudentNotActiveException('The student account is not active or verified.');
         }
     }
@@ -240,14 +232,13 @@ class EnrollmentService
     /**
      * Validate that the course section is available for enrollment
      *
-     * @param int $courseSectionId
      * @throws CourseSectionUnavailableException
      */
     private function validateCourseSectionAvailable(int $courseSectionId): void
     {
         $courseSection = CourseSection::with('term')->find($courseSectionId);
 
-        if (!$courseSection) {
+        if (! $courseSection) {
             throw new CourseSectionUnavailableException('The selected course section does not exist.');
         }
 
@@ -257,7 +248,7 @@ class EnrollmentService
         }
 
         // Check if enrollment is within the add/drop deadline
-        if ($courseSection->term && !$courseSection->term->isWithinAddDropPeriod()) {
+        if ($courseSection->term && ! $courseSection->term->isWithinAddDropPeriod()) {
             throw new CourseSectionUnavailableException('The add/drop deadline for this term has passed. Enrollment is no longer allowed.');
         }
     }
@@ -265,8 +256,6 @@ class EnrollmentService
     /**
      * Validate that the student is not already enrolled in this course section
      *
-     * @param int $studentId
-     * @param int $courseSectionId
      * @throws DuplicateEnrollmentException
      */
     private function validateNoDuplicateEnrollment(int $studentId, int $courseSectionId): void
@@ -277,16 +266,13 @@ class EnrollmentService
             ->first();
 
         if ($existingEnrollment) {
-            throw new DuplicateEnrollmentException();
+            throw new DuplicateEnrollmentException;
         }
     }
 
     /**
      * Determine enrollment status based on capacity and requested status
      *
-     * @param int $courseSectionId
-     * @param string|null $requestedStatus
-     * @return string
      * @throws EnrollmentCapacityExceededException
      */
     private function determineEnrollmentStatus(int $courseSectionId, ?string $requestedStatus): string
@@ -294,7 +280,7 @@ class EnrollmentService
         $courseSection = CourseSection::withCount([
             'enrollments' => function ($query) {
                 $query->where('status', 'enrolled');
-            }
+            },
         ])->find($courseSectionId);
 
         $enrolledCount = $courseSection->enrollments_count;
@@ -302,7 +288,7 @@ class EnrollmentService
         $availableSpots = $capacity - $enrolledCount;
 
         // If no status provided, determine automatically
-        if (!$requestedStatus) {
+        if (! $requestedStatus) {
             if ($availableSpots > 0) {
                 return 'enrolled';
             } else {
@@ -323,28 +309,26 @@ class EnrollmentService
     /**
      * Check prerequisites for the student to enroll in the course section
      *
-     * @param int $studentId
-     * @param int $courseSectionId
      * @throws \App\Exceptions\PrerequisiteNotMetException
      */
     private function checkPrerequisites(int $studentId, int $courseSectionId): void
     {
         $courseSection = CourseSection::with('course.prerequisiteCourses')->find($courseSectionId);
         $student = Student::find($studentId);
-        
-        if (!$courseSection || !$student) {
+
+        if (! $courseSection || ! $student) {
             return; // Should have been caught by earlier validations
         }
-        
+
         $course = $courseSection->course;
         $prerequisites = $course->prerequisiteCourses;
-        
+
         if ($prerequisites->isEmpty()) {
             return; // No prerequisites required
         }
-        
+
         $unmetPrerequisites = [];
-        
+
         foreach ($prerequisites as $prerequisite) {
             // Check if student has passed this prerequisite course
             $hasPassed = $student->enrollments()
@@ -356,94 +340,90 @@ class EnrollmentService
                 ->where('grade', 'NOT LIKE', 'W')
                 ->whereNotNull('grade')
                 ->exists();
-                
-            if (!$hasPassed) {
-                $unmetPrerequisites[] = $prerequisite->course_code . ' - ' . $prerequisite->title;
+
+            if (! $hasPassed) {
+                $unmetPrerequisites[] = $prerequisite->course_code.' - '.$prerequisite->title;
             }
         }
-        
-        if (!empty($unmetPrerequisites)) {
-                         throw new \App\Exceptions\PrerequisiteNotMetException(
-                 'Missing prerequisites: ' . implode(', ', $unmetPrerequisites)
-             );
-         }
-     }
 
-     /**
-      * Check for schedule conflicts with existing enrollments
-      *
-      * @param int $studentId
-      * @param int $courseSectionId
-      * @throws \App\Exceptions\DuplicateEnrollmentException
-      */
-     private function checkScheduleConflicts(int $studentId, int $courseSectionId): void
-     {
-         $newSection = CourseSection::find($courseSectionId);
-         
-         if (!$newSection || !$newSection->start_time || !$newSection->end_time || !$newSection->schedule_days) {
-             return; // Can't check conflicts without complete schedule info
-         }
-         
-         // Get student's active enrollments in the same term
-         $conflictingEnrollments = Enrollment::where('student_id', $studentId)
-             ->whereIn('status', ['enrolled', 'waitlisted'])
-             ->whereHas('courseSection', function ($query) use ($newSection) {
-                 $query->where('term_id', $newSection->term_id);
-             })
-             ->with('courseSection.course')
-             ->get();
-             
-         foreach ($conflictingEnrollments as $enrollment) {
-             $existingSection = $enrollment->courseSection;
-             
-             if (!$existingSection->start_time || !$existingSection->end_time || !$existingSection->schedule_days) {
-                 continue; // Skip sections without complete schedule info
-             }
-             
-             // Check if days overlap
-             $newDays = is_array($newSection->schedule_days) ? $newSection->schedule_days : [$newSection->schedule_days];
-             $existingDays = is_array($existingSection->schedule_days) ? $existingSection->schedule_days : [$existingSection->schedule_days];
-             
-             $daysOverlap = array_intersect($newDays, $existingDays);
-             
-             if (empty($daysOverlap)) {
-                 continue; // No day overlap, no conflict
-             }
-             
-             // Check if times overlap
-             $newStart = strtotime($newSection->start_time);
-             $newEnd = strtotime($newSection->end_time);
-             $existingStart = strtotime($existingSection->start_time);
-             $existingEnd = strtotime($existingSection->end_time);
-             
-             // Times overlap if: new_start < existing_end AND new_end > existing_start
-             if ($newStart < $existingEnd && $newEnd > $existingStart) {
-                 throw new \App\Exceptions\DuplicateEnrollmentException(
-                     sprintf(
-                         'Schedule conflict with %s (%s) on %s from %s to %s',
-                         $existingSection->course->course_code,
-                         $existingSection->course->title,
-                         implode(', ', $daysOverlap),
-                         date('g:i A', $existingStart),
-                         date('g:i A', $existingEnd)
-                     )
-                 );
-             }
-         }
-     }
+        if (! empty($unmetPrerequisites)) {
+            throw new \App\Exceptions\PrerequisiteNotMetException(
+                'Missing prerequisites: '.implode(', ', $unmetPrerequisites)
+            );
+        }
+    }
+
+    /**
+     * Check for schedule conflicts with existing enrollments
+     *
+     * @throws \App\Exceptions\DuplicateEnrollmentException
+     */
+    private function checkScheduleConflicts(int $studentId, int $courseSectionId): void
+    {
+        $newSection = CourseSection::find($courseSectionId);
+
+        if (! $newSection || ! $newSection->start_time || ! $newSection->end_time || ! $newSection->schedule_days) {
+            return; // Can't check conflicts without complete schedule info
+        }
+
+        // Get student's active enrollments in the same term
+        $conflictingEnrollments = Enrollment::where('student_id', $studentId)
+            ->whereIn('status', ['enrolled', 'waitlisted'])
+            ->whereHas('courseSection', function ($query) use ($newSection) {
+                $query->where('term_id', $newSection->term_id);
+            })
+            ->with('courseSection.course')
+            ->get();
+
+        foreach ($conflictingEnrollments as $enrollment) {
+            $existingSection = $enrollment->courseSection;
+
+            if (! $existingSection->start_time || ! $existingSection->end_time || ! $existingSection->schedule_days) {
+                continue; // Skip sections without complete schedule info
+            }
+
+            // Check if days overlap
+            $newDays = is_array($newSection->schedule_days) ? $newSection->schedule_days : [$newSection->schedule_days];
+            $existingDays = is_array($existingSection->schedule_days) ? $existingSection->schedule_days : [$existingSection->schedule_days];
+
+            $daysOverlap = array_intersect($newDays, $existingDays);
+
+            if (empty($daysOverlap)) {
+                continue; // No day overlap, no conflict
+            }
+
+            // Check if times overlap
+            $newStart = strtotime($newSection->start_time);
+            $newEnd = strtotime($newSection->end_time);
+            $existingStart = strtotime($existingSection->start_time);
+            $existingEnd = strtotime($existingSection->end_time);
+
+            // Times overlap if: new_start < existing_end AND new_end > existing_start
+            if ($newStart < $existingEnd && $newEnd > $existingStart) {
+                throw new \App\Exceptions\DuplicateEnrollmentException(
+                    sprintf(
+                        'Schedule conflict with %s (%s) on %s from %s to %s',
+                        $existingSection->course->course_code,
+                        $existingSection->course->title,
+                        implode(', ', $daysOverlap),
+                        date('g:i A', $existingStart),
+                        date('g:i A', $existingEnd)
+                    )
+                );
+            }
+        }
+    }
 
     /**
      * Check credit hour limit for the term
      *
-     * @param int $studentId
-     * @param int $courseSectionId
      * @throws CreditLimitExceededException
      */
     private function checkCreditHourLimit(int $studentId, int $courseSectionId): void
     {
         $courseSection = CourseSection::with('course')->find($courseSectionId);
 
-        if (!$courseSection || !$courseSection->course) {
+        if (! $courseSection || ! $courseSection->course) {
             return;
         }
 
@@ -483,7 +463,7 @@ class EnrollmentService
     private function validateRegistrationTimeTicket(int $studentId, int $courseSectionId): void
     {
         $courseSection = CourseSection::find($courseSectionId);
-        if (!$courseSection || !$courseSection->term_id) {
+        if (! $courseSection || ! $courseSection->term_id) {
             return;
         }
 
@@ -492,11 +472,11 @@ class EnrollmentService
             ->first();
 
         // If no ticket exists, allow enrollment (tickets are optional)
-        if (!$ticket) {
+        if (! $ticket) {
             return;
         }
 
-        if (!$ticket->canRegisterNow()) {
+        if (! $ticket->canRegisterNow()) {
             throw new RegistrationNotOpenException(
                 $ticket->start_time->format('M j, Y g:i A')
             );
@@ -509,6 +489,7 @@ class EnrollmentService
     private function requiresAdvisorApproval(int $studentId, int $courseSectionId): bool
     {
         $student = Student::find($studentId);
+
         return $student && $student->requires_advisor_approval && $student->advisor_id;
     }
 
@@ -581,15 +562,13 @@ class EnrollmentService
     /**
      * Check repeat course policy - prevent re-enrollment if student already passed
      *
-     * @param int $studentId
-     * @param int $courseSectionId
      * @throws RepeatCourseException
      */
     private function checkRepeatCoursePolicy(int $studentId, int $courseSectionId): void
     {
         $courseSection = CourseSection::with('course')->find($courseSectionId);
 
-        if (!$courseSection || !$courseSection->course) {
+        if (! $courseSection || ! $courseSection->course) {
             return;
         }
 
@@ -613,4 +592,4 @@ class EnrollmentService
             );
         }
     }
-}  
+}

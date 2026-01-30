@@ -66,7 +66,7 @@ class CourseMaterial extends Model
      */
     public function isAvailable(): bool
     {
-        if (!$this->is_published) {
+        if (! $this->is_published) {
             return false;
         }
 
@@ -82,7 +82,7 @@ class CourseMaterial extends Model
      */
     public function isLink(): bool
     {
-        return $this->type === 'link' || !empty($this->url);
+        return $this->type === 'link' || ! empty($this->url);
     }
 
     /**
@@ -90,7 +90,7 @@ class CourseMaterial extends Model
      */
     public function isFile(): bool
     {
-        return !empty($this->file_path);
+        return ! empty($this->file_path);
     }
 
     /**
@@ -98,7 +98,7 @@ class CourseMaterial extends Model
      */
     public function hasContent(): bool
     {
-        return !empty($this->content);
+        return ! empty($this->content);
     }
 
     /**
@@ -106,7 +106,7 @@ class CourseMaterial extends Model
      */
     public function getFormattedFileSizeAttribute(): ?string
     {
-        if (!$this->file_size) {
+        if (! $this->file_size) {
             return null;
         }
 
@@ -117,7 +117,7 @@ class CourseMaterial extends Model
             $bytes /= 1024;
         }
 
-        return round($bytes, 2) . ' ' . $units[$i];
+        return round($bytes, 2).' '.$units[$i];
     }
 
     /**
@@ -136,7 +136,7 @@ class CourseMaterial extends Model
         return $query->published()
             ->where(function ($q) {
                 $q->whereNull('available_from')
-                  ->orWhere('available_from', '<=', now());
+                    ->orWhere('available_from', '<=', now());
             });
     }
 

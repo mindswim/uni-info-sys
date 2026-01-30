@@ -2,27 +2,25 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\User;
-use App\Models\Student;
-use App\Models\Staff;
-use App\Models\Role;
-use App\Models\Term;
-use App\Models\Faculty;
-use App\Models\Department;
-use App\Models\Program;
+use App\Models\AcademicRecord;
+use App\Models\AdmissionApplication;
+use App\Models\Building;
 use App\Models\Course;
 use App\Models\CourseSection;
-use App\Models\Building;
-use App\Models\Room;
-use App\Models\AdmissionApplication;
-use App\Models\ProgramChoice;
-use App\Models\Enrollment;
-use App\Models\AcademicRecord;
+use App\Models\Department;
 use App\Models\Document;
-use Carbon\Carbon;
+use App\Models\Enrollment;
+use App\Models\Faculty;
+use App\Models\Program;
+use App\Models\ProgramChoice;
+use App\Models\Role;
+use App\Models\Room;
+use App\Models\Staff;
+use App\Models\Student;
+use App\Models\Term;
+use App\Models\User;
 use Faker\Factory as Faker;
+use Illuminate\Database\Seeder;
 
 class ComprehensiveDataSeeder extends Seeder
 {
@@ -267,7 +265,7 @@ class ComprehensiveDataSeeder extends Seeder
                     'user_id' => $user->id,
                     'department_id' => $department->id,
                     'job_title' => $this->faker->randomElement($titles),
-                    'office_location' => $this->faker->buildingNumber() . ' Room ' . $this->faker->numberBetween(100, 500),
+                    'office_location' => $this->faker->buildingNumber().' Room '.$this->faker->numberBetween(100, 500),
                     'office_hours' => 'MWF 2:00-4:00 PM',
                     'bio' => $this->faker->paragraph(3),
                 ]);
@@ -284,7 +282,7 @@ class ComprehensiveDataSeeder extends Seeder
         $courses = [];
         $courseTemplates = [
             'Introduction to', 'Advanced', 'Fundamentals of', 'Topics in', 'Research in',
-            'Principles of', 'Theory of', 'Applied', 'Special Topics:', 'Seminar:'
+            'Principles of', 'Theory of', 'Applied', 'Special Topics:', 'Seminar:',
         ];
 
         $levels = [100, 200, 300, 400, 500, 600];
@@ -300,8 +298,8 @@ class ComprehensiveDataSeeder extends Seeder
 
                 $course = Course::create([
                     'department_id' => $department->id,
-                    'course_code' => strtoupper(substr($department->code, 0, 3)) . $level + $i,
-                    'title' => $prefix . ' ' . ucwords($suffix),
+                    'course_code' => strtoupper(substr($department->code, 0, 3)).$level + $i,
+                    'title' => $prefix.' '.ucwords($suffix),
                     'description' => $this->faker->paragraph(2),
                     'credits' => $this->faker->randomElement([1, 2, 3, 4]),
                     'course_level' => $level < 500 ? 'Undergraduate' : 'Graduate',
@@ -412,7 +410,7 @@ class ComprehensiveDataSeeder extends Seeder
             for ($r = 0; $r < $numRecords; $r++) {
                 AcademicRecord::create([
                     'student_id' => $student->id,
-                    'institution_name' => $this->faker->company() . ' ' . $this->faker->randomElement(['High School', 'College', 'University', 'Academy']),
+                    'institution_name' => $this->faker->company().' '.$this->faker->randomElement(['High School', 'College', 'University', 'Academy']),
                     'qualification_type' => $this->faker->randomElement(['High School Diploma', 'Associate Degree', 'Bachelor Degree', 'Transfer Credits']),
                     'start_date' => $this->faker->dateTimeBetween('-6 years', '-2 years'),
                     'end_date' => $this->faker->dateTimeBetween('-2 years', 'now'),
@@ -452,8 +450,8 @@ class ComprehensiveDataSeeder extends Seeder
                         Document::create([
                             'student_id' => $student->id,
                             'document_type' => $docType,
-                            'file_name' => $docType . '_' . $student->student_number . '.pdf',
-                            'file_path' => 'documents/' . $student->student_number . '/' . $docType . '.pdf',
+                            'file_name' => $docType.'_'.$student->student_number.'.pdf',
+                            'file_path' => 'documents/'.$student->student_number.'/'.$docType.'.pdf',
                             'file_size' => rand(100000, 5000000),
                             'mime_type' => 'application/pdf',
                             'uploaded_at' => $this->faker->dateTimeBetween('-2 months', 'now'),

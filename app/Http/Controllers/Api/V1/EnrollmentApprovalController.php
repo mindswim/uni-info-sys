@@ -39,15 +39,15 @@ class EnrollmentApprovalController extends Controller
 
         $student = $request->user()->student;
 
-        if (!$student) {
+        if (! $student) {
             return response()->json(['message' => 'No student record found.'], 404);
         }
 
-        if (!$student->requires_advisor_approval) {
+        if (! $student->requires_advisor_approval) {
             return response()->json(['message' => 'Advisor approval is not required for this student.'], 422);
         }
 
-        if (!$student->advisor_id) {
+        if (! $student->advisor_id) {
             return response()->json(['message' => 'No advisor assigned. Contact your department.'], 422);
         }
 
@@ -74,7 +74,7 @@ class EnrollmentApprovalController extends Controller
 
     public function approve(Request $request, EnrollmentApproval $enrollmentApproval)
     {
-        if (!$enrollmentApproval->isPending()) {
+        if (! $enrollmentApproval->isPending()) {
             return response()->json(['message' => 'This request has already been processed.'], 422);
         }
 
@@ -103,7 +103,7 @@ class EnrollmentApprovalController extends Controller
 
     public function deny(Request $request, EnrollmentApproval $enrollmentApproval)
     {
-        if (!$enrollmentApproval->isPending()) {
+        if (! $enrollmentApproval->isPending()) {
             return response()->json(['message' => 'This request has already been processed.'], 422);
         }
 
@@ -124,7 +124,7 @@ class EnrollmentApprovalController extends Controller
     {
         $staff = $request->user()->staff;
 
-        if (!$staff) {
+        if (! $staff) {
             return response()->json(['message' => 'No staff record found.'], 404);
         }
 

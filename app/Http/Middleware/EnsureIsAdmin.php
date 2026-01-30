@@ -17,9 +17,9 @@ class EnsureIsAdmin
     {
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
-                'message' => 'Unauthenticated.'
+                'message' => 'Unauthenticated.',
             ], 401);
         }
 
@@ -34,9 +34,9 @@ class EnsureIsAdmin
             }
         }
 
-        if (!$hasAdminRole) {
+        if (! $hasAdminRole) {
             return response()->json([
-                'message' => 'Forbidden. This action requires administrator privileges.'
+                'message' => 'Forbidden. This action requires administrator privileges.',
             ], 403);
         }
 

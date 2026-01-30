@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
 
 class Conversation extends Model
 {
@@ -13,8 +13,11 @@ class Conversation extends Model
     use SoftDeletes;
 
     public const TYPE_DIRECT = 'direct';
+
     public const TYPE_GROUP = 'group';
+
     public const TYPE_COURSE = 'course';
+
     public const TYPE_SUPPORT = 'support';
 
     protected $fillable = [
@@ -98,7 +101,7 @@ class Conversation extends Model
     public function markAsReadForUser(User $user): void
     {
         $this->participants()->updateExistingPivot($user->id, [
-            'last_read_at' => now()
+            'last_read_at' => now(),
         ]);
 
         // Mark all unread messages as read
@@ -112,7 +115,7 @@ class Conversation extends Model
         foreach ($unreadMessages as $message) {
             $message->reads()->create([
                 'user_id' => $user->id,
-                'read_at' => now()
+                'read_at' => now(),
             ]);
         }
     }
@@ -136,11 +139,12 @@ class Conversation extends Model
 
         if ($this->type === self::TYPE_DIRECT) {
             $other = $this->getOtherParticipant($currentUser);
+
             return $other ? $other->name : 'Deleted User';
         }
 
         if ($this->type === self::TYPE_COURSE && $this->courseSection) {
-            return $this->courseSection->course->course_code . ' Discussion';
+            return $this->courseSection->course->course_code.' Discussion';
         }
 
         return 'Conversation';

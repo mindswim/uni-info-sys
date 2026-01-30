@@ -37,11 +37,17 @@ class Hold extends Model
 
     // Hold types
     public const TYPE_REGISTRATION = 'registration';
+
     public const TYPE_FINANCIAL = 'financial';
+
     public const TYPE_ACADEMIC = 'academic';
+
     public const TYPE_ADMINISTRATIVE = 'administrative';
+
     public const TYPE_IMMUNIZATION = 'immunization';
+
     public const TYPE_LIBRARY = 'library';
+
     public const TYPE_PARKING = 'parking';
 
     public const TYPES = [
@@ -56,7 +62,9 @@ class Hold extends Model
 
     // Severity levels
     public const SEVERITY_INFO = 'info';
+
     public const SEVERITY_WARNING = 'warning';
+
     public const SEVERITY_CRITICAL = 'critical';
 
     public const SEVERITIES = [

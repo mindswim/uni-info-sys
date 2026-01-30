@@ -31,6 +31,7 @@ class GradeChangeRequestPolicy
         // Department chair can view requests for their department's courses
         if ($user->hasRole('department_chair')) {
             $department = $courseSection->course->department;
+
             return $user->staff && $user->staff->department_id === $department->id;
         }
 
@@ -50,6 +51,7 @@ class GradeChangeRequestPolicy
         if ($user->hasRole('department_chair')) {
             $courseSection = $gradeChangeRequest->enrollment->courseSection;
             $department = $courseSection->course->department;
+
             return $user->staff && $user->staff->department_id === $department->id;
         }
 

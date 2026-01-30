@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\FinancialAidPackage;
 use App\Models\Scholarship;
 use App\Models\Student;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class FinancialAidController extends Controller
 {
@@ -19,7 +19,7 @@ class FinancialAidController extends Controller
         $user = $request->user();
         $student = Student::where('user_id', $user->id)->first();
 
-        if (!$student) {
+        if (! $student) {
             return response()->json(['message' => 'Student record not found'], 404);
         }
 
@@ -28,12 +28,12 @@ class FinancialAidController extends Controller
             ->latest()
             ->first();
 
-        if (!$package) {
+        if (! $package) {
             return response()->json(['message' => 'No financial aid package found'], 404);
         }
 
         return response()->json([
-            'data' => $this->formatPackage($package)
+            'data' => $this->formatPackage($package),
         ]);
     }
 
@@ -48,7 +48,7 @@ class FinancialAidController extends Controller
             ->get();
 
         return response()->json([
-            'data' => $packages->map(fn($pkg) => $this->formatPackage($pkg))
+            'data' => $packages->map(fn ($pkg) => $this->formatPackage($pkg)),
         ]);
     }
 
@@ -63,7 +63,7 @@ class FinancialAidController extends Controller
             ->get();
 
         return response()->json([
-            'data' => $scholarships
+            'data' => $scholarships,
         ]);
     }
 
@@ -73,7 +73,7 @@ class FinancialAidController extends Controller
     public function scholarship(Scholarship $scholarship): JsonResponse
     {
         return response()->json([
-            'data' => $scholarship->load(['department', 'program'])
+            'data' => $scholarship->load(['department', 'program']),
         ]);
     }
 
@@ -124,7 +124,7 @@ class FinancialAidController extends Controller
                     'name' => $award->scholarship->name,
                     'type' => $award->scholarship->type,
                 ] : null,
-                'disbursements' => $award->disbursements->map(fn($d) => [
+                'disbursements' => $award->disbursements->map(fn ($d) => [
                     'id' => $d->id,
                     'amount' => (float) $d->amount,
                     'scheduled_date' => $d->scheduled_date->format('Y-m-d'),
@@ -135,10 +135,10 @@ class FinancialAidController extends Controller
         });
 
         // Group awards by type
-        $giftAid = $awards->filter(fn($a) => $a['is_gift_aid']);
-        $loans = $awards->filter(fn($a) => $a['is_loan']);
-        $workStudy = $awards->filter(fn($a) => $a['aid_type'] === 'work_study');
-        $other = $awards->filter(fn($a) => !$a['is_gift_aid'] && !$a['is_loan'] && $a['aid_type'] !== 'work_study');
+        $giftAid = $awards->filter(fn ($a) => $a['is_gift_aid']);
+        $loans = $awards->filter(fn ($a) => $a['is_loan']);
+        $workStudy = $awards->filter(fn ($a) => $a['aid_type'] === 'work_study');
+        $other = $awards->filter(fn ($a) => ! $a['is_gift_aid'] && ! $a['is_loan'] && $a['aid_type'] !== 'work_study');
 
         return [
             'id' => $package->id,

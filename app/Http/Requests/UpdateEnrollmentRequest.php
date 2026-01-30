@@ -7,12 +7,12 @@ use Illuminate\Validation\Rule;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    title: "Update Enrollment Request",
-    description: "Request body for updating an enrollment. All fields are optional.",
+    title: 'Update Enrollment Request',
+    description: 'Request body for updating an enrollment. All fields are optional.',
     properties: [
-        new OA\Property(property: "status", type: "string", enum: ["enrolled", "waitlisted", "completed", "withdrawn"], description: "The new status of the enrollment.", example: "completed"),
-        new OA\Property(property: "grade", type: "string", maxLength: 5, nullable: true, description: "The grade received (required when status is 'completed').", example: "A"),
-        new OA\Property(property: "reason_for_change", type: "string", maxLength: 255, nullable: true, description: "Required when changing the grade. Reason for the grade change for audit trail.", example: "Correcting calculation error"),
+        new OA\Property(property: 'status', type: 'string', enum: ['enrolled', 'waitlisted', 'completed', 'withdrawn'], description: 'The new status of the enrollment.', example: 'completed'),
+        new OA\Property(property: 'grade', type: 'string', maxLength: 5, nullable: true, description: "The grade received (required when status is 'completed').", example: 'A'),
+        new OA\Property(property: 'reason_for_change', type: 'string', maxLength: 255, nullable: true, description: 'Required when changing the grade. Reason for the grade change for audit trail.', example: 'Correcting calculation error'),
     ]
 )]
 class UpdateEnrollmentRequest extends FormRequest
@@ -33,7 +33,7 @@ class UpdateEnrollmentRequest extends FormRequest
     public function rules(): array
     {
         $enrollment = $this->route('enrollment');
-        
+
         return [
             'status' => [
                 'sometimes',
@@ -72,7 +72,7 @@ class UpdateEnrollmentRequest extends FormRequest
      */
     private function validateStatusTransition($enrollment, $newStatus, $fail)
     {
-        if (!$enrollment) {
+        if (! $enrollment) {
             return; // Skip if enrollment not found
         }
 
@@ -84,12 +84,13 @@ class UpdateEnrollmentRequest extends FormRequest
             'withdrawn' => [], // Cannot change from withdrawn
         ];
 
-        if (!isset($validTransitions[$currentStatus])) {
+        if (! isset($validTransitions[$currentStatus])) {
             $fail('Invalid current enrollment status.');
+
             return;
         }
 
-        if (!in_array($newStatus, $validTransitions[$currentStatus])) {
+        if (! in_array($newStatus, $validTransitions[$currentStatus])) {
             $fail("Cannot change enrollment status from '{$currentStatus}' to '{$newStatus}'.");
         }
     }
@@ -119,8 +120,8 @@ class UpdateEnrollmentRequest extends FormRequest
             'AU',
         ];
 
-        if (!in_array(strtoupper($grade), $validGrades)) {
-            $fail('Invalid grade format. Valid grades are: ' . implode(', ', $validGrades));
+        if (! in_array(strtoupper($grade), $validGrades)) {
+            $fail('Invalid grade format. Valid grades are: '.implode(', ', $validGrades));
         }
     }
 
@@ -133,14 +134,14 @@ class UpdateEnrollmentRequest extends FormRequest
         $grade = $this->input('grade');
         $status = $this->input('status');
 
-        if (!$enrollment) {
+        if (! $enrollment) {
             return; // Skip if enrollment not found
         }
 
         // Only allow grade assignment for completed enrollments
         if ($grade !== null) {
             $finalStatus = $status ?? $enrollment->status;
-            
+
             if ($finalStatus !== 'completed') {
                 $validator->errors()->add(
                     'grade',

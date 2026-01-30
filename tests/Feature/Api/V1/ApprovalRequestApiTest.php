@@ -19,9 +19,13 @@ class ApprovalRequestApiTest extends TestCase
     use RefreshDatabase;
 
     private User $chairUser;
+
     private Staff $chairStaff;
+
     private Department $department;
+
     private Term $term;
+
     private CourseSection $section;
 
     protected function setUp(): void

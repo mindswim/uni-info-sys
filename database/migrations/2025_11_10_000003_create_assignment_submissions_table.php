@@ -25,7 +25,7 @@ return new class extends Migration
                 'submitted',
                 'late',
                 'graded',
-                'returned'
+                'returned',
             ])->default('not_started');
             $table->decimal('score', 8, 2)->nullable();
             $table->text('feedback')->nullable();

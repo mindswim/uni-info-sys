@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\AdmissionApplication;
 use App\Models\CourseSection;
 use App\Models\Enrollment;
-use App\Models\Role;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,7 +15,7 @@ use Tests\Traits\CreatesUsersWithRoles;
 
 class AuditingTest extends TestCase
 {
-    use RefreshDatabase, CreatesUsersWithRoles;
+    use CreatesUsersWithRoles, RefreshDatabase;
 
     /** @test */
     public function test_student_model_auditing_on_creation()
@@ -26,7 +25,7 @@ class AuditingTest extends TestCase
         $student = Student::factory()->create([
             'user_id' => $user->id,
             'first_name' => 'John',
-            'last_name' => 'Doe'
+            'last_name' => 'Doe',
         ]);
 
         // Check that audit record was created
@@ -49,7 +48,7 @@ class AuditingTest extends TestCase
         $user = User::factory()->create();
         $student = Student::factory()->create([
             'user_id' => $user->id,
-            'first_name' => 'John'
+            'first_name' => 'John',
         ]);
 
         // Update the student
@@ -82,7 +81,7 @@ class AuditingTest extends TestCase
             ->get();
 
         $this->assertGreaterThanOrEqual(1, $audits->count());
-        
+
         $updateAudit = $audits->where('event', 'updated')->first();
         $this->assertNotNull($updateAudit);
         $this->assertArrayHasKey('email', $updateAudit->new_values);
@@ -101,7 +100,7 @@ class AuditingTest extends TestCase
         $enrollment = Enrollment::factory()->create([
             'student_id' => $student->id,
             'course_section_id' => $courseSection->id,
-            'status' => 'enrolled'
+            'status' => 'enrolled',
         ]);
 
         // Update enrollment status
@@ -113,7 +112,7 @@ class AuditingTest extends TestCase
             ->get();
 
         $this->assertGreaterThanOrEqual(1, $audits->count());
-        
+
         $updateAudit = $audits->where('event', 'updated')->first();
         $this->assertNotNull($updateAudit);
         $this->assertEquals('enrolled', $updateAudit->old_values['status']);
@@ -123,12 +122,12 @@ class AuditingTest extends TestCase
     /** @test */
     public function test_admission_application_auditing()
     {
-        // Create admission application  
+        // Create admission application
         $user = User::factory()->create();
         $student = Student::factory()->create(['user_id' => $user->id]);
         $application = AdmissionApplication::factory()->create([
             'student_id' => $student->id,
-            'status' => 'pending'
+            'status' => 'pending',
         ]);
 
         // Update application status
@@ -140,7 +139,7 @@ class AuditingTest extends TestCase
             ->get();
 
         $this->assertGreaterThanOrEqual(1, $audits->count());
-        
+
         $updateAudit = $audits->where('event', 'updated')->first();
         $this->assertNotNull($updateAudit);
         $this->assertEquals('pending', $updateAudit->old_values['status']);
@@ -162,7 +161,7 @@ class AuditingTest extends TestCase
             ->get();
 
         $this->assertGreaterThanOrEqual(1, $audits->count());
-        
+
         $updateAudit = $audits->where('event', 'updated')->first();
         $this->assertNotNull($updateAudit);
         $this->assertEquals(30, $updateAudit->old_values['capacity']);
@@ -204,7 +203,7 @@ class AuditingTest extends TestCase
         // Verify we can query audits by model type
         $studentAudits = Audit::where('auditable_type', 'App\\Models\\Student')->count();
         $userAudits = Audit::where('auditable_type', 'App\\Models\\User')->count();
-        
+
         $this->assertGreaterThan(0, $studentAudits);
         $this->assertGreaterThan(0, $userAudits);
     }
@@ -226,13 +225,13 @@ class AuditingTest extends TestCase
             'student_id' => $student->id,
             'course_section_id' => $courseSection->id,
             'status' => 'completed',
-            'grade' => 'B'
+            'grade' => 'B',
         ]);
 
         // Update the grade via API with reason for change
         $response = $this->putJson("/api/v1/enrollments/{$enrollment->id}", [
             'grade' => 'A',
-            'reason_for_change' => 'Correcting calculation error in final exam'
+            'reason_for_change' => 'Correcting calculation error in final exam',
         ]);
 
         $response->assertOk();
@@ -250,13 +249,13 @@ class AuditingTest extends TestCase
 
         $this->assertNotNull($audit);
         $this->assertEquals('updated', $audit->event);
-        
+
         // Verify old and new grade values
         $this->assertArrayHasKey('grade', $audit->old_values);
         $this->assertArrayHasKey('grade', $audit->new_values);
         $this->assertEquals('B', $audit->old_values['grade']);
         $this->assertEquals('A', $audit->new_values['grade']);
-        
+
         // Verify reason for change is stored in tags
         $this->assertNotEmpty($audit->tags);
         $this->assertStringContainsString('reason:Correcting calculation error in final exam', $audit->tags);
@@ -278,14 +277,14 @@ class AuditingTest extends TestCase
         $enrollment = Enrollment::factory()->create([
             'student_id' => $student->id,
             'course_section_id' => $courseSection->id,
-            'status' => 'enrolled'
+            'status' => 'enrolled',
         ]);
 
         // Update the status via API
         $response = $this->putJson("/api/v1/enrollments/{$enrollment->id}", [
             'status' => 'completed',
             'grade' => 'B+',
-            'reason_for_change' => 'Course completion'
+            'reason_for_change' => 'Course completion',
         ]);
 
         $response->assertOk();
@@ -298,13 +297,13 @@ class AuditingTest extends TestCase
             ->first();
 
         $this->assertNotNull($audit);
-        
+
         // Verify both status and grade changes are audited
         $this->assertArrayHasKey('status', $audit->old_values);
         $this->assertArrayHasKey('status', $audit->new_values);
         $this->assertEquals('enrolled', $audit->old_values['status']);
         $this->assertEquals('completed', $audit->new_values['status']);
-        
+
         $this->assertArrayHasKey('grade', $audit->new_values);
         $this->assertEquals('B+', $audit->new_values['grade']);
     }
@@ -326,12 +325,12 @@ class AuditingTest extends TestCase
             'student_id' => $student->id,
             'course_section_id' => $courseSection->id,
             'status' => 'completed',
-            'grade' => 'B'
+            'grade' => 'B',
         ]);
 
         // Try to update grade without reason_for_change
         $response = $this->putJson("/api/v1/enrollments/{$enrollment->id}", [
-            'grade' => 'A'
+            'grade' => 'A',
             // Missing reason_for_change
         ]);
 
@@ -355,12 +354,12 @@ class AuditingTest extends TestCase
         $enrollment = Enrollment::factory()->create([
             'student_id' => $student->id,
             'course_section_id' => $courseSection->id,
-            'status' => 'enrolled'
+            'status' => 'enrolled',
         ]);
 
         // Update status without grade change (no reason_for_change needed)
         $response = $this->putJson("/api/v1/enrollments/{$enrollment->id}", [
-            'status' => 'withdrawn'
+            'status' => 'withdrawn',
             // No reason_for_change needed when not updating grade
         ]);
 

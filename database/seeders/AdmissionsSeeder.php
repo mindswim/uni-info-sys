@@ -2,15 +2,15 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\AcademicRecord;
+use App\Models\AdmissionApplication;
+use App\Models\Document;
+use App\Models\Program;
+use App\Models\ProgramChoice;
 use App\Models\Role;
 use App\Models\Student;
-use App\Models\Program;
 use App\Models\Term;
-use App\Models\AdmissionApplication;
-use App\Models\ProgramChoice;
-use App\Models\Document;
-use App\Models\AcademicRecord;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -198,7 +198,7 @@ class AdmissionsSeeder extends Seeder
             $applicants[] = $applicant;
         }
 
-        Log::info('Created ' . count($applicants) . ' prospective students with applications');
+        Log::info('Created '.count($applicants).' prospective students with applications');
 
         // Create application statistics summary
         $this->logApplicationStats();
@@ -211,10 +211,10 @@ class AdmissionsSeeder extends Seeder
         $highSchool = $this->selectHighSchool($profile['profile']);
 
         // Create user
-        $email = strtolower($profile['first_name'] . '.' . $profile['last_name'] . ($index > 0 ? $index : '') . '@applicant.edu');
+        $email = strtolower($profile['first_name'].'.'.$profile['last_name'].($index > 0 ? $index : '').'@applicant.edu');
 
         $user = User::create([
-            'name' => $profile['first_name'] . ' ' . $profile['last_name'],
+            'name' => $profile['first_name'].' '.$profile['last_name'],
             'email' => $email,
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
@@ -224,7 +224,7 @@ class AdmissionsSeeder extends Seeder
         // Create student record (prospective)
         $student = Student::create([
             'user_id' => $user->id,
-            'student_number' => 'APP' . date('Y') . str_pad($index + 1, 4, '0', STR_PAD_LEFT),
+            'student_number' => 'APP'.date('Y').str_pad($index + 1, 4, '0', STR_PAD_LEFT),
             'first_name' => $profile['first_name'],
             'last_name' => $profile['last_name'],
             'date_of_birth' => fake()->dateTimeBetween('-19 years', '-17 years')->format('Y-m-d'),
@@ -338,11 +338,11 @@ class AdmissionsSeeder extends Seeder
     private function selectHighSchool(string $profile): array
     {
         $eligibleSchools = match ($profile) {
-            'high_achiever' => array_filter($this->highSchools, fn($s) => $s['tier'] === 'elite'),
-            'strong' => array_filter($this->highSchools, fn($s) => in_array($s['tier'], ['elite', 'strong'])),
-            'international_strong', 'international_good' => array_filter($this->highSchools, fn($s) => isset($s['international'])),
-            'good' => array_filter($this->highSchools, fn($s) => in_array($s['tier'], ['strong', 'good'])),
-            default => array_filter($this->highSchools, fn($s) => in_array($s['tier'], ['good', 'average'])),
+            'high_achiever' => array_filter($this->highSchools, fn ($s) => $s['tier'] === 'elite'),
+            'strong' => array_filter($this->highSchools, fn ($s) => in_array($s['tier'], ['elite', 'strong'])),
+            'international_strong', 'international_good' => array_filter($this->highSchools, fn ($s) => isset($s['international'])),
+            'good' => array_filter($this->highSchools, fn ($s) => in_array($s['tier'], ['strong', 'good'])),
+            default => array_filter($this->highSchools, fn ($s) => in_array($s['tier'], ['good', 'average'])),
         };
 
         return $eligibleSchools[array_rand($eligibleSchools)];
@@ -365,12 +365,18 @@ class AdmissionsSeeder extends Seeder
         };
 
         // Adjust by GPA
-        if ($stats['gpa'] >= 3.8) $acceptanceChance += 10;
-        elseif ($stats['gpa'] < 3.0) $acceptanceChance -= 20;
+        if ($stats['gpa'] >= 3.8) {
+            $acceptanceChance += 10;
+        } elseif ($stats['gpa'] < 3.0) {
+            $acceptanceChance -= 20;
+        }
 
         // Adjust by SAT
-        if ($stats['sat'] >= 1450) $acceptanceChance += 10;
-        elseif ($stats['sat'] < 1100) $acceptanceChance -= 15;
+        if ($stats['sat'] >= 1450) {
+            $acceptanceChance += 10;
+        } elseif ($stats['sat'] < 1100) {
+            $acceptanceChance -= 15;
+        }
 
         $roll = rand(1, 100);
 
@@ -414,7 +420,7 @@ class AdmissionsSeeder extends Seeder
         Document::create([
             'student_id' => $student->id,
             'document_type' => 'transcript',
-            'file_path' => 'documents/transcripts/' . $student->id . '_hs_transcript.pdf',
+            'file_path' => 'documents/transcripts/'.$student->id.'_hs_transcript.pdf',
             'original_filename' => 'Official_High_School_Transcript.pdf',
             'mime_type' => 'application/pdf',
             'file_size' => rand(50000, 200000),
@@ -430,7 +436,7 @@ class AdmissionsSeeder extends Seeder
             Document::create([
                 'student_id' => $student->id,
                 'document_type' => 'test_scores',
-                'file_path' => 'documents/scores/' . $student->id . '_sat_scores.pdf',
+                'file_path' => 'documents/scores/'.$student->id.'_sat_scores.pdf',
                 'original_filename' => 'SAT_Score_Report.pdf',
                 'mime_type' => 'application/pdf',
                 'file_size' => rand(30000, 80000),
@@ -449,8 +455,8 @@ class AdmissionsSeeder extends Seeder
             Document::create([
                 'student_id' => $student->id,
                 'document_type' => 'recommendation_letter',
-                'file_path' => 'documents/recommendations/' . $student->id . '_rec_' . $i . '.pdf',
-                'original_filename' => 'Recommendation_Letter_' . $recommender . '.pdf',
+                'file_path' => 'documents/recommendations/'.$student->id.'_rec_'.$i.'.pdf',
+                'original_filename' => 'Recommendation_Letter_'.$recommender.'.pdf',
                 'mime_type' => 'application/pdf',
                 'file_size' => rand(20000, 60000),
                 'status' => fake()->randomElement(['pending', 'approved']),
@@ -465,7 +471,7 @@ class AdmissionsSeeder extends Seeder
         Document::create([
             'student_id' => $student->id,
             'document_type' => 'essay',
-            'file_path' => 'documents/essays/' . $student->id . '_personal_essay.pdf',
+            'file_path' => 'documents/essays/'.$student->id.'_personal_essay.pdf',
             'original_filename' => 'Personal_Statement.pdf',
             'mime_type' => 'application/pdf',
             'file_size' => rand(15000, 40000),

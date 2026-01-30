@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\Program;
 use App\Models\Course;
 use App\Models\DegreeRequirement;
+use App\Models\Program;
+use Illuminate\Database\Seeder;
 
 class UpdateCipCodesAndCourseLevelsSeeder extends Seeder
 {
@@ -20,13 +19,13 @@ class UpdateCipCodesAndCourseLevelsSeeder extends Seeder
         foreach ($programs as $program) {
             $program->update([
                 'cip_code' => $program->assignCIPCode(),
-                'total_credit_hours' => match($program->degree_level) {
+                'total_credit_hours' => match ($program->degree_level) {
                     'Bachelor' => 120,
                     'Master' => 36,
                     'PhD' => 72,
                     'Associate' => 60,
                     default => 120
-                }
+                },
             ]);
         }
 
@@ -42,7 +41,7 @@ class UpdateCipCodesAndCourseLevelsSeeder extends Seeder
             $this->createCSRequirements($csProgram);
         }
 
-        // Create requirements for Business Administration Bachelor program  
+        // Create requirements for Business Administration Bachelor program
         $businessProgram = Program::where('name', 'Business Administration')->first();
         if ($businessProgram) {
             $this->createBusinessRequirements($businessProgram);
@@ -61,17 +60,17 @@ class UpdateCipCodesAndCourseLevelsSeeder extends Seeder
             'description' => 'Complete composition and technical writing courses',
             'required_credit_hours' => 6,
             'min_courses' => 2,
-            'sort_order' => 1
+            'sort_order' => 1,
         ]);
 
         DegreeRequirement::create([
             'program_id' => $program->id,
-            'category' => 'general_education', 
+            'category' => 'general_education',
             'name' => 'Mathematics',
             'description' => 'Calculus I, II, and Discrete Mathematics',
             'required_credit_hours' => 12,
             'min_courses' => 4,
-            'sort_order' => 2
+            'sort_order' => 2,
         ]);
 
         DegreeRequirement::create([
@@ -81,7 +80,7 @@ class UpdateCipCodesAndCourseLevelsSeeder extends Seeder
             'description' => 'Physics and Chemistry with labs',
             'required_credit_hours' => 8,
             'min_courses' => 2,
-            'sort_order' => 3
+            'sort_order' => 3,
         ]);
 
         DegreeRequirement::create([
@@ -91,7 +90,7 @@ class UpdateCipCodesAndCourseLevelsSeeder extends Seeder
             'description' => 'History, Psychology, Philosophy, Literature',
             'required_credit_hours' => 12,
             'min_courses' => 4,
-            'sort_order' => 4
+            'sort_order' => 4,
         ]);
 
         // Major Core Requirements
@@ -103,18 +102,18 @@ class UpdateCipCodesAndCourseLevelsSeeder extends Seeder
             'required_credit_hours' => 8,
             'min_courses' => 2,
             'min_gpa' => 2.0,
-            'sort_order' => 5
+            'sort_order' => 5,
         ]);
 
         DegreeRequirement::create([
             'program_id' => $program->id,
             'category' => 'major_core',
-            'name' => 'Data Structures and Algorithms', 
+            'name' => 'Data Structures and Algorithms',
             'description' => 'CS 201, CS 202 - Core CS theory and implementation',
             'required_credit_hours' => 8,
             'min_courses' => 2,
             'min_gpa' => 2.5,
-            'sort_order' => 6
+            'sort_order' => 6,
         ]);
 
         DegreeRequirement::create([
@@ -125,7 +124,7 @@ class UpdateCipCodesAndCourseLevelsSeeder extends Seeder
             'required_credit_hours' => 12,
             'min_courses' => 3,
             'min_gpa' => 2.0,
-            'sort_order' => 7
+            'sort_order' => 7,
         ]);
 
         // Major Electives
@@ -137,7 +136,7 @@ class UpdateCipCodesAndCourseLevelsSeeder extends Seeder
             'required_credit_hours' => 18,
             'min_courses' => 6,
             'min_gpa' => 2.0,
-            'sort_order' => 8
+            'sort_order' => 8,
         ]);
 
         // Capstone
@@ -149,7 +148,7 @@ class UpdateCipCodesAndCourseLevelsSeeder extends Seeder
             'required_credit_hours' => 3,
             'min_courses' => 1,
             'min_gpa' => 2.0,
-            'sort_order' => 9
+            'sort_order' => 9,
         ]);
 
         // Free Electives
@@ -160,7 +159,7 @@ class UpdateCipCodesAndCourseLevelsSeeder extends Seeder
             'description' => 'Any courses to reach 120 total credit hours',
             'required_credit_hours' => 21,
             'min_courses' => 7,
-            'sort_order' => 10
+            'sort_order' => 10,
         ]);
     }
 
@@ -174,7 +173,7 @@ class UpdateCipCodesAndCourseLevelsSeeder extends Seeder
             'description' => 'Business Communication and Public Speaking',
             'required_credit_hours' => 6,
             'min_courses' => 2,
-            'sort_order' => 1
+            'sort_order' => 1,
         ]);
 
         DegreeRequirement::create([
@@ -184,7 +183,7 @@ class UpdateCipCodesAndCourseLevelsSeeder extends Seeder
             'description' => 'Statistics, College Algebra, Business Calculus',
             'required_credit_hours' => 9,
             'min_courses' => 3,
-            'sort_order' => 2
+            'sort_order' => 2,
         ]);
 
         // Business Core
@@ -196,7 +195,7 @@ class UpdateCipCodesAndCourseLevelsSeeder extends Seeder
             'required_credit_hours' => 30,
             'min_courses' => 10,
             'min_gpa' => 2.0,
-            'sort_order' => 3
+            'sort_order' => 3,
         ]);
 
         DegreeRequirement::create([
@@ -207,7 +206,7 @@ class UpdateCipCodesAndCourseLevelsSeeder extends Seeder
             'required_credit_hours' => 15,
             'min_courses' => 5,
             'min_gpa' => 2.5,
-            'sort_order' => 4
+            'sort_order' => 4,
         ]);
 
         DegreeRequirement::create([
@@ -218,7 +217,7 @@ class UpdateCipCodesAndCourseLevelsSeeder extends Seeder
             'required_credit_hours' => 6,
             'min_courses' => 2,
             'min_gpa' => 2.5,
-            'sort_order' => 5
+            'sort_order' => 5,
         ]);
     }
 }

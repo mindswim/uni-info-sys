@@ -34,7 +34,7 @@ class EnrollmentVerificationService
             'total_credits' => $totalCredits,
             'enrollment_status' => $enrollmentStatus,
             'issue_date' => now()->format('F j, Y'),
-            'verification_code' => strtoupper(substr(md5($student->id . $term->id . now()->timestamp), 0, 10)),
+            'verification_code' => strtoupper(substr(md5($student->id.$term->id.now()->timestamp), 0, 10)),
         ];
 
         return Pdf::loadView('letters.enrollment-verification', $data);

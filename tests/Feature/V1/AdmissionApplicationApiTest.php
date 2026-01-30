@@ -14,17 +14,26 @@ use Tests\Traits\CreatesUsersWithRoles;
 
 class AdmissionApplicationApiTest extends TestCase
 {
-    use RefreshDatabase, CreatesUsersWithRoles;
+    use CreatesUsersWithRoles, RefreshDatabase;
 
     protected User $adminUser;
+
     protected User $staffUser;
+
     protected User $studentUser;
+
     protected User $otherStudentUser;
+
     protected Student $student;
+
     protected Student $otherStudent;
+
     protected Term $term;
+
     protected Role $adminRole;
+
     protected Role $staffRole;
+
     protected Role $studentRole;
 
     protected function setUp(): void
@@ -64,7 +73,7 @@ class AdmissionApplicationApiTest extends TestCase
         $response = $this->getJson('/api/v1/admission-applications');
 
         $response->assertStatus(401)
-                 ->assertJson(['detail' => 'Authentication is required to access this resource.']);
+            ->assertJson(['detail' => 'Authentication is required to access this resource.']);
     }
 
     /** @test */
@@ -77,12 +86,12 @@ class AdmissionApplicationApiTest extends TestCase
                 'name' => 'Summer 2031',
                 'start_date' => '2031-06-01',
                 'end_date' => '2031-08-15',
-                'add_drop_deadline' => '2031-06-15'
+                'add_drop_deadline' => '2031-06-15',
             ]
         );
 
         AdmissionApplication::factory()->count(3)->create([
-            'term_id' => $term->id
+            'term_id' => $term->id,
         ]);
 
         $response = $this->actingAs($this->adminUser, 'sanctum')
@@ -97,11 +106,11 @@ class AdmissionApplicationApiTest extends TestCase
                         'term_id',
                         'status',
                         'application_date',
-                        'comments'
-                    ]
+                        'comments',
+                    ],
                 ],
                 'links',
-                'meta'
+                'meta',
             ]);
     }
 
@@ -117,11 +126,11 @@ class AdmissionApplicationApiTest extends TestCase
         $response = $this->getJson('/api/v1/admission-applications');
 
         $response->assertStatus(200)
-                 ->assertJsonCount(1, 'data');
-        
+            ->assertJsonCount(1, 'data');
+
         // Get the actual data array
         $data = $response->json('data');
-        
+
         // Assert we only see our own application
         $this->assertEquals(1, count($data));
         $this->assertEquals($ownApplication->id, $data[0]['id']);
@@ -138,30 +147,30 @@ class AdmissionApplicationApiTest extends TestCase
                 'name' => 'Summer 2034',
                 'start_date' => '2034-06-01',
                 'end_date' => '2034-08-15',
-                'add_drop_deadline' => '2034-06-15'
+                'add_drop_deadline' => '2034-06-15',
             ]
         );
-        
+
         $term2 = Term::firstOrCreate(
             ['academic_year' => 2035, 'semester' => 'Fall'],
             [
                 'name' => 'Fall 2035',
                 'start_date' => '2035-09-01',
                 'end_date' => '2035-12-20',
-                'add_drop_deadline' => '2035-09-15'
+                'add_drop_deadline' => '2035-09-15',
             ]
         );
 
         AdmissionApplication::factory()->create([
             'student_id' => $this->student->id,
             'term_id' => $term1->id,
-            'status' => 'draft'
+            'status' => 'draft',
         ]);
 
         AdmissionApplication::factory()->create([
             'student_id' => $this->student->id,
             'term_id' => $term2->id,
-            'status' => 'submitted'
+            'status' => 'submitted',
         ]);
 
         $response = $this->actingAs($this->adminUser, 'sanctum')
@@ -171,8 +180,8 @@ class AdmissionApplicationApiTest extends TestCase
             ->assertJsonCount(1, 'data')
             ->assertJson([
                 'data' => [
-                    ['status' => 'submitted']
-                ]
+                    ['status' => 'submitted'],
+                ],
             ]);
     }
 
@@ -189,9 +198,9 @@ class AdmissionApplicationApiTest extends TestCase
         $response = $this->getJson("/api/v1/admission-applications?term_id={$this->term->id}");
 
         $response->assertStatus(200)
-                 ->assertJsonCount(1, 'data')
-                 ->assertJsonFragment(['id' => $application1->id])
-                 ->assertJsonMissing(['id' => $application2->id]);
+            ->assertJsonCount(1, 'data')
+            ->assertJsonFragment(['id' => $application1->id])
+            ->assertJsonMissing(['id' => $application2->id]);
     }
 
     /** @test */
@@ -203,34 +212,34 @@ class AdmissionApplicationApiTest extends TestCase
             'student_id' => $this->student->id,
             'term_id' => $this->term->id,
             'status' => 'draft',
-            'comments' => 'Looking forward to this program'
+            'comments' => 'Looking forward to this program',
         ];
 
         $response = $this->postJson('/api/v1/admission-applications', $applicationData);
 
         $response->assertStatus(201)
-                 ->assertJsonStructure([
-                     'message',
-                     'data' => [
-                         'id',
-                         'student_id',
-                         'term_id',
-                         'status',
-                         'application_date',
-                         'comments'
-                     ]
-                 ])
-                 ->assertJsonFragment([
-                     'student_id' => $this->student->id,
-                     'term_id' => $this->term->id,
-                     'status' => 'draft',
-                     'comments' => 'Looking forward to this program'
-                 ]);
+            ->assertJsonStructure([
+                'message',
+                'data' => [
+                    'id',
+                    'student_id',
+                    'term_id',
+                    'status',
+                    'application_date',
+                    'comments',
+                ],
+            ])
+            ->assertJsonFragment([
+                'student_id' => $this->student->id,
+                'term_id' => $this->term->id,
+                'status' => 'draft',
+                'comments' => 'Looking forward to this program',
+            ]);
 
         $this->assertDatabaseHas('admission_applications', [
             'student_id' => $this->student->id,
             'term_id' => $this->term->id,
-            'status' => 'draft'
+            'status' => 'draft',
         ]);
     }
 
@@ -242,13 +251,13 @@ class AdmissionApplicationApiTest extends TestCase
         $applicationData = [
             'student_id' => $this->otherStudent->id,
             'term_id' => $this->term->id,
-            'status' => 'draft'
+            'status' => 'draft',
         ];
 
         $response = $this->postJson('/api/v1/admission-applications', $applicationData);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['student_id']);
+            ->assertJsonValidationErrors(['student_id']);
     }
 
     /** @test */
@@ -259,16 +268,16 @@ class AdmissionApplicationApiTest extends TestCase
         $applicationData = [
             'student_id' => $this->student->id,
             'term_id' => $this->term->id,
-            'status' => 'draft'
+            'status' => 'draft',
         ];
 
         $response = $this->postJson('/api/v1/admission-applications', $applicationData);
 
         $response->assertStatus(201)
-                 ->assertJsonFragment([
-                     'student_id' => $this->student->id,
-                     'term_id' => $this->term->id
-                 ]);
+            ->assertJsonFragment([
+                'student_id' => $this->student->id,
+                'term_id' => $this->term->id,
+            ]);
     }
 
     /** @test */
@@ -279,7 +288,7 @@ class AdmissionApplicationApiTest extends TestCase
         $response = $this->postJson('/api/v1/admission-applications', []);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['student_id', 'term_id']);
+            ->assertJsonValidationErrors(['student_id', 'term_id']);
     }
 
     /** @test */
@@ -289,13 +298,13 @@ class AdmissionApplicationApiTest extends TestCase
 
         $applicationData = [
             'student_id' => 999,
-            'term_id' => 999
+            'term_id' => 999,
         ];
 
         $response = $this->postJson('/api/v1/admission-applications', $applicationData);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['student_id', 'term_id']);
+            ->assertJsonValidationErrors(['student_id', 'term_id']);
     }
 
     /** @test */
@@ -305,17 +314,17 @@ class AdmissionApplicationApiTest extends TestCase
 
         $application = AdmissionApplication::factory()->create([
             'student_id' => $this->student->id,
-            'term_id' => $this->term->id
+            'term_id' => $this->term->id,
         ]);
 
         $response = $this->getJson("/api/v1/admission-applications/{$application->id}");
 
         $response->assertStatus(200)
-                 ->assertJsonFragment([
-                     'id' => $application->id,
-                     'student_id' => $this->student->id,
-                     'term_id' => $this->term->id
-                 ]);
+            ->assertJsonFragment([
+                'id' => $application->id,
+                'student_id' => $this->student->id,
+                'term_id' => $this->term->id,
+            ]);
     }
 
     /** @test */
@@ -348,33 +357,33 @@ class AdmissionApplicationApiTest extends TestCase
                 'name' => 'Fall 2033',
                 'start_date' => '2033-09-01',
                 'end_date' => '2033-12-20',
-                'add_drop_deadline' => '2033-09-15'
+                'add_drop_deadline' => '2033-09-15',
             ]
         );
 
         $application = AdmissionApplication::factory()->create([
             'student_id' => $this->student->id,
             'term_id' => $term->id,
-            'status' => 'draft'
+            'status' => 'draft',
         ]);
 
         $updateData = [
             'status' => 'submitted',
-            'comments' => 'Updated comments'
+            'comments' => 'Updated comments',
         ];
 
         $response = $this->putJson("/api/v1/admission-applications/{$application->id}", $updateData);
 
         $response->assertStatus(200)
-                 ->assertJsonFragment([
-                     'status' => 'submitted',
-                     'comments' => 'Updated comments'
-                 ]);
+            ->assertJsonFragment([
+                'status' => 'submitted',
+                'comments' => 'Updated comments',
+            ]);
 
         $this->assertDatabaseHas('admission_applications', [
             'id' => $application->id,
             'status' => 'submitted',
-            'comments' => 'Updated comments'
+            'comments' => 'Updated comments',
         ]);
     }
 
@@ -385,7 +394,7 @@ class AdmissionApplicationApiTest extends TestCase
 
         $application = AdmissionApplication::factory()->create([
             'student_id' => $this->student->id,
-            'status' => 'submitted'
+            'status' => 'submitted',
         ]);
 
         $updateData = ['status' => 'draft'];
@@ -402,26 +411,26 @@ class AdmissionApplicationApiTest extends TestCase
 
         $application = AdmissionApplication::factory()->create([
             'student_id' => $this->student->id,
-            'status' => 'submitted'
+            'status' => 'submitted',
         ]);
 
         $updateData = [
             'status' => 'accepted',
-            'decision_status' => 'Accepted with conditions'
+            'decision_status' => 'Accepted with conditions',
         ];
 
         $response = $this->putJson("/api/v1/admission-applications/{$application->id}", $updateData);
 
         $response->assertStatus(200)
-                 ->assertJsonFragment([
-                     'status' => 'accepted',
-                     'decision_status' => 'Accepted with conditions'
-                 ]);
+            ->assertJsonFragment([
+                'status' => 'accepted',
+                'decision_status' => 'Accepted with conditions',
+            ]);
 
         $this->assertDatabaseHas('admission_applications', [
             'id' => $application->id,
             'status' => 'accepted',
-            'decision_status' => 'Accepted with conditions'
+            'decision_status' => 'Accepted with conditions',
         ]);
     }
 
@@ -432,13 +441,13 @@ class AdmissionApplicationApiTest extends TestCase
 
         $application = AdmissionApplication::factory()->create([
             'student_id' => $this->student->id,
-            'status' => 'draft'
+            'status' => 'draft',
         ]);
 
         $response = $this->deleteJson("/api/v1/admission-applications/{$application->id}");
 
         $response->assertStatus(200)
-                 ->assertJsonFragment(['message' => 'Admission application deleted successfully.']);
+            ->assertJsonFragment(['message' => 'Admission application deleted successfully.']);
 
         $this->assertSoftDeleted('admission_applications', ['id' => $application->id]);
     }
@@ -450,7 +459,7 @@ class AdmissionApplicationApiTest extends TestCase
 
         $application = AdmissionApplication::factory()->create([
             'student_id' => $this->student->id,
-            'status' => 'submitted'
+            'status' => 'submitted',
         ]);
 
         $response = $this->deleteJson("/api/v1/admission-applications/{$application->id}");
@@ -468,13 +477,13 @@ class AdmissionApplicationApiTest extends TestCase
                 'name' => 'Spring 2029',
                 'start_date' => '2029-01-15',
                 'end_date' => '2029-05-10',
-                'add_drop_deadline' => '2029-01-29'
+                'add_drop_deadline' => '2029-01-29',
             ]
         );
 
         $application = AdmissionApplication::factory()->create([
             'student_id' => $this->student->id,
-            'term_id' => $term->id
+            'term_id' => $term->id,
         ]);
 
         $response = $this->actingAs($this->adminUser, 'sanctum')
@@ -482,7 +491,7 @@ class AdmissionApplicationApiTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJson([
-                'message' => 'Admission application deleted successfully.'
+                'message' => 'Admission application deleted successfully.',
             ]);
         $this->assertSoftDeleted('admission_applications', ['id' => $application->id]);
     }
@@ -507,7 +516,7 @@ class AdmissionApplicationApiTest extends TestCase
         $response = $this->getJson('/api/v1/admission-applications');
 
         $response->assertStatus(200)
-                 ->assertJsonCount(2, 'data');
+            ->assertJsonCount(2, 'data');
     }
 
     /** @test */
@@ -522,26 +531,26 @@ class AdmissionApplicationApiTest extends TestCase
                 'name' => 'Summer 2035',
                 'start_date' => '2035-06-01',
                 'end_date' => '2035-08-15',
-                'add_drop_deadline' => '2035-06-15'
+                'add_drop_deadline' => '2035-06-15',
             ]
         );
 
         $application1 = AdmissionApplication::factory()->create([
             'student_id' => $this->student->id,
-            'term_id' => $term->id
+            'term_id' => $term->id,
         ]);
-        
+
         $application2 = AdmissionApplication::factory()->create([
             'student_id' => $this->otherStudent->id,
-            'term_id' => $term->id
+            'term_id' => $term->id,
         ]);
 
         $response = $this->getJson("/api/v1/admission-applications?student_id={$this->student->id}");
 
         $response->assertStatus(200)
-                 ->assertJsonCount(1, 'data')
-                 ->assertJsonFragment(['id' => $application1->id])
-                 ->assertJsonMissing(['id' => $application2->id]);
+            ->assertJsonCount(1, 'data')
+            ->assertJsonFragment(['id' => $application1->id])
+            ->assertJsonMissing(['id' => $application2->id]);
     }
 
     /** @test */
@@ -554,20 +563,20 @@ class AdmissionApplicationApiTest extends TestCase
                 'name' => 'Fall 2031',
                 'start_date' => '2031-09-01',
                 'end_date' => '2031-12-20',
-                'add_drop_deadline' => '2031-09-15'
+                'add_drop_deadline' => '2031-09-15',
             ]
         );
 
         $otherStudent = Student::factory()->create();
-        
+
         AdmissionApplication::factory()->create([
             'student_id' => $this->student->id,
-            'term_id' => $term->id
+            'term_id' => $term->id,
         ]);
 
         AdmissionApplication::factory()->create([
             'student_id' => $otherStudent->id,
-            'term_id' => $term->id
+            'term_id' => $term->id,
         ]);
 
         // Student tries to filter by another student's ID
@@ -576,7 +585,7 @@ class AdmissionApplicationApiTest extends TestCase
 
         // Should only see their own applications, not filtered by the requested student_id
         $response->assertStatus(200);
-        
+
         $applications = $response->json('data');
         $this->assertCount(1, $applications);
         $this->assertEquals($this->student->id, $applications[0]['student_id']);

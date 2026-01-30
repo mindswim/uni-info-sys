@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Feature;
 
-use App\Models\User;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,7 +16,7 @@ class MetricsEndpointTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create a user for authenticated requests
         $this->user = User::factory()->create();
         $adminRole = Role::factory()->create(['name' => 'Admin']);
@@ -42,9 +42,9 @@ class MetricsEndpointTest extends TestCase
         $response = $this->get('/api/metrics');
 
         $response->assertStatus(200);
-        
+
         $content = $response->getContent();
-        
+
         // Check for basic Prometheus metrics format
         $this->assertStringContainsString('# HELP', $content);
         $this->assertStringContainsString('# TYPE', $content);
@@ -56,16 +56,16 @@ class MetricsEndpointTest extends TestCase
         // Make some API requests to generate metrics
         $this->actingAs($this->user, 'sanctum')
             ->getJson('/api/v1/faculties');
-        
+
         $this->actingAs($this->user, 'sanctum')
             ->getJson('/api/v1/departments');
-        
+
         // Get metrics
         $response = $this->get('/api/metrics');
         $response->assertStatus(200);
-        
+
         $content = $response->getContent();
-        
+
         // Check that HTTP request metrics are present
         $this->assertStringContainsString('app_http_requests_total', $content);
         $this->assertStringContainsString('app_http_request_duration_seconds', $content);
@@ -77,11 +77,11 @@ class MetricsEndpointTest extends TestCase
         // Make a specific API request
         $this->actingAs($this->user, 'sanctum')
             ->getJson('/api/v1/faculties');
-        
+
         // Get metrics
         $response = $this->get('/api/metrics');
         $content = $response->getContent();
-        
+
         // Check that metrics include proper labels
         $this->assertStringContainsString('method="GET"', $content);
         $this->assertStringContainsString('status="200"', $content);
@@ -93,15 +93,15 @@ class MetricsEndpointTest extends TestCase
         // Make a request that will return 200
         $this->actingAs($this->user, 'sanctum')
             ->getJson('/api/v1/faculties');
-        
+
         // Make a request that might return 404/403
         $response404 = $this->actingAs($this->user, 'sanctum')
             ->getJson('/api/v1/faculties/99999');
-        
+
         // Get metrics
         $response = $this->get('/api/metrics');
         $content = $response->getContent();
-        
+
         // The test passes if the metrics endpoint is accessible
         // Actual metric collection may vary based on storage persistence
         $this->assertStringContainsString('# HELP', $content);
@@ -114,16 +114,16 @@ class MetricsEndpointTest extends TestCase
         // Make an API request
         $this->actingAs($this->user, 'sanctum')
             ->getJson('/api/v1/faculties');
-        
+
         // Get metrics
         $response = $this->get('/api/metrics');
         $content = $response->getContent();
-        
+
         // Check for histogram metrics
         $this->assertStringContainsString('app_http_request_duration_seconds_bucket', $content);
         $this->assertStringContainsString('app_http_request_duration_seconds_count', $content);
         $this->assertStringContainsString('app_http_request_duration_seconds_sum', $content);
-        
+
         // Check for histogram buckets
         $this->assertStringContainsString('le="0.1"', $content);
         $this->assertStringContainsString('le="0.25"', $content);
@@ -135,11 +135,11 @@ class MetricsEndpointTest extends TestCase
     {
         // Make an unauthenticated request to a public endpoint
         $this->getJson('/api/health');
-        
+
         // Get metrics
         $response = $this->get('/api/metrics');
         $content = $response->getContent();
-        
+
         // Verify that the request was tracked
         $this->assertStringContainsString('app_http_requests_total', $content);
     }
@@ -150,7 +150,7 @@ class MetricsEndpointTest extends TestCase
         // Make multiple requests quickly (more than the rate limit)
         for ($i = 0; $i < 65; $i++) {
             $response = $this->get('/api/metrics');
-            
+
             // The first 60 should succeed, then we should hit rate limit
             if ($i < 60) {
                 $this->assertEquals(200, $response->status(), "Request $i should succeed");
@@ -170,18 +170,18 @@ class MetricsEndpointTest extends TestCase
         // Make requests to endpoints with different IDs
         $this->actingAs($this->user, 'sanctum')
             ->getJson('/api/v1/faculties/1');
-        
+
         $this->actingAs($this->user, 'sanctum')
             ->getJson('/api/v1/faculties/2');
-        
+
         // Get metrics
         $response = $this->get('/api/metrics');
         $content = $response->getContent();
-        
+
         // Verify that specific IDs are not present in route labels
         $this->assertStringNotContainsString('route="api/v1/faculties/1"', $content);
         $this->assertStringNotContainsString('route="api/v1/faculties/2"', $content);
-        
+
         // The middleware logic is in place for route normalization
         $this->assertTrue(true, 'Route normalization logic is implemented in middleware');
     }

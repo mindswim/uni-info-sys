@@ -4,14 +4,14 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\HandlesCsvImportExport;
-use App\Jobs\ProcessStaffImport;
-use App\Models\Staff;
-use App\Models\User;
-use App\Models\CourseSection;
-use App\Http\Resources\StaffResource;
-use App\Http\Resources\CourseSectionResource;
 use App\Http\Requests\StoreStaffRequest;
 use App\Http\Requests\UpdateStaffRequest;
+use App\Http\Resources\CourseSectionResource;
+use App\Http\Resources\StaffResource;
+use App\Jobs\ProcessStaffImport;
+use App\Models\CourseSection;
+use App\Models\Staff;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -19,29 +19,30 @@ use Illuminate\Support\Facades\Hash;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(
-    name: "Staff",
-    description: "Endpoints for managing staff members."
+    name: 'Staff',
+    description: 'Endpoints for managing staff members.'
 )]
 class StaffController extends Controller
 {
     use HandlesCsvImportExport;
+
     #[OA\Get(
-        path: "/api/v1/staff",
-        summary: "List all staff members",
-        tags: ["Staff"],
+        path: '/api/v1/staff',
+        summary: 'List all staff members',
+        tags: ['Staff'],
         parameters: [
-            new OA\Parameter(name: "page", in: "query", required: false, schema: new OA\Schema(type: "integer", default: 1)),
-            new OA\Parameter(name: "department_id", in: "query", required: false, description: "Filter by department ID", schema: new OA\Schema(type: "integer")),
-            new OA\Parameter(name: "position", in: "query", required: false, description: "Filter by job title", schema: new OA\Schema(type: "string")),
+            new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 1)),
+            new OA\Parameter(name: 'department_id', in: 'query', required: false, description: 'Filter by department ID', schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'position', in: 'query', required: false, description: 'Filter by job title', schema: new OA\Schema(type: 'string')),
         ],
         responses: [
             new OA\Response(
                 response: 200,
-                description: "A paginated list of staff members.",
-                content: new OA\JsonContent(type: "array", items: new OA\Items(ref: "#/components/schemas/StaffResource"))
+                description: 'A paginated list of staff members.',
+                content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: '#/components/schemas/StaffResource'))
             ),
-            new OA\Response(response: 401, description: "Unauthenticated"),
-            new OA\Response(response: 403, description: "Unauthorized"),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
         ]
     )]
     public function index(Request $request)
@@ -62,22 +63,22 @@ class StaffController extends Controller
     }
 
     #[OA\Post(
-        path: "/api/v1/staff",
-        summary: "Create a new staff member",
-        tags: ["Staff"],
+        path: '/api/v1/staff',
+        summary: 'Create a new staff member',
+        tags: ['Staff'],
         requestBody: new OA\RequestBody(
             required: true,
-            content: new OA\JsonContent(ref: "#/components/schemas/StoreStaffRequest")
+            content: new OA\JsonContent(ref: '#/components/schemas/StoreStaffRequest')
         ),
         responses: [
             new OA\Response(
                 response: 201,
-                description: "Staff member created successfully.",
-                content: new OA\JsonContent(ref: "#/components/schemas/StaffResource")
+                description: 'Staff member created successfully.',
+                content: new OA\JsonContent(ref: '#/components/schemas/StaffResource')
             ),
-            new OA\Response(response: 401, description: "Unauthenticated"),
-            new OA\Response(response: 403, description: "Unauthorized"),
-            new OA\Response(response: 422, description: "Validation error"),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+            new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
     public function store(StoreStaffRequest $request)
@@ -108,21 +109,21 @@ class StaffController extends Controller
     }
 
     #[OA\Get(
-        path: "/api/v1/staff/{staff}",
-        summary: "Get a single staff member",
-        tags: ["Staff"],
+        path: '/api/v1/staff/{staff}',
+        summary: 'Get a single staff member',
+        tags: ['Staff'],
         parameters: [
-            new OA\Parameter(name: "staff", in: "path", required: true, description: "ID of the staff member", schema: new OA\Schema(type: "integer")),
+            new OA\Parameter(name: 'staff', in: 'path', required: true, description: 'ID of the staff member', schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
             new OA\Response(
                 response: 200,
-                description: "The requested staff member.",
-                content: new OA\JsonContent(ref: "#/components/schemas/StaffResource")
+                description: 'The requested staff member.',
+                content: new OA\JsonContent(ref: '#/components/schemas/StaffResource')
             ),
-            new OA\Response(response: 401, description: "Unauthenticated"),
-            new OA\Response(response: 403, description: "Unauthorized"),
-            new OA\Response(response: 404, description: "Not Found"),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+            new OA\Response(response: 404, description: 'Not Found'),
         ]
     )]
     public function show(Staff $staff)
@@ -130,30 +131,31 @@ class StaffController extends Controller
         $this->authorize('view', $staff);
 
         $staff->load(['user', 'department']);
+
         return new StaffResource($staff);
     }
 
     #[OA\Put(
-        path: "/api/v1/staff/{staff}",
-        summary: "Update a staff member",
-        tags: ["Staff"],
+        path: '/api/v1/staff/{staff}',
+        summary: 'Update a staff member',
+        tags: ['Staff'],
         parameters: [
-            new OA\Parameter(name: "staff", in: "path", required: true, description: "ID of the staff member", schema: new OA\Schema(type: "integer")),
+            new OA\Parameter(name: 'staff', in: 'path', required: true, description: 'ID of the staff member', schema: new OA\Schema(type: 'integer')),
         ],
         requestBody: new OA\RequestBody(
             required: true,
-            content: new OA\JsonContent(ref: "#/components/schemas/UpdateStaffRequest")
+            content: new OA\JsonContent(ref: '#/components/schemas/UpdateStaffRequest')
         ),
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Staff member updated successfully.",
-                content: new OA\JsonContent(ref: "#/components/schemas/StaffResource")
+                description: 'Staff member updated successfully.',
+                content: new OA\JsonContent(ref: '#/components/schemas/StaffResource')
             ),
-            new OA\Response(response: 401, description: "Unauthenticated"),
-            new OA\Response(response: 403, description: "Unauthorized"),
-            new OA\Response(response: 404, description: "Not Found"),
-            new OA\Response(response: 422, description: "Validation error"),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+            new OA\Response(response: 404, description: 'Not Found'),
+            new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
     public function update(UpdateStaffRequest $request, Staff $staff)
@@ -166,26 +168,27 @@ class StaffController extends Controller
             if (isset($validated['user'])) {
                 $staff->user->update($validated['user']);
             }
-            
+
             $staff->update($validated);
         });
 
         $staff->load(['user', 'department']);
+
         return new StaffResource($staff);
     }
 
     #[OA\Delete(
-        path: "/api/v1/staff/{staff}",
-        summary: "Delete a staff member",
-        tags: ["Staff"],
+        path: '/api/v1/staff/{staff}',
+        summary: 'Delete a staff member',
+        tags: ['Staff'],
         parameters: [
-            new OA\Parameter(name: "staff", in: "path", required: true, description: "ID of the staff member", schema: new OA\Schema(type: "integer")),
+            new OA\Parameter(name: 'staff', in: 'path', required: true, description: 'ID of the staff member', schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 204, description: "Staff member deleted successfully."),
-            new OA\Response(response: 401, description: "Unauthenticated"),
-            new OA\Response(response: 403, description: "Unauthorized"),
-            new OA\Response(response: 404, description: "Not Found"),
+            new OA\Response(response: 204, description: 'Staff member deleted successfully.'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+            new OA\Response(response: 404, description: 'Not Found'),
         ]
     )]
     public function destroy(Staff $staff)
@@ -205,22 +208,22 @@ class StaffController extends Controller
     }
 
     #[OA\Get(
-        path: "/api/v1/staff/me",
+        path: '/api/v1/staff/me',
         summary: "Get the authenticated staff member's profile",
-        tags: ["Staff"],
+        tags: ['Staff'],
         responses: [
             new OA\Response(
                 response: 200,
                 description: "The authenticated staff member's profile.",
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "data", ref: "#/components/schemas/StaffResource"),
+                        new OA\Property(property: 'data', ref: '#/components/schemas/StaffResource'),
                     ],
-                    type: "object"
+                    type: 'object'
                 )
             ),
-            new OA\Response(response: 401, description: "Unauthenticated"),
-            new OA\Response(response: 404, description: "Staff profile not found for the authenticated user"),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 404, description: 'Staff profile not found for the authenticated user'),
         ]
     )]
     public function me(Request $request)
@@ -231,54 +234,54 @@ class StaffController extends Controller
             ->with(['user', 'department'])
             ->first();
 
-        if (!$staff) {
+        if (! $staff) {
             return response()->json([
-                'message' => 'Staff profile not found for the authenticated user'
+                'message' => 'Staff profile not found for the authenticated user',
             ], 404);
         }
 
         return response()->json([
-            'data' => new StaffResource($staff)
+            'data' => new StaffResource($staff),
         ], 200);
     }
 
     #[OA\Get(
-        path: "/api/v1/staff/me/sections",
+        path: '/api/v1/staff/me/sections',
         summary: "Get the authenticated staff member's course sections",
-        tags: ["Staff"],
+        tags: ['Staff'],
         parameters: [
             new OA\Parameter(
-                name: "term_id",
-                in: "query",
+                name: 'term_id',
+                in: 'query',
                 required: false,
-                description: "Filter by term ID",
-                schema: new OA\Schema(type: "integer")
+                description: 'Filter by term ID',
+                schema: new OA\Schema(type: 'integer')
             ),
             new OA\Parameter(
-                name: "status",
-                in: "query",
+                name: 'status',
+                in: 'query',
                 required: false,
-                description: "Filter by section status (active, completed, cancelled)",
-                schema: new OA\Schema(type: "string")
+                description: 'Filter by section status (active, completed, cancelled)',
+                schema: new OA\Schema(type: 'string')
             ),
         ],
         responses: [
             new OA\Response(
                 response: 200,
-                description: "List of course sections taught by the authenticated staff member.",
+                description: 'List of course sections taught by the authenticated staff member.',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(
-                            property: "data",
-                            type: "array",
-                            items: new OA\Items(ref: "#/components/schemas/CourseSectionResource")
+                            property: 'data',
+                            type: 'array',
+                            items: new OA\Items(ref: '#/components/schemas/CourseSectionResource')
                         ),
                     ],
-                    type: "object"
+                    type: 'object'
                 )
             ),
-            new OA\Response(response: 401, description: "Unauthenticated"),
-            new OA\Response(response: 404, description: "Staff profile not found for the authenticated user"),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 404, description: 'Staff profile not found for the authenticated user'),
         ]
     )]
     public function mySections(Request $request)
@@ -287,9 +290,9 @@ class StaffController extends Controller
 
         $staff = Staff::where('user_id', $user->id)->first();
 
-        if (!$staff) {
+        if (! $staff) {
             return response()->json([
-                'message' => 'Staff profile not found for the authenticated user'
+                'message' => 'Staff profile not found for the authenticated user',
             ], 404);
         }
 
@@ -298,7 +301,7 @@ class StaffController extends Controller
                 'course',
                 'term',
                 'room.building',
-                'enrollments.student.user'
+                'enrollments.student.user',
             ]);
 
         if ($request->has('term_id')) {
@@ -314,7 +317,7 @@ class StaffController extends Controller
             ->get();
 
         return response()->json([
-            'data' => CourseSectionResource::collection($sections)
+            'data' => CourseSectionResource::collection($sections),
         ], 200);
     }
 
@@ -327,9 +330,9 @@ class StaffController extends Controller
 
         $staff = Staff::where('user_id', $user->id)->first();
 
-        if (!$staff) {
+        if (! $staff) {
             return response()->json([
-                'message' => 'Staff profile not found for the authenticated user'
+                'message' => 'Staff profile not found for the authenticated user',
             ], 404);
         }
 
@@ -340,18 +343,18 @@ class StaffController extends Controller
                 $q->where('term_id', $request->term_id);
             }
         })
-        ->with([
-            'user',
-            'majorProgram',
-            'enrollments' => function ($q) use ($staff, $request) {
-                $q->whereHas('courseSection', function ($sq) use ($staff, $request) {
-                    $sq->where('instructor_id', $staff->id);
-                    if ($request->has('term_id')) {
-                        $sq->where('term_id', $request->term_id);
-                    }
-                })->with('courseSection.course');
-            }
-        ]);
+            ->with([
+                'user',
+                'majorProgram',
+                'enrollments' => function ($q) use ($staff, $request) {
+                    $q->whereHas('courseSection', function ($sq) use ($staff, $request) {
+                        $sq->where('instructor_id', $staff->id);
+                        if ($request->has('term_id')) {
+                            $sq->where('term_id', $request->term_id);
+                        }
+                    })->with('courseSection.course');
+                },
+            ]);
 
         // Search filter
         if ($request->has('search')) {
@@ -380,7 +383,7 @@ class StaffController extends Controller
                     'student_number' => $student->student_number,
                     'first_name' => $student->first_name,
                     'last_name' => $student->last_name,
-                    'full_name' => $student->first_name . ' ' . $student->last_name,
+                    'full_name' => $student->first_name.' '.$student->last_name,
                     'email' => $student->user?->email,
                     'gpa' => $student->gpa,
                     'semester_gpa' => $student->semester_gpa,
@@ -405,7 +408,7 @@ class StaffController extends Controller
             }),
             'meta' => [
                 'total' => $students->count(),
-            ]
+            ],
         ]);
     }
 

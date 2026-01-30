@@ -14,21 +14,21 @@ return new class extends Migration
     {
         // Check if the unique constraint already exists
         $hasUniqueConstraint = $this->hasUniqueConstraint();
-        
-        if (!$hasUniqueConstraint) {
+
+        if (! $hasUniqueConstraint) {
             Schema::table('terms', function (Blueprint $table) {
                 $table->unique(['academic_year', 'semester'], 'terms_academic_year_semester_unique');
             });
         }
 
         // Add individual indexes for better query performance
-        if (!$this->hasIndex('terms_academic_year_index')) {
+        if (! $this->hasIndex('terms_academic_year_index')) {
             Schema::table('terms', function (Blueprint $table) {
                 $table->index('academic_year', 'terms_academic_year_index');
             });
         }
 
-        if (!$this->hasIndex('terms_semester_index')) {
+        if (! $this->hasIndex('terms_semester_index')) {
             Schema::table('terms', function (Blueprint $table) {
                 $table->index('semester', 'terms_semester_index');
             });
@@ -45,11 +45,11 @@ return new class extends Migration
             if ($this->hasIndex('terms_academic_year_index')) {
                 $table->dropIndex('terms_academic_year_index');
             }
-            
+
             if ($this->hasIndex('terms_semester_index')) {
                 $table->dropIndex('terms_semester_index');
             }
-            
+
             // Drop unique constraint if it exists
             if ($this->hasUniqueConstraint()) {
                 $table->dropUnique('terms_academic_year_semester_unique');
@@ -63,7 +63,7 @@ return new class extends Migration
     private function hasUniqueConstraint(): bool
     {
         $databaseName = DB::getDatabaseName();
-        
+
         // Check for MySQL
         if (DB::getDriverName() === 'mysql') {
             $constraint = DB::select("
@@ -74,10 +74,10 @@ return new class extends Migration
                 AND CONSTRAINT_TYPE = 'UNIQUE'
                 AND CONSTRAINT_NAME = 'terms_academic_year_semester_unique'
             ", [$databaseName]);
-            
-            return !empty($constraint);
+
+            return ! empty($constraint);
         }
-        
+
         // For other databases, assume constraint exists to be safe
         return false;
     }
@@ -88,7 +88,7 @@ return new class extends Migration
     private function hasIndex(string $indexName): bool
     {
         $databaseName = DB::getDatabaseName();
-        
+
         // Check for MySQL
         if (DB::getDriverName() === 'mysql') {
             $index = DB::select("
@@ -98,10 +98,10 @@ return new class extends Migration
                 AND TABLE_NAME = 'terms' 
                 AND INDEX_NAME = ?
             ", [$databaseName, $indexName]);
-            
-            return !empty($index);
+
+            return ! empty($index);
         }
-        
+
         // For other databases, assume index doesn't exist
         return false;
     }

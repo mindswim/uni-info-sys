@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Course;
-use App\Models\Term;
-use App\Models\Staff;
 use App\Models\Room;
+use App\Models\Staff;
+use App\Models\Term;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\CourseSection>
@@ -32,7 +32,7 @@ class CourseSectionFactory extends Factory
             ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], // Daily classes
             ['Saturday'], // Weekend classes
             ['Monday', 'Wednesday'], // Two days per week
-            ['Tuesday', 'Thursday', 'Friday'] // Three days per week
+            ['Tuesday', 'Thursday', 'Friday'], // Three days per week
         ]);
 
         // Create some variety in capacity including small seminars and large lectures
@@ -41,7 +41,7 @@ class CourseSectionFactory extends Factory
             $this->faker->numberBetween(15, 30),  // Normal classes
             $this->faker->numberBetween(30, 50),  // Medium classes
             $this->faker->numberBetween(50, 100), // Large classes
-            $this->faker->numberBetween(100, 300) // Lecture halls
+            $this->faker->numberBetween(100, 300), // Lecture halls
         ]);
 
         // Include some closed/full sections for edge case testing

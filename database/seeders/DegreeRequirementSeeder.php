@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Course;
-use App\Models\DegreeRequirement;
 use App\Models\Program;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
@@ -16,6 +15,7 @@ class DegreeRequirementSeeder extends Seeder
 
         if ($programs->isEmpty()) {
             Log::warning('DegreeRequirementSeeder: No programs found. Run ProgramSeeder first.');
+
             return;
         }
 
@@ -23,7 +23,7 @@ class DegreeRequirementSeeder extends Seeder
             $this->seedRequirementsForProgram($program);
         }
 
-        Log::info('DegreeRequirementSeeder: Seeded degree requirements for ' . $programs->count() . ' programs.');
+        Log::info('DegreeRequirementSeeder: Seeded degree requirements for '.$programs->count().' programs.');
     }
 
     private function seedRequirementsForProgram(Program $program): void
@@ -53,8 +53,8 @@ class DegreeRequirementSeeder extends Seeder
         $requirements = [
             [
                 'category' => 'core',
-                'name' => $program->name . ' Core',
-                'description' => 'Required core courses for the ' . $program->name . ' program.',
+                'name' => $program->name.' Core',
+                'description' => 'Required core courses for the '.$program->name.' program.',
                 'required_credit_hours' => (int) round($totalCredits * 0.30),
                 'min_courses' => max(1, (int) round(count($deptCourses) * 0.4)),
                 'allowed_courses' => array_slice($deptCourses, 0, 15),
@@ -63,7 +63,7 @@ class DegreeRequirementSeeder extends Seeder
             ],
             [
                 'category' => 'major',
-                'name' => $program->name . ' Electives',
+                'name' => $program->name.' Electives',
                 'description' => 'Elective courses within the major field.',
                 'required_credit_hours' => (int) round($totalCredits * 0.15),
                 'min_courses' => 3,
@@ -77,7 +77,7 @@ class DegreeRequirementSeeder extends Seeder
                 'description' => 'Required mathematics courses.',
                 'required_credit_hours' => 12,
                 'min_courses' => 3,
-                'allowed_courses' => !empty($mathCourses) ? $mathCourses : null,
+                'allowed_courses' => ! empty($mathCourses) ? $mathCourses : null,
                 'is_required' => true,
                 'sort_order' => 3,
             ],
@@ -87,7 +87,7 @@ class DegreeRequirementSeeder extends Seeder
                 'description' => 'Required writing and composition courses.',
                 'required_credit_hours' => 6,
                 'min_courses' => 2,
-                'allowed_courses' => !empty($engCourses) ? $engCourses : null,
+                'allowed_courses' => ! empty($engCourses) ? $engCourses : null,
                 'is_required' => true,
                 'sort_order' => 4,
             ],
@@ -97,7 +97,7 @@ class DegreeRequirementSeeder extends Seeder
                 'description' => 'Breadth requirement in humanities and social sciences.',
                 'required_credit_hours' => 12,
                 'min_courses' => 4,
-                'allowed_courses' => !empty($genEdCourses) ? array_slice($genEdCourses, 0, 10) : null,
+                'allowed_courses' => ! empty($genEdCourses) ? array_slice($genEdCourses, 0, 10) : null,
                 'is_required' => true,
                 'sort_order' => 5,
             ],

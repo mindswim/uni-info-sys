@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Models\Program;
 use App\Models\Department;
+use App\Models\Program;
 
 class ProcessProgramImport extends AbstractCsvImportJob
 {
@@ -50,7 +50,7 @@ class ProcessProgramImport extends AbstractCsvImportJob
     {
         $department = Department::where('code', $data['department_code'])->first();
 
-        if (!$department) {
+        if (! $department) {
             throw new \Exception("Department '{$data['department_code']}' not found");
         }
 

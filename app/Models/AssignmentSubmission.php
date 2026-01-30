@@ -122,7 +122,7 @@ class AssignmentSubmission extends Model
      */
     public function isPassing(): bool
     {
-        if (!$this->isGraded() || $this->final_score === null) {
+        if (! $this->isGraded() || $this->final_score === null) {
             return false;
         }
 

@@ -17,7 +17,7 @@ class EnrollmentFilterTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->filter = new EnrollmentFilter();
+        $this->filter = new EnrollmentFilter;
     }
 
     /** @test */

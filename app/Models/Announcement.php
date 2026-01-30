@@ -69,7 +69,7 @@ class Announcement extends Model
      */
     public function isVisible(): bool
     {
-        if (!$this->is_published) {
+        if (! $this->is_published) {
             return false;
         }
 
@@ -136,11 +136,11 @@ class Announcement extends Model
         return $query->where('is_published', true)
             ->where(function ($q) {
                 $q->whereNull('published_at')
-                  ->orWhere('published_at', '<=', now());
+                    ->orWhere('published_at', '<=', now());
             })
             ->where(function ($q) {
                 $q->whereNull('expires_at')
-                  ->orWhere('expires_at', '>', now());
+                    ->orWhere('expires_at', '>', now());
             });
     }
 
@@ -150,7 +150,7 @@ class Announcement extends Model
     public function scopeUniversityWide($query)
     {
         return $query->whereNull('announceable_type')
-                     ->whereNull('announceable_id');
+            ->whereNull('announceable_id');
     }
 
     /**
@@ -159,7 +159,7 @@ class Announcement extends Model
     public function scopeForCourseSection($query, int $sectionId)
     {
         return $query->where('announceable_type', CourseSection::class)
-                     ->where('announceable_id', $sectionId);
+            ->where('announceable_id', $sectionId);
     }
 
     /**
@@ -168,7 +168,7 @@ class Announcement extends Model
     public function scopeForDepartment($query, int $departmentId)
     {
         return $query->where('announceable_type', Department::class)
-                     ->where('announceable_id', $departmentId);
+            ->where('announceable_id', $departmentId);
     }
 
     /**
@@ -201,7 +201,7 @@ class Announcement extends Model
     public function scopeLatest($query)
     {
         return $query->orderByDesc('published_at')
-                     ->orderByDesc('created_at');
+            ->orderByDesc('created_at');
     }
 
     /**
@@ -210,7 +210,7 @@ class Announcement extends Model
     public function scopeOrdered($query)
     {
         return $query->pinnedFirst()
-                     ->orderByPriority()
-                     ->latest();
+            ->orderByPriority()
+            ->latest();
     }
 }

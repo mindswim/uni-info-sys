@@ -18,9 +18,13 @@ class TuitionRateTest extends TestCase
     use RefreshDatabase;
 
     private User $adminUser;
+
     private User $staffUser;
+
     private User $studentUser;
+
     private Program $program;
+
     private Term $term;
 
     protected function setUp(): void

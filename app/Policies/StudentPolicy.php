@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Student;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class StudentPolicy
 {
@@ -24,6 +23,7 @@ class StudentPolicy
     public function view(User $user, Student $student): bool
     {
         $userRoles = $user->roles()->pluck('name')->toArray();
+
         // An admin/staff can view any student, or a student can view their own record.
         return in_array('admin', $userRoles) || in_array('staff', $userRoles) || $user->id === $student->user_id;
     }
@@ -34,6 +34,7 @@ class StudentPolicy
     public function create(User $user): bool
     {
         $userRoles = $user->roles()->pluck('name')->toArray();
+
         // Only admin can create students for now.
         return in_array('admin', $userRoles);
     }
@@ -44,6 +45,7 @@ class StudentPolicy
     public function update(User $user, Student $student): bool
     {
         $userRoles = $user->roles()->pluck('name')->toArray();
+
         // Admin can update any student, or a student can update their own profile.
         return in_array('admin', $userRoles) || $user->id === $student->user_id;
     }
@@ -54,6 +56,7 @@ class StudentPolicy
     public function delete(User $user, Student $student): bool
     {
         $userRoles = $user->roles()->pluck('name')->toArray();
+
         // Only admin can delete students for now.
         return in_array('admin', $userRoles);
     }
@@ -64,6 +67,7 @@ class StudentPolicy
     public function restore(User $user, Student $student): bool
     {
         $userRoles = $user->roles()->pluck('name')->toArray();
+
         return in_array('admin', $userRoles);
     }
 
@@ -73,6 +77,7 @@ class StudentPolicy
     public function forceDelete(User $user, Student $student): bool
     {
         $userRoles = $user->roles()->pluck('name')->toArray();
+
         return in_array('admin', $userRoles);
     }
 }

@@ -35,13 +35,21 @@ class ActionItem extends Model
 
     // Action item types
     public const TYPE_REGISTRATION = 'registration';
+
     public const TYPE_FINANCIAL_AID = 'financial_aid';
+
     public const TYPE_PAYMENT = 'payment';
+
     public const TYPE_DOCUMENT = 'document';
+
     public const TYPE_ADVISING = 'advising';
+
     public const TYPE_COURSE_EVAL = 'course_eval';
+
     public const TYPE_IMMUNIZATION = 'immunization';
+
     public const TYPE_ORIENTATION = 'orientation';
+
     public const TYPE_GRADUATION = 'graduation';
 
     public const TYPES = [
@@ -58,8 +66,11 @@ class ActionItem extends Model
 
     // Status values
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_IN_PROGRESS = 'in_progress';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_DISMISSED = 'dismissed';
 
     public const STATUSES = [
@@ -71,8 +82,11 @@ class ActionItem extends Model
 
     // Priority levels
     public const PRIORITY_LOW = 'low';
+
     public const PRIORITY_NORMAL = 'normal';
+
     public const PRIORITY_HIGH = 'high';
+
     public const PRIORITY_URGENT = 'urgent';
 
     public const PRIORITIES = [
@@ -153,7 +167,7 @@ class ActionItem extends Model
 
     public function isOverdue(): bool
     {
-        return $this->due_date && $this->due_date->isPast() && !$this->isComplete();
+        return $this->due_date && $this->due_date->isPast() && ! $this->isComplete();
     }
 
     public function isDueSoon(int $days = 7): bool
@@ -161,7 +175,7 @@ class ActionItem extends Model
         return $this->due_date &&
                $this->due_date->isFuture() &&
                $this->due_date->lte(now()->addDays($days)) &&
-               !$this->isComplete();
+               ! $this->isComplete();
     }
 
     public function markComplete(): void

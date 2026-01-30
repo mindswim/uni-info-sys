@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\Faculty;
 use App\Models\Department;
+use App\Models\Faculty;
 use App\Models\Program;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -15,11 +15,11 @@ class AcademicHierarchyTest extends TestCase
     public function test_can_create_faculty(): void
     {
         $faculty = Faculty::create([
-            'name' => 'Faculty of Engineering'
+            'name' => 'Faculty of Engineering',
         ]);
 
         $this->assertDatabaseHas('faculties', [
-            'name' => 'Faculty of Engineering'
+            'name' => 'Faculty of Engineering',
         ]);
 
         $this->assertEquals('Faculty of Engineering', $faculty->name);
@@ -28,16 +28,16 @@ class AcademicHierarchyTest extends TestCase
     public function test_can_create_department_with_faculty(): void
     {
         $faculty = Faculty::create(['name' => 'Faculty of Engineering']);
-        
+
         $department = Department::create([
             'faculty_id' => $faculty->id,
             'name' => 'Computer Science',
-            'code' => 'CS'
+            'code' => 'CS',
         ]);
 
         $this->assertDatabaseHas('departments', [
             'faculty_id' => $faculty->id,
-            'name' => 'Computer Science'
+            'name' => 'Computer Science',
         ]);
 
         $this->assertEquals('Computer Science', $department->name);
@@ -47,7 +47,7 @@ class AcademicHierarchyTest extends TestCase
     public function test_faculty_has_many_departments(): void
     {
         $faculty = Faculty::create(['name' => 'Faculty of Engineering']);
-        
+
         $dept1 = Department::create(['faculty_id' => $faculty->id, 'name' => 'Computer Science', 'code' => 'CS']);
         $dept2 = Department::create(['faculty_id' => $faculty->id, 'name' => 'Electrical Engineering', 'code' => 'EE']);
 
@@ -69,7 +69,7 @@ class AcademicHierarchyTest extends TestCase
     {
         $faculty = Faculty::create(['name' => 'Faculty of Engineering']);
         $department = Department::create(['faculty_id' => $faculty->id, 'name' => 'Computer Science', 'code' => 'CS']);
-        
+
         $program = Program::create([
             'name' => 'Bachelor of Computer Science',
             'department_id' => $department->id,
@@ -77,12 +77,12 @@ class AcademicHierarchyTest extends TestCase
             'duration' => 4,
             'description' => 'A comprehensive computer science program',
             'requirements' => 'High school diploma with mathematics',
-            'capacity' => 100
+            'capacity' => 100,
         ]);
 
         $this->assertDatabaseHas('programs', [
             'name' => 'Bachelor of Computer Science',
-            'department_id' => $department->id
+            'department_id' => $department->id,
         ]);
 
         $this->assertEquals('Bachelor of Computer Science', $program->name);
@@ -93,7 +93,7 @@ class AcademicHierarchyTest extends TestCase
     {
         $faculty = Faculty::create(['name' => 'Faculty of Engineering']);
         $department = Department::create(['faculty_id' => $faculty->id, 'name' => 'Computer Science', 'code' => 'CS']);
-        
+
         $program1 = Program::create([
             'name' => 'Bachelor of Computer Science',
             'department_id' => $department->id,
@@ -101,7 +101,7 @@ class AcademicHierarchyTest extends TestCase
             'duration' => 4,
             'description' => 'Bachelor program',
             'requirements' => 'High school diploma',
-            'capacity' => 100
+            'capacity' => 100,
         ]);
 
         $program2 = Program::create([
@@ -111,7 +111,7 @@ class AcademicHierarchyTest extends TestCase
             'duration' => 2,
             'description' => 'Master program',
             'requirements' => 'Bachelor degree',
-            'capacity' => 50
+            'capacity' => 50,
         ]);
 
         $this->assertCount(2, $department->programs);
@@ -123,7 +123,7 @@ class AcademicHierarchyTest extends TestCase
     {
         $faculty = Faculty::create(['name' => 'Faculty of Engineering']);
         $department = Department::create(['faculty_id' => $faculty->id, 'name' => 'Computer Science', 'code' => 'CS']);
-        
+
         $program = Program::create([
             'name' => 'Bachelor of Computer Science',
             'department_id' => $department->id,
@@ -131,7 +131,7 @@ class AcademicHierarchyTest extends TestCase
             'duration' => 4,
             'description' => 'Bachelor program',
             'requirements' => 'High school diploma',
-            'capacity' => 100
+            'capacity' => 100,
         ]);
 
         $this->assertInstanceOf(Department::class, $program->department);
@@ -154,7 +154,7 @@ class AcademicHierarchyTest extends TestCase
     {
         $faculty = Faculty::create(['name' => 'Faculty of Engineering']);
         $department = Department::create(['faculty_id' => $faculty->id, 'name' => 'Computer Science', 'code' => 'CS']);
-        
+
         $program = Program::create([
             'name' => 'Bachelor of Computer Science',
             'department_id' => $department->id,
@@ -162,7 +162,7 @@ class AcademicHierarchyTest extends TestCase
             'duration' => 4,
             'description' => 'Bachelor program',
             'requirements' => 'High school diploma',
-            'capacity' => 100
+            'capacity' => 100,
         ]);
 
         $this->assertDatabaseHas('programs', ['id' => $program->id, 'department_id' => $department->id]);
@@ -252,28 +252,28 @@ class AcademicHierarchyTest extends TestCase
         $engineeringFaculty = Faculty::where('name', 'Faculty of Engineering')->first();
         $this->assertDatabaseHas('departments', [
             'faculty_id' => $engineeringFaculty->id,
-            'name' => 'Computer Science'
+            'name' => 'Computer Science',
         ]);
         $this->assertDatabaseHas('departments', [
             'faculty_id' => $engineeringFaculty->id,
-            'name' => 'Electrical Engineering'
+            'name' => 'Electrical Engineering',
         ]);
 
         $scienceFaculty = Faculty::where('name', 'Faculty of Science')->first();
         $this->assertDatabaseHas('departments', [
             'faculty_id' => $scienceFaculty->id,
-            'name' => 'Mathematics'
+            'name' => 'Mathematics',
         ]);
 
         // Verify programs were created with correct department relationships
         $csDepartment = Department::where('name', 'Computer Science')->first();
         $this->assertDatabaseHas('programs', [
             'department_id' => $csDepartment->id,
-            'name' => 'Bachelor of Computer Science'
+            'name' => 'Bachelor of Computer Science',
         ]);
         $this->assertDatabaseHas('programs', [
             'department_id' => $csDepartment->id,
-            'name' => 'Master of Computer Science'
+            'name' => 'Master of Computer Science',
         ]);
 
         // Verify the complete hierarchy works

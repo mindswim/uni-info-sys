@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Enrollment;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class EnrollmentPolicy
 {
@@ -23,8 +22,8 @@ class EnrollmentPolicy
     public function view(User $user, Enrollment $enrollment): bool
     {
         // Admin/staff can view any enrollment, student can view their own
-        return $user->hasRole('admin') || 
-               $user->hasRole('staff') || 
+        return $user->hasRole('admin') ||
+               $user->hasRole('staff') ||
                ($user->hasRole('student') && $user->id === $enrollment->student->user_id);
     }
 
@@ -43,8 +42,8 @@ class EnrollmentPolicy
     public function update(User $user, Enrollment $enrollment): bool
     {
         // Admin/staff can update any enrollment, student can update their own
-        return $user->hasRole('admin') || 
-               $user->hasRole('staff') || 
+        return $user->hasRole('admin') ||
+               $user->hasRole('staff') ||
                ($user->hasRole('student') && $user->id === $enrollment->student->user_id);
     }
 
@@ -54,8 +53,8 @@ class EnrollmentPolicy
     public function delete(User $user, Enrollment $enrollment): bool
     {
         // Admin/staff can delete any, student can withdraw from their own enrollment
-        return $user->hasRole('admin') || 
-               $user->hasRole('staff') || 
+        return $user->hasRole('admin') ||
+               $user->hasRole('staff') ||
                ($user->hasRole('student') && $user->id === $enrollment->student->user_id);
     }
 

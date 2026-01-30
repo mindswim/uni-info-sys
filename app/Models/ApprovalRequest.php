@@ -12,6 +12,7 @@ class ApprovalRequest extends Model
     use HasFactory;
 
     const TYPE_SECTION_OFFERING = 'section_offering';
+
     const TYPE_ENROLLMENT_OVERRIDE = 'enrollment_override';
 
     protected $fillable = [

@@ -32,6 +32,7 @@ class GraduationApplicationController extends Controller
         // Append clearance summary to each application
         $applications->getCollection()->transform(function ($app) {
             $app->clearance_summary = $app->getClearanceSummary();
+
             return $app;
         });
 
@@ -51,6 +52,7 @@ class GraduationApplicationController extends Controller
             ->get()
             ->map(function ($app) {
                 $app->clearance_summary = $app->getClearanceSummary();
+
                 return $app;
             });
 
@@ -138,7 +140,7 @@ class GraduationApplicationController extends Controller
      */
     public function clearDepartment(Request $request, GraduationApplication $graduationApplication, string $department): JsonResponse
     {
-        if (!in_array($graduationApplication->status, ['clearance_in_progress', 'cleared'])) {
+        if (! in_array($graduationApplication->status, ['clearance_in_progress', 'cleared'])) {
             return response()->json(['message' => 'Application is not in clearance stage.'], 422);
         }
 
@@ -162,7 +164,7 @@ class GraduationApplicationController extends Controller
      */
     public function blockDepartment(Request $request, GraduationApplication $graduationApplication, string $department): JsonResponse
     {
-        if (!in_array($graduationApplication->status, ['clearance_in_progress', 'cleared'])) {
+        if (! in_array($graduationApplication->status, ['clearance_in_progress', 'cleared'])) {
             return response()->json(['message' => 'Application is not in clearance stage.'], 422);
         }
 
@@ -235,7 +237,7 @@ class GraduationApplicationController extends Controller
     public function deny(Request $request, GraduationApplication $graduationApplication): JsonResponse
     {
         $allowedStatuses = ['pending', 'under_review', 'clearance_in_progress', 'cleared'];
-        if (!in_array($graduationApplication->status, $allowedStatuses)) {
+        if (! in_array($graduationApplication->status, $allowedStatuses)) {
             return response()->json(['message' => 'Application cannot be denied in its current state.'], 422);
         }
 

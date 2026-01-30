@@ -3,9 +3,8 @@
 namespace App\Policies;
 
 use App\Models\Document;
-use App\Models\User;
 use App\Models\Student;
-use Illuminate\Auth\Access\Response;
+use App\Models\User;
 
 class DocumentPolicy
 {

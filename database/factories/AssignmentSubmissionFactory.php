@@ -33,8 +33,9 @@ class AssignmentSubmissionFactory extends Factory
             'file_path' => $this->faker->optional(0.3)->filePath(),
             'file_name' => function (array $attributes) {
                 if ($attributes['file_path']) {
-                    return $this->faker->word() . '_submission.' . $this->faker->randomElement(['pdf', 'docx', 'txt']);
+                    return $this->faker->word().'_submission.'.$this->faker->randomElement(['pdf', 'docx', 'txt']);
                 }
+
                 return null;
             },
             'status' => $status,
@@ -155,7 +156,7 @@ class AssignmentSubmissionFactory extends Factory
             return [
                 'status' => 'returned',
                 'score' => $this->faker->randomFloat(2, 40, 80),
-                'feedback' => 'Please revise: ' . $this->faker->sentence(),
+                'feedback' => 'Please revise: '.$this->faker->sentence(),
                 'graded_at' => $this->faker->dateTimeBetween('-3 days', 'now'),
                 'graded_by' => Staff::factory(),
             ];

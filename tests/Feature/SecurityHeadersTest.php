@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Feature;
 
-use App\Models\User;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -58,7 +58,7 @@ class SecurityHeadersTest extends TestCase
 
         // Give the user the required permission explicitly
         $permission = \App\Models\Permission::where('name', 'hierarchy.manage')->first();
-        if (!$permission) {
+        if (! $permission) {
             $permission = \App\Models\Permission::create(['name' => 'hierarchy.manage']);
         }
         $adminRole->permissions()->attach($permission);
@@ -105,17 +105,17 @@ class SecurityHeadersTest extends TestCase
     {
         // Test in non-production environment (default for tests)
         $response = $this->get('/');
-        
+
         $response->assertHeaderMissing('Strict-Transport-Security');
-        
+
         // Simulate production environment
         $this->app['env'] = 'production';
         app()->detectEnvironment(function () {
             return 'production';
         });
-        
+
         $response = $this->get('/');
-        
+
         $response->assertHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     }
 
@@ -148,10 +148,10 @@ class SecurityHeadersTest extends TestCase
         $response->assertHeader('Referrer-Policy', 'no-referrer-when-downgrade');
         $response->assertHeader('X-XSS-Protection', '1; mode=block');
         $response->assertHeader('X-Permitted-Cross-Domain-Policies', 'none');
-        
+
         // CSP header
         $this->assertTrue($response->headers->has('Content-Security-Policy'));
-        
+
         // Verify sensitive headers are removed
         $response->assertHeaderMissing('X-Powered-By');
         $response->assertHeaderMissing('Server');

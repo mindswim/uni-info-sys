@@ -6,7 +6,6 @@ use App\Models\Course;
 use App\Models\DegreeRequirement;
 use App\Models\Department;
 use App\Models\Faculty;
-use App\Models\Permission;
 use App\Models\Program;
 use App\Models\Role;
 use App\Models\User;
@@ -19,8 +18,11 @@ class DegreeRequirementTest extends TestCase
     use RefreshDatabase;
 
     private User $adminUser;
+
     private User $studentUser;
+
     private Program $program;
+
     private Department $department;
 
     protected function setUp(): void

@@ -19,10 +19,15 @@ class InstructorAssignmentApiTest extends TestCase
     use RefreshDatabase;
 
     private User $chairUser;
+
     private Staff $chairStaff;
+
     private Department $department;
+
     private CourseSection $section;
+
     private Staff $instructor;
+
     private Term $term;
 
     protected function setUp(): void

@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class MessageController extends Controller
 {
@@ -25,7 +25,7 @@ class MessageController extends Controller
             ->get();
 
         return response()->json([
-            'data' => $conversations->map(fn($conv) => $this->formatConversation($conv, $user))
+            'data' => $conversations->map(fn ($conv) => $this->formatConversation($conv, $user)),
         ]);
     }
 
@@ -37,7 +37,7 @@ class MessageController extends Controller
         $user = $request->user();
 
         // Verify user is a participant
-        if (!$conversation->participants()->where('user_id', $user->id)->exists()) {
+        if (! $conversation->participants()->where('user_id', $user->id)->exists()) {
             return response()->json(['message' => 'Access denied'], 403);
         }
 
@@ -58,14 +58,14 @@ class MessageController extends Controller
                 'messages' => collect($messages->items())
                     ->reverse()
                     ->values()
-                    ->map(fn($msg) => $this->formatMessage($msg, $user)),
+                    ->map(fn ($msg) => $this->formatMessage($msg, $user)),
             ],
             'meta' => [
                 'current_page' => $messages->currentPage(),
                 'last_page' => $messages->lastPage(),
                 'per_page' => $messages->perPage(),
                 'total' => $messages->total(),
-            ]
+            ],
         ]);
     }
 
@@ -117,7 +117,7 @@ class MessageController extends Controller
             'data' => [
                 'conversation' => $this->formatConversation($conversation, $user),
                 'message' => $this->formatMessage($message->load('sender'), $user),
-            ]
+            ],
         ], 201);
     }
 
@@ -129,7 +129,7 @@ class MessageController extends Controller
         $user = $request->user();
 
         // Verify user is a participant
-        if (!$conversation->participants()->where('user_id', $user->id)->exists()) {
+        if (! $conversation->participants()->where('user_id', $user->id)->exists()) {
             return response()->json(['message' => 'Access denied'], 403);
         }
 
@@ -144,7 +144,7 @@ class MessageController extends Controller
                 ->where('conversation_id', $conversation->id)
                 ->first();
 
-            if (!$replyTo) {
+            if (! $replyTo) {
                 return response()->json(['message' => 'Invalid reply target'], 422);
             }
         }
@@ -160,7 +160,7 @@ class MessageController extends Controller
 
         return response()->json([
             'message' => 'Message sent successfully',
-            'data' => $this->formatMessage($message, $user)
+            'data' => $this->formatMessage($message, $user),
         ], 201);
     }
 
@@ -171,14 +171,14 @@ class MessageController extends Controller
     {
         $user = $request->user();
 
-        if (!$conversation->participants()->where('user_id', $user->id)->exists()) {
+        if (! $conversation->participants()->where('user_id', $user->id)->exists()) {
             return response()->json(['message' => 'Access denied'], 403);
         }
 
         $conversation->markAsReadForUser($user);
 
         return response()->json([
-            'message' => 'Conversation marked as read'
+            'message' => 'Conversation marked as read',
         ]);
     }
 
@@ -196,8 +196,8 @@ class MessageController extends Controller
 
         return response()->json([
             'data' => [
-                'unread_count' => $count
-            ]
+                'unread_count' => $count,
+            ],
         ]);
     }
 
@@ -209,11 +209,11 @@ class MessageController extends Controller
         $user = $request->user();
 
         $conversation->participants()->updateExistingPivot($user->id, [
-            'is_archived' => true
+            'is_archived' => true,
         ]);
 
         return response()->json([
-            'message' => 'Conversation archived'
+            'message' => 'Conversation archived',
         ]);
     }
 
@@ -230,18 +230,18 @@ class MessageController extends Controller
 
         $users = User::where('id', '!=', $user->id)
             ->where(function ($q) use ($validated) {
-                $q->where('name', 'like', '%' . $validated['query'] . '%')
-                    ->orWhere('email', 'like', '%' . $validated['query'] . '%');
+                $q->where('name', 'like', '%'.$validated['query'].'%')
+                    ->orWhere('email', 'like', '%'.$validated['query'].'%');
             })
             ->limit(10)
             ->get(['id', 'name', 'email']);
 
         return response()->json([
-            'data' => $users->map(fn($u) => [
+            'data' => $users->map(fn ($u) => [
                 'id' => $u->id,
                 'name' => $u->name,
                 'email' => $u->email,
-            ])
+            ]),
         ]);
     }
 
@@ -261,7 +261,7 @@ class MessageController extends Controller
                 'is_mine' => $conversation->latestMessage->sender_id === $currentUser->id,
                 'created_at' => $conversation->latestMessage->created_at->toIso8601String(),
             ] : null,
-            'participants' => $conversation->participants->map(fn($p) => [
+            'participants' => $conversation->participants->map(fn ($p) => [
                 'id' => $p->id,
                 'name' => $p->name,
                 'is_me' => $p->id === $currentUser->id,

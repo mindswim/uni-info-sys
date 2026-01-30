@@ -3,9 +3,9 @@
 namespace Tests\Feature\Api\V1;
 
 use App\Models\Building;
+use App\Models\Role;
 use App\Models\Room;
 use App\Models\User;
-use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -19,12 +19,12 @@ class RoomApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create admin role
         $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
-        
+
         $this->admin = User::factory()->create();
-        
+
         // Assign admin role
         $this->admin->roles()->attach($adminRole);
     }
@@ -32,6 +32,7 @@ class RoomApiTest extends TestCase
     private function getRoomData(array $overrides = []): array
     {
         $building = Building::factory()->create();
+
         return array_merge([
             'building_id' => $building->id,
             'room_number' => $this->faker->unique()->numerify('###'),
@@ -39,7 +40,7 @@ class RoomApiTest extends TestCase
             'type' => 'lecture_hall',
         ], $overrides);
     }
-    
+
     public function test_can_get_all_rooms_paginated()
     {
         Room::factory()->count(15)->create();
@@ -49,7 +50,7 @@ class RoomApiTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'room_number', 'capacity', 'type', 'building']
+                    '*' => ['id', 'room_number', 'capacity', 'type', 'building'],
                 ],
                 'links',
                 'meta',
@@ -76,9 +77,9 @@ class RoomApiTest extends TestCase
     public function test_can_create_a_room()
     {
         $data = $this->getRoomData();
-        
+
         $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/rooms', $data);
-        
+
         $response->assertStatus(201)
             ->assertJsonFragment([
                 'room_number' => $data['room_number'],
@@ -99,7 +100,7 @@ class RoomApiTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/rooms', $data);
-        
+
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['room_number']);
     }
@@ -108,7 +109,7 @@ class RoomApiTest extends TestCase
     {
         $building1 = Building::factory()->create();
         $room = Room::factory()->create(['building_id' => $building1->id]);
-        
+
         $building2 = Building::factory()->create();
         $data = $this->getRoomData([
             'building_id' => $building2->id,
@@ -116,7 +117,7 @@ class RoomApiTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/rooms', $data);
-        
+
         $response->assertStatus(201);
     }
 
@@ -133,11 +134,11 @@ class RoomApiTest extends TestCase
     public function test_can_update_a_room()
     {
         $room = Room::factory()->create();
-        
+
         $updateData = ['capacity' => 500];
 
         $response = $this->actingAs($this->admin, 'sanctum')->putJson("/api/v1/rooms/{$room->id}", $updateData);
-        
+
         $response->assertStatus(200)
             ->assertJsonFragment($updateData);
 
@@ -147,7 +148,7 @@ class RoomApiTest extends TestCase
     public function test_can_delete_a_room()
     {
         $room = Room::factory()->create();
-        
+
         $response = $this->actingAs($this->admin, 'sanctum')->deleteJson("/api/v1/rooms/{$room->id}");
 
         $response->assertStatus(204);

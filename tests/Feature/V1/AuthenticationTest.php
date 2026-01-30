@@ -4,7 +4,6 @@ namespace Tests\Feature\Api\V1;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
@@ -16,7 +15,7 @@ class AuthenticationTest extends TestCase
         $response = $this->getJson('/api/v1/faculties');
         $response->assertStatus(401) // Unauthorized
             ->assertJson([
-                'detail' => 'Authentication is required to access this resource.'
+                'detail' => 'Authentication is required to access this resource.',
             ])
             ->assertJsonStructure(['type', 'title', 'status', 'detail']);
     }
@@ -51,14 +50,14 @@ class AuthenticationTest extends TestCase
 
         $response->assertStatus(422) // Validation Exception
             ->assertJson([
-                'detail' => 'The given data was invalid.'
+                'detail' => 'The given data was invalid.',
             ])
             ->assertJsonStructure([
                 'type',
-                'title', 
+                'title',
                 'status',
                 'detail',
-                'errors'
+                'errors',
             ])
             ->assertJsonValidationErrors('email');
     }
@@ -69,7 +68,7 @@ class AuthenticationTest extends TestCase
         $token = $user->createToken('test-device')->plainTextToken;
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->getJson('/api/v1/faculties');
 
         $response->assertStatus(200);
@@ -83,7 +82,7 @@ class AuthenticationTest extends TestCase
 
         $response->assertStatus(401) // Unauthorized
             ->assertJson([
-                'detail' => 'Authentication is required to access this resource.'
+                'detail' => 'Authentication is required to access this resource.',
             ])
             ->assertJsonStructure(['type', 'title', 'status', 'detail']);
     }

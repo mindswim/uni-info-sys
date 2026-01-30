@@ -10,7 +10,6 @@ use App\Models\Course;
 use App\Models\CourseSection;
 use App\Models\Department;
 use App\Models\Faculty;
-use App\Models\Permission;
 use App\Models\Program;
 use App\Models\Role;
 use App\Models\Room;
@@ -20,34 +19,40 @@ use App\Models\Term;
 use App\Models\User;
 use App\Services\AdmissionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 use Tests\Traits\CreatesUsersWithRoles;
 
 class StudentEnrollmentFlowTest extends TestCase
 {
-    use RefreshDatabase, CreatesUsersWithRoles;
+    use CreatesUsersWithRoles, RefreshDatabase;
 
     private Role $studentRole;
+
     private Role $adminRole;
+
     private Faculty $faculty;
+
     private Department $department;
+
     private Program $program;
+
     private Term $term;
+
     private Course $course;
+
     private CourseSection $courseSection;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Set up roles and permissions
         $this->setupRolesAndPermissions();
-        
+
         // Set up academic structure
         $this->setupAcademicStructure();
-        
+
         // Fake queues for job testing
         Queue::fake();
     }
@@ -227,7 +232,7 @@ class StudentEnrollmentFlowTest extends TestCase
 
         // Verify enrollment confirmation job was dispatched
         Queue::assertPushed(SendEnrollmentConfirmation::class, function ($job) use ($student) {
-            return $job->enrollment->student_id === $student->id 
+            return $job->enrollment->student_id === $student->id
                 && $job->confirmationType === 'enrolled';
         });
 
@@ -251,7 +256,7 @@ class StudentEnrollmentFlowTest extends TestCase
         // Step 9: Verify User Can Access Their Data
         $studentDataResponse = $this->actingAs($user, 'sanctum')
             ->getJson("/api/v1/students/{$student->id}");
-        
+
         $studentDataResponse->assertOk()
             ->assertJsonFragment([
                 'id' => $student->id,
@@ -260,10 +265,10 @@ class StudentEnrollmentFlowTest extends TestCase
 
         // Step 10: Verify System Security Behavior - Students cannot access other students' data
         $otherStudent = Student::factory()->create();
-        
+
         $otherStudentResponse = $this->actingAs($user, 'sanctum')
             ->getJson("/api/v1/students/{$otherStudent->id}");
-        
+
         // The system correctly prevents access to other students' data
         $otherStudentResponse->assertForbidden();
     }
@@ -310,7 +315,7 @@ class StudentEnrollmentFlowTest extends TestCase
         // Currently enrollment succeeds even with rejected application
         // This is a potential area for business rule improvement
         $enrollmentResponse->assertCreated();
-        
+
         $this->assertDatabaseHas('enrollments', [
             'student_id' => $student->id,
             'course_section_id' => $this->courseSection->id,
@@ -337,14 +342,14 @@ class StudentEnrollmentFlowTest extends TestCase
         $otherUser = User::factory()->create(['email_verified_at' => now()]);
         $otherUser->roles()->attach($this->studentRole);
         $otherStudent = Student::factory()->create(['user_id' => $otherUser->id]);
-        
+
         // Create accepted application for other student
         AdmissionApplication::factory()->create([
             'student_id' => $otherStudent->id,
             'term_id' => $this->term->id,
             'status' => 'accepted',
         ]);
-        
+
         $this->actingAs($otherUser, 'sanctum')
             ->postJson('/api/v1/enrollments', [
                 'student_id' => $otherStudent->id,
@@ -368,10 +373,8 @@ class StudentEnrollmentFlowTest extends TestCase
 
         // Verify waitlist confirmation job was dispatched
         Queue::assertPushed(SendEnrollmentConfirmation::class, function ($job) use ($student) {
-            return $job->enrollment->student_id === $student->id 
+            return $job->enrollment->student_id === $student->id
                 && $job->confirmationType === 'waitlisted';
         });
     }
-
-
 }

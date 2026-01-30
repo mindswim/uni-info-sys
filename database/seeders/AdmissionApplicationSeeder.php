@@ -1,8 +1,9 @@
 <?php
+
 namespace Database\Seeders;
 
-use App\Models\Student;
 use App\Models\AdmissionApplication;
+use App\Models\Student;
 use App\Models\Term;
 use Illuminate\Database\Seeder;
 

@@ -17,9 +17,13 @@ class CourseMaterialTest extends TestCase
     use RefreshDatabase;
 
     protected User $adminUser;
+
     protected User $studentUser;
+
     protected Student $student;
+
     protected CourseSection $courseSection;
+
     protected Enrollment $enrollment;
 
     protected function setUp(): void

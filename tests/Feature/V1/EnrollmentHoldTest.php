@@ -24,7 +24,9 @@ class EnrollmentHoldTest extends TestCase
     use RefreshDatabase;
 
     private Student $student;
+
     private CourseSection $courseSection;
+
     private User $adminUser;
 
     protected function setUp(): void

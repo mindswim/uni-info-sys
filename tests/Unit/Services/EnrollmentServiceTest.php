@@ -13,8 +13,8 @@ use App\Models\Term;
 use App\Models\User;
 use App\Services\EnrollmentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use Illuminate\Support\Facades\Queue;
+use Tests\TestCase;
 
 class EnrollmentServiceTest extends TestCase
 {
@@ -25,7 +25,7 @@ class EnrollmentServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->enrollmentService = new EnrollmentService();
+        $this->enrollmentService = new EnrollmentService;
     }
 
     public function test_enrolls_student_successfully_when_capacity_available()
@@ -80,7 +80,7 @@ class EnrollmentServiceTest extends TestCase
 
         // Fill the course section to capacity
         $enrolledStudent = Student::factory()->create([
-            'user_id' => User::factory()->create(['email_verified_at' => now()])->id
+            'user_id' => User::factory()->create(['email_verified_at' => now()])->id,
         ]);
         Enrollment::factory()->create([
             'student_id' => $enrolledStudent->id,
@@ -193,7 +193,7 @@ class EnrollmentServiceTest extends TestCase
 
         // Fill the course section to capacity
         $enrolledStudent = Student::factory()->create([
-            'user_id' => User::factory()->create(['email_verified_at' => now()])->id
+            'user_id' => User::factory()->create(['email_verified_at' => now()])->id,
         ]);
         Enrollment::factory()->create([
             'student_id' => $enrolledStudent->id,
@@ -226,7 +226,7 @@ class EnrollmentServiceTest extends TestCase
 
         // Create one enrolled student
         $enrolledStudent = Student::factory()->create([
-            'user_id' => User::factory()->create(['email_verified_at' => now()])->id
+            'user_id' => User::factory()->create(['email_verified_at' => now()])->id,
         ]);
         Enrollment::factory()->create([
             'student_id' => $enrolledStudent->id,
@@ -236,7 +236,7 @@ class EnrollmentServiceTest extends TestCase
 
         // Create waitlisted students
         $waitlistedStudent1 = Student::factory()->create([
-            'user_id' => User::factory()->create(['email_verified_at' => now()])->id
+            'user_id' => User::factory()->create(['email_verified_at' => now()])->id,
         ]);
         $waitlistedEnrollment1 = Enrollment::factory()->create([
             'student_id' => $waitlistedStudent1->id,
@@ -246,7 +246,7 @@ class EnrollmentServiceTest extends TestCase
         ]);
 
         $waitlistedStudent2 = Student::factory()->create([
-            'user_id' => User::factory()->create(['email_verified_at' => now()])->id
+            'user_id' => User::factory()->create(['email_verified_at' => now()])->id,
         ]);
         Enrollment::factory()->create([
             'student_id' => $waitlistedStudent2->id,
@@ -282,7 +282,7 @@ class EnrollmentServiceTest extends TestCase
 
         // Fill the course section to capacity
         $enrolledStudent = Student::factory()->create([
-            'user_id' => User::factory()->create(['email_verified_at' => now()])->id
+            'user_id' => User::factory()->create(['email_verified_at' => now()])->id,
         ]);
         Enrollment::factory()->create([
             'student_id' => $enrolledStudent->id,
@@ -292,7 +292,7 @@ class EnrollmentServiceTest extends TestCase
 
         // Create waitlisted student
         $waitlistedStudent = Student::factory()->create([
-            'user_id' => User::factory()->create(['email_verified_at' => now()])->id
+            'user_id' => User::factory()->create(['email_verified_at' => now()])->id,
         ]);
         Enrollment::factory()->create([
             'student_id' => $waitlistedStudent->id,
@@ -321,7 +321,7 @@ class EnrollmentServiceTest extends TestCase
 
         // Create one enrolled student (capacity available but no waitlisted students)
         $enrolledStudent = Student::factory()->create([
-            'user_id' => User::factory()->create(['email_verified_at' => now()])->id
+            'user_id' => User::factory()->create(['email_verified_at' => now()])->id,
         ]);
         Enrollment::factory()->create([
             'student_id' => $enrolledStudent->id,
@@ -339,7 +339,7 @@ class EnrollmentServiceTest extends TestCase
     public function test_withdraw_student_successfully()
     {
         Queue::fake();
-        
+
         // Arrange
         $user = User::factory()->create(['email_verified_at' => now()]);
         $student = Student::factory()->create(['user_id' => $user->id]);
@@ -367,7 +367,7 @@ class EnrollmentServiceTest extends TestCase
             'id' => $enrollment->id,
             'status' => 'withdrawn',
         ]);
-        
+
         // Assert that waitlist promotion job was dispatched
         Queue::assertPushed(\App\Jobs\ProcessWaitlistPromotion::class, function ($job) use ($courseSection) {
             return $job->courseSection->id === $courseSection->id;
@@ -377,7 +377,7 @@ class EnrollmentServiceTest extends TestCase
     public function test_withdraw_student_from_waitlist_does_not_dispatch_promotion_job()
     {
         Queue::fake();
-        
+
         // Arrange
         $user = User::factory()->create(['email_verified_at' => now()]);
         $student = Student::factory()->create(['user_id' => $user->id]);
@@ -405,7 +405,7 @@ class EnrollmentServiceTest extends TestCase
             'id' => $enrollment->id,
             'status' => 'withdrawn',
         ]);
-        
+
         // Assert that NO waitlist promotion job was dispatched
         Queue::assertNotPushed(\App\Jobs\ProcessWaitlistPromotion::class);
     }
@@ -493,7 +493,7 @@ class EnrollmentServiceTest extends TestCase
     public function test_allows_withdrawal_when_no_deadline_is_set()
     {
         Queue::fake();
-        
+
         // Arrange
         $user = User::factory()->create(['email_verified_at' => now()]);
         $student = Student::factory()->create(['user_id' => $user->id]);

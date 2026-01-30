@@ -67,6 +67,7 @@ class TuitionRate extends Model
     public function scopeCurrent($query)
     {
         $today = now()->toDateString();
+
         return $query->where('effective_date', '<=', $today)
             ->where(function ($q) use ($today) {
                 $q->whereNull('end_date')

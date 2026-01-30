@@ -38,6 +38,7 @@ class RegistrationTimeTicket extends Model
     public function canRegisterNow(): bool
     {
         $now = now();
+
         return $now->gte($this->start_time) && $now->lte($this->end_time);
     }
 

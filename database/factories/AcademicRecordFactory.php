@@ -21,13 +21,13 @@ class AcademicRecordFactory extends Factory
             'Lincoln High School', 'Washington High School', 'Roosevelt High School',
             'Jefferson High School', 'Madison High School', 'Monroe High School',
             'Jackson High School', 'Adams High School', 'Kennedy High School',
-            'Wilson High School', 'Franklin High School', 'Hamilton High School'
+            'Wilson High School', 'Franklin High School', 'Hamilton High School',
         ];
 
         $subjects = [
             'Mathematics', 'English', 'Science', 'History', 'Chemistry', 'Physics',
             'Biology', 'Literature', 'Foreign Language', 'Computer Science',
-            'Art', 'Music', 'Physical Education', 'Social Studies'
+            'Art', 'Music', 'Physical Education', 'Social Studies',
         ];
 
         return [

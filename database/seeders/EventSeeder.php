@@ -2,14 +2,14 @@
 
 namespace Database\Seeders;
 
-use App\Models\Event;
-use App\Models\Term;
 use App\Models\CourseSection;
 use App\Models\Department;
+use App\Models\Event;
+use App\Models\Term;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 class EventSeeder extends Seeder
 {
@@ -21,12 +21,13 @@ class EventSeeder extends Seeder
         Log::info('Seeding events...');
 
         $term = Term::where('name', 'Fall 2024')->first();
-        $admin = User::whereHas('roles', fn($q) => $q->where('name', 'admin'))->first();
+        $admin = User::whereHas('roles', fn ($q) => $q->where('name', 'admin'))->first();
         $departments = Department::all();
         $courseSections = CourseSection::with('course')->take(10)->get();
 
-        if (!$term || !$admin) {
+        if (! $term || ! $admin) {
             Log::warning('Missing term or admin user for event seeding');
+
             return;
         }
 
@@ -185,7 +186,7 @@ class EventSeeder extends Seeder
             // Midterm review session
             Event::create([
                 'title' => "{$section->course->course_code} Midterm Review",
-                'description' => "Review session for the upcoming midterm exam.",
+                'description' => 'Review session for the upcoming midterm exam.',
                 'start_time' => Carbon::parse($term->start_date)->addWeeks(6)->addDays(5)->setHour(18),
                 'end_time' => Carbon::parse($term->start_date)->addWeeks(6)->addDays(5)->setHour(20),
                 'location' => $section->room ? "Room {$section->room->room_number}" : 'TBA',
@@ -199,7 +200,7 @@ class EventSeeder extends Seeder
             // Final exam review
             Event::create([
                 'title' => "{$section->course->course_code} Final Review",
-                'description' => "Review session before the final exam.",
+                'description' => 'Review session before the final exam.',
                 'start_time' => Carbon::parse($term->end_date)->subWeeks(2)->setHour(18),
                 'end_time' => Carbon::parse($term->end_date)->subWeeks(2)->setHour(20),
                 'location' => $section->room ? "Room {$section->room->room_number}" : 'TBA',

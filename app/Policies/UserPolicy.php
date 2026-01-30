@@ -11,7 +11,8 @@ class UserPolicy
      */
     private function isAdmin(User $user): bool
     {
-        $userRoles = $user->roles()->pluck('name')->map(fn($r) => strtolower($r))->toArray();
+        $userRoles = $user->roles()->pluck('name')->map(fn ($r) => strtolower($r))->toArray();
+
         return in_array('admin', $userRoles) || in_array('super admin', $userRoles);
     }
 

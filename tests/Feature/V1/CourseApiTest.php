@@ -4,8 +4,6 @@ namespace Tests\Feature\Api\V1;
 
 use App\Models\Course;
 use App\Models\Department;
-use App\Models\User;
-use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -13,7 +11,7 @@ use Tests\Traits\CreatesUsersWithRoles;
 
 class CourseApiTest extends TestCase
 {
-    use RefreshDatabase, WithFaker, CreatesUsersWithRoles;
+    use CreatesUsersWithRoles, RefreshDatabase, WithFaker;
 
     private $admin;
 
@@ -27,6 +25,7 @@ class CourseApiTest extends TestCase
     private function getCourseData(array $overrides = []): array
     {
         $department = Department::factory()->create();
+
         return array_merge([
             'title' => $this->faker->sentence(3),
             'course_code' => $this->faker->unique()->bothify('CS###'),
@@ -46,7 +45,7 @@ class CourseApiTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'title', 'course_code', 'credits', 'description', 'department', 'prerequisite_courses']
+                    '*' => ['id', 'title', 'course_code', 'credits', 'description', 'department', 'prerequisite_courses'],
                 ],
                 'links',
                 'meta',
@@ -69,11 +68,11 @@ class CourseApiTest extends TestCase
             $this->assertEquals($department1->id, $course['department']['id']);
         }
     }
-    
+
     public function test_can_create_a_course_without_prerequisites()
     {
         $data = $this->getCourseData();
-        
+
         $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/courses', $data);
 
         $response->assertStatus(201)
@@ -81,7 +80,7 @@ class CourseApiTest extends TestCase
                 'title' => $data['title'],
                 'course_code' => $data['course_code'],
             ]);
-        
+
         $this->assertDatabaseHas('courses', ['title' => $data['title']]);
         $this->assertCount(0, $response->json('data.prerequisite_courses'));
     }
@@ -154,7 +153,7 @@ class CourseApiTest extends TestCase
     {
         $prereq = Course::factory()->create();
         $course = Course::factory()->hasAttached($prereq, [], 'prerequisiteCourses')->create();
-        
+
         $this->assertDatabaseHas('course_prerequisites', ['course_id' => $course->id, 'prerequisite_id' => $prereq->id]);
 
         $updateData = ['prerequisites' => []];

@@ -20,8 +20,11 @@ class ProcessCourseImport implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected string $filePath;
+
     protected int $userId;
+
     protected string $importId;
+
     protected string $originalFileName;
 
     /**
@@ -42,27 +45,27 @@ class ProcessCourseImport implements ShouldQueue
     {
         $user = User::find($this->userId);
         $logFile = "imports/logs/{$this->importId}_errors.log";
-        
+
         $stats = [
             'total_rows' => 0,
             'successful' => 0,
             'failed' => 0,
             'updated' => 0,
             'created' => 0,
-            'errors' => []
+            'errors' => [],
         ];
 
         try {
             // Get the file contents
             $csvContent = Storage::disk('local')->get($this->filePath);
-            
+
             if (empty($csvContent)) {
                 throw new \Exception('CSV file is empty or could not be read.');
             }
 
             // Parse CSV
             $lines = str_getcsv($csvContent, "\n");
-            
+
             if (empty($lines)) {
                 throw new \Exception('No data found in CSV file.');
             }
@@ -70,26 +73,26 @@ class ProcessCourseImport implements ShouldQueue
             // Get headers from first line
             $headers = str_getcsv(array_shift($lines));
             $expectedHeaders = ['course_code', 'title', 'description', 'credits', 'department_code', 'prerequisite_course_codes'];
-            
+
             // Validate CSV headers
             $missingHeaders = array_diff($expectedHeaders, array_map('trim', $headers));
-            if (!empty($missingHeaders)) {
+            if (! empty($missingHeaders)) {
                 // Allow missing optional headers
                 $requiredHeaders = ['course_code', 'title', 'credits', 'department_code'];
                 $missingRequired = array_intersect($missingHeaders, $requiredHeaders);
-                
-                if (!empty($missingRequired)) {
-                    throw new \Exception('Missing required headers: ' . implode(', ', $missingRequired));
+
+                if (! empty($missingRequired)) {
+                    throw new \Exception('Missing required headers: '.implode(', ', $missingRequired));
                 }
             }
 
             // Map headers to indices
             $headerMap = array_flip(array_map('trim', $headers));
 
-            Log::info("Starting course import", [
+            Log::info('Starting course import', [
                 'import_id' => $this->importId,
                 'user_id' => $this->userId,
-                'total_rows' => count($lines)
+                'total_rows' => count($lines),
             ]);
 
             $stats['total_rows'] = count($lines);
@@ -97,10 +100,10 @@ class ProcessCourseImport implements ShouldQueue
             // Process each row
             foreach ($lines as $lineNumber => $line) {
                 $rowNumber = $lineNumber + 2; // +2 because we removed header and line numbers start at 0
-                
+
                 try {
                     $row = str_getcsv($line);
-                    
+
                     // Skip empty rows
                     if (empty(array_filter($row))) {
                         continue;
@@ -108,12 +111,13 @@ class ProcessCourseImport implements ShouldQueue
 
                     // Extract data using header mapping
                     $courseData = $this->extractCourseData($row, $headerMap);
-                    
+
                     // Validate the data
                     $validator = $this->validateCourseData($courseData, $rowNumber);
-                    
+
                     if ($validator->fails()) {
                         $this->logError($logFile, $rowNumber, 'Validation failed', $validator->errors()->toArray(), $stats);
+
                         continue;
                     }
 
@@ -131,10 +135,10 @@ class ProcessCourseImport implements ShouldQueue
             $this->sendCompletionNotification($user, $stats);
 
         } catch (\Exception $e) {
-            Log::error("Course import failed", [
+            Log::error('Course import failed', [
                 'import_id' => $this->importId,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             $this->logError($logFile, 0, 'Import failed', $e->getMessage(), $stats);
@@ -171,7 +175,7 @@ class ProcessCourseImport implements ShouldQueue
             'description' => 'nullable|string',
             'credits' => 'required|integer|min:1|max:10',
             'department_code' => 'required|string|exists:departments,code',
-            'prerequisite_course_codes' => 'nullable|string'
+            'prerequisite_course_codes' => 'nullable|string',
         ], [
             'course_code.required' => 'Course code is required',
             'course_code.max' => 'Course code must not exceed 20 characters',
@@ -182,7 +186,7 @@ class ProcessCourseImport implements ShouldQueue
             'credits.min' => 'Credits must be at least 1',
             'credits.max' => 'Credits must not exceed 10',
             'department_code.required' => 'Department code is required',
-            'department_code.exists' => 'Department code does not exist in the system'
+            'department_code.exists' => 'Department code does not exist in the system',
         ]);
     }
 
@@ -193,8 +197,8 @@ class ProcessCourseImport implements ShouldQueue
     {
         // Find the department
         $department = Department::where('code', $data['department_code'])->first();
-        
-        if (!$department) {
+
+        if (! $department) {
             throw new \Exception("Department with code '{$data['department_code']}' not found");
         }
 
@@ -223,7 +227,7 @@ class ProcessCourseImport implements ShouldQueue
         }
 
         // Handle prerequisites
-        if (!empty($data['prerequisite_course_codes'])) {
+        if (! empty($data['prerequisite_course_codes'])) {
             $this->processPrerequisites($course, $data['prerequisite_course_codes']);
         }
 
@@ -237,7 +241,7 @@ class ProcessCourseImport implements ShouldQueue
     {
         $codes = array_map('trim', explode(',', $prerequisiteCodes));
         $codes = array_filter($codes); // Remove empty values
-        
+
         if (empty($codes)) {
             return;
         }
@@ -247,10 +251,10 @@ class ProcessCourseImport implements ShouldQueue
         $foundCodes = $prerequisites->pluck('course_code')->toArray();
         $missingCodes = array_diff($codes, $foundCodes);
 
-        if (!empty($missingCodes)) {
-            Log::warning("Some prerequisite courses not found", [
+        if (! empty($missingCodes)) {
+            Log::warning('Some prerequisite courses not found', [
                 'course_code' => $course->course_code,
-                'missing_prerequisites' => $missingCodes
+                'missing_prerequisites' => $missingCodes,
             ]);
         }
 
@@ -264,16 +268,16 @@ class ProcessCourseImport implements ShouldQueue
     private function logError(string $logFile, int $rowNumber, string $type, $details, array &$stats): void
     {
         $stats['failed']++;
-        
+
         $errorMessage = is_array($details) ? json_encode($details, JSON_PRETTY_PRINT) : $details;
         $logEntry = "Row {$rowNumber}: {$type} - {$errorMessage}\n";
-        
+
         Storage::disk('local')->append($logFile, $logEntry);
-        
+
         $stats['errors'][] = [
             'row' => $rowNumber,
             'type' => $type,
-            'details' => $details
+            'details' => $details,
         ];
     }
 
@@ -296,10 +300,10 @@ class ProcessCourseImport implements ShouldQueue
             $message .= "\nSome rows failed to import. Check the error log for details.";
         }
 
-        Log::info("Course import completed", [
+        Log::info('Course import completed', [
             'import_id' => $this->importId,
             'user_id' => $this->userId,
-            'stats' => $stats
+            'stats' => $stats,
         ]);
 
         // Here you could send an email notification, create a database notification, etc.
@@ -316,10 +320,10 @@ class ProcessCourseImport implements ShouldQueue
         $message .= "Import ID: {$this->importId}\n\n";
         $message .= "Error: {$error}";
 
-        Log::error("Course import failed notification", [
+        Log::error('Course import failed notification', [
             'import_id' => $this->importId,
             'user_id' => $this->userId,
-            'error' => $error
+            'error' => $error,
         ]);
 
         // Here you could send an email notification, create a database notification, etc.

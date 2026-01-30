@@ -18,13 +18,13 @@ class PermissionFactory extends Factory
     {
         return [
             'name' => $this->faker->unique()->randomElement([
-                'manage-applications', 
-                'submit-documents', 
-                'view-own-data', 
-                'manage-users', 
+                'manage-applications',
+                'submit-documents',
+                'view-own-data',
+                'manage-users',
                 'view-reports',
                 'approve-applications',
-                'delete-documents'
+                'delete-documents',
             ]),
             'description' => $this->faker->sentence(),
         ];

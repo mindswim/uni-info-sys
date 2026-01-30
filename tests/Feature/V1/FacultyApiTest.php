@@ -2,12 +2,12 @@
 
 namespace Tests\Feature\Api\V1;
 
+use App\Models\Department;
+use App\Models\Faculty;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use App\Models\Faculty;
-use App\Models\Department;
-use App\Models\User;
-use App\Models\Role;
 
 class FacultyApiTest extends TestCase
 {
@@ -18,13 +18,13 @@ class FacultyApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create admin role
         $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
-        
+
         // For now, we will just use a generic user. RBAC will be added later.
         $this->admin = User::factory()->create();
-        
+
         // Assign admin role
         $this->admin->roles()->attach($adminRole);
     }
@@ -41,7 +41,7 @@ class FacultyApiTest extends TestCase
             ->assertJsonStructure([
                 'data' => [['id', 'name', 'departments']],
                 'links',
-                'meta'
+                'meta',
             ]);
     }
 
@@ -57,7 +57,7 @@ class FacultyApiTest extends TestCase
                 'data' => [
                     'id' => $faculty->id,
                     'name' => $faculty->name,
-                ]
+                ],
             ])
             ->assertJsonCount(3, 'data.departments');
     }
@@ -79,10 +79,10 @@ class FacultyApiTest extends TestCase
         $response->assertStatus(201)
             ->assertJson([
                 'data' => [
-                    'name' => 'Faculty of Awesome'
-                ]
+                    'name' => 'Faculty of Awesome',
+                ],
             ]);
-            
+
         $this->assertDatabaseHas('faculties', $facultyData);
     }
 
@@ -104,10 +104,10 @@ class FacultyApiTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'data' => [
-                    'name' => 'Updated Faculty Name'
-                ]
+                    'name' => 'Updated Faculty Name',
+                ],
             ]);
-            
+
         $this->assertDatabaseHas('faculties', ['id' => $faculty->id, 'name' => 'Updated Faculty Name']);
     }
 

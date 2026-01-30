@@ -9,14 +9,14 @@ use App\Models\AdmissionApplication;
 use App\Models\CourseSection;
 use App\Models\Enrollment;
 use App\Models\Student;
+use App\Models\Term;
 use App\Models\User;
 use App\Services\AdmissionService;
 use App\Services\EnrollmentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
-use App\Models\Term;
-use Illuminate\Support\Facades\Artisan;
 
 class BackgroundJobIntegrationTest extends TestCase
 {
@@ -40,7 +40,7 @@ class BackgroundJobIntegrationTest extends TestCase
         ]);
         $courseSection = CourseSection::factory()->create([
             'term_id' => $term->id,
-            'capacity' => 10
+            'capacity' => 10,
         ]);
 
         $enrollmentService = app(EnrollmentService::class);
@@ -68,7 +68,7 @@ class BackgroundJobIntegrationTest extends TestCase
         ]);
         $courseSection = CourseSection::factory()->create([
             'term_id' => $term->id,
-            'capacity' => 1
+            'capacity' => 1,
         ]);
 
         // Fill the course section
@@ -76,7 +76,7 @@ class BackgroundJobIntegrationTest extends TestCase
         Enrollment::factory()->create([
             'student_id' => $otherStudent->id,
             'course_section_id' => $courseSection->id,
-            'status' => 'enrolled'
+            'status' => 'enrolled',
         ]);
 
         $enrollmentService = app(EnrollmentService::class);
@@ -103,7 +103,7 @@ class BackgroundJobIntegrationTest extends TestCase
         $enrollment = Enrollment::factory()->create([
             'student_id' => $student->id,
             'course_section_id' => $courseSection->id,
-            'status' => 'waitlisted'
+            'status' => 'waitlisted',
         ]);
 
         $enrollmentService = app(EnrollmentService::class);
@@ -166,15 +166,15 @@ class BackgroundJobIntegrationTest extends TestCase
         $enrollment = Enrollment::factory()->create([
             'student_id' => $student->id,
             'course_section_id' => $courseSection->id,
-            'status' => 'enrolled'
+            'status' => 'enrolled',
         ]);
 
         // Test the service directly instead of through API to avoid authorization issues
         $enrollmentService = app(EnrollmentService::class);
-        
+
         // Simulate what happens when enrollment status changes to withdrawn
         $enrollment->update(['status' => 'withdrawn']);
-        
+
         // Process waitlist promotion (this is what the controller would do)
         ProcessWaitlistPromotion::dispatch($courseSection);
 

@@ -2,42 +2,47 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
-use Tests\Traits\CreatesUsersWithRoles;
-use App\Services\GradeService;
-use App\Models\User;
-use App\Models\Role;
-use App\Models\Student;
-use App\Models\Staff;
+use App\Exceptions\GradingDeadlinePassedException;
+use App\Exceptions\InvalidGradeException;
+use App\Exceptions\UnauthorizedGradeSubmissionException;
 use App\Models\Course;
 use App\Models\CourseSection;
 use App\Models\Enrollment;
+use App\Models\Role;
+use App\Models\Staff;
+use App\Models\Student;
 use App\Models\Term;
-use App\Models\GradeChangeRequest;
-use App\Exceptions\InvalidGradeException;
-use App\Exceptions\GradingDeadlinePassedException;
-use App\Exceptions\UnauthorizedGradeSubmissionException;
+use App\Models\User;
+use App\Services\GradeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Carbon\Carbon;
+use Tests\TestCase;
+use Tests\Traits\CreatesUsersWithRoles;
 
 class GradeServiceTest extends TestCase
 {
-    use RefreshDatabase, CreatesUsersWithRoles;
+    use CreatesUsersWithRoles, RefreshDatabase;
 
     protected GradeService $gradeService;
+
     protected User $instructorUser;
+
     protected Staff $instructor;
+
     protected User $studentUser;
+
     protected Student $student;
+
     protected CourseSection $courseSection;
+
     protected Enrollment $enrollment;
+
     protected Term $term;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->gradeService = new GradeService();
+        $this->gradeService = new GradeService;
 
         // Create term with grade deadline in the future
         $this->term = Term::factory()->create([

@@ -1,9 +1,10 @@
 <?php
+
 namespace Database\Seeders;
 
-use App\Models\Program;
-use App\Models\Faculty;
 use App\Models\Department;
+use App\Models\Faculty;
+use App\Models\Program;
 use Illuminate\Database\Seeder;
 
 class ProgramSeeder extends Seeder
@@ -32,7 +33,7 @@ class ProgramSeeder extends Seeder
                 'duration' => 4,
                 'description' => 'A comprehensive program in computer science and software engineering.',
                 'requirements' => 'High school diploma with strong mathematics background.',
-                'capacity' => 100
+                'capacity' => 100,
             ],
             [
                 'name' => 'Business Administration',
@@ -41,7 +42,7 @@ class ProgramSeeder extends Seeder
                 'duration' => 2,
                 'description' => 'Advanced business management and leadership program.',
                 'requirements' => "Bachelor's degree with minimum 3.0 GPA.",
-                'capacity' => 50
+                'capacity' => 50,
             ],
             [
                 'name' => 'Data Science',
@@ -50,8 +51,8 @@ class ProgramSeeder extends Seeder
                 'duration' => 2,
                 'description' => 'Advanced program in data analysis and machine learning.',
                 'requirements' => "Bachelor's in related field with strong statistics background.",
-                'capacity' => 75
-            ]
+                'capacity' => 75,
+            ],
         ];
 
         foreach ($programs as $programData) {

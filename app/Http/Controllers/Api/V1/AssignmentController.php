@@ -68,7 +68,7 @@ class AssignmentController extends Controller
             'course_section_id' => 'required|integer|exists:course_sections,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'type' => 'required|string|in:' . implode(',', Assignment::TYPES),
+            'type' => 'required|string|in:'.implode(',', Assignment::TYPES),
             'due_date' => 'required|date|after:now',
             'available_from' => 'nullable|date|before:due_date',
             'max_points' => 'sometimes|numeric|min:0|max:99999',
@@ -130,7 +130,7 @@ class AssignmentController extends Controller
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
-            'type' => 'sometimes|string|in:' . implode(',', Assignment::TYPES),
+            'type' => 'sometimes|string|in:'.implode(',', Assignment::TYPES),
             'due_date' => 'sometimes|date',
             'available_from' => 'nullable|date',
             'max_points' => 'sometimes|numeric|min:0|max:99999',
@@ -236,6 +236,7 @@ class AssignmentController extends Controller
                 $data['enrollment_id'] = $enrollment->id;
                 $data['is_past_due'] = $assignment->isPastDue();
                 $data['time_remaining'] = $assignment->time_remaining;
+
                 return $data;
             });
         })->sortBy('due_date')->values();
@@ -255,6 +256,7 @@ class AssignmentController extends Controller
 
         // Reuse the forStudent logic
         $request->merge(['student_id' => $student->id]);
+
         return $this->forStudent($request);
     }
 
@@ -282,6 +284,7 @@ class AssignmentController extends Controller
                 $data['course_title'] = $enrollment->courseSection->course->title;
                 $data['enrollment_id'] = $enrollment->id;
                 $data['time_remaining'] = $assignment->time_remaining;
+
                 return $data;
             });
         })->sortBy('due_date')->values();
@@ -333,7 +336,7 @@ class AssignmentController extends Controller
         ]);
 
         $newAssignment = $assignment->replicate();
-        $newAssignment->title = $assignment->title . ' (Copy)';
+        $newAssignment->title = $assignment->title.' (Copy)';
         $newAssignment->is_published = false;
 
         if (isset($validated['course_section_id'])) {

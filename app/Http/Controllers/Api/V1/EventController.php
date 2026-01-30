@@ -5,9 +5,8 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Student;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class EventController extends Controller
 {
@@ -57,7 +56,7 @@ class EventController extends Controller
         $events = $query->orderBy('start_time')->get();
 
         return response()->json([
-            'data' => $events->map(fn($event) => $this->formatEvent($event))
+            'data' => $events->map(fn ($event) => $this->formatEvent($event)),
         ]);
     }
 
@@ -95,7 +94,7 @@ class EventController extends Controller
         $events = $query->get();
 
         return response()->json([
-            'data' => $events->map(fn($event) => $this->formatEvent($event))
+            'data' => $events->map(fn ($event) => $this->formatEvent($event)),
         ]);
     }
 
@@ -144,13 +143,13 @@ class EventController extends Controller
         $events = $query->paginate($request->input('per_page', 50));
 
         return response()->json([
-            'data' => collect($events->items())->map(fn($event) => $this->formatEvent($event)),
+            'data' => collect($events->items())->map(fn ($event) => $this->formatEvent($event)),
             'meta' => [
                 'current_page' => $events->currentPage(),
                 'last_page' => $events->lastPage(),
                 'per_page' => $events->perPage(),
                 'total' => $events->total(),
-            ]
+            ],
         ]);
     }
 
@@ -160,7 +159,7 @@ class EventController extends Controller
     public function types(): JsonResponse
     {
         return response()->json([
-            'data' => Event::TYPES
+            'data' => Event::TYPES,
         ]);
     }
 
@@ -172,7 +171,7 @@ class EventController extends Controller
         $event->load(['creator', 'term', 'courseSection.course', 'department', 'attendees']);
 
         return response()->json([
-            'data' => $this->formatEvent($event, true)
+            'data' => $this->formatEvent($event, true),
         ]);
     }
 
@@ -188,7 +187,7 @@ class EventController extends Controller
             'end_time' => 'required|date|after:start_time',
             'all_day' => 'sometimes|boolean',
             'location' => 'nullable|string|max:255',
-            'type' => 'sometimes|string|in:' . implode(',', array_keys(Event::TYPES)),
+            'type' => 'sometimes|string|in:'.implode(',', array_keys(Event::TYPES)),
             'color' => 'nullable|string|max:20',
             'visibility' => 'sometimes|string|in:public,students,staff,private',
             'term_id' => 'nullable|integer|exists:terms,id',
@@ -204,7 +203,7 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Event created successfully',
-            'data' => $this->formatEvent($event)
+            'data' => $this->formatEvent($event),
         ], 201);
     }
 
@@ -220,7 +219,7 @@ class EventController extends Controller
             'end_time' => 'sometimes|date|after:start_time',
             'all_day' => 'sometimes|boolean',
             'location' => 'nullable|string|max:255',
-            'type' => 'sometimes|string|in:' . implode(',', array_keys(Event::TYPES)),
+            'type' => 'sometimes|string|in:'.implode(',', array_keys(Event::TYPES)),
             'color' => 'nullable|string|max:20',
             'visibility' => 'sometimes|string|in:public,students,staff,private',
             'term_id' => 'nullable|integer|exists:terms,id',
@@ -234,7 +233,7 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Event updated successfully',
-            'data' => $this->formatEvent($event)
+            'data' => $this->formatEvent($event),
         ]);
     }
 
@@ -244,17 +243,17 @@ class EventController extends Controller
     public function cancel(Request $request, Event $event): JsonResponse
     {
         $validated = $request->validate([
-            'reason' => 'nullable|string|max:500'
+            'reason' => 'nullable|string|max:500',
         ]);
 
         $event->update([
             'is_cancelled' => true,
-            'cancellation_reason' => $validated['reason'] ?? null
+            'cancellation_reason' => $validated['reason'] ?? null,
         ]);
 
         return response()->json([
             'message' => 'Event cancelled successfully',
-            'data' => $this->formatEvent($event)
+            'data' => $this->formatEvent($event),
         ]);
     }
 
@@ -266,7 +265,7 @@ class EventController extends Controller
         $event->delete();
 
         return response()->json([
-            'message' => 'Event deleted successfully'
+            'message' => 'Event deleted successfully',
         ]);
     }
 
@@ -276,18 +275,18 @@ class EventController extends Controller
     public function rsvp(Request $request, Event $event): JsonResponse
     {
         $validated = $request->validate([
-            'status' => 'required|string|in:attending,maybe,declined'
+            'status' => 'required|string|in:attending,maybe,declined',
         ]);
 
         $event->attendees()->syncWithoutDetaching([
-            $request->user()->id => ['status' => $validated['status']]
+            $request->user()->id => ['status' => $validated['status']],
         ]);
 
         return response()->json([
             'message' => 'RSVP updated successfully',
             'data' => [
-                'status' => $validated['status']
-            ]
+                'status' => $validated['status'],
+            ],
         ]);
     }
 
@@ -322,7 +321,7 @@ class EventController extends Controller
                     'id' => $event->courseSection->course->id,
                     'code' => $event->courseSection->course->course_code,
                     'title' => $event->courseSection->course->title,
-                ]
+                ],
             ] : null,
             'department' => $event->department ? [
                 'id' => $event->department->id,
@@ -331,7 +330,7 @@ class EventController extends Controller
         ];
 
         if ($includeAttendees && $event->relationLoaded('attendees')) {
-            $formatted['attendees'] = $event->attendees->map(fn($user) => [
+            $formatted['attendees'] = $event->attendees->map(fn ($user) => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'status' => $user->pivot->status,

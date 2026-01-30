@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Role;
 use App\Models\Permission;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,12 +16,12 @@ class RoleBasedAccessControlTest extends TestCase
     {
         $role = Role::create([
             'name' => 'admin',
-            'description' => 'Administrator role with full access'
+            'description' => 'Administrator role with full access',
         ]);
 
         $this->assertDatabaseHas('roles', [
             'name' => 'admin',
-            'description' => 'Administrator role with full access'
+            'description' => 'Administrator role with full access',
         ]);
 
         $this->assertEquals('admin', $role->name);
@@ -32,12 +32,12 @@ class RoleBasedAccessControlTest extends TestCase
     {
         $permission = Permission::create([
             'name' => 'manage-applications',
-            'description' => 'Can manage student applications'
+            'description' => 'Can manage student applications',
         ]);
 
         $this->assertDatabaseHas('permissions', [
             'name' => 'manage-applications',
-            'description' => 'Can manage student applications'
+            'description' => 'Can manage student applications',
         ]);
 
         $this->assertEquals('manage-applications', $permission->name);
@@ -92,7 +92,7 @@ class RoleBasedAccessControlTest extends TestCase
 
         $this->assertDatabaseHas('role_user', [
             'user_id' => $user->id,
-            'role_id' => $role->id
+            'role_id' => $role->id,
         ]);
 
         // Delete the role
@@ -101,7 +101,7 @@ class RoleBasedAccessControlTest extends TestCase
         // The pivot record should be deleted due to cascade
         $this->assertDatabaseMissing('role_user', [
             'user_id' => $user->id,
-            'role_id' => $role->id
+            'role_id' => $role->id,
         ]);
     }
 
@@ -114,7 +114,7 @@ class RoleBasedAccessControlTest extends TestCase
 
         $this->assertDatabaseHas('permission_role', [
             'role_id' => $role->id,
-            'permission_id' => $permission->id
+            'permission_id' => $permission->id,
         ]);
 
         // Delete the permission
@@ -123,7 +123,7 @@ class RoleBasedAccessControlTest extends TestCase
         // The pivot record should be deleted due to cascade
         $this->assertDatabaseMissing('permission_role', [
             'role_id' => $role->id,
-            'permission_id' => $permission->id
+            'permission_id' => $permission->id,
         ]);
     }
 
@@ -276,7 +276,7 @@ class RoleBasedAccessControlTest extends TestCase
             'view-reports',
             'approve-applications',
             'manage-programs',
-            'verify-documents'
+            'verify-documents',
         ];
 
         foreach ($expectedPermissions as $permission) {

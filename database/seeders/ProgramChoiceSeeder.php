@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use App\Models\AdmissionApplication;
@@ -11,11 +12,11 @@ class ProgramChoiceSeeder extends Seeder
     {
         AdmissionApplication::all()->each(function ($application) {
             $programs = Program::inRandomOrder()->take(2)->get();
-            foreach($programs as $index => $program) {
+            foreach ($programs as $index => $program) {
                 $application->programChoices()->create([
                     'program_id' => $program->id,
                     'preference_order' => $index + 1,
-                    'status' => fake()->randomElement(['pending', 'accepted', 'rejected'])
+                    'status' => fake()->randomElement(['pending', 'accepted', 'rejected']),
                 ]);
             }
         });

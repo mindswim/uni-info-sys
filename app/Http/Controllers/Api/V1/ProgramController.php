@@ -6,10 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\HandlesCsvImportExport;
 use App\Http\Requests\StoreProgramRequest;
 use App\Http\Requests\UpdateProgramRequest;
+use App\Http\Resources\ProgramResource;
 use App\Jobs\ProcessProgramImport;
 use App\Models\Program;
 use Illuminate\Http\Request;
-use App\Http\Resources\ProgramResource;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
@@ -20,6 +20,7 @@ use OpenApi\Attributes as OA;
 class ProgramController extends Controller
 {
     use HandlesCsvImportExport;
+
     /**
      * Public program directory - no authentication required
      */

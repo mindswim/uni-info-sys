@@ -72,6 +72,7 @@ class Scholarship extends Model
         if ($this->available_slots === null) {
             return true;
         }
+
         return $this->slots_awarded < $this->available_slots;
     }
 
@@ -92,6 +93,7 @@ class Scholarship extends Model
         if ($this->program_id && $student->major_program_id !== $this->program_id) {
             return false;
         }
+
         return true;
     }
 
@@ -109,7 +111,7 @@ class Scholarship extends Model
     {
         return $query->where(function ($q) {
             $q->whereNull('available_slots')
-              ->orWhereColumn('slots_awarded', '<', 'available_slots');
+                ->orWhereColumn('slots_awarded', '<', 'available_slots');
         });
     }
 }

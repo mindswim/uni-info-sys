@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Enrollment;
 use App\Models\Invoice;
 use App\Models\InvoiceLineItem;
 use App\Models\Payment;
@@ -25,6 +24,7 @@ class BillingSeeder extends Seeder
 
         if ($programs->isEmpty() || $terms->isEmpty()) {
             $this->command->warn('No programs or terms found. Run DemoSeeder first.');
+
             return;
         }
 
@@ -98,7 +98,7 @@ class BillingSeeder extends Seeder
             }
         }
 
-        $this->command->info('Created ' . TuitionRate::count() . ' tuition rates');
+        $this->command->info('Created '.TuitionRate::count().' tuition rates');
 
         // Generate invoices for students with enrollments
         $this->command->info('Generating invoices...');
@@ -112,14 +112,18 @@ class BillingSeeder extends Seeder
 
             foreach ($enrollmentsByTerm as $termId => $termEnrollments) {
                 $term = Term::find($termId);
-                if (!$term) continue;
+                if (! $term) {
+                    continue;
+                }
 
                 // Check if invoice already exists for this student/term
                 $existingInvoice = Invoice::where('student_id', $student->id)
                     ->where('term_id', $term->id)
                     ->first();
 
-                if ($existingInvoice) continue;
+                if ($existingInvoice) {
+                    continue;
+                }
 
                 try {
                     $billingService->generateInvoiceForTerm($student, $term);
@@ -146,8 +150,8 @@ class BillingSeeder extends Seeder
                     $invoice,
                     $paymentAmount,
                     'credit_card',
-                    'TXN-' . strtoupper(substr(md5(uniqid()), 0, 10)),
-                    'DEMO-' . rand(1000, 9999)
+                    'TXN-'.strtoupper(substr(md5(uniqid()), 0, 10)),
+                    'DEMO-'.rand(1000, 9999)
                 );
 
                 $paymentCount++;
@@ -160,9 +164,9 @@ class BillingSeeder extends Seeder
 
         $this->command->info('Billing data seeded successfully!');
         $this->command->info('Summary:');
-        $this->command->info('- Tuition Rates: ' . TuitionRate::count());
-        $this->command->info('- Invoices: ' . Invoice::count());
-        $this->command->info('- Invoice Line Items: ' . InvoiceLineItem::count());
-        $this->command->info('- Payments: ' . Payment::count());
+        $this->command->info('- Tuition Rates: '.TuitionRate::count());
+        $this->command->info('- Invoices: '.Invoice::count());
+        $this->command->info('- Invoice Line Items: '.InvoiceLineItem::count());
+        $this->command->info('- Payments: '.Payment::count());
     }
 }

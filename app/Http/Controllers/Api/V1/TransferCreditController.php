@@ -45,7 +45,7 @@ class TransferCreditController extends Controller
         if ($match) {
             $transfer->update([
                 'equivalent_course_id' => $match->internal_course_id,
-                'notes' => ($transfer->notes ? $transfer->notes . "\n" : '') . 'Auto-matched from equivalency table.',
+                'notes' => ($transfer->notes ? $transfer->notes."\n" : '').'Auto-matched from equivalency table.',
             ]);
         }
 

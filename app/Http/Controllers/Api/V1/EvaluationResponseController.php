@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\EvaluationForm;
 use App\Models\EvaluationResponse;
 use App\Services\EvaluationService;
 use Illuminate\Http\Request;
@@ -21,7 +20,7 @@ class EvaluationResponseController extends Controller
     {
         $student = $request->user()->student;
 
-        if (!$student) {
+        if (! $student) {
             return response()->json(['message' => 'No student record found.'], 404);
         }
 
@@ -43,7 +42,7 @@ class EvaluationResponseController extends Controller
 
         $student = $request->user()->student;
 
-        if (!$student) {
+        if (! $student) {
             return response()->json(['message' => 'No student record found.'], 404);
         }
 

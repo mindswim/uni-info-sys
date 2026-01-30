@@ -4,11 +4,11 @@ namespace Tests\Feature\Api\V1;
 
 use App\Models\Course;
 use App\Models\CourseSection;
+use App\Models\Role;
 use App\Models\Room;
 use App\Models\Staff;
 use App\Models\Term;
 use App\Models\User;
-use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -22,12 +22,12 @@ class CourseSectionApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create admin role
         $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
-        
+
         $this->admin = User::factory()->create();
-        
+
         // Assign admin role
         $this->admin->roles()->attach($adminRole);
     }
@@ -46,7 +46,7 @@ class CourseSectionApiTest extends TestCase
             'end_time' => '11:30',
         ], $overrides);
     }
-    
+
     public function test_can_get_all_course_sections_paginated()
     {
         // Create specific terms and courses to avoid unique constraint violations
@@ -55,7 +55,7 @@ class CourseSectionApiTest extends TestCase
         $course1 = Course::factory()->create();
         $course2 = Course::factory()->create();
         $course3 = Course::factory()->create();
-        
+
         // Create sections with specific combinations to avoid duplicates
         CourseSection::factory()->create(['course_id' => $course1->id, 'term_id' => $term1->id, 'section_number' => '001']);
         CourseSection::factory()->create(['course_id' => $course1->id, 'term_id' => $term1->id, 'section_number' => '002']);
@@ -101,7 +101,7 @@ class CourseSectionApiTest extends TestCase
 
         $response->assertStatus(200);
         $this->assertCount(3, $response->json('data'));
-        foreach($response->json('data') as $section) {
+        foreach ($response->json('data') as $section) {
             $this->assertEquals($course1->id, $section['course']['id']);
             $this->assertEquals($term->id, $section['term']['id']);
         }
@@ -110,9 +110,9 @@ class CourseSectionApiTest extends TestCase
     public function test_can_create_a_course_section()
     {
         $data = $this->getSectionData();
-        
+
         $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/course-sections', $data);
-        
+
         $response->assertStatus(201)
             ->assertJsonFragment([
                 'capacity' => 100,
@@ -138,11 +138,11 @@ class CourseSectionApiTest extends TestCase
     {
         $section = CourseSection::factory()->create();
         $newRoom = Room::factory()->create();
-        
+
         $updateData = ['capacity' => 150, 'room_id' => $newRoom->id];
 
         $response = $this->actingAs($this->admin, 'sanctum')->putJson("/api/v1/course-sections/{$section->id}", $updateData);
-        
+
         $response->assertStatus(200)
             ->assertJsonFragment(['capacity' => 150])
             ->assertJsonPath('data.room.id', $newRoom->id);
@@ -153,7 +153,7 @@ class CourseSectionApiTest extends TestCase
     public function test_can_delete_a_course_section()
     {
         $section = CourseSection::factory()->create();
-        
+
         $response = $this->actingAs($this->admin, 'sanctum')->deleteJson("/api/v1/course-sections/{$section->id}");
 
         $response->assertStatus(204);

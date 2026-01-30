@@ -20,7 +20,7 @@ class DegreeAuditController extends Controller
     {
         $programId = $student->major_program_id;
 
-        if (!$programId) {
+        if (! $programId) {
             return response()->json(['message' => 'Student has no major program assigned.'], 422);
         }
 

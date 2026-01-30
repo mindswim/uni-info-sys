@@ -26,7 +26,7 @@ class TranscriptController extends Controller
     {
         $pdf = $this->transcriptService->generatePDF($student);
 
-        $filename = 'transcript_' . $student->student_number . '_' . now()->format('Y-m-d') . '.pdf';
+        $filename = 'transcript_'.$student->student_number.'_'.now()->format('Y-m-d').'.pdf';
 
         return $pdf->download($filename);
     }

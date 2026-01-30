@@ -5,9 +5,8 @@ namespace App\Services;
 use App\Exceptions\BusinessRuleViolationException;
 use App\Exceptions\InvalidApplicationStatusException;
 use App\Jobs\SendApplicationStatusNotification;
-use App\Models\Student;
 use App\Models\AdmissionApplication;
-use App\Notifications\ApplicationStatusUpdated;
+use App\Models\Student;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -16,9 +15,8 @@ class AdmissionService
     /**
      * Create a new draft admission application for a student.
      *
-     * @param Student $student The student applying.
-     * @param array $data Validated data for the application.
-     * @return AdmissionApplication
+     * @param  Student  $student  The student applying.
+     * @param  array  $data  Validated data for the application.
      */
     public function createDraftApplication(Student $student, array $data): AdmissionApplication
     {
@@ -27,6 +25,7 @@ class AdmissionService
 
         if ($existingDraft) {
             Log::info("Student {$student->id} already has a draft application. Returning existing one.");
+
             return $existingDraft;
         }
 
@@ -34,32 +33,28 @@ class AdmissionService
         return $student->admissionApplications()->create([
             ...$data,
             'application_date' => now(),
-            'status' => 'draft' // Explicitly set status
+            'status' => 'draft', // Explicitly set status
         ]);
     }
 
     /**
      * Update the status of an admission application and notify the student.
-     *
-     * @param AdmissionApplication $application
-     * @param string $newStatus
-     * @return AdmissionApplication
      */
     public function updateApplicationStatus(AdmissionApplication $application, string $newStatus): AdmissionApplication
     {
         $oldStatus = $application->status;
-        
+
         // Update the application status
         $application->update(['status' => $newStatus]);
-        
+
         // Only send notification if status actually changed
         if ($oldStatus !== $newStatus) {
             // Dispatch notification job asynchronously
             SendApplicationStatusNotification::dispatch($application);
-            
+
             Log::info("Application {$application->id} status updated from {$oldStatus} to {$newStatus}. Notification job dispatched.");
         }
-        
+
         return $application;
     }
 
@@ -70,8 +65,6 @@ class AdmissionService
      * class_standing, academic_status), finalizes program choices, and transitions
      * the application to 'enrolled'.
      *
-     * @param AdmissionApplication $application
-     * @return AdmissionApplication
      * @throws InvalidApplicationStatusException
      * @throws BusinessRuleViolationException
      */
@@ -87,11 +80,11 @@ class AdmissionService
             $application->load(['student', 'programChoices.program']);
             $student = $application->student;
 
-            if (!$student) {
+            if (! $student) {
                 throw new BusinessRuleViolationException('Application has no associated student.');
             }
 
-            if (!in_array($student->enrollment_status, ['prospective', null])) {
+            if (! in_array($student->enrollment_status, ['prospective', null])) {
                 throw new BusinessRuleViolationException(
                     "Student is already {$student->enrollment_status}. Cannot enroll again."
                 );
@@ -102,13 +95,13 @@ class AdmissionService
                 ->where('status', 'accepted')
                 ->first();
 
-            if (!$acceptedChoice) {
+            if (! $acceptedChoice) {
                 $acceptedChoice = $application->programChoices
                     ->sortBy('preference_order')
                     ->first();
             }
 
-            if (!$acceptedChoice) {
+            if (! $acceptedChoice) {
                 throw new BusinessRuleViolationException('Application has no program choices.');
             }
 

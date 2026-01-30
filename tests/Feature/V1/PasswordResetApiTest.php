@@ -3,12 +3,12 @@
 namespace Tests\Feature\Api\V1;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
 
 class PasswordResetApiTest extends TestCase
@@ -18,7 +18,7 @@ class PasswordResetApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Fake notifications to prevent actual emails being sent
         Notification::fake();
     }
@@ -27,16 +27,16 @@ class PasswordResetApiTest extends TestCase
     public function it_can_send_password_reset_link_for_valid_email()
     {
         $user = User::factory()->create([
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
         ]);
 
         $response = $this->postJson('/api/v1/forgot-password', [
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
         ]);
 
         $response->assertStatus(200)
             ->assertJson([
-                'message' => 'Password reset link sent to your email address.'
+                'message' => 'Password reset link sent to your email address.',
             ]);
 
         // Assert that a password reset notification was sent
@@ -47,12 +47,12 @@ class PasswordResetApiTest extends TestCase
     public function it_returns_error_for_nonexistent_email()
     {
         $response = $this->postJson('/api/v1/forgot-password', [
-            'email' => 'nonexistent@example.com'
+            'email' => 'nonexistent@example.com',
         ]);
 
         $response->assertStatus(400)
             ->assertJson([
-                'message' => "We can't find a user with that email address."
+                'message' => "We can't find a user with that email address.",
             ]);
 
         // Assert no notifications were sent
@@ -63,7 +63,7 @@ class PasswordResetApiTest extends TestCase
     public function it_validates_email_format_for_forgot_password()
     {
         $response = $this->postJson('/api/v1/forgot-password', [
-            'email' => 'invalid-email'
+            'email' => 'invalid-email',
         ]);
 
         $response->assertStatus(422)
@@ -83,7 +83,7 @@ class PasswordResetApiTest extends TestCase
     public function it_can_reset_password_with_valid_token()
     {
         $user = User::factory()->create([
-            'password' => bcrypt('oldpassword')
+            'password' => bcrypt('oldpassword'),
         ]);
 
         // Create a real password reset token
@@ -93,12 +93,12 @@ class PasswordResetApiTest extends TestCase
             'email' => $user->email,
             'token' => $token,
             'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123'
+            'password_confirmation' => 'newpassword123',
         ]);
 
         $response->assertOk()
             ->assertJson([
-                'message' => 'Your password has been reset successfully.'
+                'message' => 'Your password has been reset successfully.',
             ]);
 
         // Verify the password was actually changed
@@ -111,19 +111,19 @@ class PasswordResetApiTest extends TestCase
     public function it_fails_with_invalid_token()
     {
         $user = User::factory()->create([
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
         ]);
 
         $response = $this->postJson('/api/v1/reset-password', [
             'token' => 'invalid-token',
             'email' => 'test@example.com',
             'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123'
+            'password_confirmation' => 'newpassword123',
         ]);
 
         $response->assertStatus(400)
             ->assertJson([
-                'message' => 'This password reset token is invalid or has expired.'
+                'message' => 'This password reset token is invalid or has expired.',
             ]);
     }
 
@@ -131,12 +131,12 @@ class PasswordResetApiTest extends TestCase
     public function it_fails_with_expired_token()
     {
         $user = User::factory()->create([
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
         ]);
 
         // Create a token and then manually expire it
         $token = Password::createToken($user);
-        
+
         // Simulate token expiration by updating the created_at timestamp
         DB::table('password_reset_tokens')
             ->where('email', $user->email)
@@ -146,12 +146,12 @@ class PasswordResetApiTest extends TestCase
             'token' => $token,
             'email' => 'test@example.com',
             'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123'
+            'password_confirmation' => 'newpassword123',
         ]);
 
         $response->assertStatus(400)
             ->assertJson([
-                'message' => 'This password reset token is invalid or has expired.'
+                'message' => 'This password reset token is invalid or has expired.',
             ]);
     }
 
@@ -171,7 +171,7 @@ class PasswordResetApiTest extends TestCase
             'token' => 'some-token',
             'email' => 'invalid-email',
             'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123'
+            'password_confirmation' => 'newpassword123',
         ]);
 
         $response->assertStatus(422)
@@ -185,7 +185,7 @@ class PasswordResetApiTest extends TestCase
             'token' => 'some-token',
             'email' => 'test@example.com',
             'password' => 'short',
-            'password_confirmation' => 'short'
+            'password_confirmation' => 'short',
         ]);
 
         $response->assertStatus(422)
@@ -199,7 +199,7 @@ class PasswordResetApiTest extends TestCase
             'token' => 'some-token',
             'email' => 'test@example.com',
             'password' => 'newpassword123',
-            'password_confirmation' => 'differentpassword'
+            'password_confirmation' => 'differentpassword',
         ]);
 
         $response->assertStatus(422)
@@ -213,12 +213,12 @@ class PasswordResetApiTest extends TestCase
             'token' => 'some-token',
             'email' => 'nonexistent@example.com',
             'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123'
+            'password_confirmation' => 'newpassword123',
         ]);
 
         $response->assertStatus(400)
             ->assertJson([
-                'message' => "We can't find a user with that email address."
+                'message' => "We can't find a user with that email address.",
             ]);
     }
 
@@ -226,17 +226,17 @@ class PasswordResetApiTest extends TestCase
     public function it_can_complete_full_password_reset_flow()
     {
         $user = User::factory()->create([
-            'password' => bcrypt('oldpassword')
+            'password' => bcrypt('oldpassword'),
         ]);
 
         // Step 1: Request password reset
         $response = $this->postJson('/api/v1/forgot-password', [
-            'email' => $user->email
+            'email' => $user->email,
         ]);
 
         $response->assertOk()
             ->assertJson([
-                'message' => 'Password reset link sent to your email address.'
+                'message' => 'Password reset link sent to your email address.',
             ]);
 
         // Step 2: Get the token from the database (in tests, we can create it directly)
@@ -247,12 +247,12 @@ class PasswordResetApiTest extends TestCase
             'email' => $user->email,
             'token' => $token,
             'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123'
+            'password_confirmation' => 'newpassword123',
         ]);
 
         $response->assertOk()
             ->assertJson([
-                'message' => 'Your password has been reset successfully.'
+                'message' => 'Your password has been reset successfully.',
             ]);
 
         // Step 4: Verify password was changed and user can login with new password
@@ -271,19 +271,19 @@ class PasswordResetApiTest extends TestCase
     public function it_respects_rate_limiting_on_forgot_password()
     {
         $user = User::factory()->create([
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
         ]);
 
         // Make multiple requests quickly to trigger rate limiting
         for ($i = 0; $i < 10; $i++) {
             $this->postJson('/api/v1/forgot-password', [
-                'email' => 'test@example.com'
+                'email' => 'test@example.com',
             ]);
         }
 
         // The next request should be rate limited
         $response = $this->postJson('/api/v1/forgot-password', [
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
         ]);
 
         // Rate limiting might not be triggered in test environment depending on configuration
@@ -300,7 +300,7 @@ class PasswordResetApiTest extends TestCase
                 'token' => 'some-token',
                 'email' => 'test@example.com',
                 'password' => 'newpassword123',
-                'password_confirmation' => 'newpassword123'
+                'password_confirmation' => 'newpassword123',
             ]);
         }
 
@@ -309,7 +309,7 @@ class PasswordResetApiTest extends TestCase
             'token' => 'some-token',
             'email' => 'test@example.com',
             'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123'
+            'password_confirmation' => 'newpassword123',
         ]);
 
         // Rate limiting might not be triggered in test environment depending on configuration

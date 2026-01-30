@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\AcademicRecord;
 use App\Models\Enrollment;
 use App\Models\Student;
-use App\Models\AcademicRecord;
 use App\Models\Term;
 use App\Services\GradeService;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -33,7 +33,7 @@ class GradeSeeder extends Seeder
 
     public function __construct()
     {
-        $this->gradeService = new GradeService();
+        $this->gradeService = new GradeService;
     }
 
     /**
@@ -54,6 +54,7 @@ class GradeSeeder extends Seeder
 
         if ($enrollments->isEmpty()) {
             $this->command->warn('No enrollments found without grades.');
+
             return;
         }
 
@@ -118,7 +119,7 @@ class GradeSeeder extends Seeder
             $this->command->info('✓ Grade seeding completed successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->command->error('Grade seeding failed: ' . $e->getMessage());
+            $this->command->error('Grade seeding failed: '.$e->getMessage());
             throw $e;
         }
     }
@@ -273,6 +274,7 @@ class GradeSeeder extends Seeder
                 $expanded[] = $grade;
             }
         }
+
         return $expanded;
     }
 

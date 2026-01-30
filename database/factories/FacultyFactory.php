@@ -25,7 +25,7 @@ class FacultyFactory extends Factory
                 'Faculty of Medicine',
                 'Faculty of Law',
                 'Faculty of Education',
-                'Faculty of Social Sciences'
+                'Faculty of Social Sciences',
             ]),
         ];
     }

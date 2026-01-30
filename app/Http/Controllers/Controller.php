@@ -12,42 +12,51 @@ use Illuminate\Routing\Controller as BaseController;
  *     title="University Admissions System API",
  *     version="1.0.0",
  *     description="RESTful API for managing university admissions, student enrollment, and academic records",
+ *
  *     @OA\Contact(
  *         email="admin@university.edu"
  *     )
  * )
+ *
  * @OA\Server(
  *     url="/api/v1",
  *     description="API V1"
  * )
+ *
  * @OA\SecurityScheme(
  *     securityScheme="bearerAuth",
  *     type="http",
  *     scheme="bearer",
  *     bearerFormat="JWT"
  * )
+ *
  * @OA\Parameter(
  *    parameter="enrollment_student_id_filter",
  *    name="student_id",
  *    in="query",
  *    description="Filter by student ID",
  *    required=false,
+ *
  *    @OA\Schema(type="integer")
  * )
+ *
  * @OA\Parameter(
  *   parameter="enrollment_course_section_id_filter",
  *   name="course_section_id",
  *   in="query",
  *   description="Filter by course section ID",
  *   required=false,
+ *
  *   @OA\Schema(type="integer")
  * )
+ *
  * @OA\Parameter(
  *  parameter="enrollment_status_filter",
  *  name="status",
  *  in="query",
  *  description="Filter by enrollment status",
  *  required=false,
+ *
  *  @OA\Schema(type="string", enum={"enrolled", "waitlisted", "completed", "withdrawn"})
  * )
  * @OA\Schema(
@@ -56,6 +65,7 @@ use Illuminate\Routing\Controller as BaseController;
  *     description="Standard error response format following RFC 7807",
  *     type="object",
  *     required={"type", "title", "status", "detail"},
+ *
  *     @OA\Property(property="type", type="string", format="uri", example="https://tools.ietf.org/html/rfc7231#section-6.5.4", description="A URI reference that identifies the problem type"),
  *     @OA\Property(property="title", type="string", example="Resource Not Found", description="A short, human-readable summary of the problem type"),
  *     @OA\Property(property="status", type="integer", example=404, description="The HTTP status code"),
@@ -63,6 +73,7 @@ use Illuminate\Routing\Controller as BaseController;
  *     @OA\Property(property="errors", type="object", description="Validation errors (for 422 responses)", additionalProperties={"type": "array", "items": {"type": "string"}}),
  *     @OA\Property(property="extensions", type="object", description="Additional problem-specific extension members", additionalProperties=true)
  * )
+ *
  * @OA\Schema(
  *     schema="ValidationError",
  *     title="Validation Error",
@@ -71,6 +82,7 @@ use Illuminate\Routing\Controller as BaseController;
  *         @OA\Schema(ref="#/components/schemas/ProblemDetails"),
  *         @OA\Schema(
  *             type="object",
+ *
  *             @OA\Property(property="type", type="string", example="https://tools.ietf.org/html/rfc4918#section-11.2"),
  *             @OA\Property(property="title", type="string", example="Validation Failed"),
  *             @OA\Property(property="status", type="integer", example=422),
@@ -84,6 +96,7 @@ use Illuminate\Routing\Controller as BaseController;
  *         )
  *     }
  * )
+ *
  * @OA\Schema(
  *     schema="NotFoundError",
  *     title="Not Found Error",
@@ -92,6 +105,7 @@ use Illuminate\Routing\Controller as BaseController;
  *         @OA\Schema(ref="#/components/schemas/ProblemDetails"),
  *         @OA\Schema(
  *             type="object",
+ *
  *             @OA\Property(property="type", type="string", example="https://tools.ietf.org/html/rfc7231#section-6.5.4"),
  *             @OA\Property(property="title", type="string", example="Resource Not Found"),
  *             @OA\Property(property="status", type="integer", example=404),
@@ -99,6 +113,7 @@ use Illuminate\Routing\Controller as BaseController;
  *         )
  *     }
  * )
+ *
  * @OA\Schema(
  *     schema="UnauthorizedError",
  *     title="Unauthorized Error",
@@ -107,6 +122,7 @@ use Illuminate\Routing\Controller as BaseController;
  *         @OA\Schema(ref="#/components/schemas/ProblemDetails"),
  *         @OA\Schema(
  *             type="object",
+ *
  *             @OA\Property(property="type", type="string", example="https://tools.ietf.org/html/rfc7235#section-3.1"),
  *             @OA\Property(property="title", type="string", example="Unauthenticated"),
  *             @OA\Property(property="status", type="integer", example=401),
@@ -114,6 +130,7 @@ use Illuminate\Routing\Controller as BaseController;
  *         )
  *     }
  * )
+ *
  * @OA\Schema(
  *     schema="ForbiddenError",
  *     title="Forbidden Error",
@@ -122,6 +139,7 @@ use Illuminate\Routing\Controller as BaseController;
  *         @OA\Schema(ref="#/components/schemas/ProblemDetails"),
  *         @OA\Schema(
  *             type="object",
+ *
  *             @OA\Property(property="type", type="string", example="https://tools.ietf.org/html/rfc7231#section-6.5.3"),
  *             @OA\Property(property="title", type="string", example="Forbidden"),
  *             @OA\Property(property="status", type="integer", example=403),

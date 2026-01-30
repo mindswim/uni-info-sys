@@ -22,10 +22,15 @@ class ChairGradeChangeApiTest extends TestCase
     use RefreshDatabase;
 
     private User $chairUser;
+
     private Staff $chairStaff;
+
     private Department $department;
+
     private CourseSection $section;
+
     private GradeChangeRequest $gradeChange;
+
     private Term $term;
 
     protected function setUp(): void

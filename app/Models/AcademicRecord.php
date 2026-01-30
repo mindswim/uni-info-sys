@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,7 +11,7 @@ class AcademicRecord extends Model
 
     protected $fillable = [
         'student_id', 'institution_name', 'qualification_type',
-        'start_date', 'end_date', 'gpa', 'transcript_url', 'verified'
+        'start_date', 'end_date', 'gpa', 'transcript_url', 'verified',
     ];
 
     protected $casts = [

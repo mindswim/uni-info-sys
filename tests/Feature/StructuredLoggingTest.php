@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Feature;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Tests\TestCase;
-use App\Models\User;
 
 class StructuredLoggingTest extends TestCase
 {
@@ -19,7 +19,7 @@ class StructuredLoggingTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertHeader('X-Request-ID');
-        
+
         // Verify the trace ID is a valid UUID format
         $traceId = $response->headers->get('X-Request-ID');
         $this->assertTrue(Str::isUuid($traceId));
@@ -29,7 +29,7 @@ class StructuredLoggingTest extends TestCase
     public function it_preserves_existing_request_id_header()
     {
         $customTraceId = (string) Str::uuid();
-        
+
         $response = $this->withHeaders([
             'X-Request-ID' => $customTraceId,
         ])->getJson('/api/health');
@@ -43,9 +43,9 @@ class StructuredLoggingTest extends TestCase
     {
         // Use a fake log channel to capture log entries
         Log::spy();
-        
+
         $customTraceId = (string) Str::uuid();
-        
+
         // Make a request that will trigger logging (e.g., authentication failure)
         $this->withHeaders([
             'X-Request-ID' => $customTraceId,
@@ -65,7 +65,7 @@ class StructuredLoggingTest extends TestCase
 
         // Create a custom trace ID
         $customTraceId = (string) Str::uuid();
-        
+
         $response = $this->withHeaders([
             'X-Request-ID' => $customTraceId,
             'User-Agent' => 'Test-Agent/1.0',
@@ -73,7 +73,7 @@ class StructuredLoggingTest extends TestCase
 
         // Verify the response includes the trace ID
         $response->assertHeader('X-Request-ID', $customTraceId);
-        
+
         // The middleware should have processed the request successfully
         $this->assertTrue($response->status() >= 200 && $response->status() < 500);
     }
@@ -83,10 +83,10 @@ class StructuredLoggingTest extends TestCase
     {
         // Test with the health endpoint which supports different methods
         $methods = ['GET'];
-        
+
         foreach ($methods as $method) {
             $response = $this->json($method, '/api/health');
-            
+
             // Each request should get a unique trace ID
             $response->assertHeader('X-Request-ID');
             $traceId = $response->headers->get('X-Request-ID');
@@ -102,7 +102,7 @@ class StructuredLoggingTest extends TestCase
         $response = $this->getJson('/api/v1/students');
 
         $response->assertStatus(401);
-        
+
         // Check if trace ID is present - it may not be for certain auth errors
         // This is acceptable as auth middleware often runs before custom middleware
         if ($response->headers->has('X-Request-ID')) {
@@ -121,7 +121,7 @@ class StructuredLoggingTest extends TestCase
         // Web routes should not have the trace ID middleware
         // (unless explicitly configured)
         $response = $this->get('/');
-        
+
         // The web route might return various status codes
         // For now, we just verify the request completes
         $this->assertTrue($response->status() >= 200 && $response->status() < 600);
@@ -131,12 +131,12 @@ class StructuredLoggingTest extends TestCase
     public function trace_id_persists_through_request_lifecycle()
     {
         $customTraceId = (string) Str::uuid();
-        
+
         // Make multiple requests with the same trace ID
         $response1 = $this->withHeaders([
             'X-Request-ID' => $customTraceId,
         ])->getJson('/api/health');
-        
+
         $response2 = $this->withHeaders([
             'X-Request-ID' => $customTraceId,
         ])->getJson('/api/health');
@@ -155,7 +155,7 @@ class StructuredLoggingTest extends TestCase
         }
 
         $customTraceId = (string) Str::uuid();
-        
+
         // Make a request that will trigger some logging
         $response = $this->withHeaders([
             'X-Request-ID' => $customTraceId,
@@ -171,12 +171,12 @@ class StructuredLoggingTest extends TestCase
         $logFile = storage_path('logs/laravel.log');
         if (file_exists($logFile)) {
             $logContents = file_get_contents($logFile);
-            
+
             // The log should contain our trace ID in some form
             // Note: The exact format depends on the logging configuration
             $this->assertNotEmpty($logContents, 'Log file should not be empty');
         }
-        
+
         // This test mainly verifies the middleware runs without errors
         // Actual log format verification would require more complex setup
         $this->assertTrue(true);

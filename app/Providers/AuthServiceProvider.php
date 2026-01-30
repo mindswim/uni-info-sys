@@ -2,9 +2,6 @@
 
 namespace App\Providers;
 
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Gate;
-
 use App\Models\AcademicRecord;
 use App\Models\AdmissionApplication;
 use App\Models\Building;
@@ -23,7 +20,6 @@ use App\Models\Staff;
 use App\Models\Student;
 use App\Models\Term;
 use App\Models\User;
-
 use App\Policies\AcademicRecordPolicy;
 use App\Policies\AdmissionApplicationPolicy;
 use App\Policies\BuildingPolicy;
@@ -34,14 +30,16 @@ use App\Policies\DocumentPolicy;
 use App\Policies\EnrollmentPolicy;
 use App\Policies\FacultyPolicy;
 use App\Policies\PermissionPolicy;
-use App\Policies\ProgramPolicy;
 use App\Policies\ProgramChoicePolicy;
+use App\Policies\ProgramPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\RoomPolicy;
 use App\Policies\StaffPolicy;
 use App\Policies\StudentPolicy;
 use App\Policies\TermPolicy;
 use App\Policies\UserPolicy;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -85,7 +83,7 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
-        
+
         // Define custom gates
         Gate::define('create-document-for-student', function ($user, $student) {
             // A student can add a document to their own profile. Admin/staff can add to any.

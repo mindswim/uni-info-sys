@@ -7,52 +7,52 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: "ProgramChoiceResource",
-    title: "Program Choice Resource",
-    description: "Program choice resource representation",
+    schema: 'ProgramChoiceResource',
+    title: 'Program Choice Resource',
+    description: 'Program choice resource representation',
     properties: [
         new OA\Property(
-            property: "id",
-            type: "integer",
-            description: "Unique identifier of the program choice",
+            property: 'id',
+            type: 'integer',
+            description: 'Unique identifier of the program choice',
             example: 1
         ),
         new OA\Property(
-            property: "application_id",
-            type: "integer",
-            description: "ID of the admission application this choice belongs to",
+            property: 'application_id',
+            type: 'integer',
+            description: 'ID of the admission application this choice belongs to',
             example: 1
         ),
         new OA\Property(
-            property: "program_id",
-            type: "integer",
-            description: "ID of the program being chosen",
+            property: 'program_id',
+            type: 'integer',
+            description: 'ID of the program being chosen',
             example: 1
         ),
         new OA\Property(
-            property: "preference_order",
-            type: "integer",
-            description: "The preference order of this program choice (1 = most preferred)",
+            property: 'preference_order',
+            type: 'integer',
+            description: 'The preference order of this program choice (1 = most preferred)',
             example: 1
         ),
         new OA\Property(
-            property: "status",
-            type: "string",
-            description: "Current status of this program choice",
-            enum: ["pending", "accepted", "rejected"],
-            example: "pending"
+            property: 'status',
+            type: 'string',
+            description: 'Current status of this program choice',
+            enum: ['pending', 'accepted', 'rejected'],
+            example: 'pending'
         ),
         new OA\Property(
-            property: "program",
-            type: "object",
-            description: "Program information (when loaded)",
+            property: 'program',
+            type: 'object',
+            description: 'Program information (when loaded)',
             nullable: true
         ),
         new OA\Property(
-            property: "admission_application",
-            ref: "#/components/schemas/AdmissionApplicationResource",
-            description: "Admission application information (when loaded)"
-        )
+            property: 'admission_application',
+            ref: '#/components/schemas/AdmissionApplicationResource',
+            description: 'Admission application information (when loaded)'
+        ),
     ]
 )]
 class ProgramChoiceResource extends JsonResource

@@ -5,10 +5,8 @@ namespace Tests\Unit\Services;
 use App\Models\ApprovalRequest;
 use App\Models\CourseSection;
 use App\Models\Department;
-use App\Models\Enrollment;
 use App\Models\Faculty;
 use App\Models\Staff;
-use App\Models\User;
 use App\Services\ApprovalService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -18,7 +16,9 @@ class ApprovalServiceTest extends TestCase
     use RefreshDatabase;
 
     private ApprovalService $service;
+
     private Department $department;
+
     private Staff $staff;
 
     protected function setUp(): void

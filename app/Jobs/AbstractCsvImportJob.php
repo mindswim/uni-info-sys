@@ -27,9 +27,13 @@ abstract class AbstractCsvImportJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected string $filePath;
+
     protected int $userId;
+
     protected string $importId;
+
     protected string $originalFileName;
+
     protected CsvImportExportService $csvService;
 
     /**
@@ -67,7 +71,7 @@ abstract class AbstractCsvImportJob implements ShouldQueue
             Log::info("{$this->getEntityName()} import started", [
                 'import_id' => $this->importId,
                 'user_id' => $this->userId,
-                'total_rows' => count($rows)
+                'total_rows' => count($rows),
             ]);
 
             $stats['total_rows'] = count($rows);
@@ -82,6 +86,7 @@ abstract class AbstractCsvImportJob implements ShouldQueue
                     // Skip empty rows
                     if (empty(array_filter($row))) {
                         $stats['skipped']++;
+
                         continue;
                     }
 
@@ -103,6 +108,7 @@ abstract class AbstractCsvImportJob implements ShouldQueue
                             'Validation failed',
                             $validator->errors()->toArray()
                         );
+
                         continue;
                     }
 
@@ -129,7 +135,7 @@ abstract class AbstractCsvImportJob implements ShouldQueue
             Log::error("{$this->getEntityName()} import failed", [
                 'import_id' => $this->importId,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             $this->csvService->logError($stats, $logFile, 0, 'Import failed', $e->getMessage());
@@ -167,7 +173,7 @@ abstract class AbstractCsvImportJob implements ShouldQueue
     /**
      * Get validation rules for row data
      *
-     * @param array $data Row data
+     * @param  array  $data  Row data
      * @return array Laravel validation rules
      */
     abstract protected function getValidationRules(array $data): array;
@@ -180,10 +186,9 @@ abstract class AbstractCsvImportJob implements ShouldQueue
     /**
      * Process a single CSV row
      *
-     * @param array $data Validated row data
-     * @param int $rowNumber Row number in CSV
-     * @param array $stats Statistics tracker (passed by reference)
-     * @return void
+     * @param  array  $data  Validated row data
+     * @param  int  $rowNumber  Row number in CSV
+     * @param  array  $stats  Statistics tracker (passed by reference)
      */
     abstract protected function processRow(array $data, int $rowNumber, array &$stats): void;
 
@@ -202,7 +207,7 @@ abstract class AbstractCsvImportJob implements ShouldQueue
         Log::info("{$this->getEntityName()} import completed", [
             'import_id' => $this->importId,
             'user_id' => $this->userId,
-            'stats' => $stats
+            'stats' => $stats,
         ]);
 
         // TODO: Send actual notification (email, database notification, etc.)
@@ -222,7 +227,7 @@ abstract class AbstractCsvImportJob implements ShouldQueue
         Log::error("{$this->getEntityName()} import failed notification", [
             'import_id' => $this->importId,
             'user_id' => $this->userId,
-            'error' => $error
+            'error' => $error,
         ]);
 
         // TODO: Send actual notification (email, database notification, etc.)

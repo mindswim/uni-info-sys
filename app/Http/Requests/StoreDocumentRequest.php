@@ -6,12 +6,12 @@ use Illuminate\Foundation\Http\FormRequest;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: "StoreDocumentRequest",
-    title: "Store Document Request",
-    required: ["document_type", "file"],
+    schema: 'StoreDocumentRequest',
+    title: 'Store Document Request',
+    required: ['document_type', 'file'],
     properties: [
-        new OA\Property(property: "document_type", type: "string", enum: ["transcript", "essay", "recommendation", "certificate", "other"], example: "transcript"),
-        new OA\Property(property: "file", type: "string", format: "binary", description: "The document file to upload (PDF, DOC, DOCX)"),
+        new OA\Property(property: 'document_type', type: 'string', enum: ['transcript', 'essay', 'recommendation', 'certificate', 'other'], example: 'transcript'),
+        new OA\Property(property: 'file', type: 'string', format: 'binary', description: 'The document file to upload (PDF, DOC, DOCX)'),
     ]
 )]
 class StoreDocumentRequest extends FormRequest

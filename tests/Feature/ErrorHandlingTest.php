@@ -2,9 +2,6 @@
 
 namespace Tests\Feature\Feature;
 
-use App\Exceptions\DuplicateEnrollmentException;
-use App\Exceptions\EnrollmentCapacityExceededException;
-use App\Exceptions\ResourceNotFoundException;
 use App\Models\Course;
 use App\Models\CourseSection;
 use App\Models\Enrollment;
@@ -12,18 +9,18 @@ use App\Models\Role;
 use App\Models\Student;
 use App\Models\Term;
 use App\Models\User;
-use App\Services\EnrollmentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 use Tests\Traits\CreatesUsersWithRoles;
 
 class ErrorHandlingTest extends TestCase
 {
-    use RefreshDatabase, CreatesUsersWithRoles;
+    use CreatesUsersWithRoles, RefreshDatabase;
 
     private User $adminUser;
+
     private User $studentUser;
+
     private Student $student;
 
     protected function setUp(): void
@@ -77,10 +74,10 @@ class ErrorHandlingTest extends TestCase
             ])
             ->assertJsonStructure([
                 'type',
-                'title', 
+                'title',
                 'status',
                 'detail',
-                'error_code'
+                'error_code',
             ]);
     }
 
@@ -124,9 +121,9 @@ class ErrorHandlingTest extends TestCase
             ->assertJsonStructure([
                 'type',
                 'title',
-                'status', 
+                'status',
                 'detail',
-                'error_code'
+                'error_code',
             ]);
     }
 
@@ -169,8 +166,8 @@ class ErrorHandlingTest extends TestCase
                 'type',
                 'title',
                 'status',
-                'detail', 
-                'error_code'
+                'detail',
+                'error_code',
             ]);
     }
 
@@ -190,9 +187,9 @@ class ErrorHandlingTest extends TestCase
                 'type',
                 'title',
                 'status',
-                'detail'
+                'detail',
             ]);
-        
+
         // The detail should contain the Laravel ModelNotFoundException message
         $this->assertStringContainsString('No query results for model', $response->json('detail'));
     }
@@ -218,8 +215,8 @@ class ErrorHandlingTest extends TestCase
                 'status',
                 'detail',
                 'errors' => [
-                    'name'
-                ]
+                    'name',
+                ],
             ]);
     }
 
@@ -239,7 +236,7 @@ class ErrorHandlingTest extends TestCase
                 'type',
                 'title',
                 'status',
-                'detail'
+                'detail',
             ]);
     }
 
@@ -267,7 +264,7 @@ class ErrorHandlingTest extends TestCase
                 'type',
                 'title',
                 'status',
-                'detail'
+                'detail',
             ]);
     }
 
@@ -286,7 +283,7 @@ class ErrorHandlingTest extends TestCase
                 'type',
                 'title',
                 'status',
-                'detail'
+                'detail',
             ]);
     }
 
@@ -304,7 +301,7 @@ class ErrorHandlingTest extends TestCase
                 'type',
                 'title',
                 'status',
-                'detail'
+                'detail',
             ])
             ->assertJsonMissing(['debug']);
     }

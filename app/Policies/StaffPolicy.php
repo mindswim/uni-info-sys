@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Staff;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class StaffPolicy
 {
@@ -23,7 +22,7 @@ class StaffPolicy
     public function view(User $user, Staff $staff): bool
     {
         // Admin can view any staff, staff can view their own profile
-        return $user->hasRole('admin') || 
+        return $user->hasRole('admin') ||
                ($user->hasRole('staff') && $user->id === $staff->user_id);
     }
 
@@ -42,7 +41,7 @@ class StaffPolicy
     public function update(User $user, Staff $staff): bool
     {
         // Admin can update any staff, staff can update their own profile
-        return $user->hasRole('admin') || 
+        return $user->hasRole('admin') ||
                ($user->hasRole('staff') && $user->id === $staff->user_id);
     }
 

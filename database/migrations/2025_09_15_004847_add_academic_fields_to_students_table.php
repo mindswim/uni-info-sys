@@ -104,7 +104,7 @@ return new class extends Migration
                 'major_program_id', 'minor_program_id', 'admission_date', 'expected_graduation_date',
                 'total_credits_earned', 'credits_in_progress', 'financial_hold', 'receives_financial_aid',
                 'high_school', 'high_school_graduation_year', 'sat_score', 'act_score',
-                'preferred_name', 'pronouns', 'parent_guardian_name', 'parent_guardian_phone'
+                'preferred_name', 'pronouns', 'parent_guardian_name', 'parent_guardian_phone',
             ]);
         });
     }

@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Program;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use OpenApi\Attributes as OA;
@@ -31,6 +30,7 @@ class UpdateProgramRequest extends FormRequest
     public function authorize(): bool
     {
         $program = $this->route('program');
+
         return $this->user()->can('update', $program);
     }
 

@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use App\Services\MetricsService;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class PrometheusMetrics
@@ -25,11 +24,11 @@ class PrometheusMetrics
     public function handle(Request $request, Closure $next): SymfonyResponse
     {
         $startTime = microtime(true);
-        
+
         $response = $next($request);
-        
+
         $this->recordMetrics($request, $response, $startTime);
-        
+
         return $response;
     }
 
@@ -42,7 +41,7 @@ class PrometheusMetrics
 
         // Record request count
         $this->metricsService->incrementHttpRequests($method, $route, $status);
-        
+
         // Record request duration
         $this->metricsService->observeHttpRequestDuration($method, $route, $duration);
     }
@@ -50,26 +49,26 @@ class PrometheusMetrics
     private function getRouteName(Request $request): string
     {
         $route = $request->route();
-        
+
         if ($route) {
             // Use the route name if available
             if ($route->getName()) {
                 return $route->getName();
             }
-            
+
             // Use the route URI pattern which already has {id} placeholders
             $uri = $route->uri();
             if ($uri) {
                 return $uri;
             }
         }
-        
+
         // Fallback to the request path, but normalize it to avoid high cardinality
         $path = $request->getPathInfo();
-        
+
         // Replace numeric IDs with placeholders to reduce cardinality
         $normalizedPath = preg_replace('/\/\d+/', '/{id}', $path);
-        
+
         return $normalizedPath ?: '/';
     }
 }

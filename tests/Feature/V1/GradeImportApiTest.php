@@ -5,11 +5,9 @@ namespace Tests\Feature\Api\V1;
 use App\Jobs\ProcessGradeImport;
 use App\Models\Course;
 use App\Models\CourseSection;
-use App\Models\Enrollment;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\Staff;
-use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -47,20 +45,20 @@ class GradeImportApiTest extends TestCase
         // Create instructor user with staff record
         $instructorUser = User::factory()->create();
         $instructorStaff = Staff::factory()->create(['user_id' => $instructorUser->id]);
-        
+
         // Create other faculty user
         $otherFacultyUser = User::factory()->create();
         $otherFacultyStaff = Staff::factory()->create(['user_id' => $otherFacultyUser->id]);
-        
+
         // Give both users the grades.upload permission
         $this->giveUserPermission($instructorUser, 'grades.upload');
         $this->giveUserPermission($otherFacultyUser, 'grades.upload');
-        
+
         // Create course section assigned to instructor
         $courseSection = CourseSection::factory()->create([
-            'instructor_id' => $instructorStaff->id
+            'instructor_id' => $instructorStaff->id,
         ]);
-        
+
         $file = UploadedFile::fake()->create('grades.csv', 100, 'text/csv');
 
         // Test that assigned instructor can upload
@@ -79,7 +77,7 @@ class GradeImportApiTest extends TestCase
 
         $response->assertStatus(403)
             ->assertJson([
-                'message' => 'You do not have permission to upload grades for this course section.'
+                'message' => 'You do not have permission to upload grades for this course section.',
             ]);
     }
 
@@ -90,13 +88,13 @@ class GradeImportApiTest extends TestCase
         $adminUser = User::factory()->create();
         $this->giveUserPermission($adminUser, 'enrollments.manage');
         $this->giveUserPermission($adminUser, 'grades.upload'); // Admin also needs this permission
-        
+
         // Create instructor and course section
         $instructorStaff = Staff::factory()->create();
         $courseSection = CourseSection::factory()->create([
-            'instructor_id' => $instructorStaff->id
+            'instructor_id' => $instructorStaff->id,
         ]);
-        
+
         $file = UploadedFile::fake()->create('grades.csv', 100, 'text/csv');
 
         $response = $this->actingAs($adminUser, 'sanctum')
@@ -113,11 +111,11 @@ class GradeImportApiTest extends TestCase
         // Create user without permission
         $user = User::factory()->create();
         $staff = Staff::factory()->create(['user_id' => $user->id]);
-        
+
         $courseSection = CourseSection::factory()->create([
-            'instructor_id' => $staff->id
+            'instructor_id' => $staff->id,
         ]);
-        
+
         $file = UploadedFile::fake()->create('grades.csv', 100, 'text/csv');
 
         $response = $this->actingAs($user, 'sanctum')
@@ -134,9 +132,9 @@ class GradeImportApiTest extends TestCase
         $user = User::factory()->create();
         $staff = Staff::factory()->create(['user_id' => $user->id]);
         $this->giveUserPermission($user, 'grades.upload');
-        
+
         $courseSection = CourseSection::factory()->create([
-            'instructor_id' => $staff->id
+            'instructor_id' => $staff->id,
         ]);
 
         // Test missing file
@@ -148,7 +146,7 @@ class GradeImportApiTest extends TestCase
 
         // Test invalid file type
         $invalidFile = UploadedFile::fake()->create('grades.pdf', 100, 'application/pdf');
-        
+
         $response = $this->actingAs($user, 'sanctum')
             ->postJson("/api/v1/course-sections/{$courseSection->id}/import-grades", [
                 'file' => $invalidFile,
@@ -159,7 +157,7 @@ class GradeImportApiTest extends TestCase
 
         // Test file too large (> 5MB)
         $largeFile = UploadedFile::fake()->create('grades.csv', 6000, 'text/csv'); // 6MB
-        
+
         $response = $this->actingAs($user, 'sanctum')
             ->postJson("/api/v1/course-sections/{$courseSection->id}/import-grades", [
                 'file' => $largeFile,
@@ -175,11 +173,11 @@ class GradeImportApiTest extends TestCase
         $user = User::factory()->create();
         $staff = Staff::factory()->create(['user_id' => $user->id]);
         $this->giveUserPermission($user, 'grades.upload');
-        
+
         $course = Course::factory()->create(['course_code' => 'CS101']);
         $courseSection = CourseSection::factory()->create([
             'instructor_id' => $staff->id,
-            'course_id' => $course->id
+            'course_id' => $course->id,
         ]);
 
         $file = UploadedFile::fake()->create('grades.csv', 100, 'text/csv');
@@ -197,9 +195,9 @@ class GradeImportApiTest extends TestCase
                 'course_section' => [
                     'id',
                     'course_code',
-                    'section'
+                    'section',
                 ],
-                'estimated_processing_time'
+                'estimated_processing_time',
             ]);
     }
 
@@ -209,9 +207,9 @@ class GradeImportApiTest extends TestCase
         $user = User::factory()->create();
         $staff = Staff::factory()->create(['user_id' => $user->id]);
         $this->giveUserPermission($user, 'grades.upload');
-        
+
         $courseSection = CourseSection::factory()->create([
-            'instructor_id' => $staff->id
+            'instructor_id' => $staff->id,
         ]);
 
         $file = UploadedFile::fake()->create('grades.csv', 100, 'text/csv');
@@ -228,8 +226,8 @@ class GradeImportApiTest extends TestCase
             $userIdProperty->setAccessible(true);
             $courseSectionIdProperty = $reflection->getProperty('courseSectionId');
             $courseSectionIdProperty->setAccessible(true);
-            
-            return $userIdProperty->getValue($job) === $user->id && 
+
+            return $userIdProperty->getValue($job) === $user->id &&
                    $courseSectionIdProperty->getValue($job) === $courseSection->id;
         });
     }
@@ -240,9 +238,9 @@ class GradeImportApiTest extends TestCase
         $user = User::factory()->create();
         $staff = Staff::factory()->create(['user_id' => $user->id]);
         $this->giveUserPermission($user, 'grades.upload');
-        
+
         $courseSection = CourseSection::factory()->create([
-            'instructor_id' => $staff->id
+            'instructor_id' => $staff->id,
         ]);
 
         $file = UploadedFile::fake()->create('grades.csv', 100, 'text/csv');
@@ -264,11 +262,11 @@ class GradeImportApiTest extends TestCase
     {
         $user = User::factory()->create();
         $this->giveUserPermission($user, 'grades.upload');
-        
+
         $file = UploadedFile::fake()->create('grades.csv', 100, 'text/csv');
 
         $response = $this->actingAs($user, 'sanctum')
-            ->postJson("/api/v1/course-sections/999/import-grades", [
+            ->postJson('/api/v1/course-sections/999/import-grades', [
                 'file' => $file,
             ]);
 
@@ -281,11 +279,11 @@ class GradeImportApiTest extends TestCase
         $user = User::factory()->create();
         $staff = Staff::factory()->create(['user_id' => $user->id]);
         $this->giveUserPermission($user, 'grades.upload');
-        
+
         $course = Course::factory()->create(['course_code' => 'CS101']);
         $courseSection = CourseSection::factory()->create([
             'instructor_id' => $staff->id,
-            'course_id' => $course->id
+            'course_id' => $course->id,
         ]);
 
         $file = UploadedFile::fake()->create('grades.csv', 100, 'text/csv');
@@ -300,8 +298,8 @@ class GradeImportApiTest extends TestCase
                 'course_section' => [
                     'id' => $courseSection->id,
                     'course_code' => 'CS101',
-                    'section' => "Section {$courseSection->id}"
-                ]
+                    'section' => "Section {$courseSection->id}",
+                ],
             ]);
     }
 
@@ -311,15 +309,15 @@ class GradeImportApiTest extends TestCase
     private function giveUserPermission(User $user, string $permissionName): void
     {
         $permission = Permission::firstOrCreate(['name' => $permissionName]);
-        $role = Role::firstOrCreate(['name' => 'test_role_' . $user->id]); // Make role unique per user
-        
+        $role = Role::firstOrCreate(['name' => 'test_role_'.$user->id]); // Make role unique per user
+
         // Get existing permissions and add the new one
         $existingPermissionIds = $role->permissions()->pluck('permissions.id')->toArray();
-        if (!in_array($permission->id, $existingPermissionIds)) {
+        if (! in_array($permission->id, $existingPermissionIds)) {
             $existingPermissionIds[] = $permission->id;
         }
-        
+
         $role->permissions()->sync($existingPermissionIds);
         $user->roles()->sync([$role->id]);
     }
-} 
+}

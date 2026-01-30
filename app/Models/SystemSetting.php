@@ -28,7 +28,7 @@ class SystemSetting extends Model
         return Cache::remember($cacheKey, 3600, function () use ($group, $key, $default) {
             $setting = self::where('group', $group)->where('key', $key)->first();
 
-            if (!$setting) {
+            if (! $setting) {
                 return $default;
             }
 
@@ -85,7 +85,7 @@ class SystemSetting extends Model
 
         $result = [];
         foreach ($settings as $setting) {
-            if (!isset($result[$setting->group])) {
+            if (! isset($result[$setting->group])) {
                 $result[$setting->group] = [];
             }
             $result[$setting->group][$setting->key] = self::castValue($setting->value, $setting->type);

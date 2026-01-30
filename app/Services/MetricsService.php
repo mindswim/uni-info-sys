@@ -10,13 +10,15 @@ use Prometheus\Storage\InMemory;
 class MetricsService
 {
     private CollectorRegistry $registry;
+
     private Counter $httpRequestsTotal;
+
     private Histogram $httpRequestDuration;
 
     public function __construct()
     {
         // Use InMemory storage for persistence between requests
-        $this->registry = new CollectorRegistry(new InMemory());
+        $this->registry = new CollectorRegistry(new InMemory);
         $this->initializeMetrics();
     }
 
@@ -45,7 +47,7 @@ class MetricsService
         $this->httpRequestsTotal->inc([
             'method' => $method,
             'route' => $route,
-            'status' => (string) $status
+            'status' => (string) $status,
         ]);
     }
 
@@ -53,7 +55,7 @@ class MetricsService
     {
         $this->httpRequestDuration->observe($duration, [
             'method' => $method,
-            'route' => $route
+            'route' => $route,
         ]);
     }
 
@@ -61,4 +63,4 @@ class MetricsService
     {
         return $this->registry;
     }
-} 
+}

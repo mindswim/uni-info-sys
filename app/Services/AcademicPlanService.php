@@ -19,7 +19,7 @@ class AcademicPlanService
     public function validatePlan(Student $student): array
     {
         $programId = $student->major_program_id;
-        if (!$programId) {
+        if (! $programId) {
             return ['valid' => false, 'errors' => ['No major program assigned']];
         }
 
@@ -30,7 +30,7 @@ class AcademicPlanService
             ->get();
 
         $errors = [];
-        $plannedCredits = $plannedCourses->sum(fn($pc) => $pc->course->credits ?? 0);
+        $plannedCredits = $plannedCourses->sum(fn ($pc) => $pc->course->credits ?? 0);
         $completedCredits = $degreeProgress['overall_progress']['credits_completed'];
         $totalNeeded = $degreeProgress['overall_progress']['credits_needed'];
 
@@ -51,7 +51,7 @@ class AcademicPlanService
     public function suggestCourses(Student $student, Term $term): array
     {
         $programId = $student->major_program_id;
-        if (!$programId) {
+        if (! $programId) {
             return [];
         }
 
@@ -78,7 +78,7 @@ class AcademicPlanService
 
         // Get courses from the student's department that they haven't taken
         $program = \App\Models\Program::find($programId);
-        if (!$program) {
+        if (! $program) {
             return [];
         }
 

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\RegistrationTimeTicket;
 use App\Models\Student;
-use App\Models\Term;
 use Illuminate\Http\Request;
 
 class RegistrationTimeTicketController extends Controller
@@ -26,7 +25,7 @@ class RegistrationTimeTicketController extends Controller
         $request->validate([
             'student_id' => 'required|exists:students,id',
             'term_id' => 'required|exists:terms,id',
-            'priority_group' => 'required|in:' . implode(',', RegistrationTimeTicket::PRIORITY_GROUPS),
+            'priority_group' => 'required|in:'.implode(',', RegistrationTimeTicket::PRIORITY_GROUPS),
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
         ]);
@@ -44,7 +43,7 @@ class RegistrationTimeTicketController extends Controller
         $request->validate([
             'term_id' => 'required|exists:terms,id',
             'assignments' => 'required|array',
-            'assignments.*.priority_group' => 'required|in:' . implode(',', RegistrationTimeTicket::PRIORITY_GROUPS),
+            'assignments.*.priority_group' => 'required|in:'.implode(',', RegistrationTimeTicket::PRIORITY_GROUPS),
             'assignments.*.start_time' => 'required|date',
             'assignments.*.end_time' => 'required|date|after:assignments.*.start_time',
         ]);
@@ -89,7 +88,7 @@ class RegistrationTimeTicketController extends Controller
     {
         $student = $request->user()->student;
 
-        if (!$student) {
+        if (! $student) {
             return response()->json(['message' => 'No student record found.'], 404);
         }
 
@@ -98,7 +97,7 @@ class RegistrationTimeTicketController extends Controller
             ->orderBy('start_time', 'desc')
             ->first();
 
-        if (!$ticket) {
+        if (! $ticket) {
             return response()->json(['data' => null]);
         }
 

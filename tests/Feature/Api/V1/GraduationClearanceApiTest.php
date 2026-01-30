@@ -18,9 +18,13 @@ class GraduationClearanceApiTest extends TestCase
     use RefreshDatabase;
 
     private User $adminUser;
+
     private User $studentUser;
+
     private Student $student;
+
     private Program $program;
+
     private Term $term;
 
     protected function setUp(): void

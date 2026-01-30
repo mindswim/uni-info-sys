@@ -24,7 +24,7 @@ return new class extends Migration
                 'video',
                 'link',
                 'file',
-                'other'
+                'other',
             ])->default('file');
             $table->text('content')->nullable();
             $table->string('file_path')->nullable();

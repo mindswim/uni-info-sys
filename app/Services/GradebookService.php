@@ -14,18 +14,18 @@ class GradebookService
      */
     protected const GRADE_SCALE = [
         'A+' => ['min' => 97, 'points' => 4.0],
-        'A'  => ['min' => 93, 'points' => 4.0],
+        'A' => ['min' => 93, 'points' => 4.0],
         'A-' => ['min' => 90, 'points' => 3.7],
         'B+' => ['min' => 87, 'points' => 3.3],
-        'B'  => ['min' => 83, 'points' => 3.0],
+        'B' => ['min' => 83, 'points' => 3.0],
         'B-' => ['min' => 80, 'points' => 2.7],
         'C+' => ['min' => 77, 'points' => 2.3],
-        'C'  => ['min' => 73, 'points' => 2.0],
+        'C' => ['min' => 73, 'points' => 2.0],
         'C-' => ['min' => 70, 'points' => 1.7],
         'D+' => ['min' => 67, 'points' => 1.3],
-        'D'  => ['min' => 63, 'points' => 1.0],
+        'D' => ['min' => 63, 'points' => 1.0],
         'D-' => ['min' => 60, 'points' => 0.7],
-        'F'  => ['min' => 0,  'points' => 0.0],
+        'F' => ['min' => 0,  'points' => 0.0],
     ];
 
     /**
@@ -173,6 +173,7 @@ class GradebookService
                 return $letter;
             }
         }
+
         return 'F';
     }
 
@@ -253,7 +254,7 @@ class GradebookService
 
         foreach ($assignments as $assignment) {
             $type = $assignment->type;
-            if (!isset($categories[$type])) {
+            if (! isset($categories[$type])) {
                 $categories[$type] = [
                     'type' => $type,
                     'total_points' => 0,
@@ -354,7 +355,7 @@ class GradebookService
                 'needed_percentage' => null,
                 'message' => $currentPercentage >= $targetMin
                     ? "You've already achieved this grade!"
-                    : "No remaining assignments. Current grade is final.",
+                    : 'No remaining assignments. Current grade is final.',
             ];
         }
 
@@ -371,7 +372,7 @@ class GradebookService
             'current_earned' => round($earnedWeight, 2),
             'message' => $neededPercentage <= 100
                 ? "You need {$neededPercentage}% on remaining work to achieve a {$targetMin}%."
-                : "This grade is not achievable with the remaining assignments.",
+                : 'This grade is not achievable with the remaining assignments.',
         ];
     }
 
@@ -405,7 +406,7 @@ class GradebookService
                 'needed_percentage' => null,
                 'message' => $currentPercentage >= $targetMin
                     ? "You've already achieved this grade!"
-                    : "No remaining assignments. Current grade is final.",
+                    : 'No remaining assignments. Current grade is final.',
             ];
         }
 
@@ -421,7 +422,7 @@ class GradebookService
             'current_earned' => $earnedPoints,
             'message' => $neededPercentage <= 100
                 ? "You need {$neededPercentage}% on remaining work to achieve a {$targetMin}%."
-                : "This grade is not achievable with the remaining assignments.",
+                : 'This grade is not achievable with the remaining assignments.',
         ];
     }
 
@@ -448,6 +449,7 @@ class GradebookService
 
             $assignmentGrades = $assignments->mapWithKeys(function ($assignment) use ($submissions) {
                 $submission = $submissions->get($assignment->id);
+
                 return [
                     $assignment->id => [
                         'score' => $submission ? $submission->final_score : null,
@@ -579,7 +581,7 @@ class GradebookService
 
         $headers = ['Student ID', 'Student Name'];
         foreach ($gradebook['assignments'] as $assignment) {
-            $headers[] = $assignment['title'] . ' (' . $assignment['max_points'] . ' pts)';
+            $headers[] = $assignment['title'].' ('.$assignment['max_points'].' pts)';
         }
         $headers[] = 'Current %';
         $headers[] = 'Letter Grade';

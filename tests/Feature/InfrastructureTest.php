@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Database\QueryException;
-use Tests\TestCase;
 use App\Models\Building;
 use App\Models\Room;
+use Illuminate\Database\QueryException;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class InfrastructureTest extends TestCase
 {
@@ -34,12 +34,12 @@ class InfrastructureTest extends TestCase
         $room = Room::factory()->create([
             'building_id' => $building->id,
             'room_number' => '101',
-            'capacity' => 30
+            'capacity' => 30,
         ]);
 
         $this->assertDatabaseHas('rooms', [
             'room_number' => '101',
-            'capacity' => 30
+            'capacity' => 30,
         ]);
         $this->assertEquals($building->id, $room->building->id);
     }
@@ -58,7 +58,7 @@ class InfrastructureTest extends TestCase
     {
         $building1 = Building::factory()->create();
         $building2 = Building::factory()->create();
-        
+
         $room1 = Room::factory()->create(['building_id' => $building1->id, 'room_number' => '303']);
         $room2 = Room::factory()->create(['building_id' => $building2->id, 'room_number' => '303']);
 

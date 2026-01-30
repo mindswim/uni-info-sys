@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\AttendanceRecord;
-use App\Models\CourseSection;
 use App\Models\Enrollment;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -21,6 +20,7 @@ class AttendanceSeeder extends Seeder
 
         if ($enrollments->isEmpty()) {
             $this->command->warn('No enrollments found. Run DemoSeeder first.');
+
             return;
         }
 

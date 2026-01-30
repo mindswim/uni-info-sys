@@ -85,7 +85,7 @@ class Assignment extends Model
      */
     public function isAvailable(): bool
     {
-        if (!$this->is_published) {
+        if (! $this->is_published) {
             return false;
         }
 
@@ -109,7 +109,7 @@ class Assignment extends Model
      */
     public function acceptsLateSubmissions(): bool
     {
-        if (!$this->allows_late) {
+        if (! $this->allows_late) {
             return false;
         }
 
@@ -118,6 +118,7 @@ class Assignment extends Model
         }
 
         $daysPastDue = $this->getDaysLate();
+
         return $daysPastDue <= $this->max_late_days;
     }
 
@@ -140,7 +141,7 @@ class Assignment extends Model
      */
     public function calculateLatePenalty(int $daysLate): float
     {
-        if ($daysLate <= 0 || !$this->allows_late) {
+        if ($daysLate <= 0 || ! $this->allows_late) {
             return 0;
         }
 
@@ -209,7 +210,7 @@ class Assignment extends Model
         return $query->published()
             ->where(function ($q) {
                 $q->whereNull('available_from')
-                  ->orWhere('available_from', '<=', now());
+                    ->orWhere('available_from', '<=', now());
             });
     }
 
@@ -219,7 +220,7 @@ class Assignment extends Model
     public function scopeDueSoon($query, int $days = 7)
     {
         return $query->where('due_date', '>=', now())
-                     ->where('due_date', '<=', now()->addDays($days));
+            ->where('due_date', '<=', now()->addDays($days));
     }
 
     /**

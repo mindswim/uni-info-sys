@@ -26,21 +26,28 @@ class FacultyController extends Controller
      *     operationId="getFaculties",
      *     tags={"Faculties"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
      *         description="Page number for pagination",
      *         required=false,
+     *
      *         @OA\Schema(type="integer", minimum=1, default=1)
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successfully retrieved faculties",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(
      *                 property="data",
      *                 type="array",
+     *
      *                 @OA\Items(
+     *
      *                     @OA\Property(property="id", type="integer", example=1),
      *                     @OA\Property(property="name", type="string", example="Faculty of Science"),
      *                     @OA\Property(property="created_at", type="string", format="date-time"),
@@ -48,7 +55,9 @@ class FacultyController extends Controller
      *                     @OA\Property(
      *                         property="departments",
      *                         type="array",
+     *
      *                         @OA\Items(
+     *
      *                             @OA\Property(property="id", type="integer"),
      *                             @OA\Property(property="name", type="string")
      *                         )
@@ -59,6 +68,7 @@ class FacultyController extends Controller
      *             @OA\Property(property="meta", type="object")
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthorized"),
      *     @OA\Response(response=403, description="Forbidden")
      * )
@@ -82,18 +92,24 @@ class FacultyController extends Controller
      *     operationId="createFaculty",
      *     tags={"Faculties"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         description="Faculty data",
+     *
      *         @OA\JsonContent(
      *             required={"name"},
+     *
      *             @OA\Property(property="name", type="string", example="Faculty of Science", maxLength=255)
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=201,
      *         description="Faculty created successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="name", type="string", example="Faculty of Science"),
@@ -102,6 +118,7 @@ class FacultyController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthorized", @OA\JsonContent(ref="#/components/schemas/UnauthorizedError")),
      *     @OA\Response(response=403, description="Forbidden", @OA\JsonContent(ref="#/components/schemas/ForbiddenError")),
      *     @OA\Response(response=422, description="Validation error", @OA\JsonContent(ref="#/components/schemas/ValidationError"))
@@ -112,14 +129,14 @@ class FacultyController extends Controller
         $this->authorize('create', Faculty::class);
 
         $validated = $request->validate([
-            'name' => 'required|string|unique:faculties|max:255'
+            'name' => 'required|string|unique:faculties|max:255',
         ]);
-        
+
         $faculty = Faculty::create($validated);
-        
+
         // Clear faculties cache
         Cache::forget('faculties.all');
-        
+
         return new FacultyResource($faculty);
     }
 
@@ -131,17 +148,22 @@ class FacultyController extends Controller
      *     operationId="getFaculty",
      *     tags={"Faculties"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         description="Faculty ID",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successfully retrieved faculty",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="name", type="string", example="Faculty of Science"),
@@ -150,7 +172,9 @@ class FacultyController extends Controller
      *                 @OA\Property(
      *                     property="departments",
      *                     type="array",
+     *
      *                     @OA\Items(
+     *
      *                         @OA\Property(property="id", type="integer"),
      *                         @OA\Property(property="name", type="string")
      *                     )
@@ -158,6 +182,7 @@ class FacultyController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthorized", @OA\JsonContent(ref="#/components/schemas/UnauthorizedError")),
      *     @OA\Response(response=403, description="Forbidden", @OA\JsonContent(ref="#/components/schemas/ForbiddenError")),
      *     @OA\Response(response=404, description="Faculty not found", @OA\JsonContent(ref="#/components/schemas/NotFoundError"))
@@ -178,24 +203,32 @@ class FacultyController extends Controller
      *     operationId="updateFaculty",
      *     tags={"Faculties"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         description="Faculty ID",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         description="Faculty data to update",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="name", type="string", example="Faculty of Applied Science", maxLength=255)
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Faculty updated successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="name", type="string", example="Faculty of Applied Science"),
@@ -204,6 +237,7 @@ class FacultyController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthorized", @OA\JsonContent(ref="#/components/schemas/UnauthorizedError")),
      *     @OA\Response(response=403, description="Forbidden", @OA\JsonContent(ref="#/components/schemas/ForbiddenError")),
      *     @OA\Response(response=404, description="Faculty not found", @OA\JsonContent(ref="#/components/schemas/NotFoundError")),
@@ -215,9 +249,9 @@ class FacultyController extends Controller
         $this->authorize('update', $faculty);
 
         $validated = $request->validate([
-            'name' => 'sometimes|string|unique:faculties,name,'.$faculty->id.'|max:255'
+            'name' => 'sometimes|string|unique:faculties,name,'.$faculty->id.'|max:255',
         ]);
-        
+
         $faculty->update($validated);
 
         // Clear faculties cache
@@ -234,13 +268,16 @@ class FacultyController extends Controller
      *     operationId="deleteFaculty",
      *     tags={"Faculties"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         description="Faculty ID",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(response=204, description="Faculty deleted successfully"),
      *     @OA\Response(response=401, description="Unauthorized", @OA\JsonContent(ref="#/components/schemas/UnauthorizedError")),
      *     @OA\Response(response=403, description="Forbidden", @OA\JsonContent(ref="#/components/schemas/ForbiddenError")),

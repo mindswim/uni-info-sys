@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Models\CourseSection;
-use App\Models\Enrollment;
 use App\Services\EnrollmentService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -44,7 +43,7 @@ class ProcessWaitlistPromotion implements ShouldQueue
 
                 // Send confirmation notification for the promotion
                 SendEnrollmentConfirmation::dispatch($promotedEnrollment, 'promoted');
-                
+
             } else {
                 Log::info('No students available for waitlist promotion', [
                     'course_section_id' => $this->courseSection->id,
@@ -56,7 +55,7 @@ class ProcessWaitlistPromotion implements ShouldQueue
                 'course_section_id' => $this->courseSection->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             // Re-throw to mark the job as failed
             throw $e;
         }

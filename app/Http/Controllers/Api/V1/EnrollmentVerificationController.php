@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Student;
 use App\Services\EnrollmentVerificationService;
-use Illuminate\Http\JsonResponse;
 
 class EnrollmentVerificationController extends Controller
 {

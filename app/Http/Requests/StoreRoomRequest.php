@@ -7,14 +7,14 @@ use Illuminate\Validation\Rule;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    title: "Store Room Request",
-    description: "Request body for creating a new room.",
-    required: ["building_id", "room_number", "capacity", "type"],
+    title: 'Store Room Request',
+    description: 'Request body for creating a new room.',
+    required: ['building_id', 'room_number', 'capacity', 'type'],
     properties: [
-        new OA\Property(property: "building_id", type: "integer", description: "The ID of the building this room belongs to.", example: 1),
-        new OA\Property(property: "room_number", type: "string", maxLength: 20, example: "201A"),
-        new OA\Property(property: "capacity", type: "integer", minimum: 1, example: 50),
-        new OA\Property(property: "type", type: "string", enum: ["lecture_hall", "laboratory", "seminar_room", "office"], example: "seminar_room"),
+        new OA\Property(property: 'building_id', type: 'integer', description: 'The ID of the building this room belongs to.', example: 1),
+        new OA\Property(property: 'room_number', type: 'string', maxLength: 20, example: '201A'),
+        new OA\Property(property: 'capacity', type: 'integer', minimum: 1, example: 50),
+        new OA\Property(property: 'type', type: 'string', enum: ['lecture_hall', 'laboratory', 'seminar_room', 'office'], example: 'seminar_room'),
     ]
 )]
 class StoreRoomRequest extends FormRequest

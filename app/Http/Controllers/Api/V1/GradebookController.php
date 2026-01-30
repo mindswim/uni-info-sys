@@ -138,22 +138,23 @@ class GradebookController extends Controller
         $export = $this->gradebookService->exportGradebook($courseSection);
 
         $csv = '';
-        $csv .= implode(',', array_map(fn($h) => '"' . str_replace('"', '""', $h) . '"', $export['headers'])) . "\n";
+        $csv .= implode(',', array_map(fn ($h) => '"'.str_replace('"', '""', $h).'"', $export['headers']))."\n";
 
         foreach ($export['rows'] as $row) {
             $csv .= implode(',', array_map(function ($cell) {
                 if (is_numeric($cell)) {
                     return $cell;
                 }
-                return '"' . str_replace('"', '""', (string) $cell) . '"';
-            }, $row)) . "\n";
+
+                return '"'.str_replace('"', '""', (string) $cell).'"';
+            }, $row))."\n";
         }
 
-        $filename = 'gradebook_' . $courseSection->course->course_code . '_' . $courseSection->section_number . '_' . date('Y-m-d') . '.csv';
+        $filename = 'gradebook_'.$courseSection->course->course_code.'_'.$courseSection->section_number.'_'.date('Y-m-d').'.csv';
 
         return response($csv, 200, [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 

@@ -7,18 +7,19 @@ use Illuminate\Support\Collection;
 
 /**
  * Term Pool Manager for Deterministic Testing
- * 
+ *
  * Provides a pool of unique, deterministic terms for testing to prevent
  * unique constraint violations while maintaining test isolation.
  */
 class TermPool
 {
     private static ?Collection $terms = null;
+
     private static int $counter = 0;
 
     /**
      * Get or create a term from the pool
-     * 
+     *
      * Cycles through available terms to ensure uniqueness while
      * providing deterministic behavior for tests.
      */
@@ -50,21 +51,21 @@ class TermPool
     private static function initializePool(): void
     {
         self::$terms = collect();
-        
+
         $semesters = ['Fall', 'Spring', 'Summer'];
         $startYear = 2025; // Start from 2025 to avoid conflicts with existing data
-        
+
         // Create 30 unique terms (10 years * 3 semesters) - more than enough for any test suite
         // Keeping year range reasonable to avoid MySQL datetime limits (2038 problem)
         for ($i = 0; $i < 30; $i++) {
             $year = $startYear + intval($i / 3);
             $semester = $semesters[$i % 3];
-            
+
             // Use firstOrCreate to handle race conditions gracefully
             $term = Term::firstOrCreate(
                 [
                     'academic_year' => $year,
-                    'semester' => $semester
+                    'semester' => $semester,
                 ],
                 [
                     'name' => "{$semester} {$year}",
@@ -73,7 +74,7 @@ class TermPool
                     'add_drop_deadline' => self::getDeadline($year, $semester),
                 ]
             );
-            
+
             self::$terms->push($term);
         }
     }
@@ -83,9 +84,9 @@ class TermPool
      */
     private static function getStartDate(int $year, string $semester): string
     {
-        return match($semester) {
+        return match ($semester) {
             'Spring' => "{$year}-01-15",
-            'Summer' => "{$year}-06-01", 
+            'Summer' => "{$year}-06-01",
             'Fall' => "{$year}-09-01",
             default => "{$year}-01-15",
         };
@@ -96,7 +97,7 @@ class TermPool
      */
     private static function getEndDate(int $year, string $semester): string
     {
-        return match($semester) {
+        return match ($semester) {
             'Spring' => "{$year}-05-10",
             'Summer' => "{$year}-08-15",
             'Fall' => "{$year}-12-20",
@@ -109,7 +110,7 @@ class TermPool
      */
     private static function getDeadline(int $year, string $semester): string
     {
-        return match($semester) {
+        return match ($semester) {
             'Spring' => "{$year}-01-29",
             'Summer' => "{$year}-06-15",
             'Fall' => "{$year}-09-15",
@@ -132,4 +133,4 @@ class TermPool
     {
         return self::$counter;
     }
-} 
+}

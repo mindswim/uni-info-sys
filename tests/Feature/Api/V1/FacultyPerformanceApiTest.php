@@ -20,7 +20,9 @@ class FacultyPerformanceApiTest extends TestCase
     use RefreshDatabase;
 
     private User $chairUser;
+
     private Staff $chairStaff;
+
     private Department $department;
 
     protected function setUp(): void

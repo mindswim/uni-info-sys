@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -8,15 +10,15 @@ class Program extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 
-        'department_id', 
+        'name',
+        'department_id',
         'degree_level',
         'cip_code',
         'duration',
         'total_credit_hours',
-        'description', 
-        'requirements', 
-        'capacity'
+        'description',
+        'requirements',
+        'capacity',
     ];
 
     public function department()
@@ -40,7 +42,7 @@ class Program extends Model
         $cipCodes = [
             'Bachelor of Computer Science' => '11.0701',
             'Master of Computer Science' => '11.0701',
-            'Bachelor of Information Technology' => '11.0401', 
+            'Bachelor of Information Technology' => '11.0401',
             'Bachelor of Software Engineering' => '14.0903',
             'Bachelor of Electrical Engineering' => '14.1001',
             'Master of Electrical Engineering' => '14.1001',
@@ -61,9 +63,9 @@ class Program extends Model
             'Bachelor of English' => '23.0101',
             'Bachelor of History' => '54.0101',
             'Bachelor of Political Science' => '45.1001',
-            'Bachelor of Economics' => '45.0601'
+            'Bachelor of Economics' => '45.0601',
         ];
-        
+
         return $cipCodes[$this->name] ?? '00.0000';
     }
 

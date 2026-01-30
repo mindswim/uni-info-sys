@@ -2,12 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Student;
-use App\Models\Term;
 use App\Models\CourseSection;
 use App\Models\Enrollment;
-use App\Models\FinancialAidPackage;
-use App\Models\ProgramChoice;
+use App\Models\Student;
+use App\Models\Term;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
 
@@ -25,8 +23,9 @@ class EnrollmentConversionSeeder extends Seeder
         Log::info('Starting enrollment conversion (matriculation)...');
 
         $term = Term::where('name', 'Fall 2024')->first();
-        if (!$term) {
+        if (! $term) {
             Log::warning('No Fall 2024 term found');
+
             return;
         }
 
@@ -39,8 +38,8 @@ class EnrollmentConversionSeeder extends Seeder
                 $query->where('status', 'accepted');
             })
             ->with([
-                'admissionApplications' => fn($q) => $q->where('status', 'accepted')->with('programChoices'),
-                'financialAidPackages' => fn($q) => $q->where('status', 'accepted'),
+                'admissionApplications' => fn ($q) => $q->where('status', 'accepted')->with('programChoices'),
+                'financialAidPackages' => fn ($q) => $q->where('status', 'accepted'),
             ])
             ->get();
 
@@ -69,12 +68,12 @@ class EnrollmentConversionSeeder extends Seeder
                 $query->where('status', 'accepted');
             })
             ->with([
-                'admissionApplications' => fn($q) => $q->where('status', 'accepted')->with('programChoices'),
+                'admissionApplications' => fn ($q) => $q->where('status', 'accepted')->with('programChoices'),
             ])
             ->get();
 
         // 60% of full-pay students matriculate
-        $fullPayMatriculating = $fullPayStudents->filter(fn() => fake()->boolean(60));
+        $fullPayMatriculating = $fullPayStudents->filter(fn () => fake()->boolean(60));
 
         foreach ($fullPayMatriculating as $student) {
             $this->matriculateStudent($student);
@@ -210,7 +209,7 @@ class EnrollmentConversionSeeder extends Seeder
         $enrolledInCourse = Enrollment::where('student_id', $student->id)
             ->whereHas('courseSection', function ($query) use ($section) {
                 $query->where('course_id', $section->course_id)
-                      ->where('term_id', $section->term_id);
+                    ->where('term_id', $section->term_id);
             })
             ->exists();
 
@@ -234,6 +233,7 @@ class EnrollmentConversionSeeder extends Seeder
                     'enrollment_date' => now(),
                 ]);
             }
+
             return false;
         }
 

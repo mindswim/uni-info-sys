@@ -50,7 +50,7 @@ class BillingService
 
             // Get tuition rate for student's program
             $program = $student->majorProgram;
-            if (!$program) {
+            if (! $program) {
                 throw new \Exception('Student must have a major program assigned to generate invoices.');
             }
 
@@ -71,7 +71,7 @@ class BillingService
                 ->current()
                 ->first();
 
-            if (!$tuitionRate) {
+            if (! $tuitionRate) {
                 // Fallback to program-level rate without term specificity
                 $tuitionRate = TuitionRate::where('program_id', $program->id)
                     ->whereNull('term_id')
@@ -82,7 +82,7 @@ class BillingService
                     ->first();
             }
 
-            if (!$tuitionRate) {
+            if (! $tuitionRate) {
                 throw new \Exception('No tuition rate found for this student and term.');
             }
 

@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\HandlesCsvImportExport;
+use App\Http\Resources\DepartmentResource;
 use App\Jobs\ProcessDepartmentImport;
 use App\Models\Department;
 use Illuminate\Http\Request;
-use App\Http\Resources\DepartmentResource;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -26,28 +26,37 @@ class DepartmentController extends Controller
      *     operationId="getDepartments",
      *     tags={"Departments"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
      *         description="Page number for pagination",
      *         required=false,
+     *
      *         @OA\Schema(type="integer", minimum=1, default=1)
      *     ),
+     *
      *     @OA\Parameter(
      *         name="faculty_id",
      *         in="query",
      *         description="Filter departments by faculty ID",
      *         required=false,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successfully retrieved departments",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(
      *                 property="data",
      *                 type="array",
+     *
      *                 @OA\Items(
+     *
      *                     @OA\Property(property="id", type="integer", example=1),
      *                     @OA\Property(property="name", type="string", example="Computer Science"),
      *                     @OA\Property(property="faculty_id", type="integer", example=1),
@@ -62,7 +71,9 @@ class DepartmentController extends Controller
      *                     @OA\Property(
      *                         property="programs",
      *                         type="array",
+     *
      *                         @OA\Items(
+     *
      *                             @OA\Property(property="id", type="integer"),
      *                             @OA\Property(property="name", type="string")
      *                         )
@@ -73,6 +84,7 @@ class DepartmentController extends Controller
      *             @OA\Property(property="meta", type="object")
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthorized"),
      *     @OA\Response(response=403, description="Forbidden")
      * )
@@ -84,7 +96,7 @@ class DepartmentController extends Controller
         // Create cache key based on filters
         $cacheKey = 'departments.all';
         if ($request->has('faculty_id')) {
-            $cacheKey = 'departments.faculty.' . $request->faculty_id;
+            $cacheKey = 'departments.faculty.'.$request->faculty_id;
         }
 
         $departments = Cache::remember($cacheKey, 3600, function () use ($request) {
@@ -108,20 +120,26 @@ class DepartmentController extends Controller
      *     operationId="createDepartment",
      *     tags={"Departments"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         description="Department data",
+     *
      *         @OA\JsonContent(
      *             required={"name", "code", "faculty_id"},
+     *
      *             @OA\Property(property="name", type="string", example="Computer Science", maxLength=255),
      *             @OA\Property(property="code", type="string", example="CS", maxLength=10, description="Unique department code"),
      *             @OA\Property(property="faculty_id", type="integer", example=1, description="ID of the faculty this department belongs to")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=201,
      *         description="Department created successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="name", type="string", example="Computer Science"),
@@ -137,6 +155,7 @@ class DepartmentController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthorized"),
      *     @OA\Response(response=403, description="Forbidden"),
      *     @OA\Response(response=422, description="Validation error")
@@ -149,14 +168,14 @@ class DepartmentController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:10|unique:departments,code',
-            'faculty_id' => 'required|exists:faculties,id'
+            'faculty_id' => 'required|exists:faculties,id',
         ]);
 
         $department = Department::create($validated);
 
         // Clear departments cache (all and faculty-specific)
         Cache::forget('departments.all');
-        Cache::forget('departments.faculty.' . $validated['faculty_id']);
+        Cache::forget('departments.faculty.'.$validated['faculty_id']);
 
         return new DepartmentResource($department->load('faculty'));
     }
@@ -169,17 +188,22 @@ class DepartmentController extends Controller
      *     operationId="getDepartment",
      *     tags={"Departments"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         description="Department ID",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successfully retrieved department",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="name", type="string", example="Computer Science"),
@@ -195,7 +219,9 @@ class DepartmentController extends Controller
      *                 @OA\Property(
      *                     property="programs",
      *                     type="array",
+     *
      *                     @OA\Items(
+     *
      *                         @OA\Property(property="id", type="integer"),
      *                         @OA\Property(property="name", type="string")
      *                     )
@@ -203,6 +229,7 @@ class DepartmentController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthorized"),
      *     @OA\Response(response=403, description="Forbidden"),
      *     @OA\Response(response=404, description="Department not found")
@@ -223,25 +250,33 @@ class DepartmentController extends Controller
      *     operationId="updateDepartment",
      *     tags={"Departments"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         description="Department ID",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         description="Department data to update",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="name", type="string", example="Computer Science & Engineering", maxLength=255),
      *             @OA\Property(property="faculty_id", type="integer", example=1, description="ID of the faculty this department belongs to")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Department updated successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="name", type="string", example="Computer Science & Engineering"),
@@ -257,6 +292,7 @@ class DepartmentController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="Unauthorized"),
      *     @OA\Response(response=403, description="Forbidden"),
      *     @OA\Response(response=404, description="Department not found"),
@@ -269,7 +305,7 @@ class DepartmentController extends Controller
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
-            'faculty_id' => 'sometimes|exists:faculties,id'
+            'faculty_id' => 'sometimes|exists:faculties,id',
         ]);
 
         $oldFacultyId = $department->faculty_id;
@@ -277,9 +313,9 @@ class DepartmentController extends Controller
 
         // Clear departments cache (all and affected faculty-specific caches)
         Cache::forget('departments.all');
-        Cache::forget('departments.faculty.' . $oldFacultyId);
+        Cache::forget('departments.faculty.'.$oldFacultyId);
         if (isset($validated['faculty_id']) && $validated['faculty_id'] !== $oldFacultyId) {
-            Cache::forget('departments.faculty.' . $validated['faculty_id']);
+            Cache::forget('departments.faculty.'.$validated['faculty_id']);
         }
 
         return new DepartmentResource($department->load('faculty'));
@@ -293,13 +329,16 @@ class DepartmentController extends Controller
      *     operationId="deleteDepartment",
      *     tags={"Departments"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         description="Department ID",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(response=204, description="Department deleted successfully"),
      *     @OA\Response(response=401, description="Unauthorized"),
      *     @OA\Response(response=403, description="Forbidden"),
@@ -315,7 +354,7 @@ class DepartmentController extends Controller
 
         // Clear departments cache (all and faculty-specific)
         Cache::forget('departments.all');
-        Cache::forget('departments.faculty.' . $facultyId);
+        Cache::forget('departments.faculty.'.$facultyId);
 
         return response()->noContent();
     }

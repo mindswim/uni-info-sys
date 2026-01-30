@@ -28,7 +28,7 @@ class UpdateRoleRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('roles', 'name')->ignore($this->route('role'))
+                Rule::unique('roles', 'name')->ignore($this->route('role')),
             ],
             'description' => 'sometimes|nullable|string|max:1000',
         ];

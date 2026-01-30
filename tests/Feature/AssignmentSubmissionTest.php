@@ -19,10 +19,15 @@ class AssignmentSubmissionTest extends TestCase
     use RefreshDatabase;
 
     protected User $adminUser;
+
     protected User $studentUser;
+
     protected Student $student;
+
     protected CourseSection $courseSection;
+
     protected Assignment $assignment;
+
     protected Enrollment $enrollment;
 
     protected function setUp(): void
@@ -405,7 +410,7 @@ class AssignmentSubmissionTest extends TestCase
 
     public function test_service_calculates_attempt_number(): void
     {
-        $service = new AssignmentSubmissionService();
+        $service = new AssignmentSubmissionService;
 
         // First submission
         $submission1 = $service->submit($this->assignment, $this->enrollment, [
@@ -428,7 +433,7 @@ class AssignmentSubmissionTest extends TestCase
 
     public function test_service_rejects_submission_for_wrong_course_section(): void
     {
-        $service = new AssignmentSubmissionService();
+        $service = new AssignmentSubmissionService;
 
         // Create enrollment for different course section
         $otherSection = CourseSection::factory()->create();

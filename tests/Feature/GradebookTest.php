@@ -6,7 +6,6 @@ use App\Models\Assignment;
 use App\Models\AssignmentSubmission;
 use App\Models\CourseSection;
 use App\Models\Enrollment;
-use App\Models\Staff;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\GradebookService;
@@ -19,10 +18,15 @@ class GradebookTest extends TestCase
     use RefreshDatabase;
 
     protected User $adminUser;
+
     protected User $studentUser;
+
     protected Student $student;
+
     protected CourseSection $courseSection;
+
     protected Enrollment $enrollment;
+
     protected GradebookService $gradebookService;
 
     protected function setUp(): void
@@ -51,7 +55,7 @@ class GradebookTest extends TestCase
             'status' => 'enrolled',
         ]);
 
-        $this->gradebookService = new GradebookService();
+        $this->gradebookService = new GradebookService;
     }
 
     public function test_calculates_current_grade_with_unweighted_assignments(): void

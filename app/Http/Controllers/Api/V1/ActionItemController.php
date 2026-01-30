@@ -76,10 +76,10 @@ class ActionItemController extends Controller
     {
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
-            'type' => 'required|string|in:' . implode(',', ActionItem::TYPES),
+            'type' => 'required|string|in:'.implode(',', ActionItem::TYPES),
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'priority' => 'sometimes|string|in:' . implode(',', ActionItem::PRIORITIES),
+            'priority' => 'sometimes|string|in:'.implode(',', ActionItem::PRIORITIES),
             'action_url' => 'nullable|string|max:500',
             'action_label' => 'nullable|string|max:50',
             'due_date' => 'nullable|date',
@@ -108,11 +108,11 @@ class ActionItemController extends Controller
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
-            'priority' => 'sometimes|string|in:' . implode(',', ActionItem::PRIORITIES),
+            'priority' => 'sometimes|string|in:'.implode(',', ActionItem::PRIORITIES),
             'action_url' => 'nullable|string|max:500',
             'action_label' => 'nullable|string|max:50',
             'due_date' => 'nullable|date',
-            'status' => 'sometimes|string|in:' . implode(',', ActionItem::STATUSES),
+            'status' => 'sometimes|string|in:'.implode(',', ActionItem::STATUSES),
         ]);
 
         // Handle completion
@@ -173,7 +173,7 @@ class ActionItemController extends Controller
     {
         $student = Student::where('user_id', $request->user()->id)->first();
 
-        if (!$student) {
+        if (! $student) {
             return response()->json([
                 'data' => [
                     'total_pending' => 0,
@@ -197,9 +197,8 @@ class ActionItemController extends Controller
         return response()->json([
             'data' => [
                 'total_pending' => $incompleteItems->count(),
-                'overdue_count' => $incompleteItems->filter(fn($item) => $item->isOverdue())->count(),
-                'due_this_week' => $incompleteItems->filter(fn($item) =>
-                    $item->due_date &&
+                'overdue_count' => $incompleteItems->filter(fn ($item) => $item->isOverdue())->count(),
+                'due_this_week' => $incompleteItems->filter(fn ($item) => $item->due_date &&
                     $item->due_date->gte($now) &&
                     $item->due_date->lte($weekFromNow)
                 )->count(),

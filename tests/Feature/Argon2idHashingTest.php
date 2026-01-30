@@ -4,8 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class Argon2idHashingTest extends TestCase
@@ -16,7 +16,7 @@ class Argon2idHashingTest extends TestCase
     {
         // Create new user and verify password hash format
         $user = User::factory()->create(['password' => 'test-password']);
-        
+
         $this->assertStringStartsWith('$argon2id$', $user->password);
         $this->assertEquals('argon2id', $user->password_algorithm);
     }
@@ -25,7 +25,7 @@ class Argon2idHashingTest extends TestCase
     {
         // Create a user with bcrypt hash manually (bypassing mutator)
         $bcryptHash = bcrypt('test-password');
-        
+
         DB::table('users')->insert([
             'name' => 'Test User',
             'email' => 'test@example.com',
@@ -49,7 +49,7 @@ class Argon2idHashingTest extends TestCase
     {
         // Create a user with bcrypt hash manually (bypassing mutator)
         $bcryptHash = bcrypt('old-password');
-        
+
         DB::table('users')->insert([
             'name' => 'Test User',
             'email' => 'test@example.com',
@@ -76,13 +76,13 @@ class Argon2idHashingTest extends TestCase
     public function test_argon2id_parameters_are_secure()
     {
         $config = config('hashing.argon2id');
-        
+
         // Verify memory parameter is secure (at least 64MB)
         $this->assertGreaterThanOrEqual(65536, $config['memory']);
-        
+
         // Verify time parameter is secure (at least 3 iterations)
         $this->assertGreaterThanOrEqual(3, $config['time']);
-        
+
         // Verify threads parameter is set
         $this->assertGreaterThanOrEqual(1, $config['threads']);
     }
@@ -91,10 +91,10 @@ class Argon2idHashingTest extends TestCase
     {
         $password = 'test-password-123';
         $hash = Hash::make($password);
-        
+
         // Verify the hash was created with argon2id
         $this->assertStringStartsWith('$argon2id$', $hash);
-        
+
         // Verify Hash::check works
         $this->assertTrue(Hash::check($password, $hash));
         $this->assertFalse(Hash::check('wrong-password', $hash));
@@ -133,7 +133,7 @@ class Argon2idHashingTest extends TestCase
     {
         // Test that config returns argon2id as default
         $this->assertEquals('argon2id', config('hashing.driver'));
-        
+
         // Test that argon2id config exists
         $this->assertIsArray(config('hashing.argon2id'));
         $this->assertArrayHasKey('memory', config('hashing.argon2id'));
@@ -144,16 +144,16 @@ class Argon2idHashingTest extends TestCase
     public function test_performance_is_acceptable()
     {
         $password = 'test-password-for-performance';
-        
+
         $startTime = microtime(true);
         $hash = Hash::make($password);
         $endTime = microtime(true);
-        
+
         $duration = $endTime - $startTime;
-        
+
         // Hashing should complete within 2 seconds (generous limit)
-        $this->assertLessThan(2.0, $duration, 'Argon2id hashing took too long: ' . $duration . ' seconds');
-        
+        $this->assertLessThan(2.0, $duration, 'Argon2id hashing took too long: '.$duration.' seconds');
+
         // Verify the hash was created correctly
         $this->assertStringStartsWith('$argon2id$', $hash);
         $this->assertTrue(Hash::check($password, $hash));
@@ -164,7 +164,7 @@ class Argon2idHashingTest extends TestCase
         // Test that we can still verify bcrypt hashes created with bcrypt function
         $password = 'test-password';
         $bcryptHash = bcrypt($password);
-        
+
         $this->assertStringStartsWith('$2y$', $bcryptHash);
         $this->assertTrue(Hash::check($password, $bcryptHash));
         $this->assertFalse(Hash::check('wrong-password', $bcryptHash));
@@ -174,11 +174,11 @@ class Argon2idHashingTest extends TestCase
     {
         // Test that password_algorithm column exists and is tracked
         $user = User::factory()->create(['password' => 'test-password']);
-        
+
         // Check database directly
         $userFromDb = User::find($user->id);
         $this->assertEquals('argon2id', $userFromDb->password_algorithm);
-        
+
         // Verify column exists in database schema
         $this->assertTrue(\Schema::hasColumn('users', 'password_algorithm'));
     }
@@ -187,7 +187,7 @@ class Argon2idHashingTest extends TestCase
     {
         // Create user with bcrypt hash manually (bypassing mutator)
         $bcryptHash = bcrypt('password123');
-        
+
         DB::table('users')->insert([
             'name' => 'Bcrypt User',
             'email' => 'bcrypt@example.com',
@@ -201,7 +201,7 @@ class Argon2idHashingTest extends TestCase
 
         $argon2idUser = User::factory()->create([
             'email' => 'argon2id@example.com',
-            'password' => 'password123'
+            'password' => 'password123',
         ]);
 
         // Both should be able to authenticate
@@ -212,4 +212,4 @@ class Argon2idHashingTest extends TestCase
         $this->assertEquals('bcrypt', $bcryptUser->password_algorithm);
         $this->assertEquals('argon2id', $argon2idUser->password_algorithm);
     }
-} 
+}

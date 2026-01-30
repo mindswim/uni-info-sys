@@ -10,16 +10,23 @@ class GraduationApplication extends Model
     use HasFactory;
 
     const STATUS_PENDING = 'pending';
+
     const STATUS_UNDER_REVIEW = 'under_review';
+
     const STATUS_CLEARANCE_IN_PROGRESS = 'clearance_in_progress';
+
     const STATUS_CLEARED = 'cleared';
+
     const STATUS_APPROVED = 'approved';
+
     const STATUS_DENIED = 'denied';
 
     const CLEARANCE_DEPARTMENTS = ['academic', 'financial', 'library', 'registrar'];
 
     const CLEARANCE_PENDING = 'pending';
+
     const CLEARANCE_CLEARED = 'cleared';
+
     const CLEARANCE_HOLD = 'hold';
 
     protected $fillable = [
@@ -68,12 +75,12 @@ class GraduationApplication extends Model
     public function isFullyCleared(): bool
     {
         $clearance = $this->clearance_status;
-        if (!$clearance) {
+        if (! $clearance) {
             return false;
         }
 
         foreach (self::CLEARANCE_DEPARTMENTS as $dept) {
-            if (!isset($clearance[$dept]) || $clearance[$dept]['status'] !== self::CLEARANCE_CLEARED) {
+            if (! isset($clearance[$dept]) || $clearance[$dept]['status'] !== self::CLEARANCE_CLEARED) {
                 return false;
             }
         }

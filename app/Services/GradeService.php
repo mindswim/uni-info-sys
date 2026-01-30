@@ -10,9 +10,9 @@ use App\Models\Enrollment;
 use App\Models\GradeChangeRequest;
 use App\Models\Student;
 use App\Models\Term;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 /**
  * Grade Service
@@ -32,31 +32,27 @@ class GradeService
      */
     private const GRADE_POINTS = [
         'A+' => 4.0,
-        'A'  => 4.0,
+        'A' => 4.0,
         'A-' => 3.7,
         'B+' => 3.3,
-        'B'  => 3.0,
+        'B' => 3.0,
         'B-' => 2.7,
         'C+' => 2.3,
-        'C'  => 2.0,
+        'C' => 2.0,
         'C-' => 1.7,
         'D+' => 1.3,
-        'D'  => 1.0,
+        'D' => 1.0,
         'D-' => 0.7,
-        'F'  => 0.0,
-        'P'  => null, // Pass (not counted in GPA)
+        'F' => 0.0,
+        'P' => null, // Pass (not counted in GPA)
         'NP' => null, // No Pass (not counted in GPA)
-        'W'  => null, // Withdrawn (not counted in GPA)
-        'I'  => null, // Incomplete (not counted in GPA)
+        'W' => null, // Withdrawn (not counted in GPA)
+        'I' => null, // Incomplete (not counted in GPA)
     ];
 
     /**
      * Submit a grade for an enrollment
      *
-     * @param Enrollment $enrollment
-     * @param string $grade
-     * @param int $submittedByUserId
-     * @return Enrollment
      * @throws InvalidGradeException
      * @throws GradingDeadlinePassedException
      * @throws UnauthorizedGradeSubmissionException
@@ -65,12 +61,12 @@ class GradeService
     {
         return DB::transaction(function () use ($enrollment, $grade, $submittedByUserId) {
             // Validate grade format
-            if (!$this->isValidGrade($grade)) {
-                throw new InvalidGradeException("Invalid grade: {$grade}. Must be one of: " . implode(', ', array_keys(self::GRADE_POINTS)));
+            if (! $this->isValidGrade($grade)) {
+                throw new InvalidGradeException("Invalid grade: {$grade}. Must be one of: ".implode(', ', array_keys(self::GRADE_POINTS)));
             }
 
             // Check if enrollment is in gradable status
-            if (!in_array($enrollment->status, ['enrolled', 'completed'])) {
+            if (! in_array($enrollment->status, ['enrolled', 'completed'])) {
                 throw new InvalidGradeException("Cannot grade enrollment with status: {$enrollment->status}");
             }
 
@@ -78,12 +74,12 @@ class GradeService
             $courseSection = $enrollment->courseSection;
             $instructor = $courseSection->instructor;
             $isInstructor = $instructor && $instructor->user_id === $submittedByUserId;
-            if (!$isInstructor && !$this->isAdmin($submittedByUserId)) {
+            if (! $isInstructor && ! $this->isAdmin($submittedByUserId)) {
                 throw new UnauthorizedGradeSubmissionException("User {$submittedByUserId} is not authorized to grade this course section");
             }
 
             // Check grading deadline (allow admin override)
-            if (!$this->isAdmin($submittedByUserId)) {
+            if (! $this->isAdmin($submittedByUserId)) {
                 $this->enforceGradingDeadline($courseSection);
             }
 
@@ -115,9 +111,7 @@ class GradeService
     /**
      * Submit grades for multiple enrollments in bulk
      *
-     * @param CourseSection $courseSection
-     * @param array $grades Format: ['enrollment_id' => 'grade']
-     * @param int $submittedByUserId
+     * @param  array  $grades  Format: ['enrollment_id' => 'grade']
      * @return array ['successful' => int, 'failed' => array]
      */
     public function bulkSubmitGrades(CourseSection $courseSection, array $grades, int $submittedByUserId): array
@@ -128,12 +122,12 @@ class GradeService
         // Verify authorization once for the whole batch
         $instructor = $courseSection->instructor;
         $isInstructor = $instructor && $instructor->user_id === $submittedByUserId;
-        if (!$isInstructor && !$this->isAdmin($submittedByUserId)) {
+        if (! $isInstructor && ! $this->isAdmin($submittedByUserId)) {
             throw new UnauthorizedGradeSubmissionException("User {$submittedByUserId} is not authorized to grade this course section");
         }
 
         // Check deadline once
-        if (!$this->isAdmin($submittedByUserId)) {
+        if (! $this->isAdmin($submittedByUserId)) {
             $this->enforceGradingDeadline($courseSection);
         }
 
@@ -170,21 +164,15 @@ class GradeService
 
     /**
      * Request a grade change (requires approval after deadline)
-     *
-     * @param Enrollment $enrollment
-     * @param string $newGrade
-     * @param string $reason
-     * @param int $requestedByUserId
-     * @return GradeChangeRequest
      */
     public function requestGradeChange(Enrollment $enrollment, string $newGrade, string $reason, int $requestedByUserId): GradeChangeRequest
     {
-        if (!$this->isValidGrade($newGrade)) {
+        if (! $this->isValidGrade($newGrade)) {
             throw new InvalidGradeException("Invalid grade: {$newGrade}");
         }
 
         if (empty($enrollment->grade)) {
-            throw new InvalidGradeException("Cannot change grade for enrollment without existing grade. Use submitGrade instead.");
+            throw new InvalidGradeException('Cannot change grade for enrollment without existing grade. Use submitGrade instead.');
         }
 
         $gradeChangeRequest = GradeChangeRequest::create([
@@ -209,16 +197,12 @@ class GradeService
 
     /**
      * Approve a grade change request
-     *
-     * @param GradeChangeRequest $request
-     * @param int $approvedByUserId
-     * @return Enrollment
      */
     public function approveGradeChange(GradeChangeRequest $request, int $approvedByUserId): Enrollment
     {
         return DB::transaction(function () use ($request, $approvedByUserId) {
             if ($request->status !== 'pending') {
-                throw new InvalidGradeException("Grade change request is not pending");
+                throw new InvalidGradeException('Grade change request is not pending');
             }
 
             $enrollment = $request->enrollment;
@@ -247,16 +231,11 @@ class GradeService
 
     /**
      * Deny a grade change request
-     *
-     * @param GradeChangeRequest $request
-     * @param int $deniedByUserId
-     * @param string $denialReason
-     * @return GradeChangeRequest
      */
     public function denyGradeChange(GradeChangeRequest $request, int $deniedByUserId, string $denialReason): GradeChangeRequest
     {
         if ($request->status !== 'pending') {
-            throw new InvalidGradeException("Grade change request is not pending");
+            throw new InvalidGradeException('Grade change request is not pending');
         }
 
         $request->update([
@@ -278,9 +257,6 @@ class GradeService
 
     /**
      * Calculate grade distribution for a course section
-     *
-     * @param CourseSection $courseSection
-     * @return array
      */
     public function calculateGradeDistribution(CourseSection $courseSection): array
     {
@@ -322,9 +298,6 @@ class GradeService
 
     /**
      * Get grading progress for a course section
-     *
-     * @param CourseSection $courseSection
-     * @return array
      */
     public function getGradingProgress(CourseSection $courseSection): array
     {
@@ -351,9 +324,6 @@ class GradeService
 
     /**
      * Recalculate student's GPA based on all completed enrollments
-     *
-     * @param Student $student
-     * @return float
      */
     private function recalculateStudentGPA(Student $student): float
     {
@@ -395,14 +365,13 @@ class GradeService
     /**
      * Enforce grading deadline for a course section
      *
-     * @param CourseSection $courseSection
      * @throws GradingDeadlinePassedException
      */
     private function enforceGradingDeadline(CourseSection $courseSection): void
     {
         $term = $courseSection->term;
 
-        if (!$term->grade_deadline) {
+        if (! $term->grade_deadline) {
             return; // No deadline set
         }
 
@@ -410,17 +379,14 @@ class GradeService
 
         if (now()->greaterThan($deadline)) {
             throw new GradingDeadlinePassedException(
-                "Grading deadline for {$term->name} has passed ({$deadline->format('Y-m-d')}). " .
-                "Grade changes now require approval through the grade change request process."
+                "Grading deadline for {$term->name} has passed ({$deadline->format('Y-m-d')}). ".
+                'Grade changes now require approval through the grade change request process.'
             );
         }
     }
 
     /**
      * Check if a grade is valid
-     *
-     * @param string $grade
-     * @return bool
      */
     private function isValidGrade(string $grade): bool
     {
@@ -429,20 +395,16 @@ class GradeService
 
     /**
      * Check if user is an admin
-     *
-     * @param int $userId
-     * @return bool
      */
     private function isAdmin(int $userId): bool
     {
         $user = \App\Models\User::find($userId);
+
         return $user && $user->hasRole('admin');
     }
 
     /**
      * Get current term
-     *
-     * @return Term
      */
     private function getCurrentTerm(): Term
     {
@@ -456,8 +418,6 @@ class GradeService
 
     /**
      * Get all valid grades
-     *
-     * @return array
      */
     public static function getValidGrades(): array
     {
@@ -466,9 +426,6 @@ class GradeService
 
     /**
      * Get grade point value
-     *
-     * @param string $grade
-     * @return float|null
      */
     public static function getGradePoints(string $grade): ?float
     {

@@ -50,20 +50,20 @@ class AssignmentFactory extends Factory
     {
         $titles = [
             'homework' => [
-                'Homework ' . fake()->numberBetween(1, 10),
-                'Problem Set ' . fake()->numberBetween(1, 10),
-                'Chapter ' . fake()->numberBetween(1, 15) . ' Exercises',
-                'Weekly Assignment ' . fake()->numberBetween(1, 15),
+                'Homework '.fake()->numberBetween(1, 10),
+                'Problem Set '.fake()->numberBetween(1, 10),
+                'Chapter '.fake()->numberBetween(1, 15).' Exercises',
+                'Weekly Assignment '.fake()->numberBetween(1, 15),
             ],
             'quiz' => [
-                'Quiz ' . fake()->numberBetween(1, 10),
+                'Quiz '.fake()->numberBetween(1, 10),
                 'Pop Quiz',
-                'Reading Quiz - Chapter ' . fake()->numberBetween(1, 15),
-                'Concept Check ' . fake()->numberBetween(1, 10),
+                'Reading Quiz - Chapter '.fake()->numberBetween(1, 15),
+                'Concept Check '.fake()->numberBetween(1, 10),
             ],
             'exam' => [
-                'Exam ' . fake()->numberBetween(1, 3),
-                'Unit ' . fake()->numberBetween(1, 5) . ' Exam',
+                'Exam '.fake()->numberBetween(1, 3),
+                'Unit '.fake()->numberBetween(1, 5).' Exam',
                 'Comprehensive Exam',
             ],
             'midterm' => [
@@ -97,9 +97,9 @@ class AssignmentFactory extends Factory
                 'Final Presentation',
             ],
             'lab' => [
-                'Lab ' . fake()->numberBetween(1, 12),
-                'Laboratory Report ' . fake()->numberBetween(1, 12),
-                'Practical Exercise ' . fake()->numberBetween(1, 10),
+                'Lab '.fake()->numberBetween(1, 12),
+                'Laboratory Report '.fake()->numberBetween(1, 12),
+                'Practical Exercise '.fake()->numberBetween(1, 10),
             ],
             'participation' => [
                 'Class Participation',

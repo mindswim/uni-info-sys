@@ -1,8 +1,9 @@
 <?php
+
 namespace Database\Seeders;
 
-use App\Models\Student;
 use App\Models\AcademicRecord;
+use App\Models\Student;
 use Illuminate\Database\Seeder;
 
 class AcademicRecordSeeder extends Seeder
@@ -12,7 +13,7 @@ class AcademicRecordSeeder extends Seeder
         Student::all()->each(function ($student) {
             AcademicRecord::create([
                 'student_id' => $student->id,
-                'institution_name' => fake()->company() . ' High School',
+                'institution_name' => fake()->company().' High School',
                 'qualification_type' => 'High School Diploma',
                 'start_date' => fake()->dateTimeBetween('-6 years', '-4 years'),
                 'end_date' => fake()->dateTimeBetween('-4 years', '-2 years'),

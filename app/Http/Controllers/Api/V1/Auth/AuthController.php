@@ -38,7 +38,7 @@ class AuthController extends Controller
 
             Student::create([
                 'user_id' => $user->id,
-                'student_number' => 'STU' . random_int(100000, 999999),
+                'student_number' => 'STU'.random_int(100000, 999999),
                 'first_name' => $nameParts[0],
                 'last_name' => $nameParts[1] ?? '',
                 'date_of_birth' => '2000-01-01',

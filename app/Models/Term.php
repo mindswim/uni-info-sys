@@ -10,7 +10,7 @@ class Term extends Model
     use HasFactory;
 
     protected $fillable = ['name', 'academic_year', 'semester', 'start_date', 'end_date', 'add_drop_deadline', 'grade_deadline', 'is_current'];
-    
+
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
@@ -33,7 +33,7 @@ class Term extends Model
      */
     public function isWithinAddDropPeriod(): bool
     {
-        if (!$this->add_drop_deadline) {
+        if (! $this->add_drop_deadline) {
             return true; // No deadline set, allow enrollment
         }
 

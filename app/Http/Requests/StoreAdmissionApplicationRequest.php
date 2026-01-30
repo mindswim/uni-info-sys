@@ -32,35 +32,35 @@ class StoreAdmissionApplicationRequest extends FormRequest
                 function ($attribute, $value, $fail) {
                     $user = $this->user();
                     $userRoles = $user->roles()->pluck('name')->toArray();
-                    
-                    if (!in_array('admin', $userRoles) && !in_array('staff', $userRoles)) {
+
+                    if (! in_array('admin', $userRoles) && ! in_array('staff', $userRoles)) {
                         $userStudent = $user->student;
-                        if (!$userStudent || $userStudent->id != $value) {
+                        if (! $userStudent || $userStudent->id != $value) {
                             $fail('You can only create applications for your own student record.');
                         }
                     }
-                }
+                },
             ],
             'term_id' => [
                 'required',
                 'integer',
-                'exists:terms,id'
+                'exists:terms,id',
             ],
             'status' => [
                 'sometimes',
                 'string',
-                Rule::in(['draft', 'submitted', 'under_review', 'accepted', 'rejected', 'waitlisted', 'enrolled'])
+                Rule::in(['draft', 'submitted', 'under_review', 'accepted', 'rejected', 'waitlisted', 'enrolled']),
             ],
             'application_date' => [
                 'sometimes',
-                'date'
+                'date',
             ],
             'comments' => [
                 'sometimes',
                 'nullable',
                 'string',
-                'max:1000'
-            ]
+                'max:1000',
+            ],
         ];
     }
 
@@ -77,7 +77,7 @@ class StoreAdmissionApplicationRequest extends FormRequest
             'term_id.required' => 'Term ID is required.',
             'term_id.exists' => 'The selected term does not exist.',
             'status.in' => 'Status must be one of: draft, submitted, under_review, accepted, rejected, waitlisted, enrolled.',
-            'comments.max' => 'Comments cannot exceed 1000 characters.'
+            'comments.max' => 'Comments cannot exceed 1000 characters.',
         ];
     }
 }

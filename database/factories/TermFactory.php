@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Term;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Term>
@@ -54,7 +54,7 @@ class TermFactory extends Factory
 
         $semesters = ['Fall', 'Spring', 'Summer'];
         $startYear = 2025; // Start from 2025 to avoid conflicts with seeded data
-        
+
         // Keep within reasonable MySQL datetime limits (avoid 2038 problem)
         $year = $startYear + intval($counter / 3);
         // Cap at 2034 to stay well within MySQL datetime limits
@@ -120,7 +120,7 @@ class TermFactory extends Factory
             if (app()->runningUnitTests()) {
                 static $uniqueCounter = 0;
                 $uniqueCounter++;
-                
+
                 $semesters = ['Fall', 'Spring', 'Summer'];
                 $year = 2030 + intval($uniqueCounter / 3);
                 // Cap at 2034 to stay within MySQL datetime limits
@@ -128,10 +128,10 @@ class TermFactory extends Factory
                     $year = 2030 + (($uniqueCounter / 3) % 5); // Cycle through 2030-2034
                 }
                 $semester = $semesters[$uniqueCounter % 3];
-                
+
                 return array_merge($attributes, $this->buildTermData($year, $semester));
             }
-            
+
             return $attributes;
         });
     }

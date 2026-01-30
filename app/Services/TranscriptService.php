@@ -52,7 +52,7 @@ class TranscriptService
                     'points' => $points * $credits,
                 ];
 
-                if (!in_array($grade, ['W', 'WF', 'I', 'P', 'NP'])) {
+                if (! in_array($grade, ['W', 'WF', 'I', 'P', 'NP'])) {
                     $termCredits += $credits;
                     $termPoints += ($points * $credits);
                 }
@@ -73,7 +73,7 @@ class TranscriptService
 
         return [
             'student' => [
-                'name' => $student->first_name . ' ' . $student->last_name,
+                'name' => $student->first_name.' '.$student->last_name,
                 'student_number' => $student->student_number,
                 'email' => $student->user->email ?? '',
                 'program' => $student->majorProgram->name ?? 'Undeclared',

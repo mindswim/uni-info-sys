@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
 
 class Event extends Model
 {
@@ -13,13 +13,21 @@ class Event extends Model
     use SoftDeletes;
 
     public const TYPE_GENERAL = 'general';
+
     public const TYPE_ACADEMIC = 'academic';
+
     public const TYPE_DEADLINE = 'deadline';
+
     public const TYPE_MEETING = 'meeting';
+
     public const TYPE_CLASS = 'class';
+
     public const TYPE_EXAM = 'exam';
+
     public const TYPE_HOLIDAY = 'holiday';
+
     public const TYPE_ORIENTATION = 'orientation';
+
     public const TYPE_REGISTRATION = 'registration';
 
     public const TYPES = [
@@ -35,8 +43,11 @@ class Event extends Model
     ];
 
     public const VISIBILITY_PUBLIC = 'public';
+
     public const VISIBILITY_STUDENTS = 'students';
+
     public const VISIBILITY_STAFF = 'staff';
+
     public const VISIBILITY_PRIVATE = 'private';
 
     protected $fillable = [
@@ -136,7 +147,7 @@ class Event extends Model
 
     public function scopeVisible(Builder $query, ?User $user = null): Builder
     {
-        if (!$user) {
+        if (! $user) {
             return $query->where('visibility', self::VISIBILITY_PUBLIC);
         }
 
@@ -144,7 +155,7 @@ class Event extends Model
             $q->where('visibility', self::VISIBILITY_PUBLIC)
                 ->orWhere('created_by', $user->id);
 
-            $roles = $user->roles()->pluck('name')->map(fn($r) => strtolower($r))->toArray();
+            $roles = $user->roles()->pluck('name')->map(fn ($r) => strtolower($r))->toArray();
 
             if (in_array('student', $roles)) {
                 $q->orWhere('visibility', self::VISIBILITY_STUDENTS);
@@ -188,7 +199,7 @@ class Event extends Model
 
     public function isActive(): bool
     {
-        return !$this->is_cancelled;
+        return ! $this->is_cancelled;
     }
 
     public function isPast(): bool

@@ -20,7 +20,7 @@ class PlannedCourseController extends Controller
     {
         $student = $request->user()->student;
 
-        if (!$student) {
+        if (! $student) {
             return response()->json(['message' => 'No student record found.'], 404);
         }
 
@@ -47,7 +47,7 @@ class PlannedCourseController extends Controller
 
         $student = $request->user()->student;
 
-        if (!$student) {
+        if (! $student) {
             return response()->json(['message' => 'No student record found.'], 404);
         }
 
@@ -86,7 +86,7 @@ class PlannedCourseController extends Controller
     {
         $student = $request->user()->student;
 
-        if (!$student) {
+        if (! $student) {
             return response()->json(['message' => 'No student record found.'], 404);
         }
 
@@ -102,7 +102,7 @@ class PlannedCourseController extends Controller
     {
         $student = $request->user()->student;
 
-        if (!$student) {
+        if (! $student) {
             return response()->json(['message' => 'No student record found.'], 404);
         }
 

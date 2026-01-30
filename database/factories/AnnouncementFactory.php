@@ -42,10 +42,10 @@ class AnnouncementFactory extends Factory
     private function generateTitle(): string
     {
         $titles = [
-            'Important Update Regarding ' . fake()->words(3, true),
-            'Reminder: ' . fake()->words(4, true),
+            'Important Update Regarding '.fake()->words(3, true),
+            'Reminder: '.fake()->words(4, true),
             'Schedule Change Notice',
-            'Upcoming Event: ' . fake()->words(3, true),
+            'Upcoming Event: '.fake()->words(3, true),
             'Office Hours Update',
             'Assignment Deadline Extended',
             'Campus Closure Notice',
@@ -80,6 +80,7 @@ class AnnouncementFactory extends Factory
     {
         return $this->state(function (array $attributes) use ($section) {
             $section = $section ?? CourseSection::factory()->create();
+
             return [
                 'announceable_type' => CourseSection::class,
                 'announceable_id' => $section->id,
@@ -94,6 +95,7 @@ class AnnouncementFactory extends Factory
     {
         return $this->state(function (array $attributes) use ($department) {
             $department = $department ?? Department::factory()->create();
+
             return [
                 'announceable_type' => Department::class,
                 'announceable_id' => $department->id,
@@ -163,7 +165,7 @@ class AnnouncementFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'priority' => 'important',
-            'title' => 'Important: ' . fake()->words(4, true),
+            'title' => 'Important: '.fake()->words(4, true),
         ]);
     }
 
@@ -174,7 +176,7 @@ class AnnouncementFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'priority' => 'urgent',
-            'title' => 'URGENT: ' . fake()->words(4, true),
+            'title' => 'URGENT: '.fake()->words(4, true),
             'is_pinned' => true,
         ]);
     }

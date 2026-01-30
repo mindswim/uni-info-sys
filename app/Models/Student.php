@@ -10,8 +10,8 @@ use OwenIt\Auditing\Contracts\Auditable;
 class Student extends Model implements Auditable
 {
     use HasFactory;
-    use SoftDeletes;
     use \OwenIt\Auditing\Auditable;
+    use SoftDeletes;
 
     protected $fillable = [
         'user_id', 'student_number', 'first_name', 'last_name',
@@ -77,10 +77,10 @@ class Student extends Model implements Auditable
 
     public function hasCompleteProfile(): bool
     {
-        return !empty($this->address) &&
-               !empty($this->phone) &&
-               !empty($this->emergency_contact_name) &&
-               !empty($this->emergency_contact_phone);
+        return ! empty($this->address) &&
+               ! empty($this->phone) &&
+               ! empty($this->emergency_contact_name) &&
+               ! empty($this->emergency_contact_phone);
     }
 
     public function enrollments()
@@ -168,9 +168,16 @@ class Student extends Model implements Auditable
     {
         $credits = $this->total_credits_earned;
 
-        if ($credits >= 90) return 'senior';
-        if ($credits >= 60) return 'junior';
-        if ($credits >= 30) return 'sophomore';
+        if ($credits >= 90) {
+            return 'senior';
+        }
+        if ($credits >= 60) {
+            return 'junior';
+        }
+        if ($credits >= 30) {
+            return 'sophomore';
+        }
+
         return 'freshman';
     }
 
@@ -181,7 +188,7 @@ class Student extends Model implements Auditable
 
     public function getAcademicStatusColorAttribute()
     {
-        return match($this->academic_status) {
+        return match ($this->academic_status) {
             'good_standing' => 'green',
             'academic_warning' => 'yellow',
             'academic_probation' => 'orange',
@@ -192,8 +199,6 @@ class Student extends Model implements Auditable
 
     /**
      * Calculate GPA based on completed enrollments
-     *
-     * @return float
      */
     public function calculateGPA(): float
     {
@@ -202,7 +207,7 @@ class Student extends Model implements Auditable
             'B+' => 3.3, 'B' => 3.0, 'B-' => 2.7,
             'C+' => 2.3, 'C' => 2.0, 'C-' => 1.7,
             'D+' => 1.3, 'D' => 1.0, 'D-' => 0.7,
-            'F' => 0.0
+            'F' => 0.0,
         ];
 
         $completedEnrollments = $this->enrollments()
@@ -232,8 +237,6 @@ class Student extends Model implements Auditable
 
     /**
      * Get current GPA (calculated)
-     *
-     * @return float
      */
     public function getCurrentGPAAttribute(): float
     {
@@ -242,47 +245,41 @@ class Student extends Model implements Auditable
 
     /**
      * Get academic standing based on GPA and credit hours
-     * 
-     * @return array
      */
     public function getAcademicStanding(): array
     {
         $service = app(\App\Services\StudentService::class);
+
         return $service->getAcademicStanding($this);
     }
 
     /**
      * Get total completed credit hours
-     *
-     * @return int
      */
     public function getTotalCompletedCredits(): int
     {
         $service = app(\App\Services\StudentService::class);
+
         return $service->getTotalCompletedCredits($this);
     }
 
     /**
      * Check degree progress for a specific program
-     *
-     * @param int $programId
-     * @return array
      */
     public function checkDegreeProgress(int $programId): array
     {
         $service = app(\App\Services\StudentService::class);
+
         return $service->checkDegreeProgress($this, $programId);
     }
 
     /**
      * Validate prerequisites for a course
-     *
-     * @param \App\Models\Course $course
-     * @return array
      */
     public function validatePrerequisites(\App\Models\Course $course): array
     {
         $service = app(\App\Services\StudentService::class);
+
         return $service->validatePrerequisites($this, $course);
     }
 }

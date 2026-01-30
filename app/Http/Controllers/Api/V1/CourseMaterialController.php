@@ -65,7 +65,7 @@ class CourseMaterialController extends Controller
             'class_session_id' => 'nullable|integer|exists:class_sessions,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'type' => 'required|string|in:' . implode(',', CourseMaterial::TYPES),
+            'type' => 'required|string|in:'.implode(',', CourseMaterial::TYPES),
             'content' => 'nullable|string',
             'file_path' => 'nullable|string|max:500',
             'file_name' => 'nullable|string|max:255',
@@ -78,7 +78,7 @@ class CourseMaterialController extends Controller
         ]);
 
         // Validate that session belongs to section if provided
-        if (!empty($validated['class_session_id'])) {
+        if (! empty($validated['class_session_id'])) {
             $session = ClassSession::find($validated['class_session_id']);
             if ($session && $session->course_section_id !== $validated['course_section_id']) {
                 return response()->json([
@@ -122,7 +122,7 @@ class CourseMaterialController extends Controller
             'class_session_id' => 'nullable|integer|exists:class_sessions,id',
             'title' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
-            'type' => 'sometimes|string|in:' . implode(',', CourseMaterial::TYPES),
+            'type' => 'sometimes|string|in:'.implode(',', CourseMaterial::TYPES),
             'content' => 'nullable|string',
             'file_path' => 'nullable|string|max:500',
             'file_name' => 'nullable|string|max:255',
@@ -135,7 +135,7 @@ class CourseMaterialController extends Controller
         ]);
 
         // Validate that session belongs to section if provided
-        if (!empty($validated['class_session_id'])) {
+        if (! empty($validated['class_session_id'])) {
             $session = ClassSession::find($validated['class_session_id']);
             if ($session && $session->course_section_id !== $courseMaterial->course_section_id) {
                 return response()->json([
@@ -189,6 +189,7 @@ class CourseMaterialController extends Controller
         // Group by type if requested
         if ($request->boolean('grouped')) {
             $grouped = $materials->groupBy('type');
+
             return response()->json([
                 'data' => $grouped,
             ]);
@@ -221,7 +222,7 @@ class CourseMaterialController extends Controller
             ->available()
             ->first();
 
-        if (!$syllabus) {
+        if (! $syllabus) {
             return response()->json([
                 'message' => 'No syllabus found for this course section.',
                 'data' => null,
@@ -254,6 +255,7 @@ class CourseMaterialController extends Controller
                 $data = $material->toArray();
                 $data['course_code'] = $enrollment->courseSection->course->course_code;
                 $data['course_title'] = $enrollment->courseSection->course->title;
+
                 return $data;
             });
         });
@@ -281,7 +283,7 @@ class CourseMaterialController extends Controller
             ->where('course_section_id', $courseSection->id)
             ->first();
 
-        if (!$enrollment) {
+        if (! $enrollment) {
             return response()->json([
                 'message' => 'Student is not enrolled in this course section.',
             ], 403);

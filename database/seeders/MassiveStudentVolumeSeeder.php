@@ -2,13 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\User;
-use App\Models\Student;
 use App\Models\Program;
 use App\Models\Role;
+use App\Models\Student;
+use App\Models\User;
 use Faker\Factory as Faker;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class MassiveStudentVolumeSeeder extends Seeder
@@ -25,6 +24,7 @@ class MassiveStudentVolumeSeeder extends Seeder
 
         if ($programs->isEmpty()) {
             $this->command->warn('No programs found. Please run ProgramSeeder first.');
+
             return;
         }
 
@@ -51,7 +51,7 @@ class MassiveStudentVolumeSeeder extends Seeder
             'Springfield High', 'Franklin High School', 'Hamilton High',
             'Riverside Prep', 'Metro High School', 'Charter Oak High',
             'Elmwood High', 'Brookside High School', 'Maple Grove High',
-            'Sunset High School', 'Clearview High', 'Northwood Academy'
+            'Sunset High School', 'Clearview High', 'Northwood Academy',
         ];
 
         $batches = ceil($targetStudents / $batchSize);
@@ -62,7 +62,7 @@ class MassiveStudentVolumeSeeder extends Seeder
             $studentsToCreate = min($batchSize, $targetStudents - (($batch - 1) * $batchSize));
 
             for ($i = 1; $i <= $studentsToCreate; $i++) {
-                $studentNumber = 'STU' . str_pad($currentCount + (($batch - 1) * $batchSize) + $i, 6, '0', STR_PAD_LEFT);
+                $studentNumber = 'STU'.str_pad($currentCount + (($batch - 1) * $batchSize) + $i, 6, '0', STR_PAD_LEFT);
 
                 // Generate realistic age distribution (18-26 for undergrad, 22-35 for grad)
                 $isGraduateStudent = $faker->boolean(15); // 15% graduate students
@@ -99,7 +99,7 @@ class MassiveStudentVolumeSeeder extends Seeder
                 // Test scores (not everyone has recent scores)
                 $hasTestScores = $faker->boolean(80);
                 $satScore = $hasTestScores && $faker->boolean(70) ? $faker->numberBetween(900, 1600) : null;
-                $actScore = $hasTestScores && !$satScore && $faker->boolean(60) ? $faker->numberBetween(15, 36) : null;
+                $actScore = $hasTestScores && ! $satScore && $faker->boolean(60) ? $faker->numberBetween(15, 36) : null;
 
                 // Diverse gender and pronouns
                 $gender = $faker->randomElement(['male', 'female', 'other']);
@@ -186,9 +186,16 @@ class MassiveStudentVolumeSeeder extends Seeder
             return 'graduate';
         }
 
-        if ($yearsInCollege >= 4 || $credits >= 90) return 'senior';
-        if ($yearsInCollege >= 3 || $credits >= 60) return 'junior';
-        if ($yearsInCollege >= 2 || $credits >= 30) return 'sophomore';
+        if ($yearsInCollege >= 4 || $credits >= 90) {
+            return 'senior';
+        }
+        if ($yearsInCollege >= 3 || $credits >= 60) {
+            return 'junior';
+        }
+        if ($yearsInCollege >= 2 || $credits >= 30) {
+            return 'sophomore';
+        }
+
         return 'freshman';
     }
 
@@ -197,7 +204,7 @@ class MassiveStudentVolumeSeeder extends Seeder
         $faker = Faker::create();
 
         // Real university GPA distributions with slight improvement over time
-        return match($classStanding) {
+        return match ($classStanding) {
             'freshman' => $faker->randomFloat(2, 2.3, 3.8),
             'sophomore' => $faker->randomFloat(2, 2.5, 3.9),
             'junior' => $faker->randomFloat(2, 2.6, 3.9),
@@ -209,16 +216,23 @@ class MassiveStudentVolumeSeeder extends Seeder
 
     private function determineAcademicStatus(float $gpa): string
     {
-        if ($gpa >= 2.0) return 'good_standing';
-        if ($gpa >= 1.5) return 'academic_warning';
-        if ($gpa >= 1.0) return 'academic_probation';
+        if ($gpa >= 2.0) {
+            return 'good_standing';
+        }
+        if ($gpa >= 1.5) {
+            return 'academic_warning';
+        }
+        if ($gpa >= 1.0) {
+            return 'academic_probation';
+        }
+
         return 'academic_suspension';
     }
 
     private function assignMajorProgram($programs, string $classStanding, $faker)
     {
         // Freshmen less likely to have declared major, upperclassmen more likely
-        $hasProgram = match($classStanding) {
+        $hasProgram = match ($classStanding) {
             'freshman' => $faker->boolean(60),
             'sophomore' => $faker->boolean(85),
             'junior' => $faker->boolean(95),
@@ -235,7 +249,7 @@ class MassiveStudentVolumeSeeder extends Seeder
         $pronounOptions = [
             'male' => ['he/him' => 90, 'he/they' => 5, 'they/them' => 5],
             'female' => ['she/her' => 90, 'she/they' => 5, 'they/them' => 5],
-            'other' => ['they/them' => 70, 'he/they' => 15, 'she/they' => 15]
+            'other' => ['they/them' => 70, 'he/they' => 15, 'she/they' => 15],
         ];
 
         return $this->weightedRandom($pronounOptions[$gender], $faker);
@@ -254,7 +268,7 @@ class MassiveStudentVolumeSeeder extends Seeder
             'Mexican' => 2,
             'German' => 1,
             'British' => 1,
-            'Brazilian' => 1
+            'Brazilian' => 1,
         ];
 
         return $this->weightedRandom($nationalities, $faker);
@@ -317,8 +331,8 @@ class MassiveStudentVolumeSeeder extends Seeder
         $maxGPA = Student::max('gpa');
 
         $this->command->info("\nGPA Statistics:");
-        $this->command->info("  Average: " . round($avgGPA, 2));
-        $this->command->info("  Range: " . round($minGPA, 2) . " - " . round($maxGPA, 2));
+        $this->command->info('  Average: '.round($avgGPA, 2));
+        $this->command->info('  Range: '.round($minGPA, 2).' - '.round($maxGPA, 2));
 
         // Financial aid stats
         $aidRecipients = Student::where('receives_financial_aid', true)->count();

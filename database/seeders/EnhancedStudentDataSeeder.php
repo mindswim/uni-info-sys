@@ -2,12 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\Student;
-use App\Models\Program;
 use App\Models\Enrollment;
+use App\Models\Program;
+use App\Models\Student;
 use Faker\Factory as Faker;
+use Illuminate\Database\Seeder;
 
 class EnhancedStudentDataSeeder extends Seeder
 {
@@ -25,6 +24,7 @@ class EnhancedStudentDataSeeder extends Seeder
 
         if ($programs->isEmpty()) {
             $this->command->warn('No programs found. Please run ProgramSeeder first.');
+
             return;
         }
 
@@ -38,7 +38,7 @@ class EnhancedStudentDataSeeder extends Seeder
             'East High School', 'West High School', 'Riverside High School',
             'Oakwood High School', 'Hillside High School', 'Parkview High School',
             'Valley High School', 'Mountain View High School', 'Sunrise High School',
-            'Pine Ridge High School', 'Cedar Grove High School'
+            'Pine Ridge High School', 'Cedar Grove High School',
         ];
 
         // Realistic pronouns distribution
@@ -47,7 +47,7 @@ class EnhancedStudentDataSeeder extends Seeder
             'she/her' => 45,
             'they/them' => 8,
             'he/they' => 1,
-            'she/they' => 1
+            'she/they' => 1,
         ];
 
         foreach ($students as $student) {
@@ -147,9 +147,16 @@ class EnhancedStudentDataSeeder extends Seeder
     private function determineClassStanding(int $credits, int $yearsInCollege): string
     {
         // Adjust based on years in college too
-        if ($yearsInCollege >= 4 || $credits >= 90) return 'senior';
-        if ($yearsInCollege >= 3 || $credits >= 60) return 'junior';
-        if ($yearsInCollege >= 2 || $credits >= 30) return 'sophomore';
+        if ($yearsInCollege >= 4 || $credits >= 90) {
+            return 'senior';
+        }
+        if ($yearsInCollege >= 3 || $credits >= 60) {
+            return 'junior';
+        }
+        if ($yearsInCollege >= 2 || $credits >= 30) {
+            return 'sophomore';
+        }
+
         return 'freshman';
     }
 
@@ -158,7 +165,7 @@ class EnhancedStudentDataSeeder extends Seeder
         $faker = Faker::create();
 
         // GPAs tend to improve over time
-        $baseGPA = match($classStanding) {
+        $baseGPA = match ($classStanding) {
             'freshman' => $faker->randomFloat(2, 2.5, 3.8),
             'sophomore' => $faker->randomFloat(2, 2.6, 3.9),
             'junior' => $faker->randomFloat(2, 2.7, 3.9),
@@ -171,9 +178,16 @@ class EnhancedStudentDataSeeder extends Seeder
 
     private function determineAcademicStatus(float $gpa): string
     {
-        if ($gpa >= 2.0) return 'good_standing';
-        if ($gpa >= 1.5) return 'academic_warning';
-        if ($gpa >= 1.0) return 'academic_probation';
+        if ($gpa >= 2.0) {
+            return 'good_standing';
+        }
+        if ($gpa >= 1.5) {
+            return 'academic_warning';
+        }
+        if ($gpa >= 1.0) {
+            return 'academic_probation';
+        }
+
         return 'academic_suspension';
     }
 
@@ -212,7 +226,7 @@ class EnhancedStudentDataSeeder extends Seeder
     private function printStatistics($students): void
     {
         $this->command->info("\n=== Enhanced Student Statistics ===");
-        $this->command->info("Total Students: " . $students->count());
+        $this->command->info('Total Students: '.$students->count());
 
         // Class standing distribution
         $classStanding = Student::selectRaw('class_standing, COUNT(*) as count')
@@ -227,7 +241,7 @@ class EnhancedStudentDataSeeder extends Seeder
 
         // GPA statistics
         $avgGPA = Student::avg('gpa');
-        $this->command->info("\nAverage GPA: " . round($avgGPA, 2));
+        $this->command->info("\nAverage GPA: ".round($avgGPA, 2));
 
         // Academic status
         $academicStatus = Student::selectRaw('academic_status, COUNT(*) as count')

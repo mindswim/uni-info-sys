@@ -2,14 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\Student;
-use App\Models\Term;
-use App\Models\Department;
-use App\Models\Program;
-use App\Models\Scholarship;
-use App\Models\FinancialAidPackage;
 use App\Models\AidAward;
 use App\Models\AidDisbursement;
+use App\Models\Department;
+use App\Models\FinancialAidPackage;
+use App\Models\Scholarship;
+use App\Models\Student;
+use App\Models\Term;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
 
@@ -17,23 +16,35 @@ class FinancialAidSeeder extends Seeder
 {
     // University cost of attendance components (annual)
     private const TUITION_IN_STATE = 12500;
+
     private const TUITION_OUT_OF_STATE = 32000;
+
     private const FEES = 1800;
+
     private const ROOM_BOARD = 14500;
+
     private const BOOKS_SUPPLIES = 1200;
+
     private const TRANSPORTATION = 1500;
+
     private const PERSONAL = 2000;
 
     // Federal loan limits (annual, first-year dependent)
     private const SUBSIDIZED_LOAN_LIMIT = 3500;
+
     private const UNSUBSIDIZED_LOAN_LIMIT = 2000;
 
     // Federal rates
     private const SUBSIDIZED_RATE = 5.50;
+
     private const UNSUBSIDIZED_RATE = 5.50;
+
     private const PLUS_RATE = 8.05;
+
     private const SUB_ORIGINATION_FEE = 1.057;
+
     private const UNSUB_ORIGINATION_FEE = 1.057;
+
     private const PLUS_ORIGINATION_FEE = 4.228;
 
     private array $scholarships = [];
@@ -273,7 +284,7 @@ class FinancialAidSeeder extends Seeder
             $this->scholarships[$data['code']] = $scholarship;
         }
 
-        Log::info('Created ' . count($scholarshipData) . ' scholarships');
+        Log::info('Created '.count($scholarshipData).' scholarships');
     }
 
     private function createFinancialAidPackages(): void
@@ -286,12 +297,13 @@ class FinancialAidSeeder extends Seeder
         }])->get();
 
         $term = Term::where('name', 'Fall 2024')->first();
-        if (!$term) {
+        if (! $term) {
             $term = Term::first();
         }
 
-        if (!$term) {
+        if (! $term) {
             Log::warning('No term found for financial aid packages');
+
             return;
         }
 
@@ -412,17 +424,17 @@ class FinancialAidSeeder extends Seeder
             }
 
             // Check eligibility
-            if (!$scholarship->isEligible($student)) {
+            if (! $scholarship->isEligible($student)) {
                 continue;
             }
 
             // Check availability
-            if (!$scholarship->hasAvailableSlots()) {
+            if (! $scholarship->hasAvailableSlots()) {
                 continue;
             }
 
             // Random chance to receive (simulates selection process)
-            $chance = match($scholarship->type) {
+            $chance = match ($scholarship->type) {
                 'merit' => $this->getMeritChance($student, $scholarship),
                 'need' => $this->getNeedChance($package->expected_family_contribution, $scholarship),
                 'departmental' => 30,
@@ -431,7 +443,7 @@ class FinancialAidSeeder extends Seeder
                 default => 20,
             };
 
-            if (!fake()->boolean($chance)) {
+            if (! fake()->boolean($chance)) {
                 continue;
             }
 
@@ -477,9 +489,16 @@ class FinancialAidSeeder extends Seeder
         }
 
         // Lower EFC = higher chance
-        if ($efc < 5000) return 70;
-        if ($efc < 15000) return 50;
-        if ($efc < 30000) return 30;
+        if ($efc < 5000) {
+            return 70;
+        }
+        if ($efc < 15000) {
+            return 50;
+        }
+        if ($efc < 30000) {
+            return 30;
+        }
+
         return 15;
     }
 

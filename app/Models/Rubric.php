@@ -45,7 +45,7 @@ class Rubric extends Model
     public function duplicate(): self
     {
         $clone = $this->replicate();
-        $clone->title = $this->title . ' (Copy)';
+        $clone->title = $this->title.' (Copy)';
         $clone->is_template = false;
         $clone->save();
 

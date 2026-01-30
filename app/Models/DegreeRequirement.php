@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class DegreeRequirement extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'program_id',
-        'category', 
+        'category',
         'name',
         'description',
         'required_credit_hours',
@@ -21,14 +21,14 @@ class DegreeRequirement extends Model
         'allowed_courses',
         'excluded_courses',
         'is_required',
-        'sort_order'
+        'sort_order',
     ];
 
     protected $casts = [
         'allowed_courses' => 'array',
         'excluded_courses' => 'array',
         'min_gpa' => 'decimal:2',
-        'is_required' => 'boolean'
+        'is_required' => 'boolean',
     ];
 
     public function program()
@@ -45,7 +45,7 @@ class DegreeRequirement extends Model
         }
 
         // If specific courses are allowed, check if this course is in the list
-        if ($this->allowed_courses && !empty($this->allowed_courses)) {
+        if ($this->allowed_courses && ! empty($this->allowed_courses)) {
             return in_array($course->id, $this->allowed_courses);
         }
 

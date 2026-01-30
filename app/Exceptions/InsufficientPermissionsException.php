@@ -11,4 +11,4 @@ class InsufficientPermissionsException extends Exception
         $message = "Insufficient permissions to {$action} on {$resource}";
         parent::__construct($message, $code, $previous);
     }
-} 
+}

@@ -5,7 +5,6 @@ namespace Tests\Feature\Api\V1;
 use App\Models\AdmissionApplication;
 use App\Models\Department;
 use App\Models\Faculty;
-use App\Models\Permission;
 use App\Models\Program;
 use App\Models\ProgramChoice;
 use App\Models\Role;
@@ -21,8 +20,11 @@ class EnrollmentConfirmationTest extends TestCase
     use RefreshDatabase;
 
     private User $studentUser;
+
     private Student $student;
+
     private AdmissionApplication $application;
+
     private Program $program;
 
     protected function setUp(): void

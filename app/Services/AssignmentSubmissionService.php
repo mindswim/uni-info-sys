@@ -26,7 +26,7 @@ class AssignmentSubmissionService
         }
 
         // Check if assignment is available
-        if (!$assignment->isAvailable()) {
+        if (! $assignment->isAvailable()) {
             throw new \InvalidArgumentException(
                 'Assignment is not available for submission.'
             );
@@ -34,7 +34,7 @@ class AssignmentSubmissionService
 
         // Check if late submissions are allowed
         $daysLate = $assignment->getDaysLate();
-        if ($daysLate > 0 && !$assignment->acceptsLateSubmissions()) {
+        if ($daysLate > 0 && ! $assignment->acceptsLateSubmissions()) {
             throw new \InvalidArgumentException(
                 'Late submissions are not accepted for this assignment.'
             );
@@ -85,6 +85,7 @@ class AssignmentSubmissionService
                 'file_name' => $data['file_name'] ?? $submission->file_name,
                 'status' => 'in_progress',
             ]);
+
             return $submission->fresh();
         }
 
@@ -114,7 +115,7 @@ class AssignmentSubmissionService
         Staff $grader,
         ?string $feedback = null
     ): AssignmentSubmission {
-        if (!$submission->isSubmitted()) {
+        if (! $submission->isSubmitted()) {
             throw new \InvalidArgumentException(
                 'Cannot grade a submission that has not been submitted.'
             );
@@ -157,7 +158,7 @@ class AssignmentSubmissionService
         AssignmentSubmission $submission,
         string $feedback
     ): AssignmentSubmission {
-        if (!$submission->isGraded()) {
+        if (! $submission->isGraded()) {
             throw new \InvalidArgumentException(
                 'Can only return graded submissions for revision.'
             );
@@ -218,12 +219,13 @@ class AssignmentSubmissionService
             foreach ($grades as $gradeData) {
                 $submission = AssignmentSubmission::find($gradeData['submission_id']);
 
-                if (!$submission) {
+                if (! $submission) {
                     $results[] = [
                         'submission_id' => $gradeData['submission_id'],
                         'success' => false,
                         'error' => 'Submission not found.',
                     ];
+
                     continue;
                 }
 
@@ -271,7 +273,7 @@ class AssignmentSubmissionService
             'median_score' => $scores->isNotEmpty() ? round($scores->median(), 2) : null,
             'highest_score' => $scores->max(),
             'lowest_score' => $scores->min(),
-            'passing_count' => $gradedSubmissions->filter(fn($s) => $s->isPassing())->count(),
+            'passing_count' => $gradedSubmissions->filter(fn ($s) => $s->isPassing())->count(),
         ];
     }
 

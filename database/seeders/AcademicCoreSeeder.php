@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Announcement;
 use App\Models\Assignment;
 use App\Models\AssignmentSubmission;
-use App\Models\Announcement;
 use App\Models\ClassSession;
 use App\Models\CourseSection;
 use App\Models\Enrollment;
@@ -99,7 +99,9 @@ class AcademicCoreSeeder extends Seeder
 
         foreach ($sections as $section) {
             $scheduleDays = $section->schedule_days ?? [];
-            if (empty($scheduleDays)) continue;
+            if (empty($scheduleDays)) {
+                continue;
+            }
 
             $termStart = Carbon::parse($section->term->start_date ?? now()->subMonths(2));
             $termEnd = Carbon::parse($section->term->end_date ?? now()->addMonths(2));
@@ -121,7 +123,7 @@ class AcademicCoreSeeder extends Seeder
                         'end_time' => $section->end_time ?? '11:00:00',
                         'session_number' => $sessionNumber,
                         'title' => "Session {$sessionNumber}",
-                        'description' => "Regular class session covering course material.",
+                        'description' => 'Regular class session covering course material.',
                         'status' => $current->lt(now()) ? 'completed' : 'scheduled',
                     ]);
                     $sessionNumber++;
@@ -168,7 +170,7 @@ class AcademicCoreSeeder extends Seeder
                     'due_date' => $dueDate->setHour(23)->setMinute(59),
                     'available_from' => $dueDate->copy()->subWeeks(2),
                     'is_published' => $isPublished,
-                    'allows_late' => !in_array($template['type'], ['exam', 'midterm', 'final']),
+                    'allows_late' => ! in_array($template['type'], ['exam', 'midterm', 'final']),
                     'late_penalty_per_day' => in_array($template['type'], ['exam', 'midterm', 'final']) ? 0 : 10,
                     'sort_order' => $index,
                 ]);
@@ -201,7 +203,9 @@ class AcademicCoreSeeder extends Seeder
 
             foreach ($enrollments as $enrollment) {
                 // 85% of students submit past-due assignments
-                if (rand(1, 100) > 85) continue;
+                if (rand(1, 100) > 85) {
+                    continue;
+                }
 
                 $submittedAt = Carbon::parse($assignment->due_date)
                     ->subHours(rand(1, 72)); // Submit 1-72 hours before deadline
@@ -264,8 +268,9 @@ class AcademicCoreSeeder extends Seeder
 
         // Get a staff member to be the author (use first instructor)
         $author = Staff::first();
-        if (!$author) {
+        if (! $author) {
             $this->command->warn('No staff found. Skipping announcements.');
+
             return;
         }
 
@@ -314,17 +319,17 @@ class AcademicCoreSeeder extends Seeder
     private function generateDescription(string $type): string
     {
         $descriptions = [
-            'homework' => "Complete this assignment demonstrating your understanding of the course material. Submit your work before the deadline.",
-            'lab' => "Hands-on laboratory exercise. Follow the instructions carefully and document your results. Include screenshots where applicable.",
-            'quiz' => "Short assessment covering recent material. You will have one attempt. Review your notes before starting.",
-            'exam' => "Comprehensive examination covering all material to date. No collaboration allowed. Bring a calculator if permitted.",
-            'midterm' => "Midterm examination covering material from the first half of the course. Prepare thoroughly.",
-            'final' => "Final examination. Comprehensive coverage of all course material. This is a significant portion of your grade.",
-            'project' => "Major project demonstrating mastery of course concepts. Follow the rubric carefully. Original work only.",
-            'paper' => "Written assignment. Follow the formatting guidelines in the syllabus. Cite all sources properly.",
-            'presentation' => "Prepare and deliver a presentation on the assigned topic. Visual aids encouraged.",
-            'participation' => "Active participation in class activities and discussions.",
-            'other' => "Complete this assignment according to the provided instructions.",
+            'homework' => 'Complete this assignment demonstrating your understanding of the course material. Submit your work before the deadline.',
+            'lab' => 'Hands-on laboratory exercise. Follow the instructions carefully and document your results. Include screenshots where applicable.',
+            'quiz' => 'Short assessment covering recent material. You will have one attempt. Review your notes before starting.',
+            'exam' => 'Comprehensive examination covering all material to date. No collaboration allowed. Bring a calculator if permitted.',
+            'midterm' => 'Midterm examination covering material from the first half of the course. Prepare thoroughly.',
+            'final' => 'Final examination. Comprehensive coverage of all course material. This is a significant portion of your grade.',
+            'project' => 'Major project demonstrating mastery of course concepts. Follow the rubric carefully. Original work only.',
+            'paper' => 'Written assignment. Follow the formatting guidelines in the syllabus. Cite all sources properly.',
+            'presentation' => 'Prepare and deliver a presentation on the assigned topic. Visual aids encouraged.',
+            'participation' => 'Active participation in class activities and discussions.',
+            'other' => 'Complete this assignment according to the provided instructions.',
         ];
 
         return $descriptions[$type] ?? $descriptions['homework'];
@@ -333,17 +338,17 @@ class AcademicCoreSeeder extends Seeder
     private function generateSubmissionContent(string $type): string
     {
         $contents = [
-            'homework' => "Submitted assignment work. [Student submission content]",
-            'lab' => "Lab report with methodology, results, and conclusions.",
-            'quiz' => "Quiz responses submitted.",
-            'exam' => "Exam completed.",
-            'midterm' => "Midterm exam completed.",
-            'final' => "Final exam completed.",
-            'project' => "Project submission including all required components.",
-            'paper' => "Research paper submitted.",
-            'presentation' => "Presentation slides submitted.",
-            'participation' => "Participation recorded.",
-            'other' => "Assignment submitted.",
+            'homework' => 'Submitted assignment work. [Student submission content]',
+            'lab' => 'Lab report with methodology, results, and conclusions.',
+            'quiz' => 'Quiz responses submitted.',
+            'exam' => 'Exam completed.',
+            'midterm' => 'Midterm exam completed.',
+            'final' => 'Final exam completed.',
+            'project' => 'Project submission including all required components.',
+            'paper' => 'Research paper submitted.',
+            'presentation' => 'Presentation slides submitted.',
+            'participation' => 'Participation recorded.',
+            'other' => 'Assignment submitted.',
         ];
 
         return $contents[$type] ?? $contents['homework'];
@@ -371,15 +376,15 @@ class AcademicCoreSeeder extends Seeder
         $percentage = ($score / $maxPoints) * 100;
 
         if ($percentage >= 90) {
-            return "Excellent work! Your submission demonstrates strong understanding of the material.";
+            return 'Excellent work! Your submission demonstrates strong understanding of the material.';
         } elseif ($percentage >= 80) {
-            return "Good job! Solid understanding shown. Minor areas for improvement noted.";
+            return 'Good job! Solid understanding shown. Minor areas for improvement noted.';
         } elseif ($percentage >= 70) {
-            return "Satisfactory work. Review the feedback and focus on the areas needing improvement.";
+            return 'Satisfactory work. Review the feedback and focus on the areas needing improvement.';
         } elseif ($percentage >= 60) {
-            return "Needs improvement. Please review the material and consider attending office hours.";
+            return 'Needs improvement. Please review the material and consider attending office hours.';
         } else {
-            return "Below expectations. Please see the instructor to discuss how to improve.";
+            return 'Below expectations. Please see the instructor to discuss how to improve.';
         }
     }
 }

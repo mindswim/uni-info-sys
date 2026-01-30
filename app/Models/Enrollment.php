@@ -10,8 +10,8 @@ use OwenIt\Auditing\Contracts\Auditable;
 class Enrollment extends Model implements Auditable
 {
     use HasFactory;
-    use SoftDeletes;
     use \OwenIt\Auditing\Auditable;
+    use SoftDeletes;
 
     protected $fillable = ['student_id', 'course_section_id', 'status', 'grade', 'enrollment_date', 'completion_date'];
 
@@ -43,14 +43,21 @@ class Enrollment extends Model implements Auditable
     public function generateTags(): array
     {
         $tags = [];
-        
+
         if ($this->reasonForChange) {
             $tags[] = "reason:{$this->reasonForChange}";
         }
-        
+
         return $tags;
     }
 
-    public function student() { return $this->belongsTo(Student::class); }
-    public function courseSection() { return $this->belongsTo(CourseSection::class); }
+    public function student()
+    {
+        return $this->belongsTo(Student::class);
+    }
+
+    public function courseSection()
+    {
+        return $this->belongsTo(CourseSection::class);
+    }
 }

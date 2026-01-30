@@ -3,9 +3,9 @@
 namespace Tests\Feature\Api\V1;
 
 use App\Models\Department;
+use App\Models\Role;
 use App\Models\Staff;
 use App\Models\User;
-use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -19,13 +19,13 @@ class StaffApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create admin role
         $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
-        
+
         // Create a user to act as an admin for authentication
         $this->admin = User::factory()->create();
-        
+
         // Assign admin role
         $this->admin->roles()->attach($adminRole);
     }
@@ -33,6 +33,7 @@ class StaffApiTest extends TestCase
     private function getStaffData(array $overrides = []): array
     {
         $department = Department::factory()->create();
+
         return array_merge([
             'user' => [
                 'name' => $this->faker->name,
@@ -46,7 +47,7 @@ class StaffApiTest extends TestCase
             'department_id' => $department->id,
         ], $overrides);
     }
-    
+
     public function test_can_get_all_staff_paginated()
     {
         Staff::factory()->count(15)->create();
@@ -56,7 +57,7 @@ class StaffApiTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'job_title', 'user', 'department']
+                    '*' => ['id', 'job_title', 'user', 'department'],
                 ],
                 'links',
                 'meta',
@@ -83,9 +84,9 @@ class StaffApiTest extends TestCase
     public function test_can_create_a_staff_member()
     {
         $data = $this->getStaffData();
-        
+
         $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/staff', $data);
-        
+
         $response->assertStatus(201)
             ->assertJsonFragment(['job_title' => $data['job_title']])
             ->assertJsonPath('data.user.email', $data['user']['email']);
@@ -118,7 +119,7 @@ class StaffApiTest extends TestCase
                     'email' => $staff->user->email,
                     'created_at' => $staff->user->created_at->toISOString(),
                     'updated_at' => $staff->user->updated_at->toISOString(),
-                ]
+                ],
             ]);
     }
 
@@ -126,7 +127,7 @@ class StaffApiTest extends TestCase
     {
         $staff = Staff::factory()->create();
         $newDepartment = Department::factory()->create();
-        
+
         $updateData = [
             'user' => [
                 'name' => 'Updated Name',
@@ -136,7 +137,7 @@ class StaffApiTest extends TestCase
         ];
 
         $response = $this->actingAs($this->admin, 'sanctum')->putJson("/api/v1/staff/{$staff->id}", $updateData);
-        
+
         $response->assertStatus(200)
             ->assertJsonPath('data.user.name', 'Updated Name')
             ->assertJsonPath('data.job_title', 'Senior Developer')
@@ -153,7 +154,7 @@ class StaffApiTest extends TestCase
 
         $this->assertDatabaseHas('users', ['id' => $userId]);
         $this->assertDatabaseHas('staff', ['id' => $staff->id]);
-        
+
         $response = $this->actingAs($this->admin, 'sanctum')->deleteJson("/api/v1/staff/{$staff->id}");
 
         $response->assertStatus(204);

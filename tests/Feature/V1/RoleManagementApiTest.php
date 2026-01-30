@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Api\V1;
 
-use App\Models\Role;
 use App\Models\Permission;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -16,7 +16,7 @@ class RoleManagementApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Run the role permission seeder
         $this->seed(\Database\Seeders\RolePermissionSeeder::class);
     }
@@ -26,7 +26,7 @@ class RoleManagementApiTest extends TestCase
     {
         $regularUser = User::factory()->create();
         $role = Role::factory()->create(['name' => 'test-role']);
-        
+
         // Create a valid permission for the sync test
         $permission = Permission::factory()->create(['name' => 'test.permission']);
 
@@ -57,25 +57,25 @@ class RoleManagementApiTest extends TestCase
         $user = User::factory()->create();
         $adminRole = Role::where('name', 'Admin')->first();
         $user->roles()->attach($adminRole);
-        
+
         Sanctum::actingAs($user);
 
         $response = $this->getJson('/api/v1/roles');
-        
+
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        '*' => [
-                            'id',
-                            'name',
-                            'description',
-                            'created_at',
-                            'updated_at'
-                        ]
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'name',
+                        'description',
+                        'created_at',
+                        'updated_at',
                     ],
-                    'links',
-                    'meta'
-                ]);
+                ],
+                'links',
+                'meta',
+            ]);
     }
 
     /** @test */
@@ -84,32 +84,32 @@ class RoleManagementApiTest extends TestCase
         $user = User::factory()->create();
         $adminRole = Role::where('name', 'Admin')->first();
         $user->roles()->attach($adminRole);
-        
+
         Sanctum::actingAs($user);
 
         $roleData = [
             'name' => 'Content Manager',
-            'description' => 'Can manage content and moderate posts'
+            'description' => 'Can manage content and moderate posts',
         ];
 
         $response = $this->postJson('/api/v1/roles', $roleData);
-        
+
         $response->assertStatus(201)
-                ->assertJsonStructure([
-                    'data' => [
-                        'id',
-                        'name',
-                        'description',
-                        'created_at',
-                        'updated_at'
-                    ]
-                ])
-                ->assertJson([
-                    'data' => [
-                        'name' => 'Content Manager',
-                        'description' => 'Can manage content and moderate posts'
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'name',
+                    'description',
+                    'created_at',
+                    'updated_at',
+                ],
+            ])
+            ->assertJson([
+                'data' => [
+                    'name' => 'Content Manager',
+                    'description' => 'Can manage content and moderate posts',
+                ],
+            ]);
 
         $this->assertDatabaseHas('roles', $roleData);
     }
@@ -120,30 +120,30 @@ class RoleManagementApiTest extends TestCase
         $user = User::factory()->create();
         $adminRole = Role::where('name', 'Admin')->first();
         $user->roles()->attach($adminRole);
-        
+
         Sanctum::actingAs($user);
 
         $role = Role::first();
 
         $response = $this->getJson("/api/v1/roles/{$role->id}");
-        
+
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        'id',
-                        'name',
-                        'description',
-                        'created_at',
-                        'updated_at'
-                    ]
-                ])
-                ->assertJson([
-                    'data' => [
-                        'id' => $role->id,
-                        'name' => $role->name,
-                        'description' => $role->description
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'name',
+                    'description',
+                    'created_at',
+                    'updated_at',
+                ],
+            ])
+            ->assertJson([
+                'data' => [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'description' => $role->description,
+                ],
+            ]);
     }
 
     /** @test */
@@ -152,32 +152,32 @@ class RoleManagementApiTest extends TestCase
         $user = User::factory()->create();
         $adminRole = Role::where('name', 'Admin')->first();
         $user->roles()->attach($adminRole);
-        
+
         Sanctum::actingAs($user);
 
         $role = Role::with('permissions')->first();
 
         $response = $this->getJson("/api/v1/roles/{$role->id}?include_permissions=true");
-        
+
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        'id',
-                        'name',
-                        'description',
-                        'created_at',
-                        'updated_at',
-                        'permissions' => [
-                            '*' => [
-                                'id',
-                                'name',
-                                'description',
-                                'created_at',
-                                'updated_at'
-                            ]
-                        ]
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'name',
+                    'description',
+                    'created_at',
+                    'updated_at',
+                    'permissions' => [
+                        '*' => [
+                            'id',
+                            'name',
+                            'description',
+                            'created_at',
+                            'updated_at',
+                        ],
+                    ],
+                ],
+            ]);
     }
 
     /** @test */
@@ -186,26 +186,26 @@ class RoleManagementApiTest extends TestCase
         $user = User::factory()->create();
         $adminRole = Role::where('name', 'Admin')->first();
         $user->roles()->attach($adminRole);
-        
+
         Sanctum::actingAs($user);
 
         $role = Role::create(['name' => 'Test Role', 'description' => 'Test description']);
 
         $updateData = [
             'name' => 'Updated Role',
-            'description' => 'Updated description'
+            'description' => 'Updated description',
         ];
 
         $response = $this->putJson("/api/v1/roles/{$role->id}", $updateData);
-        
+
         $response->assertStatus(200)
-                ->assertJson([
-                    'data' => [
-                        'id' => $role->id,
-                        'name' => 'Updated Role',
-                        'description' => 'Updated description'
-                    ]
-                ]);
+            ->assertJson([
+                'data' => [
+                    'id' => $role->id,
+                    'name' => 'Updated Role',
+                    'description' => 'Updated description',
+                ],
+            ]);
 
         $this->assertDatabaseHas('roles', $updateData);
     }
@@ -216,13 +216,13 @@ class RoleManagementApiTest extends TestCase
         $user = User::factory()->create();
         $adminRole = Role::where('name', 'Admin')->first();
         $user->roles()->attach($adminRole);
-        
+
         Sanctum::actingAs($user);
 
         $role = Role::create(['name' => 'Test Role to Delete', 'description' => 'Test description']);
 
         $response = $this->deleteJson("/api/v1/roles/{$role->id}");
-        
+
         $response->assertStatus(204);
 
         $this->assertDatabaseMissing('roles', ['id' => $role->id]);
@@ -234,44 +234,44 @@ class RoleManagementApiTest extends TestCase
         $user = User::factory()->create();
         $adminRole = Role::where('name', 'Admin')->first();
         $user->roles()->attach($adminRole);
-        
+
         Sanctum::actingAs($user);
 
         $role = Role::create(['name' => 'Test Role', 'description' => 'Test description']);
         $permissions = Permission::take(3)->get();
 
         $response = $this->postJson("/api/v1/roles/{$role->id}/permissions", [
-            'permissions' => $permissions->pluck('id')->toArray()
+            'permissions' => $permissions->pluck('id')->toArray(),
         ]);
-        
+
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        'id',
-                        'name',
-                        'description',
-                        'created_at',
-                        'updated_at',
-                        'permissions' => [
-                            '*' => [
-                                'id',
-                                'name',
-                                'description',
-                                'created_at',
-                                'updated_at'
-                            ]
-                        ]
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'name',
+                    'description',
+                    'created_at',
+                    'updated_at',
+                    'permissions' => [
+                        '*' => [
+                            'id',
+                            'name',
+                            'description',
+                            'created_at',
+                            'updated_at',
+                        ],
                     ],
-                    'message'
-                ])
-                ->assertJson([
-                    'message' => 'Permissions synced successfully'
-                ]);
+                ],
+                'message',
+            ])
+            ->assertJson([
+                'message' => 'Permissions synced successfully',
+            ]);
 
         // Verify permissions were synced
         $role->refresh();
         $this->assertCount(3, $role->permissions);
-        
+
         foreach ($permissions as $permission) {
             $this->assertTrue($role->permissions->contains($permission));
         }
@@ -283,18 +283,18 @@ class RoleManagementApiTest extends TestCase
         $user = User::factory()->create();
         $adminRole = Role::where('name', 'Admin')->first();
         $user->roles()->attach($adminRole);
-        
+
         Sanctum::actingAs($user);
 
         $existingRole = Role::first();
 
         $response = $this->postJson('/api/v1/roles', [
             'name' => $existingRole->name,
-            'description' => 'Test description'
+            'description' => 'Test description',
         ]);
-        
+
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['name']);
+            ->assertJsonValidationErrors(['name']);
     }
 
     /** @test */
@@ -303,15 +303,15 @@ class RoleManagementApiTest extends TestCase
         $user = User::factory()->create();
         $adminRole = Role::where('name', 'Admin')->first();
         $user->roles()->attach($adminRole);
-        
+
         Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/roles', [
-            'description' => 'Test description'
+            'description' => 'Test description',
         ]);
-        
+
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['name']);
+            ->assertJsonValidationErrors(['name']);
     }
 
     /** @test */
@@ -320,17 +320,17 @@ class RoleManagementApiTest extends TestCase
         $user = User::factory()->create();
         $adminRole = Role::where('name', 'Admin')->first();
         $user->roles()->attach($adminRole);
-        
+
         Sanctum::actingAs($user);
 
         $role = Role::create(['name' => 'Test Role', 'description' => 'Test description']);
 
         $response = $this->postJson("/api/v1/roles/{$role->id}/permissions", [
-            'permissions' => [999, 998, 997] // Non-existent permission IDs
+            'permissions' => [999, 998, 997], // Non-existent permission IDs
         ]);
-        
+
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['permissions.0', 'permissions.1', 'permissions.2']);
+            ->assertJsonValidationErrors(['permissions.0', 'permissions.1', 'permissions.2']);
     }
 
     /** @test */
@@ -339,15 +339,15 @@ class RoleManagementApiTest extends TestCase
         $user = User::factory()->create();
         $adminRole = Role::where('name', 'Admin')->first();
         $user->roles()->attach($adminRole);
-        
+
         Sanctum::actingAs($user);
 
         $role = Role::create(['name' => 'Test Role', 'description' => 'Test description']);
 
         $response = $this->postJson("/api/v1/roles/{$role->id}/permissions", []);
-        
+
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['permissions']);
+            ->assertJsonValidationErrors(['permissions']);
     }
 
     /** @test */
@@ -367,4 +367,4 @@ class RoleManagementApiTest extends TestCase
         $response = $this->getJson('/api/v1/roles');
         $response->assertStatus(403);
     }
-} 
+}

@@ -2,13 +2,13 @@
 
 namespace Tests\Feature\Api\V1;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Faculty;
 use App\Models\Department;
+use App\Models\Faculty;
 use App\Models\Program;
 use App\Models\Role;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class DepartmentApiTest extends TestCase
 {
@@ -19,12 +19,12 @@ class DepartmentApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create admin role
         $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
-        
+
         $this->admin = User::factory()->create();
-        
+
         // Assign admin role
         $this->admin->roles()->attach($adminRole);
     }
@@ -50,7 +50,7 @@ class DepartmentApiTest extends TestCase
         Department::factory()->count(2)->create(['faculty_id' => $faculty2->id]);
 
         $response = $this->actingAs($this->admin, 'sanctum')->getJson("/api/v1/departments?faculty_id={$faculty1->id}");
-        
+
         $response->assertStatus(200)->assertJsonCount(3, 'data');
     }
 
@@ -67,7 +67,7 @@ class DepartmentApiTest extends TestCase
                     'id' => $department->id,
                     'name' => $department->name,
                     'faculty' => ['id' => $department->faculty->id],
-                ]
+                ],
             ])
             ->assertJsonCount(2, 'data.programs');
     }

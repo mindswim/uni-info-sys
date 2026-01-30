@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
@@ -29,7 +29,7 @@ class UserController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -55,7 +55,7 @@ class UserController extends Controller
         $this->authorize('view', $user);
 
         return response()->json([
-            'data' => $user->load('roles')
+            'data' => $user->load('roles'),
         ]);
     }
 
@@ -67,7 +67,7 @@ class UserController extends Controller
         $this->authorize('view', $user);
 
         return response()->json([
-            'data' => $user->roles()->with('permissions')->get()
+            'data' => $user->roles()->with('permissions')->get(),
         ]);
     }
 }

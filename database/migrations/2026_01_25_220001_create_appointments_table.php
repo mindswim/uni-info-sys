@@ -20,14 +20,14 @@ return new class extends Migration
                 'career',
                 'academic',
                 'personal',
-                'other'
+                'other',
             ])->default('advising');
             $table->enum('status', [
                 'scheduled',
                 'confirmed',
                 'completed',
                 'cancelled',
-                'no_show'
+                'no_show',
             ])->default('scheduled');
             $table->string('location')->nullable();
             $table->string('meeting_link')->nullable();

@@ -12,18 +12,18 @@ class Course extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'course_code', 
+        'course_code',
         'course_number',
-        'title', 
-        'description', 
-        'credits', 
+        'title',
+        'description',
+        'credits',
         'level',
         'prerequisites',
-        'department_id'
+        'department_id',
     ];
 
     protected $casts = [
-        'prerequisites' => 'array'
+        'prerequisites' => 'array',
     ];
 
     public function department()
@@ -35,7 +35,7 @@ class Course extends Model
     {
         return $this->belongsToMany(Course::class, 'course_prerequisites', 'course_id', 'prerequisite_id');
     }
-    
+
     public function isPrerequisiteFor()
     {
         return $this->belongsToMany(Course::class, 'course_prerequisites', 'prerequisite_id', 'course_id');
@@ -62,13 +62,20 @@ class Course extends Model
         // Extract numeric portion from course code
         if (preg_match('/([0-9]+)/', $this->course_code, $matches)) {
             $number = intval($matches[1]);
-            
-            if ($number < 100) return 'lower_division';
-            if ($number < 200) return 'upper_division'; 
-            if ($number < 300) return 'graduate';
+
+            if ($number < 100) {
+                return 'lower_division';
+            }
+            if ($number < 200) {
+                return 'upper_division';
+            }
+            if ($number < 300) {
+                return 'graduate';
+            }
+
             return 'advanced_graduate';
         }
-        
+
         return 'lower_division';
     }
 
@@ -77,6 +84,7 @@ class Course extends Model
         if (preg_match('/([0-9]+[A-Z]*)/', $this->course_code, $matches)) {
             return $matches[1];
         }
+
         return '';
     }
 
@@ -84,13 +92,13 @@ class Course extends Model
     protected static function boot()
     {
         parent::boot();
-        
+
         static::saving(function ($course) {
-            if (!$course->course_number) {
+            if (! $course->course_number) {
                 $course->course_number = $course->extractCourseNumber();
             }
-            
-            if (!$course->level) {
+
+            if (! $course->level) {
                 $course->level = $course->getCourseLevel();
             }
         });

@@ -115,7 +115,7 @@ class DiscussionForumController extends Controller
 
     public function togglePin(DiscussionTopic $discussionTopic): JsonResponse
     {
-        $discussionTopic->update(['is_pinned' => !$discussionTopic->is_pinned]);
+        $discussionTopic->update(['is_pinned' => ! $discussionTopic->is_pinned]);
 
         return response()->json([
             'message' => $discussionTopic->is_pinned ? 'Topic pinned.' : 'Topic unpinned.',
@@ -125,7 +125,7 @@ class DiscussionForumController extends Controller
 
     public function toggleLock(DiscussionTopic $discussionTopic): JsonResponse
     {
-        $discussionTopic->update(['is_locked' => !$discussionTopic->is_locked]);
+        $discussionTopic->update(['is_locked' => ! $discussionTopic->is_locked]);
 
         return response()->json([
             'message' => $discussionTopic->is_locked ? 'Topic locked.' : 'Topic unlocked.',

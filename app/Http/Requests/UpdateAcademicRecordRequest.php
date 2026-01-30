@@ -6,15 +6,15 @@ use Illuminate\Foundation\Http\FormRequest;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: "UpdateAcademicRecordRequest",
-    title: "Update Academic Record Request",
+    schema: 'UpdateAcademicRecordRequest',
+    title: 'Update Academic Record Request',
     properties: [
-        new OA\Property(property: "institution_name", type: "string", example: "University of California", description: "The name of the educational institution"),
-        new OA\Property(property: "qualification_type", type: "string", example: "Bachelor of Science", description: "The type of qualification or degree"),
-        new OA\Property(property: "start_date", type: "string", format: "date", example: "2020-09-01", description: "The start date of the academic program"),
-        new OA\Property(property: "end_date", type: "string", format: "date", example: "2024-06-15", description: "The end date of the academic program"),
-        new OA\Property(property: "gpa", type: "number", format: "float", example: 3.85, description: "The Grade Point Average achieved (0.00-4.00)"),
-        new OA\Property(property: "transcript_url", type: "string", example: "https://example.com/transcript.pdf", description: "URL to the transcript document", nullable: true),
+        new OA\Property(property: 'institution_name', type: 'string', example: 'University of California', description: 'The name of the educational institution'),
+        new OA\Property(property: 'qualification_type', type: 'string', example: 'Bachelor of Science', description: 'The type of qualification or degree'),
+        new OA\Property(property: 'start_date', type: 'string', format: 'date', example: '2020-09-01', description: 'The start date of the academic program'),
+        new OA\Property(property: 'end_date', type: 'string', format: 'date', example: '2024-06-15', description: 'The end date of the academic program'),
+        new OA\Property(property: 'gpa', type: 'number', format: 'float', example: 3.85, description: 'The Grade Point Average achieved (0.00-4.00)'),
+        new OA\Property(property: 'transcript_url', type: 'string', example: 'https://example.com/transcript.pdf', description: 'URL to the transcript document', nullable: true),
     ]
 )]
 class UpdateAcademicRecordRequest extends FormRequest

@@ -18,7 +18,7 @@ class AdmissionApplicationFactory extends Factory
             'application_date' => now(),
             'decision_date' => null,
             'decision_status' => null,
-            'comments' => null
+            'comments' => null,
         ];
     }
 
@@ -42,7 +42,7 @@ class AdmissionApplicationFactory extends Factory
             return [
                 'status' => 'draft',
                 'decision_date' => null,
-                'decision_status' => null
+                'decision_status' => null,
             ];
         });
     }
@@ -54,7 +54,7 @@ class AdmissionApplicationFactory extends Factory
                 'status' => 'submitted',
                 'application_date' => now(),
                 'decision_date' => null,
-                'decision_status' => null
+                'decision_status' => null,
             ];
         });
     }

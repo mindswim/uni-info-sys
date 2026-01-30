@@ -15,8 +15,11 @@ class DocumentVerificationTest extends TestCase
     use RefreshDatabase;
 
     private User $adminUser;
+
     private User $studentUser;
+
     private Student $student;
+
     private Document $document;
 
     protected function setUp(): void

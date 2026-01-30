@@ -22,8 +22,11 @@ class AdmissionEnrollmentTest extends TestCase
     use RefreshDatabase;
 
     private User $adminUser;
+
     private Student $student;
+
     private AdmissionApplication $application;
+
     private Program $program;
 
     protected function setUp(): void

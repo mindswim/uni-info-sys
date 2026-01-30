@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\User;
 use App\Models\Department;
 use App\Models\Faculty;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Staff>
@@ -24,7 +24,7 @@ class StaffFactory extends Factory
             'department_id' => Department::factory()->for(Faculty::factory()),
             'job_title' => $this->faker->jobTitle,
             'bio' => $this->faker->paragraph,
-            'office_location' => 'Building ' . $this->faker->buildingNumber . ', Room ' . $this->faker->randomNumber(3),
+            'office_location' => 'Building '.$this->faker->buildingNumber.', Room '.$this->faker->randomNumber(3),
         ];
     }
 }

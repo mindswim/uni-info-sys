@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 
 class Appointment extends Model
 {
@@ -136,7 +136,7 @@ class Appointment extends Model
 
     public function getTypeLabel(): string
     {
-        return match($this->type) {
+        return match ($this->type) {
             'advising' => 'Academic Advising',
             'registration' => 'Registration Assistance',
             'career' => 'Career Counseling',
@@ -149,7 +149,7 @@ class Appointment extends Model
 
     public function getStatusLabel(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'scheduled' => 'Scheduled',
             'confirmed' => 'Confirmed',
             'completed' => 'Completed',

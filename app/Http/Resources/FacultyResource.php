@@ -7,15 +7,15 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    title: "Faculty Resource",
-    description: "Represents a faculty in the university.",
+    title: 'Faculty Resource',
+    description: 'Represents a faculty in the university.',
     properties: [
-        new OA\Property(property: "id", type: "integer", readOnly: true, example: 1),
-        new OA\Property(property: "name", type: "string", example: "Faculty of Science"),
+        new OA\Property(property: 'id', type: 'integer', readOnly: true, example: 1),
+        new OA\Property(property: 'name', type: 'string', example: 'Faculty of Science'),
         new OA\Property(
-            property: "departments",
-            type: "array",
-            items: new OA\Items(ref: "#/components/schemas/DepartmentResource")
+            property: 'departments',
+            type: 'array',
+            items: new OA\Items(ref: '#/components/schemas/DepartmentResource')
         ),
     ]
 )]

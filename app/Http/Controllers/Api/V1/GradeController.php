@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\SubmitGradeRequest;
+use App\Http\Requests\ApproveGradeChangeRequest;
 use App\Http\Requests\BulkSubmitGradesRequest;
 use App\Http\Requests\GradeChangeRequestRequest;
-use App\Http\Requests\ApproveGradeChangeRequest;
+use App\Http\Requests\SubmitGradeRequest;
 use App\Models\CourseSection;
 use App\Models\Enrollment;
 use App\Models\GradeChangeRequest;
@@ -32,19 +32,25 @@ class GradeController extends Controller
      *     summary="Submit or update a grade for an enrollment",
      *     tags={"Grades"},
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(
      *         name="enrollment",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"grade"},
+     *
      *             @OA\Property(property="grade", type="string", example="A", description="Letter grade (A+, A, A-, B+, etc.)")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Grade submitted successfully"
@@ -79,16 +85,21 @@ class GradeController extends Controller
      *     summary="Submit grades for multiple students in bulk",
      *     tags={"Grades"},
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(
      *         name="courseSection",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"grades"},
+     *
      *             @OA\Property(
      *                 property="grades",
      *                 type="object",
@@ -97,6 +108,7 @@ class GradeController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Bulk grades submitted"
@@ -113,7 +125,7 @@ class GradeController extends Controller
 
         $message = "Successfully graded {$result['successful']} out of {$result['total']} enrollments";
         if (count($result['failed']) > 0) {
-            $message .= ". " . count($result['failed']) . " failed.";
+            $message .= '. '.count($result['failed']).' failed.';
         }
 
         return response()->json([
@@ -128,12 +140,15 @@ class GradeController extends Controller
      *     summary="Get grade distribution for a course section",
      *     tags={"Grades"},
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(
      *         name="courseSection",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Grade distribution data"
@@ -157,12 +172,15 @@ class GradeController extends Controller
      *     summary="Get grading progress for a course section",
      *     tags={"Grades"},
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(
      *         name="courseSection",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Grading progress data"
@@ -186,15 +204,19 @@ class GradeController extends Controller
      *     summary="Request a grade change",
      *     tags={"Grades"},
      *     security={{"sanctum":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"enrollment_id", "new_grade", "reason"},
+     *
      *             @OA\Property(property="enrollment_id", type="integer"),
      *             @OA\Property(property="new_grade", type="string", example="B+"),
      *             @OA\Property(property="reason", type="string", example="Grading error - missed extra credit")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=201,
      *         description="Grade change request created"
@@ -224,12 +246,15 @@ class GradeController extends Controller
      *     summary="Approve a grade change request",
      *     tags={"Grades"},
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(
      *         name="gradeChangeRequest",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Grade change approved"
@@ -260,19 +285,25 @@ class GradeController extends Controller
      *     summary="Deny a grade change request",
      *     tags={"Grades"},
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(
      *         name="gradeChangeRequest",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"denial_reason"},
+     *
      *             @OA\Property(property="denial_reason", type="string", example="Insufficient justification")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Grade change denied"
@@ -301,12 +332,15 @@ class GradeController extends Controller
      *     summary="List grade change requests",
      *     tags={"Grades"},
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(
      *         name="status",
      *         in="query",
      *         required=false,
+     *
      *         @OA\Schema(type="string", enum={"pending", "approved", "denied"})
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="List of grade change requests"
@@ -328,7 +362,7 @@ class GradeController extends Controller
         }
 
         // Admin sees all, faculty sees only their courses, staff may see department
-        if (!$request->user()->hasRole('admin')) {
+        if (! $request->user()->hasRole('admin')) {
             if ($request->user()->hasRole('faculty')) {
                 $staffId = $request->user()->staff->id;
                 $query->whereHas('enrollment.courseSection', function ($q) use ($staffId) {
@@ -348,6 +382,7 @@ class GradeController extends Controller
      *     summary="Get list of valid letter grades",
      *     tags={"Grades"},
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="List of valid grades"

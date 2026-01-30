@@ -329,6 +329,7 @@ class AssignmentSubmissionController extends Controller
             $data['percentage'] = $submission->percentage;
             $data['letter_grade'] = $submission->letter_grade;
             $data['is_passing'] = $submission->isPassing();
+
             return $data;
         });
 
@@ -350,7 +351,7 @@ class AssignmentSubmissionController extends Controller
             ->where('course_section_id', $assignment->course_section_id)
             ->first();
 
-        if (!$enrollment) {
+        if (! $enrollment) {
             return response()->json([
                 'message' => 'Student is not enrolled in this course section.',
             ], 404);
@@ -362,7 +363,7 @@ class AssignmentSubmissionController extends Controller
             $request->has('attempt') ? (int) $request->attempt : null
         );
 
-        if (!$submission) {
+        if (! $submission) {
             return response()->json([
                 'data' => null,
                 'message' => 'No submission found.',

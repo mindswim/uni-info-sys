@@ -3,9 +3,9 @@
 namespace Tests\Feature\Api\V1;
 
 use App\Models\Building;
+use App\Models\Role;
 use App\Models\Room;
 use App\Models\User;
-use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -19,13 +19,13 @@ class BuildingApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create admin user with admin role
         $this->admin = User::factory()->create();
         $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
         $this->admin->roles()->attach($adminRole);
     }
-    
+
     public function test_can_get_all_buildings_paginated_with_rooms()
     {
         Building::factory()->has(Room::factory()->count(3))->count(5)->create();
@@ -35,7 +35,7 @@ class BuildingApiTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'name', 'address', 'rooms']
+                    '*' => ['id', 'name', 'address', 'rooms'],
                 ],
                 'links',
                 'meta',
@@ -47,12 +47,12 @@ class BuildingApiTest extends TestCase
     public function test_can_create_a_building()
     {
         $data = [
-            'name' => $this->faker->unique()->word . ' Hall',
+            'name' => $this->faker->unique()->word.' Hall',
             'address' => $this->faker->address,
         ];
-        
+
         $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/buildings', $data);
-        
+
         $response->assertStatus(201)
             ->assertJsonFragment($data);
 
@@ -66,7 +66,7 @@ class BuildingApiTest extends TestCase
         $data = ['name' => $building->name];
 
         $response = $this->actingAs($this->admin, 'sanctum')->postJson('/api/v1/buildings', $data);
-        
+
         $response->assertStatus(422)->assertJsonValidationErrors(['name']);
     }
 
@@ -84,11 +84,11 @@ class BuildingApiTest extends TestCase
     public function test_can_update_a_building()
     {
         $building = Building::factory()->create();
-        
+
         $updateData = ['name' => 'Updated Building Name'];
 
         $response = $this->actingAs($this->admin, 'sanctum')->putJson("/api/v1/buildings/{$building->id}", $updateData);
-        
+
         $response->assertStatus(200)
             ->assertJsonFragment($updateData);
 
@@ -98,7 +98,7 @@ class BuildingApiTest extends TestCase
     public function test_can_delete_a_building()
     {
         $building = Building::factory()->create();
-        
+
         $response = $this->actingAs($this->admin, 'sanctum')->deleteJson("/api/v1/buildings/{$building->id}");
 
         $response->assertStatus(204);

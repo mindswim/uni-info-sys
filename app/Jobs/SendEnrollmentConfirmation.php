@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Models\Enrollment;
-use App\Notifications\ApplicationStatusUpdated;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -39,18 +38,19 @@ class SendEnrollmentConfirmation implements ShouldQueue
             $this->enrollment->load(['student.user', 'courseSection.course']);
 
             $user = $this->enrollment->student->user;
-            
-            if (!$user) {
+
+            if (! $user) {
                 Log::warning('Cannot send enrollment confirmation - student has no user account', [
                     'enrollment_id' => $this->enrollment->id,
                     'student_id' => $this->enrollment->student_id,
                 ]);
+
                 return;
             }
 
             // Send notification based on enrollment status
             $message = $this->getConfirmationMessage();
-            
+
             // For now, we'll log the notification
             // In a real implementation, you would send an email or push notification
             Log::info('Enrollment confirmation sent', [
@@ -67,7 +67,7 @@ class SendEnrollmentConfirmation implements ShouldQueue
                 'enrollment_id' => $this->enrollment->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             // Re-throw to mark the job as failed
             throw $e;
         }

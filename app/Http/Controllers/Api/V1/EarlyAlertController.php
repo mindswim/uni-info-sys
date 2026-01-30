@@ -49,8 +49,8 @@ class EarlyAlertController extends Controller
         $validated = $request->validate([
             'student_id' => ['required', 'exists:students,id'],
             'course_section_id' => ['required', 'exists:course_sections,id'],
-            'alert_type' => ['required', 'in:' . implode(',', EarlyAlert::ALERT_TYPES)],
-            'severity' => ['required', 'in:' . implode(',', EarlyAlert::SEVERITIES)],
+            'alert_type' => ['required', 'in:'.implode(',', EarlyAlert::ALERT_TYPES)],
+            'severity' => ['required', 'in:'.implode(',', EarlyAlert::SEVERITIES)],
             'description' => ['required', 'string', 'max:2000'],
         ]);
 
@@ -83,7 +83,7 @@ class EarlyAlertController extends Controller
     public function update(Request $request, EarlyAlert $earlyAlert): JsonResponse
     {
         $validated = $request->validate([
-            'status' => ['required', 'in:' . implode(',', EarlyAlert::STATUSES)],
+            'status' => ['required', 'in:'.implode(',', EarlyAlert::STATUSES)],
             'resolution_notes' => ['nullable', 'string', 'max:2000'],
         ]);
 

@@ -2,8 +2,6 @@
 
 namespace Tests\Feature\Api\V1;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class AcademicRecordApiTest extends TestCase
@@ -16,6 +14,6 @@ class AcademicRecordApiTest extends TestCase
         $response = $this->get('/api/health');
 
         $response->assertStatus(200)
-                 ->assertJson(['status' => 'healthy']);
+            ->assertJson(['status' => 'healthy']);
     }
 }

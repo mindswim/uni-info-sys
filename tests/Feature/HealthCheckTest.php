@@ -3,8 +3,6 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class HealthCheckTest extends TestCase
@@ -21,26 +19,26 @@ class HealthCheckTest extends TestCase
                 'timestamp',
                 'services' => [
                     'database' => ['status', 'message'],
-                    'cache' => ['status', 'message']
+                    'cache' => ['status', 'message'],
                 ],
                 'application' => [
                     'name',
                     'environment',
-                    'version'
-                ]
+                    'version',
+                ],
             ])
             ->assertJson([
                 'status' => 'healthy',
                 'services' => [
                     'database' => [
                         'status' => 'healthy',
-                        'message' => 'Database connection successful'
+                        'message' => 'Database connection successful',
                     ],
                     'cache' => [
                         'status' => 'healthy',
-                        'message' => 'Cache connection successful'
-                    ]
-                ]
+                        'message' => 'Cache connection successful',
+                    ],
+                ],
             ]);
 
         // Verify timestamp is a valid ISO 8601 format
@@ -58,8 +56,8 @@ class HealthCheckTest extends TestCase
                 'application' => [
                     'name' => config('app.name'),
                     'environment' => config('app.env'),
-                    'version' => '1.0.0'
-                ]
+                    'version' => '1.0.0',
+                ],
             ]);
     }
 
@@ -69,7 +67,7 @@ class HealthCheckTest extends TestCase
         $response = $this->get('/api/health');
 
         $response->assertStatus(200);
-        
+
         // Should not return authentication error
         $response->assertJsonMissing(['message' => 'Unauthenticated.']);
     }
@@ -79,7 +77,7 @@ class HealthCheckTest extends TestCase
         $response = $this->get('/api/health');
 
         $data = $response->json();
-        
+
         $this->assertArrayHasKey('database', $data['services']);
         $this->assertEquals('healthy', $data['services']['database']['status']);
         $this->assertStringContainsString('Database connection successful', $data['services']['database']['message']);
@@ -90,7 +88,7 @@ class HealthCheckTest extends TestCase
         $response = $this->get('/api/health');
 
         $data = $response->json();
-        
+
         $this->assertArrayHasKey('cache', $data['services']);
         $this->assertEquals('healthy', $data['services']['cache']['status']);
         $this->assertStringContainsString('Cache connection successful', $data['services']['cache']['message']);
@@ -103,7 +101,7 @@ class HealthCheckTest extends TestCase
             $response = $this->get('/api/health');
             $response->assertStatus(200);
         }
-        
+
         // All should succeed since we allow 100 requests per minute
         $this->assertTrue(true); // Test passes if no rate limiting errors
     }
@@ -119,16 +117,16 @@ class HealthCheckTest extends TestCase
     public function test_health_check_response_includes_timestamp()
     {
         $beforeRequest = now();
-        
+
         $response = $this->get('/api/health');
-        
+
         $afterRequest = now();
         $data = $response->json();
-        
+
         $this->assertArrayHasKey('timestamp', $data);
-        
+
         $responseTimestamp = \Carbon\Carbon::parse($data['timestamp']);
-        
+
         $this->assertTrue($responseTimestamp->between($beforeRequest, $afterRequest));
     }
 }

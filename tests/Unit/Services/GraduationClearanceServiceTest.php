@@ -17,8 +17,11 @@ class GraduationClearanceServiceTest extends TestCase
     use RefreshDatabase;
 
     private GraduationClearanceService $service;
+
     private Student $student;
+
     private Program $program;
+
     private Term $term;
 
     protected function setUp(): void

@@ -82,10 +82,11 @@ class AidAward extends Model
 
     public function getNetLoanAmountAttribute(): ?float
     {
-        if (!$this->isLoan()) {
+        if (! $this->isLoan()) {
             return null;
         }
         $fee = $this->origination_fee ? ($this->amount * $this->origination_fee / 100) : 0;
+
         return $this->amount - $fee;
     }
 

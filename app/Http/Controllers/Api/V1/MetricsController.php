@@ -18,13 +18,11 @@ class MetricsController extends Controller
 
     /**
      * Expose Prometheus metrics endpoint
-     * 
-     * @return Response
      */
     public function index(): Response
     {
         $registry = $this->metricsService->getRegistry();
-        $renderer = new RenderTextFormat();
+        $renderer = new RenderTextFormat;
         $result = $renderer->render($registry->getMetricFamilySamples());
 
         return response($result, 200, [

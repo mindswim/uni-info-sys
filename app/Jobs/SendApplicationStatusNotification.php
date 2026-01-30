@@ -37,12 +37,13 @@ class SendApplicationStatusNotification implements ShouldQueue
             $this->application->load(['student.user']);
 
             $user = $this->application->student->user;
-            
-            if (!$user) {
+
+            if (! $user) {
                 Log::warning('Cannot send application status notification - student has no user account', [
                     'application_id' => $this->application->id,
                     'student_id' => $this->application->student_id,
                 ]);
+
                 return;
             }
 
@@ -60,7 +61,7 @@ class SendApplicationStatusNotification implements ShouldQueue
                 'application_id' => $this->application->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             // Re-throw to mark the job as failed
             throw $e;
         }

@@ -18,7 +18,7 @@ class EvaluationService
             })
             ->first();
 
-        if (!$activeForm) {
+        if (! $activeForm) {
             return [];
         }
 
@@ -63,7 +63,7 @@ class EvaluationService
                 $questionId = $answer->evaluation_question_id;
                 $question = $answer->question;
 
-                if (!isset($questionAggregates[$questionId])) {
+                if (! isset($questionAggregates[$questionId])) {
                     $questionAggregates[$questionId] = [
                         'question_text' => $question->question_text,
                         'question_type' => $question->question_type,
@@ -90,7 +90,7 @@ class EvaluationService
                 'question_id' => $questionId,
                 'question_text' => $data['question_text'],
                 'question_type' => $data['question_type'],
-                'average_rating' => !empty($ratings) ? round(array_sum($ratings) / count($ratings), 2) : null,
+                'average_rating' => ! empty($ratings) ? round(array_sum($ratings) / count($ratings), 2) : null,
                 'response_count' => count($ratings),
                 'text_answers' => $data['text_answers'],
             ];

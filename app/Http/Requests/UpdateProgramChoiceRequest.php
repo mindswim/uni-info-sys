@@ -14,19 +14,19 @@ class UpdateProgramChoiceRequest extends FormRequest
         $user = $this->user();
         $userRoles = $user->roles()->pluck('name')->toArray();
         $programChoice = $this->route('program_choice');
-        
+
         // Admin/staff can update any program choice
         if (in_array('admin', $userRoles) || in_array('staff', $userRoles)) {
             return true;
         }
-        
+
         // Students can only update their own program choices if the application is still a draft
         if (in_array('student', $userRoles)) {
-            return $programChoice && 
+            return $programChoice &&
                    $user->id === $programChoice->admissionApplication->student->user_id &&
                    $programChoice->admissionApplication->status === 'draft';
         }
-        
+
         return false;
     }
 
@@ -40,7 +40,7 @@ class UpdateProgramChoiceRequest extends FormRequest
         $user = $this->user();
         $userRoles = $user->roles()->pluck('name')->toArray();
         $programChoice = $this->route('program_choice');
-        
+
         $rules = [
             'preference_order' => [
                 'sometimes',
@@ -58,15 +58,15 @@ class UpdateProgramChoiceRequest extends FormRequest
                             $fail('A program choice with this preference order already exists for this application.');
                         }
                     }
-                }
+                },
             ],
         ];
-        
+
         // Admin/staff can update status, students cannot
         if (in_array('admin', $userRoles) || in_array('staff', $userRoles)) {
             $rules['status'] = 'sometimes|string|in:pending,accepted,rejected';
         }
-        
+
         return $rules;
     }
 

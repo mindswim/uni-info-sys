@@ -12,13 +12,13 @@ class EnsureIsDepartmentChair
     {
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
-        if (!$user->hasRole('department-chair')) {
+        if (! $user->hasRole('department-chair')) {
             return response()->json([
-                'message' => 'Forbidden. This action requires department chair privileges.'
+                'message' => 'Forbidden. This action requires department chair privileges.',
             ], 403);
         }
 

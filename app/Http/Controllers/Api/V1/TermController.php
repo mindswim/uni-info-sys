@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\HandlesCsvImportExport;
-use App\Jobs\ProcessTermImport;
-use App\Models\Term;
-use App\Http\Resources\TermResource;
 use App\Http\Requests\StoreTermRequest;
 use App\Http\Requests\UpdateTermRequest;
+use App\Http\Resources\TermResource;
+use App\Jobs\ProcessTermImport;
+use App\Models\Term;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
@@ -20,6 +20,7 @@ use OpenApi\Attributes as OA;
 class TermController extends Controller
 {
     use HandlesCsvImportExport;
+
     #[OA\Get(
         path: '/api/v1/terms',
         summary: 'List all terms',
@@ -49,7 +50,7 @@ class TermController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', Term::class);
-        
+
         $query = Term::query();
 
         if ($request->has('academic_year')) {
@@ -81,8 +82,9 @@ class TermController extends Controller
     public function store(StoreTermRequest $request)
     {
         $this->authorize('create', Term::class);
-        
+
         $term = Term::create($request->validated());
+
         return new TermResource($term);
     }
 
@@ -113,7 +115,7 @@ class TermController extends Controller
     public function show(Term $term)
     {
         $this->authorize('view', $term);
-        
+
         return new TermResource($term);
     }
 
@@ -149,8 +151,9 @@ class TermController extends Controller
     public function update(UpdateTermRequest $request, Term $term)
     {
         $this->authorize('update', $term);
-        
+
         $term->update($request->validated());
+
         return new TermResource($term);
     }
 
@@ -179,6 +182,7 @@ class TermController extends Controller
         $this->authorize('delete', $term);
 
         $term->delete();
+
         return response()->noContent();
     }
 

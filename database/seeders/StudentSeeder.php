@@ -1,8 +1,9 @@
 <?php
+
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Student;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class StudentSeeder extends Seeder
@@ -15,7 +16,7 @@ class StudentSeeder extends Seeder
             ->each(function ($user) {
                 Student::create([
                     'user_id' => $user->id,
-                    'student_number' => 'ST' . str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT),
+                    'student_number' => 'ST'.str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT),
                     'first_name' => fake()->firstName(),
                     'last_name' => fake()->lastName(),
                     'date_of_birth' => fake()->date(),

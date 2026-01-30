@@ -16,6 +16,7 @@ import {
   UserCheck,
   Building,
   ClipboardCheck,
+  Key,
   Award,
   MessageSquare,
   Bell,
@@ -211,6 +212,7 @@ const navigationItems = {
     {
       title: "System",
       items: [
+        { title: "Roles & Permissions", url: "/admin/roles", icon: Key },
         { title: "Settings", url: "/admin/settings", icon: Settings },
         { title: "Profile", url: "/profile", icon: User }
       ]

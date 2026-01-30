@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Feature;
+namespace Tests\Feature;
 
 use App\Jobs\ProcessWaitlistPromotion;
 use App\Jobs\SendApplicationStatusNotification;

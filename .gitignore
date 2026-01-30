@@ -27,3 +27,6 @@ routes.json
 # Custom Ignores
 .idea
 storage/framework/testing/
+test-results/
+frontend/test-results/
+frontend/playwright-report/

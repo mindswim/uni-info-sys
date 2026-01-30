@@ -191,6 +191,7 @@ const navigationItems = {
       title: "Financials",
       items: [
         { title: "Billing", url: "/admin/billing", icon: DollarSign },
+        { title: "Tuition Rates", url: "/admin/tuition-rates", icon: CreditCard },
         { title: "Financial Aid", url: "/admin/financial-aid", icon: Award }
       ]
     },

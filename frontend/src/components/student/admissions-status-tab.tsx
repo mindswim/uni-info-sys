@@ -67,6 +67,7 @@ export function AdmissionsStatusTab() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [applications, setApplications] = useState<Application[]>([])
+  const [confirmingId, setConfirmingId] = useState<number | null>(null)
 
   useEffect(() => {
     fetchApplications()
@@ -102,6 +103,43 @@ export function AdmissionsStatusTab() {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleConfirmEnrollment = async (applicationId: number) => {
+    setConfirmingId(applicationId)
+    try {
+      const token = sessionStorage.getItem('auth_token')
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/admission-applications/${applicationId}/confirm-enrollment`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+          },
+        }
+      )
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.message || 'Failed to confirm enrollment')
+      }
+
+      toast({
+        title: "Enrollment Confirmed",
+        description: "Congratulations! You are now enrolled. Welcome to the university.",
+      })
+
+      fetchApplications()
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to confirm enrollment",
+        variant: "destructive",
+      })
+    } finally {
+      setConfirmingId(null)
     }
   }
 
@@ -354,11 +392,23 @@ export function AdmissionsStatusTab() {
                       Congratulations on your acceptance!
                     </h4>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Complete your enrollment by accepting your offer and reviewing your financial aid package.
+                      Complete your enrollment by confirming your offer below. This will finalize your admission and assign your program.
                     </p>
                     <div className="flex gap-3">
-                      <Button variant="default" className="bg-green-600 hover:bg-green-700">
-                        Accept Offer
+                      <Button
+                        variant="default"
+                        className="bg-green-600 hover:bg-green-700"
+                        disabled={confirmingId === application.id}
+                        onClick={() => handleConfirmEnrollment(application.id)}
+                      >
+                        {confirmingId === application.id ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Confirming...
+                          </>
+                        ) : (
+                          'Confirm Enrollment'
+                        )}
                       </Button>
                       <Button variant="outline" asChild>
                         <a href="/student/financial-aid">View Financial Aid</a>

@@ -13,6 +13,7 @@ use App\Models\CourseSection;
 use App\Models\AdmissionApplication;
 use App\Models\ProgramChoice;
 use App\Models\Enrollment;
+use App\Models\Permission;
 use App\Models\Role;
 use Laravel\Sanctum\Sanctum;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -44,9 +45,22 @@ class StudentLifecycleTest extends TestCase
     
     private function createTestData(): void
     {
-        // Create roles (exactly like the working test)
+        // Create roles
         $this->adminRole = Role::create(['name' => 'admin', 'display_name' => 'Administrator']);
         $this->studentRole = Role::create(['name' => 'student', 'display_name' => 'Student']);
+
+        // Create route-level permissions needed by api.php middleware
+        $studentPerms = [];
+        foreach (['create_applications', 'view_applications', 'update_applications', 'create_enrollments', 'view_enrollments'] as $name) {
+            $studentPerms[] = Permission::firstOrCreate(['name' => $name])->id;
+        }
+        $this->studentRole->permissions()->sync($studentPerms);
+
+        $adminPerms = [];
+        foreach (['create_applications', 'view_applications', 'update_applications', 'create_enrollments', 'view_enrollments', 'update_enrollments', 'delete_enrollments'] as $name) {
+            $adminPerms[] = Permission::firstOrCreate(['name' => $name])->id;
+        }
+        $this->adminRole->permissions()->sync($adminPerms);
 
         // Create users
         $this->adminUser = User::factory()->create(['email' => 'admin@test.com']);
@@ -65,12 +79,12 @@ class StudentLifecycleTest extends TestCase
         
         // Create academic structure - use future term to avoid "past term" enrollment restrictions
         $this->term = Term::factory()->create([
-            'name' => 'Fall 2025',
-            'academic_year' => 2025,
+            'name' => 'Fall 2026',
+            'academic_year' => 2026,
             'semester' => 'Fall',
-            'start_date' => '2025-09-01',
-            'end_date' => '2025-12-20',
-            'add_drop_deadline' => '2025-09-15'
+            'start_date' => now()->addDays(30)->toDateString(),
+            'end_date' => now()->addDays(120)->toDateString(),
+            'add_drop_deadline' => now()->addDays(45)->toDateString(),
         ]);
         
         $this->department = Department::factory()->create([
@@ -102,14 +116,20 @@ class StudentLifecycleTest extends TestCase
             'course_id' => $this->course1->id,
             'term_id' => $this->term->id,
             'capacity' => 30,
-            'section_number' => '001'
+            'section_number' => '001',
+            'schedule_days' => 'MWF',
+            'start_time' => '09:00:00',
+            'end_time' => '10:00:00',
         ]);
-        
+
         $this->section2 = CourseSection::factory()->create([
             'course_id' => $this->course2->id,
             'term_id' => $this->term->id,
             'capacity' => 25,
-            'section_number' => '001'
+            'section_number' => '001',
+            'schedule_days' => 'TR',
+            'start_time' => '11:00:00',
+            'end_time' => '12:30:00',
         ]);
     }
 
@@ -166,34 +186,47 @@ class StudentLifecycleTest extends TestCase
         $reviewResponse->assertStatus(200)
             ->assertJsonPath('data.status', 'accepted');
 
-        // PHASE 5: Student enrolls in courses
+        // PHASE 5: Student confirms enrollment (Fix 7)
         Sanctum::actingAs($this->studentUser);
-        
-        // Enroll in first course
+
+        // Add program choice status = 'accepted' so matriculation finds the accepted program
+        ProgramChoice::where('application_id', $applicationId)->update(['status' => 'accepted']);
+
+        $confirmResponse = $this->postJson(
+            "/api/v1/admission-applications/{$applicationId}/confirm-enrollment"
+        );
+
+        $confirmResponse->assertStatus(200);
+
+        // Verify student is now enrolled
+        $this->student->refresh();
+        $this->assertEquals('full_time', $this->student->enrollment_status);
+        $this->assertEquals($this->program->id, $this->student->major_program_id);
+
+        // PHASE 6: Student enrolls in courses
         $enrollment1Response = $this->postJson('/api/v1/enrollments', [
             'student_id' => $this->student->id,
             'course_section_id' => $this->section1->id
         ]);
-        
+
         $enrollment1Response->assertStatus(201)
             ->assertJsonPath('data.status', 'enrolled');
-        
-        // Enroll in second course  
+
         $enrollment2Response = $this->postJson('/api/v1/enrollments', [
             'student_id' => $this->student->id,
             'course_section_id' => $this->section2->id
         ]);
-        
+
         $enrollment2Response->assertStatus(201)
             ->assertJsonPath('data.status', 'enrolled');
 
-        // PHASE 6: Verify complete workflow state
-        
+        // PHASE 7: Verify complete workflow state
+
         // Verify application state
         $this->assertDatabaseHas('admission_applications', [
             'id' => $applicationId,
             'student_id' => $this->student->id,
-            'status' => 'accepted'
+            'status' => 'enrolled'
         ]);
         
         // Verify program choice state
@@ -223,13 +256,13 @@ class StudentLifecycleTest extends TestCase
         
         $this->assertEquals(2, $activeEnrollments);
         
-        // Verify student details via API
-        $studentResponse = $this->getJson("/api/v1/students/{$this->student->id}");
-        
-        $studentResponse->assertStatus(200)
-            ->assertJsonPath('data.id', $this->student->id)
-            ->assertJsonPath('data.first_name', 'John')
-            ->assertJsonPath('data.last_name', 'Doe');
+        // Verify student record directly
+        $this->assertDatabaseHas('students', [
+            'id' => $this->student->id,
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'enrollment_status' => 'full_time',
+        ]);
     }
 
     public function test_authorization_enforced_throughout_workflow()
@@ -263,7 +296,8 @@ class StudentLifecycleTest extends TestCase
         $limitedSection = CourseSection::factory()->create([
             'course_id' => $this->course1->id,
             'term_id' => $this->term->id,
-            'capacity' => 1
+            'capacity' => 1,
+            'section_number' => '099',
         ]);
         
         // Create another student

@@ -303,9 +303,15 @@ export default function LoginPage() {
                   </Button>
                 </form>
 
-                <div className="mt-6 pt-4 border-t">
-                  <p className="text-sm text-muted-foreground text-center">
+                <div className="mt-6 pt-4 border-t text-center space-y-2">
+                  <p className="text-sm text-muted-foreground">
                     Demo credentials available in the Demo Login tab
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Don&apos;t have an account?{" "}
+                    <a href="/auth/register" className="text-primary hover:underline font-medium">
+                      Register
+                    </a>
                   </p>
                 </div>
               </CardContent>

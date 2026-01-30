@@ -119,6 +119,31 @@ export function TranscriptsTab() {
     alert('PDF export would be implemented with a server-side PDF generator')
   }
 
+  const handleDownloadVerification = async () => {
+    if (!student) return
+    const token = sessionStorage.getItem('auth_token')
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/students/${student.id}/enrollment-verification`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/pdf',
+        },
+      }
+    )
+    if (!res.ok) {
+      alert('Failed to generate enrollment verification letter')
+      return
+    }
+    const blob = await res.blob()
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `enrollment-verification-${student.id}.pdf`
+    a.click()
+    window.URL.revokeObjectURL(url)
+  }
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -237,6 +262,10 @@ export function TranscriptsTab() {
           <Button onClick={handleExportPdf}>
             <Download className="h-4 w-4 mr-2" />
             Download PDF
+          </Button>
+          <Button variant="outline" onClick={handleDownloadVerification}>
+            <FileText className="h-4 w-4 mr-2" />
+            Enrollment Verification
           </Button>
         </div>
       </div>

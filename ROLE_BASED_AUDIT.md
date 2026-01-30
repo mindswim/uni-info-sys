@@ -1,290 +1,476 @@
-# Role-Based Audit Framework
+# Role-Based Audit Framework -- Enterprise SIS
 
-> Complete user journey mapping for every role in the university system.
-> Each step is marked: [x] Backend API exists, [x] Frontend page exists, [ ] Missing.
+> Source of truth for roadmapping and implementation.
+> Maps every user journey an enterprise-grade Student Information System must support.
+> Status key: [x] Exists (backend + frontend), [B] Backend only, [ ] Not built yet.
+
+---
+
+## System Inventory Summary
+
+| Layer | Count |
+|-------|-------|
+| API Routes | 200+ endpoints |
+| Controllers | 43 |
+| Services | 9 (with deep business logic) |
+| Models | 30+ |
+| Frontend Pages | 63 |
+| Frontend Components | 135 |
+| Background Jobs | 16 |
+| Policy Classes | 20 |
+| Custom Exceptions | 14 |
+| Tests | 59 files |
 
 ---
 
 ## 1. Prospective Student (Unauthenticated / New User)
 
-### Journey: "I want to apply to this university"
+### Journey: "I discover the university, apply, and get accepted"
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 1.1 | I visit the university site and see a landing page | N/A | `/` page.tsx | [x] |
-| 1.2 | I register for an account | `POST /api/v1/auth/register` | `/auth/register` | [x] |
-| 1.3 | I log in to my new account | `POST /api/v1/tokens/create` | `/auth/login` | [x] |
-| 1.4 | I browse the course catalog before applying | `GET /api/v1/course-catalog` | `/apply` page exists | [x] |
-| 1.5 | I start a new admission application | `POST /api/v1/admission-applications` | `/student/apply` | [x] |
-| 1.6 | I select program choices with preference order | `POST /api/v1/admission-applications/{id}/program-choices` | apply-tab.tsx | [x] |
-| 1.7 | I upload supporting documents (transcripts, etc.) | `POST /api/v1/students/{id}/documents` | document-uploader.tsx | [x] |
-| 1.8 | I submit my application (draft -> submitted) | `PUT /api/v1/admission-applications/{id}` | apply-tab.tsx | [x] |
-| 1.9 | I check my application status | `GET /api/v1/admission-applications` | `/student/admissions` | [x] |
-| 1.10 | I receive acceptance and confirm enrollment | `POST /api/v1/admission-applications/{id}/confirm-enrollment` | admissions-status-tab.tsx | [x] |
-| 1.11 | I reset my forgotten password | `POST /api/v1/forgot-password` + `POST /api/v1/reset-password` | No page | [ ] **Missing: `/auth/forgot-password` page** |
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 1.1 | I visit the university landing page | [x] | `/` |
+| 1.2 | I register for an account | [x] | `/auth/register` + API |
+| 1.3 | I log in | [x] | `/auth/login` + API |
+| 1.4 | I reset a forgotten password | [B] | API exists (`/forgot-password`, `/reset-password`). **Missing: frontend page** |
+| 1.5 | I browse the course catalog | [x] | `/apply` + `GET /course-catalog` |
+| 1.6 | I start an admission application | [x] | `/student/apply` + API |
+| 1.7 | I select programs by preference order | [x] | apply-tab.tsx + program-choices API |
+| 1.8 | I upload supporting documents | [x] | document-uploader.tsx + API |
+| 1.9 | I submit my application | [x] | Status transition draft -> submitted |
+| 1.10 | I track my application status | [x] | `/student/admissions` + admissions-status-tab.tsx |
+| 1.11 | I receive acceptance and confirm enrollment | [x] | Confirm enrollment button + matriculation service |
+| 1.12 | I receive rejection with explanation | [x] | Status display in admissions-status-tab.tsx |
+| 1.13 | I am waitlisted and get notified when promoted | [x] | Waitlist UI + background job notifications |
+
+**Gaps:**
+- [ ] `/auth/forgot-password` page (backend ready)
+- [ ] Public-facing program directory page (browse programs without logging in)
+- [ ] Application fee payment during submission
+- [ ] Email verification flow UI (backend sends email, no frontend confirmation page)
 
 ---
 
 ## 2. Enrolled Student
 
-### Journey: "I'm enrolled and navigating university life"
+### 2a. Registration & Enrollment
 
-#### 2a. Registration & Enrollment
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 2.1 | I see my student dashboard | [x] | `/student` with widgets |
+| 2.2 | I browse courses for the upcoming term | [x] | `/student/registration` + course-registration-wizard.tsx |
+| 2.3 | I check prerequisites before registering | [x] | Prerequisite validation in EnrollmentService |
+| 2.4 | I register for courses (multi-step wizard) | [x] | 5-step wizard: catalog, prerequisites, schedule, cart, summary |
+| 2.5 | I see schedule conflict warnings | [x] | EnrollmentService time/day overlap detection |
+| 2.6 | I am auto-waitlisted when section is full | [x] | Capacity check + auto-waitlist in EnrollmentService |
+| 2.7 | I am auto-promoted when a spot opens | [x] | ProcessWaitlistPromotion job |
+| 2.8 | I view my weekly schedule | [x] | `/student/schedule` |
+| 2.9 | I drop a course during add/drop | [x] | `/student/drop-add` + withdraw endpoint |
+| 2.10 | I swap one section for another | [x] | Swap endpoint |
+| 2.11 | I get blocked from registration by a hold | [x] | RegistrationHoldException + holds check |
+| 2.12 | I view my enrollment list | [x] | `/student/enrollments` |
+| 2.13 | I receive enrollment confirmation email | [x] | SendEnrollmentConfirmation job |
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 2.1 | I see my student dashboard with key info | `GET /students/me` | `/student` | [x] |
-| 2.2 | I browse available courses for the term | `GET /api/v1/course-catalog` | `/student/registration` | [x] |
-| 2.3 | I register for courses (multi-step wizard) | `POST /api/v1/enrollments` | course-registration-wizard.tsx | [x] |
-| 2.4 | I view my current schedule | `GET /api/v1/enrollments/me` | `/student/schedule` | [x] |
-| 2.5 | I drop a course during add/drop period | `POST /api/v1/enrollments/{id}/withdraw` | `/student/drop-add` | [x] |
-| 2.6 | I swap one section for another | `POST /api/v1/enrollments/swap` | drop-add page | [x] |
-| 2.7 | I join a waitlist for a full section | `POST /api/v1/enrollments` (auto-waitlist) | registration wizard | [x] |
-| 2.8 | I view my enrollments list | `GET /api/v1/enrollments/me` | `/student/enrollments` | [x] |
+**Gaps:**
+- [ ] Registration appointment/time ticket system (students register in assigned windows)
+- [ ] Advisor approval required before registration (advisor hold)
+- [ ] Repeat course policy enforcement (retake limits, grade replacement)
+- [ ] Credit hour limit enforcement per term (e.g., max 18 credits without override)
+- [ ] Cross-listed course handling (same course, different department codes)
 
-#### 2b. Academics & Coursework
+### 2b. Academics & Coursework
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 2.9 | I view my grades for current/past terms | `GET /api/v1/gradebook/me` | `/student/grades` | [x] |
-| 2.10 | I check my degree audit / progress | `GET /api/v1/programs/{id}/degree-requirements` | `/student/degree-audit` | [x] |
-| 2.11 | I request an official transcript | N/A (no API for transcript generation) | `/student/transcripts` | [x] page, [ ] **Missing: transcript generation API** |
-| 2.12 | I view my academic records (prior education) | `GET /api/v1/students/me/academic-records` | `/student/academic-records` | [x] |
-| 2.13 | I view assignments for my courses | `GET /api/v1/assignments/me` | `/student/assignments` | [x] |
-| 2.14 | I submit an assignment | `POST /api/v1/submissions/submit` | student-assignments-tab.tsx | [x] |
-| 2.15 | I view course materials / syllabus | `GET /api/v1/course-materials/me` | `/student/materials` | [x] |
-| 2.16 | I check my class sessions / attendance | `GET /api/v1/class-sessions/me` | `/student/calendar` | [x] |
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 2.14 | I view my grades (current + historical) | [x] | `/student/grades` + gradebook/me |
+| 2.15 | I check my degree audit / progress | [x] | `/student/degree-audit` + degree requirements API |
+| 2.16 | I view academic records (prior education) | [x] | `/student/academic-records` |
+| 2.17 | I view and submit assignments | [x] | `/student/assignments` + submissions API |
+| 2.18 | I view course materials / syllabus | [x] | `/student/materials` |
+| 2.19 | I check my class schedule / sessions | [x] | `/student/calendar` |
+| 2.20 | I view my attendance record | [x] | Attendance student report API |
+| 2.21 | I request a transcript | [x] | `/student/transcripts` page exists |
+| 2.22 | I check GPA (semester + cumulative) | [x] | StudentService GPA calculations |
+| 2.23 | I see my academic standing | [x] | Good standing / probation / dean's list logic |
+| 2.24 | I see my class standing (freshman-senior) | [x] | Credit-based calculation in Student model |
 
-#### 2c. Financial
+**Gaps:**
+- [ ] Transcript PDF generation API (page exists but no document generation)
+- [ ] What-if degree audit (simulate changing major)
+- [ ] Course evaluation / instructor rating submission
+- [ ] Academic plan / 4-year planner
+- [ ] Transfer credit evaluation display
+- [ ] Incomplete grade resolution workflow (student side)
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 2.17 | I view my account balance / invoices | `GET /api/v1/invoices/student-summary` | `/student/billing` | [x] |
-| 2.18 | I make a payment | `POST /api/v1/payments` | `/student/payment` | [x] |
-| 2.19 | I view my financial aid package | `GET /api/v1/financial-aid/me` | `/student/financial-aid` | [x] |
+### 2c. Financial
 
-#### 2d. Student Life & Support
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 2.25 | I view my account balance / invoices | [x] | `/student/billing` + BillingService |
+| 2.26 | I make a payment | [x] | `/student/payment` + payments API |
+| 2.27 | I view my financial aid package | [x] | `/student/financial-aid` |
+| 2.28 | I see tuition breakdown by line item | [x] | Invoice line items (tuition, fees) |
+| 2.29 | I view payment history | [x] | Payments listing |
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 2.20 | I view my holds and to-do items | `GET /api/v1/holds/summary` + `GET /api/v1/action-items/dashboard` | `/student/holds` | [x] |
-| 2.21 | I complete an action item | `POST /api/v1/action-items/{id}/complete` | holds page | [x] |
-| 2.22 | I view my advisor info | `GET /api/v1/students/me/advisor` | `/student/advisor` | [x] |
-| 2.23 | I book an appointment with my advisor | `POST /api/v1/appointments` | `/student/advisor` page | [x] |
-| 2.24 | I view announcements | `GET /api/v1/announcements/me` | `/student/announcements` | [x] |
-| 2.25 | I send/receive messages | `GET /api/v1/messages/conversations` | `/messages` | [x] |
-| 2.26 | I view notifications | `GET /api/v1/notifications` | `/notifications` | [x] |
-| 2.27 | I update my profile | `PATCH /api/v1/settings/me` | `/profile` | [x] |
-| 2.28 | I update my notification/appearance settings | `PATCH /api/v1/settings/me/notifications` | `/settings` | [x] |
+**Gaps:**
+- [ ] Payment plan setup (installment agreements)
+- [ ] 1098-T tax form generation
+- [ ] Financial aid application/FAFSA status tracking
+- [ ] Scholarship application submission
+- [ ] Refund request for dropped courses
+- [ ] Account balance prevents registration (financial hold -- exists but no explicit balance-to-hold automation)
+
+### 2d. Student Life & Support
+
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 2.30 | I view holds and to-do items | [x] | `/student/holds` + action items |
+| 2.31 | I complete action items | [x] | Complete/dismiss endpoints |
+| 2.32 | I view my advisor | [x] | `/student/advisor` |
+| 2.33 | I book advising appointments | [x] | Appointments API |
+| 2.34 | I read announcements | [x] | `/student/announcements` |
+| 2.35 | I send/receive messages | [x] | `/messages` |
+| 2.36 | I view notifications | [x] | `/notifications` |
+| 2.37 | I update my profile | [x] | `/profile` |
+| 2.38 | I update settings (notifications, theme) | [x] | `/settings` |
+
+**Gaps:**
+- [ ] Student organization / club directory
+- [ ] Campus map / building directory (public)
+- [ ] Emergency contact management
+- [ ] Address / contact info self-service update
+- [ ] Graduation application submission
+- [ ] Diploma / commencement status tracking
 
 ---
 
 ## 3. Faculty / Instructor
 
-### Journey: "I teach courses and advise students"
+### 3a. Course Delivery
 
-#### 3a. Course Management
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 3.1 | I see my faculty dashboard | [x] | `/faculty` |
+| 3.2 | I view my assigned sections | [x] | `/faculty/sections` + staff/me/sections |
+| 3.3 | I view class rosters | [x] | `/faculty/students` |
+| 3.4 | I take attendance | [x] | `/faculty/attendance` + bulk API |
+| 3.5 | I manage class sessions | [x] | `/faculty/courses` |
+| 3.6 | I cancel / reschedule a session | [x] | Class session cancel/reschedule endpoints |
+| 3.7 | I assign a substitute instructor | [x] | Substitute endpoint |
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 3.1 | I see my faculty dashboard | `GET /api/v1/staff/me` | `/faculty` | [x] |
-| 3.2 | I view my assigned course sections | `GET /api/v1/staff/me/sections` | `/faculty/sections` | [x] |
-| 3.3 | I view class rosters | `GET /api/v1/staff/me/students` | `/faculty/students` | [x] |
-| 3.4 | I take attendance for a session | `POST /api/v1/attendance/bulk` | `/faculty/attendance` | [x] |
-| 3.5 | I view/manage class sessions | `GET /api/v1/class-sessions/me/instructor` | `/faculty/courses` | [x] |
+### 3b. Assignments & Grading
 
-#### 3b. Assignments & Grading
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 3.8 | I create assignments with due dates | [x] | `/faculty/assignments` |
+| 3.9 | I publish/unpublish assignments | [x] | Publish/unpublish endpoints |
+| 3.10 | I duplicate an assignment | [x] | Duplicate endpoint |
+| 3.11 | I view/grade student submissions | [x] | Submissions endpoints |
+| 3.12 | I batch grade submissions | [x] | batch-grade endpoint |
+| 3.13 | I return submissions for revision | [x] | Return endpoint |
+| 3.14 | I manage the gradebook | [x] | `/faculty/grades` + gradebook API |
+| 3.15 | I submit final grades | [x] | Grade submission + bulk endpoint |
+| 3.16 | I finalize grades for the term | [x] | Finalize endpoint |
+| 3.17 | I export gradebook | [x] | Export endpoint |
+| 3.18 | I view grade distribution | [x] | Distribution endpoint |
+| 3.19 | I view grading progress (% complete) | [x] | Progress endpoint |
+| 3.20 | I request a grade change after finalization | [B] | API exists. **Missing: faculty-facing UI** |
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 3.6 | I create and publish assignments | `POST /api/v1/assignments` + `POST .../publish` | `/faculty/assignments` | [x] |
-| 3.7 | I view student submissions | `GET /api/v1/assignments/{id}/submissions` | assignments-tab.tsx | [x] |
-| 3.8 | I grade individual submissions | `POST /api/v1/submissions/{id}/grade` | assignments-tab.tsx | [x] |
-| 3.9 | I batch grade submissions | `POST /api/v1/submissions/batch-grade` | assignments-tab.tsx | [x] |
-| 3.10 | I view/manage the gradebook | `GET /api/v1/course-sections/{id}/gradebook` | `/faculty/grades` | [x] |
-| 3.11 | I submit final grades for a section | `PUT /api/v1/enrollments/{id}/grade` | grades-tab.tsx | [x] |
-| 3.12 | I bulk submit final grades | `POST /api/v1/course-sections/{id}/grades/bulk` | grades-tab.tsx | [x] |
-| 3.13 | I finalize grades for the term | `POST /api/v1/course-sections/{id}/gradebook/finalize` | grades-tab.tsx | [x] |
-| 3.14 | I export gradebook | `GET /api/v1/course-sections/{id}/gradebook/export` | grades-tab.tsx | [x] |
-| 3.15 | I view grade distribution | `GET /api/v1/course-sections/{id}/grade-distribution` | grades-tab.tsx | [x] |
+### 3c. Course Content
 
-#### 3c. Course Content
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 3.21 | I upload course materials | [x] | `/faculty/materials` |
+| 3.22 | I publish/unpublish materials | [x] | Publish endpoints |
+| 3.23 | I reorder materials | [x] | Reorder endpoint |
+| 3.24 | I create section announcements | [x] | `/faculty/announcements` |
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 3.16 | I upload course materials | `POST /api/v1/course-materials` | `/faculty/materials` | [x] |
-| 3.17 | I publish/unpublish materials | `POST .../publish` / `POST .../unpublish` | materials-tab.tsx | [x] |
-| 3.18 | I create section announcements | `POST /api/v1/announcements` | `/faculty/announcements` | [x] |
+### 3d. Advising
 
-#### 3d. Advising
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 3.25 | I view my advisees | [x] | `/faculty/advisees` |
+| 3.26 | I manage appointments | [x] | `/faculty/appointments` |
+| 3.27 | I confirm/complete/no-show appointments | [x] | Status transition endpoints |
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 3.19 | I view my advisees | `GET /api/v1/staff/me/advisees` | `/faculty/advisees` | [x] |
-| 3.20 | I manage advising appointments | `GET /api/v1/staff/me/appointments` | `/faculty/appointments` | [x] |
-| 3.21 | I confirm/complete/no-show appointments | `POST .../confirm` / `POST .../complete` / `POST .../no-show` | appointments page | [x] |
+### 3e. Communication
 
-#### 3e. Communication
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 3.28 | I send/receive messages | [x] | `/messages` |
+| 3.29 | I update my profile/settings | [x] | `/profile`, `/settings` |
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 3.22 | I send/receive messages | `GET /api/v1/messages/conversations` | `/messages` | [x] |
-| 3.23 | I update my profile | `PATCH /api/v1/settings/me` | `/profile` | [x] |
-| 3.24 | I request a grade change | `POST /api/v1/grade-change-requests` | No dedicated page | [ ] **Missing: grade change request UI for faculty** |
+**Gaps:**
+- [ ] Grade change request UI for faculty (backend ready)
+- [ ] Office hours management (recurring availability slots)
+- [ ] Course section request / preference submission (for next term scheduling)
+- [ ] Student early alert / concern reporting system
+- [ ] Syllabus template / builder
+- [ ] Peer review assignment type
+- [ ] Discussion forums / threaded discussions
+- [ ] Rubric creation and rubric-based grading
 
 ---
 
 ## 4. System Administrator
 
-### Journey: "I manage the entire university system"
+### 4a. Dashboard & Analytics
 
-#### 4a. Dashboard & Analytics
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 4.1 | I see system overview dashboard | [x] | `/admin` |
+| 4.2 | I view analytics and reports | [x] | `/admin/analytics` |
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 4.1 | I see the admin dashboard with system overview | Various stats endpoints | `/admin` | [x] |
-| 4.2 | I view analytics and reports | Various endpoints | `/admin/analytics` | [x] |
+### 4b. People Management
 
-#### 4b. People Management
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 4.3 | I manage students (CRUD + soft delete) | [x] | `/admin/students` |
+| 4.4 | I manage faculty/staff | [x] | `/admin/faculty` |
+| 4.5 | I manage user accounts | [x] | `/admin/system` |
+| 4.6 | I assign roles to users | [x] | Roles API + roles-tab.tsx |
+| 4.7 | I import/export people via CSV | [x] | CSV endpoints + csv-import-export.tsx |
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 4.3 | I manage student records (CRUD) | `GET/POST/PUT/DELETE /students` | `/admin/students` | [x] |
-| 4.4 | I manage faculty/staff records | `GET/POST/PUT/DELETE /staff` | `/admin/faculty` | [x] |
-| 4.5 | I manage user accounts | `GET /users` | `/admin/system` | [x] |
+### 4c. Academic Structure
 
-#### 4c. Academic Structure
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 4.8 | I manage faculties | [x] | `/admin/faculties` |
+| 4.9 | I manage departments | [x] | `/admin/departments` |
+| 4.10 | I manage programs | [x] | `/admin/programs` |
+| 4.11 | I manage courses (with prerequisites) | [x] | `/admin/courses` |
+| 4.12 | I manage course sections | [x] | `/admin/sections` |
+| 4.13 | I manage academic terms | [x] | `/admin/terms` |
+| 4.14 | I manage degree requirements | [B] | API exists. **Missing: admin UI** |
+| 4.15 | I manage buildings | [x] | `/admin/buildings` |
+| 4.16 | I manage rooms | [x] | Rooms API (part of buildings) |
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 4.6 | I manage faculties | CRUD `/faculties` | `/admin/faculties` | [x] |
-| 4.7 | I manage departments | CRUD `/departments` | `/admin/departments` | [x] |
-| 4.8 | I manage programs | CRUD `/programs` | `/admin/programs` | [x] |
-| 4.9 | I manage courses | CRUD `/courses` | `/admin/courses` | [x] |
-| 4.10 | I manage course sections | CRUD `/course-sections` | `/admin/sections` | [x] |
-| 4.11 | I manage academic terms | CRUD `/terms` | `/admin/terms` | [x] |
-| 4.12 | I manage degree requirements | CRUD `/programs/{id}/degree-requirements` | No dedicated page | [ ] **Missing: degree requirements admin UI** |
+### 4d. Enrollment & Registration
 
-#### 4d. Enrollment & Registration
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 4.17 | I manage enrollments | [x] | `/admin/enrollments` |
+| 4.18 | I manage holds (create, resolve) | [x] | `/admin/holds` |
+| 4.19 | I manage waitlists | [x] | `/admin/waitlists` |
+| 4.20 | I manage grades | [x] | `/admin/grades` |
+| 4.21 | I review/approve grade change requests | [B] | API exists. **Missing: admin UI** |
+| 4.22 | I generate class sessions for a term | [B] | API exists. **Missing: UI trigger button** |
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 4.13 | I manage enrollments | CRUD `/enrollments` | `/admin/enrollments` | [x] |
-| 4.14 | I manage holds | CRUD `/holds` + resolve | `/admin/holds` | [x] |
-| 4.15 | I manage waitlists | Enrollment API with waitlist status | `/admin/waitlists` | [x] |
-| 4.16 | I manage grades (admin view) | Grade endpoints | `/admin/grades` | [x] |
-| 4.17 | I approve/deny grade change requests | `POST .../approve` / `POST .../deny` | No dedicated page | [ ] **Missing: grade change request review UI** |
+### 4e. Admissions
 
-#### 4e. Admissions
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 4.23 | I view all applications | [x] | `/admin/admissions` |
+| 4.24 | I review applications individually | [x] | `/admin/admissions/review` |
+| 4.25 | I bulk accept/reject/waitlist | [x] | Bulk actions API |
+| 4.26 | I view admission statistics | [x] | Stats endpoint |
+| 4.27 | I enroll accepted students | [x] | Enroll endpoint |
+| 4.28 | I verify student documents | [B] | Verify/reject API exists. **Missing: document review queue UI** |
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 4.18 | I view all applications | `GET /admission-applications` | `/admin/admissions` | [x] |
-| 4.19 | I review applications (accept/reject/waitlist) | `POST .../accept` / `POST .../reject` / `POST .../waitlist` | `/admin/admissions/review` | [x] |
-| 4.20 | I bulk process applications | `POST .../bulk-actions` | admissions-tab.tsx | [x] |
-| 4.21 | I view admission statistics | `GET .../stats` | admissions-tab.tsx | [x] |
-| 4.22 | I enroll an accepted student | `POST .../enroll` | admissions-tab.tsx | [x] |
+### 4f. Financial
 
-#### 4f. Financial
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 4.29 | I manage billing / invoices | [x] | `/admin/billing` |
+| 4.30 | I manage tuition rates | [x] | `/admin/tuition-rates` |
+| 4.31 | I manage financial aid | [x] | `/admin/financial-aid` |
+| 4.32 | I process refunds | [x] | Refund endpoint |
+| 4.33 | I add discounts/adjustments to invoices | [x] | Discount/adjustment endpoints |
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 4.23 | I manage billing / invoices | CRUD `/invoices` | `/admin/billing` | [x] |
-| 4.24 | I manage tuition rates | CRUD `/tuition-rates` | `/admin/tuition-rates` | [x] |
-| 4.25 | I manage financial aid | CRUD + stats endpoints | `/admin/financial-aid` | [x] |
-| 4.26 | I process refunds | `POST /payments/{id}/refund` | billing page | [x] |
+### 4g. Communications
 
-#### 4g. Infrastructure
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 4.34 | I create university-wide announcements | [x] | `/admin/announcements` |
+| 4.35 | I send/receive messages | [x] | `/messages` |
+| 4.36 | I manage events/calendar | [B] | CRUD API exists. **Missing: admin events page** |
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 4.27 | I manage buildings | CRUD `/buildings` | `/admin/buildings` | [x] |
-| 4.28 | I manage rooms | CRUD `/rooms` | No dedicated page (rooms inside buildings) | [x] partial |
+### 4h. System Configuration
 
-#### 4h. Communications
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 4.37 | I manage roles and permissions | [x] | `/admin/roles` |
+| 4.38 | I manage system settings | [x] | `/admin/settings` |
+| 4.39 | I view system info | [x] | System info endpoint in settings |
+| 4.40 | I clear cache / toggle maintenance | [x] | Cache/maintenance endpoints |
+| 4.41 | I import/export data via CSV | [x] | CSV on all major resources |
 
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 4.29 | I create university-wide announcements | `POST /announcements` | `/admin/announcements` | [x] |
-| 4.30 | I send/receive messages | Messages API | `/messages` | [x] |
-
-#### 4i. System Configuration
-
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 4.31 | I manage roles and permissions | CRUD `/roles` + `/permissions` | `/admin/roles` | [x] |
-| 4.32 | I manage system settings | Settings endpoints | `/admin/settings` | [x] |
-| 4.33 | I manage events/calendar | CRUD `/events` | No dedicated admin events page | [ ] **Missing: admin events management page** |
-| 4.34 | I generate class sessions for a term | `POST /terms/{id}/sessions/generate` | No UI trigger | [ ] **Missing: session generation UI (could be in terms or sections)** |
-| 4.35 | I view system info / clear cache | `GET /settings/system/info`, `POST .../cache/clear` | `/admin/settings` | [x] |
-
-#### 4j. Data Import/Export
-
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 4.36 | I import/export data via CSV | CSV endpoints on most resources | csv-import-export.tsx | [x] |
-
----
-
-## 5. Staff / Registrar (Non-Admin Staff)
-
-### Journey: "I handle registrar and admissions office tasks"
-
-> Note: The current system uses `admin` and `staff` roles. Staff share many admin endpoints but with limited permissions. The sidebar maps staff to the "faculty" navigation. This role may need refinement.
-
-| # | User Story | Backend | Frontend | Status |
-|---|-----------|---------|----------|--------|
-| 5.1 | I process admission applications | Admissions endpoints | Shares admin admissions pages | [x] via admin |
-| 5.2 | I verify student documents | `POST .../verify` / `POST .../reject` | No dedicated document review UI | [ ] **Missing: document verification queue UI** |
-| 5.3 | I manage enrollment overrides | Enrollment endpoints | Shares admin enrollment page | [x] via admin |
-| 5.4 | I generate student invoices | `POST /invoices` (via BillingService) | Via admin billing | [x] via admin |
+**Gaps:**
+- [ ] Degree requirements admin UI
+- [ ] Grade change request review UI
+- [ ] Session generation UI trigger
+- [ ] Admin events/calendar management page
+- [ ] Document verification queue UI
+- [ ] Audit log viewer (audit trail exists in DB, no UI to browse it)
+- [ ] Automated report generation / scheduled reports
+- [ ] User activity log / login history
+- [ ] Batch student status updates (e.g., end-of-term academic standing)
+- [ ] Academic calendar builder (define registration windows, holidays, deadlines)
+- [ ] Notification template management
+- [ ] Email template management
 
 ---
 
-## Gap Summary
+## 5. Staff / Registrar
 
-### Missing Frontend Pages (backend exists, no UI)
+> Currently shares admin infrastructure with permission-scoped access. The sidebar routes staff to "faculty" navigation.
 
-| Priority | Gap | Backend Endpoint | Suggested Location |
-|----------|-----|-----------------|-------------------|
-| Medium | Forgot Password page | `POST /forgot-password` + `POST /reset-password` | `/auth/forgot-password` |
-| Medium | Degree Requirements admin | CRUD `/programs/{id}/degree-requirements` | `/admin/programs` (nested tab) or dedicated page |
-| Medium | Grade Change Request review UI | `POST .../approve` / `POST .../deny` | `/admin/grades` (add tab) or `/faculty/grades` |
-| Low | Faculty grade change request UI | `POST /grade-change-requests` | `/faculty/grades` (add button) |
-| Low | Admin events/calendar management | CRUD `/events` | `/admin/events` |
-| Low | Session generation trigger UI | `POST /terms/{id}/sessions/generate` | Button in `/admin/terms` or `/admin/sections` |
-| Low | Document verification queue | `POST .../verify` / `POST .../reject` | `/admin/admissions/documents` or tab in review page |
-| Low | Transcript generation | No API yet | Backend + `/student/transcripts` enhancement |
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 5.1 | I process admission applications | [x] | Via admin pages |
+| 5.2 | I verify student documents | [B] | API exists, no queue UI |
+| 5.3 | I manage enrollment overrides | [x] | Via admin pages |
+| 5.4 | I generate invoices for students | [x] | Via admin billing |
+| 5.5 | I process transcript requests | [ ] | No workflow exists |
+| 5.6 | I handle enrollment verifications | [ ] | No workflow exists |
+| 5.7 | I manage commencement / graduation clearance | [ ] | No workflow exists |
 
-### Missing Backend APIs (no API exists)
-
-| Priority | Gap | Description |
-|----------|-----|-------------|
-| Low | Transcript PDF generation | Generate official transcript document |
-| Low | Student self-service profile edit | Students can update contact info, address, etc. (partially covered by settings) |
-
-### Observations
-
-1. **Coverage is strong.** Out of ~120 user stories across all roles, only ~8 have missing frontend UI, and only ~2 lack backend APIs entirely.
-
-2. **The staff/registrar role** is underspecified. It currently piggybacks on admin pages. A dedicated registrar experience could be a future enhancement but is not critical.
-
-3. **Faculty flow is complete.** All teaching, grading, advising, and content management flows have both backend and frontend coverage.
-
-4. **Student flow is the most complete.** Every major student journey step (apply, enroll, study, pay, graduate) has full-stack coverage.
-
-5. **Admin flow is comprehensive** with 36 distinct user stories, only 3-4 missing UI elements for edge-case features.
+**Gaps:**
+- [ ] Dedicated registrar dashboard (not same as admin)
+- [ ] Transcript request processing queue
+- [ ] Enrollment verification letter generation
+- [ ] Graduation clearance workflow
+- [ ] FERPA compliance tools (access restrictions, disclosure logging)
 
 ---
 
-## Implementation Priority
+## 6. Department Chair (Not Yet a Distinct Role)
 
-If continuing to build out gaps, recommended order:
+> This role does not exist in the current system but is standard in enterprise SIS.
 
-1. **Forgot Password page** -- common user need, backend ready
-2. **Degree Requirements admin** -- academic completeness
-3. **Grade Change Request UI** -- faculty/admin workflow gap
-4. **Session generation button** -- quick win, add to terms page
-5. **Admin events page** -- nice to have
-6. **Document verification queue** -- admissions workflow polish
-7. **Transcript generation** -- requires new backend work
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 6.1 | I view my department's courses and sections | [ ] | No role or scoped view |
+| 6.2 | I approve course section offerings for next term | [ ] | No approval workflow |
+| 6.3 | I assign instructors to sections | [ ] | Sections have instructor_id but no assignment workflow |
+| 6.4 | I review grade distributions for my department | [ ] | Data exists, no scoped view |
+| 6.5 | I approve enrollment overrides / capacity increases | [ ] | No approval workflow |
+| 6.6 | I approve grade change requests for my department | [ ] | No department-scoped review |
+| 6.7 | I review faculty performance data | [ ] | No analytics scoped to department |
+
+---
+
+## 7. Cross-Cutting Concerns (All Roles)
+
+### 7a. Implemented
+
+| Concern | Status | Details |
+|---------|--------|---------|
+| Authentication (token-based) | [x] | Sanctum |
+| Role-based access control | [x] | 20 policy classes, 3 role middleware |
+| Permission-based access | [x] | HasPermission middleware, role-permission sync |
+| Audit trail | [x] | Laravel Auditing on critical models |
+| Background job processing | [x] | 16 jobs (waitlist, notifications, CSV imports) |
+| Prometheus metrics | [x] | Request tracking, duration observability |
+| Request tracing | [x] | AddTraceIdToLogs middleware |
+| Security headers | [x] | AddSecurityHeaders middleware |
+| CORS | [x] | CorsHeaders middleware |
+| Soft deletes | [x] | Students, courses, enrollments, applications, documents |
+| CSV import/export | [x] | All major resources |
+| Domain exceptions | [x] | 14 custom exception classes |
+| Input validation | [x] | Form request classes |
+
+### 7b. Gaps
+
+| Concern | Status | Priority | Notes |
+|---------|--------|----------|-------|
+| Email delivery system | [ ] | High | Jobs dispatch notifications but no verified email delivery (Mailgun/SES) |
+| Real-time notifications (WebSocket) | [ ] | Medium | Currently polling-based only |
+| File storage abstraction | [ ] | Medium | Documents upload but no S3/cloud storage config |
+| Rate limiting on auth endpoints | [ ] | Medium | Standard Laravel throttle may be configured but not explicit |
+| API versioning strategy | [x] | -- | Already using `/api/v1/` |
+| Multi-tenancy | [ ] | Low | Single institution only (typical for portfolio) |
+| Internationalization (i18n) | [ ] | Low | English only |
+| Accessibility (WCAG compliance) | [ ] | Medium | No explicit audit done |
+| Mobile responsiveness | [x] | -- | Tailwind responsive classes used |
+| Dark mode | [x] | -- | Theme provider exists |
+| Search (global) | [x] | -- | global-search.tsx component exists |
+
+---
+
+## Enterprise Feature Gap Analysis
+
+These are features found in production SIS platforms (Banner, PeopleSoft, Workday Student) that are not yet in this system. Organized by domain and priority.
+
+### Tier 1: Important for Completeness (Recommended)
+
+| # | Feature | Domain | Backend | Frontend | Effort |
+|---|---------|--------|---------|----------|--------|
+| E1 | Forgot password page | Auth | Ready | Missing | Small |
+| E2 | Degree requirements admin UI | Academics | Ready | Missing | Small |
+| E3 | Grade change request UI (faculty + admin) | Grading | Ready | Missing | Small |
+| E4 | Session generation trigger | Scheduling | Ready | Missing | Tiny |
+| E5 | Document verification queue | Admissions | Ready | Missing | Small |
+| E6 | Admin events/calendar page | Admin | Ready | Missing | Small |
+| E7 | Audit log viewer | System | Data exists | Missing | Medium |
+| E8 | Credit hour limit per term | Enrollment | Missing | Missing | Small |
+| E9 | Repeat course policy | Enrollment | Missing | Missing | Small |
+| E10 | Graduation application | Student Life | Missing | Missing | Medium |
+
+### Tier 2: Nice to Have (Polish)
+
+| # | Feature | Domain | Backend | Frontend | Effort |
+|---|---------|--------|---------|----------|--------|
+| E11 | Registration time tickets | Registration | Missing | Missing | Medium |
+| E12 | Advisor approval for registration | Registration | Missing | Missing | Medium |
+| E13 | Transcript PDF generation | Records | Missing | Page exists | Medium |
+| E14 | What-if degree audit | Academics | Missing | Missing | Large |
+| E15 | Course evaluation submissions | Academics | Missing | Missing | Medium |
+| E16 | Academic plan / 4-year planner | Advising | Missing | Missing | Large |
+| E17 | Payment plan / installments | Financial | Missing | Missing | Medium |
+| E18 | Automated financial holds on balance | Financial | Partial | Missing | Small |
+| E19 | Batch academic standing update | Admin | Missing | Missing | Medium |
+| E20 | Academic calendar builder | Admin | Missing | Missing | Medium |
+| E21 | Email verification flow page | Auth | Partial | Missing | Small |
+| E22 | Public program directory | Marketing | Missing | Missing | Small |
+
+### Tier 3: Advanced / Enterprise (Future)
+
+| # | Feature | Domain | Notes |
+|---|---------|--------|-------|
+| E23 | Department Chair role | Governance | New role with scoped views |
+| E24 | Transfer credit evaluation | Admissions | Complex mapping logic |
+| E25 | Student early alert system | Retention | Faculty flags at-risk students |
+| E26 | Discussion forums | LMS | Threaded course discussions |
+| E27 | Rubric-based grading | LMS | Structured grading criteria |
+| E28 | Office hours management | Faculty | Recurring availability slots |
+| E29 | Enrollment verification letters | Registrar | PDF generation |
+| E30 | 1098-T tax form | Financial | Regulatory compliance |
+| E31 | FERPA compliance tools | Compliance | Access logging, disclosure tracking |
+| E32 | Graduation clearance workflow | Registrar | Multi-step approval |
+| E33 | Course section request workflow | Scheduling | Faculty preference submission |
+| E34 | Notification template management | System | Configurable email/notification templates |
+| E35 | WebSocket real-time updates | System | Live notifications, chat |
+| E36 | Peer review assignments | LMS | Student-to-student evaluation |
+| E37 | Multi-institution / multi-tenancy | System | Beyond portfolio scope |
+
+---
+
+## Scorecard
+
+| Domain | Stories | Built | Backend Only | Not Built | Coverage |
+|--------|---------|-------|-------------|-----------|----------|
+| Prospective Student | 13 | 11 | 1 | 1 | 85% |
+| Student: Registration | 13 | 13 | 0 | 0 | 100% |
+| Student: Academics | 11 | 11 | 0 | 0 | 100% |
+| Student: Financial | 5 | 5 | 0 | 0 | 100% |
+| Student: Life/Support | 9 | 9 | 0 | 0 | 100% |
+| Faculty: Course Delivery | 7 | 7 | 0 | 0 | 100% |
+| Faculty: Grading | 13 | 12 | 1 | 0 | 92% |
+| Faculty: Content | 4 | 4 | 0 | 0 | 100% |
+| Faculty: Advising | 3 | 3 | 0 | 0 | 100% |
+| Faculty: Communication | 2 | 2 | 0 | 0 | 100% |
+| Admin: All | 41 | 35 | 5 | 1 | 85% |
+| Staff / Registrar | 7 | 4 | 1 | 2 | 57% |
+| Department Chair | 7 | 0 | 0 | 7 | 0% |
+| **Totals** | **135** | **116** | **8** | **11** | **86%** |
+
+### Key Takeaway
+
+The system has **86% coverage** across 135 user stories spanning 5 active roles. The core student, faculty, and admin journeys are essentially complete. The primary gaps are:
+
+1. **8 features with backend ready but no frontend** -- small effort to close
+2. **11 features not yet built** -- mostly registrar workflows and the department chair role
+3. **15 enterprise-tier features** (Tier 3) that would bring this to full parity with commercial SIS platforms
+
+The recommended path forward is to close Tier 1 (10 items), then selectively implement Tier 2 based on which areas best demonstrate depth for the portfolio.

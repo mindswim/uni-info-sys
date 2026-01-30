@@ -10,10 +10,11 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use Tests\Traits\CreatesUsersWithRoles;
 
 class AdmissionApplicationApiTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesUsersWithRoles;
 
     protected User $adminUser;
     protected User $staffUser;
@@ -29,11 +30,12 @@ class AdmissionApplicationApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seedPermissions();
 
         // Create roles
-        $this->adminRole = Role::create(['name' => 'admin', 'display_name' => 'Administrator']);
-        $this->staffRole = Role::create(['name' => 'staff', 'display_name' => 'Staff']);
-        $this->studentRole = Role::create(['name' => 'student', 'display_name' => 'Student']);
+        $this->adminRole = Role::where('name', 'admin')->first();
+        $this->staffRole = Role::where('name', 'staff')->first();
+        $this->studentRole = Role::where('name', 'student')->first();
 
         // Create users
         $this->adminUser = User::factory()->create();
@@ -62,7 +64,7 @@ class AdmissionApplicationApiTest extends TestCase
         $response = $this->getJson('/api/v1/admission-applications');
 
         $response->assertStatus(401)
-                 ->assertJson(['detail' => 'Unauthenticated.']);
+                 ->assertJson(['detail' => 'Authentication is required to access this resource.']);
     }
 
     /** @test */

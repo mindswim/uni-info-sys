@@ -16,7 +16,7 @@ class AuthenticationTest extends TestCase
         $response = $this->getJson('/api/v1/faculties');
         $response->assertStatus(401) // Unauthorized
             ->assertJson([
-                'detail' => 'Unauthenticated.'
+                'detail' => 'Authentication is required to access this resource.'
             ])
             ->assertJsonStructure(['type', 'title', 'status', 'detail']);
     }
@@ -83,7 +83,7 @@ class AuthenticationTest extends TestCase
 
         $response->assertStatus(401) // Unauthorized
             ->assertJson([
-                'detail' => 'Unauthenticated.'
+                'detail' => 'Authentication is required to access this resource.'
             ])
             ->assertJsonStructure(['type', 'title', 'status', 'detail']);
     }

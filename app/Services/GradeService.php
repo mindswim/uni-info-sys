@@ -76,7 +76,9 @@ class GradeService
 
             // Verify instructor authorization
             $courseSection = $enrollment->courseSection;
-            if ($courseSection->instructor_id !== $submittedByUserId && !$this->isAdmin($submittedByUserId)) {
+            $instructor = $courseSection->instructor;
+            $isInstructor = $instructor && $instructor->user_id === $submittedByUserId;
+            if (!$isInstructor && !$this->isAdmin($submittedByUserId)) {
                 throw new UnauthorizedGradeSubmissionException("User {$submittedByUserId} is not authorized to grade this course section");
             }
 
@@ -124,7 +126,9 @@ class GradeService
         $failed = [];
 
         // Verify authorization once for the whole batch
-        if ($courseSection->instructor_id !== $submittedByUserId && !$this->isAdmin($submittedByUserId)) {
+        $instructor = $courseSection->instructor;
+        $isInstructor = $instructor && $instructor->user_id === $submittedByUserId;
+        if (!$isInstructor && !$this->isAdmin($submittedByUserId)) {
             throw new UnauthorizedGradeSubmissionException("User {$submittedByUserId} is not authorized to grade this course section");
         }
 
@@ -376,11 +380,8 @@ class GradeService
 
         $gpa = $totalCredits > 0 ? round($totalPoints / $totalCredits, 2) : 0.0;
 
-        // Update student's GPA in academic record
-        $student->academicRecords()->updateOrCreate(
-            ['term_id' => $this->getCurrentTerm()->id],
-            ['gpa' => $gpa]
-        );
+        // Update student's cumulative GPA
+        $student->update(['gpa' => $gpa]);
 
         Log::debug('Student GPA recalculated', [
             'student_id' => $student->id,

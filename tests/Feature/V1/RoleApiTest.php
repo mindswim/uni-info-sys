@@ -78,24 +78,13 @@ class RoleApiTest extends TestCase
                 ->assertJsonCount(3, 'data'); // admin, staff, student roles
     }
 
-    public function test_staff_can_view_roles_index()
+    public function test_staff_cannot_view_roles_index()
     {
         Sanctum::actingAs($this->staffUser);
-        
+
         $response = $this->getJson('/api/v1/roles');
-        
-        $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        '*' => [
-                            'id',
-                            'name',
-                            'description',
-                            'created_at',
-                            'updated_at'
-                        ]
-                    ]
-                ]);
+
+        $response->assertStatus(403);
     }
 
     public function test_student_cannot_view_roles_index()
@@ -132,19 +121,13 @@ class RoleApiTest extends TestCase
                 ]);
     }
 
-    public function test_staff_can_view_specific_role()
+    public function test_staff_cannot_view_specific_role()
     {
         Sanctum::actingAs($this->staffUser);
-        
+
         $response = $this->getJson("/api/v1/roles/{$this->staffRole->id}");
-        
-        $response->assertStatus(200)
-                ->assertJson([
-                    'data' => [
-                        'id' => $this->staffRole->id,
-                        'name' => 'staff'
-                    ]
-                ]);
+
+        $response->assertStatus(403);
     }
 
     public function test_student_cannot_view_specific_role()

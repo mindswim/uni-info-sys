@@ -28,7 +28,7 @@ class NotificationTest extends TestCase
         
         $this->user = User::factory()->create();
         $this->student = Student::factory()->create(['user_id' => $this->user->id]);
-        $this->application = AdmissionApplication::factory()->create(['student_id' => $this->student->id]);
+        $this->application = AdmissionApplication::factory()->create(['student_id' => $this->student->id, 'status' => 'submitted']);
         $this->admissionService = new AdmissionService();
     }
 
@@ -149,14 +149,14 @@ class NotificationTest extends TestCase
         $response = $this->getJson('/api/v1/notifications');
         $response->assertStatus(401)
             ->assertJson([
-                'detail' => 'Unauthenticated.'
+                'detail' => 'Authentication is required to access this resource.'
             ]);
 
         // Test marking notification as read without authentication
         $response = $this->postJson('/api/v1/notifications/fake-id/read');
         $response->assertStatus(401)
             ->assertJson([
-                'detail' => 'Unauthenticated.'
+                'detail' => 'Authentication is required to access this resource.'
             ]);
     }
 
@@ -164,7 +164,8 @@ class NotificationTest extends TestCase
     {
         // Update application status
         $this->admissionService->updateApplicationStatus($this->application, 'rejected');
-        
+
+        $this->user->refresh();
         $notification = $this->user->unreadNotifications->first();
         $this->assertNotNull($notification);
         

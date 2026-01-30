@@ -13,10 +13,11 @@ class Enrollment extends Model implements Auditable
     use SoftDeletes;
     use \OwenIt\Auditing\Auditable;
 
-    protected $fillable = ['student_id', 'course_section_id', 'status', 'grade', 'enrollment_date'];
+    protected $fillable = ['student_id', 'course_section_id', 'status', 'grade', 'enrollment_date', 'completion_date'];
 
     protected $casts = [
         'enrollment_date' => 'datetime',
+        'completion_date' => 'date',
     ];
 
     /**

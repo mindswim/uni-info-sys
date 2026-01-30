@@ -106,10 +106,10 @@ class CourseController extends Controller
         $course = Course::create($validated);
 
         if (isset($validated['prerequisites'])) {
-            $course->prerequisites()->sync($validated['prerequisites']);
+            $course->prerequisiteCourses()->sync($validated['prerequisites']);
         }
         
-        $course->load(['department', 'prerequisites']);
+        $course->load(['department', 'prerequisiteCourses']);
 
         // Clear courses cache (all and department-specific)
         Cache::forget('courses.all');
@@ -146,7 +146,7 @@ class CourseController extends Controller
     {
         $this->authorize('view', $course);
         
-        $course->load(['department', 'prerequisites']);
+        $course->load(['department', 'prerequisiteCourses']);
         
         return new CourseResource($course);
     }
@@ -189,10 +189,10 @@ class CourseController extends Controller
         $course->update($validated);
 
         if (isset($validated['prerequisites'])) {
-            $course->prerequisites()->sync($validated['prerequisites']);
+            $course->prerequisiteCourses()->sync($validated['prerequisites']);
         }
         
-        $course->load(['department', 'prerequisites']);
+        $course->load(['department', 'prerequisiteCourses']);
 
         // Clear courses cache
         Cache::forget('courses.all');
@@ -362,7 +362,7 @@ class CourseController extends Controller
     {
         $query = Course::with([
             'department',
-            'prerequisites',
+            'prerequisiteCourses',
             'courseSections' => function ($query) use ($request) {
                 $query->where('status', 'active')
                     ->with(['term', 'instructor.user', 'room.building']);

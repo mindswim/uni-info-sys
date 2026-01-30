@@ -255,7 +255,7 @@ class ProcessCourseImport implements ShouldQueue
         }
 
         // Sync prerequisites (this replaces all existing prerequisites)
-        $course->prerequisites()->sync($prerequisites->pluck('id')->toArray());
+        $course->prerequisiteCourses()->sync($prerequisites->pluck('id')->toArray());
     }
 
     /**

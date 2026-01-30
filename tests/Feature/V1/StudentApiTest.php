@@ -5,6 +5,7 @@ namespace Tests\Feature\Api\V1;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+use Tests\Traits\CreatesUsersWithRoles;
 use App\Models\User;
 use App\Models\Student;
 use App\Models\Role;
@@ -12,7 +13,7 @@ use Laravel\Sanctum\Sanctum;
 
 class StudentApiTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use RefreshDatabase, WithFaker, CreatesUsersWithRoles;
 
     private $adminUser, $staffUser, $studentUser1, $studentUser2;
     private $student1, $student2;
@@ -20,13 +21,12 @@ class StudentApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
-        // Create Roles
-        $adminRole = Role::create(['name' => 'admin']);
-        $staffRole = Role::create(['name' => 'staff']);
-        $studentRole = Role::create(['name' => 'student']);
+        $this->seedPermissions();
 
-        // Create Users
+        $adminRole = Role::where('name', 'admin')->first();
+        $staffRole = Role::where('name', 'staff')->first();
+        $studentRole = Role::where('name', 'student')->first();
+
         $this->adminUser = User::factory()->create();
         $this->adminUser->roles()->attach($adminRole);
 

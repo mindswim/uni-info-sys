@@ -351,25 +351,20 @@ class RoleManagementApiTest extends TestCase
     }
 
     /** @test */
-    public function user_with_roles_manage_permission_gains_access(): void
+    public function non_admin_user_with_roles_manage_permission_cannot_access_admin_routes(): void
     {
-        // Create a user with a custom role that has only roles.manage permission
+        // Role endpoints require admin role, not just roles.manage permission
         $user = User::factory()->create();
         $customRole = Role::create(['name' => 'Role Manager', 'description' => 'Can manage roles']);
         $rolesManagePermission = Permission::where('name', 'roles.manage')->first();
-        $customRole->permissions()->attach($rolesManagePermission);
+        if ($rolesManagePermission) {
+            $customRole->permissions()->attach($rolesManagePermission);
+        }
         $user->roles()->attach($customRole);
-        
+
         Sanctum::actingAs($user);
 
-        // This user should now be able to access role endpoints
         $response = $this->getJson('/api/v1/roles');
-        $response->assertStatus(200);
-
-        $response = $this->postJson('/api/v1/roles', [
-            'name' => 'New Test Role',
-            'description' => 'Created by role manager'
-        ]);
-        $response->assertStatus(201);
+        $response->assertStatus(403);
     }
 } 

@@ -17,10 +17,11 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use Tests\Traits\CreatesUsersWithRoles;
 
 class EnrollmentApiTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesUsersWithRoles;
 
     private Student $student;
     private CourseSection $courseSection;
@@ -31,14 +32,12 @@ class EnrollmentApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create test data
         $this->createTestData();
-        
+
         // Authenticate as an admin user for API tests
-        $user = User::factory()->create();
-        $adminRole = Role::factory()->create(['name' => 'admin']);
-        $user->roles()->attach($adminRole);
+        $user = $this->createAdminUser();
         Sanctum::actingAs($user);
     }
 

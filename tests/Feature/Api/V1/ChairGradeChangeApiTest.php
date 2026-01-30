@@ -79,15 +79,12 @@ class ChairGradeChangeApiTest extends TestCase
 
     public function test_chair_can_approve_grade_change(): void
     {
-        // Grade approval triggers GradeService->submitGrade which calls recalculateStudentGPA.
-        // The recalculation queries academic_records.term_id which doesn't exist in the schema.
-        // This is a pre-existing schema mismatch. Test that the endpoint is reachable and scoped.
         Sanctum::actingAs($this->chairUser);
 
         $response = $this->postJson("/api/v1/department-chair/grade-change-requests/{$this->gradeChange->id}/approve");
 
-        // 500 due to schema mismatch in GPA recalculation (academic_records.term_id missing)
-        $response->assertStatus(500);
+        $response->assertStatus(200);
+        $this->assertEquals('approved', $this->gradeChange->fresh()->status);
     }
 
     public function test_chair_can_deny_grade_change(): void

@@ -12,10 +12,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use OwenIt\Auditing\Models\Audit;
 use Tests\TestCase;
+use Tests\Traits\CreatesUsersWithRoles;
 
 class AuditingTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesUsersWithRoles;
 
     /** @test */
     public function test_student_model_auditing_on_creation()
@@ -212,9 +213,7 @@ class AuditingTest extends TestCase
     public function test_grade_change_audit_trail_with_reason()
     {
         // Create authenticated admin user
-        $user = User::factory()->create();
-        $adminRole = Role::factory()->create(['name' => 'admin']);
-        $user->roles()->attach($adminRole);
+        $user = $this->createAdminUser();
         Sanctum::actingAs($user);
 
         // Create necessary related models
@@ -267,9 +266,7 @@ class AuditingTest extends TestCase
     public function test_status_change_audit_trail()
     {
         // Create authenticated admin user
-        $user = User::factory()->create();
-        $adminRole = Role::factory()->create(['name' => 'admin']);
-        $user->roles()->attach($adminRole);
+        $user = $this->createAdminUser();
         Sanctum::actingAs($user);
 
         // Create necessary related models
@@ -316,9 +313,7 @@ class AuditingTest extends TestCase
     public function test_reason_for_change_required_when_updating_grade()
     {
         // Create authenticated admin user
-        $user = User::factory()->create();
-        $adminRole = Role::factory()->create(['name' => 'admin']);
-        $user->roles()->attach($adminRole);
+        $user = $this->createAdminUser();
         Sanctum::actingAs($user);
 
         // Create necessary related models
@@ -348,9 +343,7 @@ class AuditingTest extends TestCase
     public function test_reason_for_change_not_required_when_not_updating_grade()
     {
         // Create authenticated admin user
-        $user = User::factory()->create();
-        $adminRole = Role::factory()->create(['name' => 'admin']);
-        $user->roles()->attach($adminRole);
+        $user = $this->createAdminUser();
         Sanctum::actingAs($user);
 
         // Create necessary related models

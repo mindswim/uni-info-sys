@@ -16,10 +16,11 @@ use App\Services\EnrollmentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
+use Tests\Traits\CreatesUsersWithRoles;
 
 class ErrorHandlingTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesUsersWithRoles;
 
     private User $adminUser;
     private User $studentUser;
@@ -29,17 +30,9 @@ class ErrorHandlingTest extends TestCase
     {
         parent::setUp();
 
-        // Create admin user with proper role
-        $this->adminUser = User::factory()->create();
-        $adminRole = Role::factory()->create(['name' => 'admin']);
-        $this->adminUser->roles()->attach($adminRole);
-
-        // Create student user
-        $this->studentUser = User::factory()->create(['email_verified_at' => now()]);
-        $studentRole = Role::factory()->create(['name' => 'student']);
-        $this->studentUser->roles()->attach($studentRole);
-        
-        $this->student = Student::factory()->create(['user_id' => $this->studentUser->id]);
+        $this->adminUser = $this->createAdminUser();
+        $this->studentUser = $this->createStudentUser();
+        $this->student = $this->studentUser->student;
     }
 
     /** @test */
@@ -240,7 +233,7 @@ class ErrorHandlingTest extends TestCase
                 'type' => 'https://tools.ietf.org/html/rfc7235#section-3.1',
                 'title' => 'Unauthenticated',
                 'status' => 401,
-                'detail' => 'Unauthenticated.',
+                'detail' => 'Authentication is required to access this resource.',
             ])
             ->assertJsonStructure([
                 'type',

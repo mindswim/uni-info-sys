@@ -3,8 +3,10 @@
 namespace Tests\Unit\Services;
 
 use Tests\TestCase;
+use Tests\Traits\CreatesUsersWithRoles;
 use App\Services\GradeService;
 use App\Models\User;
+use App\Models\Role;
 use App\Models\Student;
 use App\Models\Staff;
 use App\Models\Course;
@@ -20,7 +22,7 @@ use Carbon\Carbon;
 
 class GradeServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesUsersWithRoles;
 
     protected GradeService $gradeService;
     protected User $instructorUser;
@@ -45,19 +47,23 @@ class GradeServiceTest extends TestCase
             'grade_deadline' => now()->addWeeks(2),
         ]);
 
+        $this->seedPermissions();
+
         // Create instructor
         $this->instructorUser = User::factory()->create();
         $this->instructor = Staff::factory()->create([
             'user_id' => $this->instructorUser->id,
         ]);
-        $this->instructorUser->assignRole('faculty');
+        $facultyRole = Role::firstOrCreate(['name' => 'faculty']);
+        $this->instructorUser->roles()->attach($facultyRole);
 
         // Create student
         $this->studentUser = User::factory()->create();
         $this->student = Student::factory()->create([
             'user_id' => $this->studentUser->id,
         ]);
-        $this->studentUser->assignRole('student');
+        $studentRole = Role::where('name', 'student')->first();
+        $this->studentUser->roles()->attach($studentRole);
 
         // Create course and section
         $course = Course::factory()->create([
@@ -112,8 +118,9 @@ class GradeServiceTest extends TestCase
         $validGrades = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F'];
 
         foreach ($validGrades as $grade) {
+            $student = Student::factory()->create(['user_id' => User::factory()->create()->id]);
             $enrollment = Enrollment::factory()->create([
-                'student_id' => $this->student->id,
+                'student_id' => $student->id,
                 'course_section_id' => $this->courseSection->id,
                 'status' => 'enrolled',
             ]);
@@ -134,8 +141,9 @@ class GradeServiceTest extends TestCase
         $specialGrades = ['P', 'NP', 'W', 'I'];
 
         foreach ($specialGrades as $grade) {
+            $student = Student::factory()->create(['user_id' => User::factory()->create()->id]);
             $enrollment = Enrollment::factory()->create([
-                'student_id' => $this->student->id,
+                'student_id' => $student->id,
                 'course_section_id' => $this->courseSection->id,
                 'status' => 'enrolled',
             ]);
@@ -154,7 +162,7 @@ class GradeServiceTest extends TestCase
     public function it_prevents_unauthorized_users_from_submitting_grades()
     {
         $unauthorizedUser = User::factory()->create();
-        $unauthorizedUser->assignRole('student');
+        $unauthorizedUser->roles()->attach(Role::where('name', 'student')->first());
 
         $this->expectException(UnauthorizedGradeSubmissionException::class);
 
@@ -168,8 +176,7 @@ class GradeServiceTest extends TestCase
     /** @test */
     public function admin_can_submit_grades_for_any_section()
     {
-        $adminUser = User::factory()->create();
-        $adminUser->assignRole('admin');
+        $adminUser = $this->createAdminUser();
 
         $result = $this->gradeService->submitGrade(
             $this->enrollment,
@@ -185,11 +192,13 @@ class GradeServiceTest extends TestCase
     {
         // Set grade deadline in the past
         $this->term->update(['grade_deadline' => now()->subWeeks(1)]);
+        // Reload enrollment fresh so its courseSection->term reflects the updated deadline
+        $enrollment = Enrollment::find($this->enrollment->id);
 
         $this->expectException(GradingDeadlinePassedException::class);
 
         $this->gradeService->submitGrade(
-            $this->enrollment,
+            $enrollment,
             'A',
             $this->instructorUser->id
         );
@@ -201,8 +210,7 @@ class GradeServiceTest extends TestCase
         // Set grade deadline in the past
         $this->term->update(['grade_deadline' => now()->subWeeks(1)]);
 
-        $adminUser = User::factory()->create();
-        $adminUser->assignRole('admin');
+        $adminUser = $this->createAdminUser();
 
         $result = $this->gradeService->submitGrade(
             $this->enrollment,
@@ -216,12 +224,15 @@ class GradeServiceTest extends TestCase
     /** @test */
     public function it_can_submit_bulk_grades()
     {
-        // Create multiple enrollments
-        $enrollments = Enrollment::factory()->count(5)->create([
-            'student_id' => Student::factory()->create(['user_id' => User::factory()->create()->id]),
-            'course_section_id' => $this->courseSection->id,
-            'status' => 'enrolled',
-        ]);
+        // Create multiple enrollments with distinct students
+        $enrollments = collect();
+        for ($i = 0; $i < 5; $i++) {
+            $enrollments->push(Enrollment::factory()->create([
+                'student_id' => Student::factory()->create(['user_id' => User::factory()->create()->id])->id,
+                'course_section_id' => $this->courseSection->id,
+                'status' => 'enrolled',
+            ]));
+        }
 
         $grades = [
             $enrollments[0]->id => 'A',
@@ -252,15 +263,17 @@ class GradeServiceTest extends TestCase
     public function bulk_submission_continues_on_error_and_reports_failures()
     {
         $enrollment1 = Enrollment::factory()->create([
-            'student_id' => $this->student->id,
+            'student_id' => Student::factory()->create(['user_id' => User::factory()->create()->id])->id,
             'course_section_id' => $this->courseSection->id,
             'status' => 'enrolled',
+            'grade' => null,
         ]);
 
         $enrollment2 = Enrollment::factory()->create([
             'student_id' => Student::factory()->create(['user_id' => User::factory()->create()->id]),
             'course_section_id' => $this->courseSection->id,
             'status' => 'enrolled',
+            'grade' => null,
         ]);
 
         $grades = [
@@ -305,12 +318,20 @@ class GradeServiceTest extends TestCase
     /** @test */
     public function it_tracks_grading_progress()
     {
+        // Use a fresh course section to avoid setUp enrollment interference
+        $freshSection = CourseSection::factory()->create([
+            'course_id' => Course::factory()->create(['credits' => 3])->id,
+            'term_id' => $this->term->id,
+            'instructor_id' => $this->instructor->id,
+        ]);
+
         // Create 10 enrollments, grade 6 of them
         for ($i = 0; $i < 10; $i++) {
             $enrollment = Enrollment::factory()->create([
                 'student_id' => Student::factory()->create(['user_id' => User::factory()->create()->id]),
-                'course_section_id' => $this->courseSection->id,
+                'course_section_id' => $freshSection->id,
                 'status' => 'enrolled',
+                'grade' => null,
             ]);
 
             if ($i < 6) {
@@ -318,7 +339,7 @@ class GradeServiceTest extends TestCase
             }
         }
 
-        $progress = $this->gradeService->getGradingProgress($this->courseSection);
+        $progress = $this->gradeService->getGradingProgress($freshSection);
 
         $this->assertEquals(10, $progress['total']);
         $this->assertEquals(6, $progress['graded']);
@@ -330,16 +351,23 @@ class GradeServiceTest extends TestCase
     /** @test */
     public function grading_progress_shows_complete_when_all_graded()
     {
+        $freshSection = CourseSection::factory()->create([
+            'course_id' => Course::factory()->create(['credits' => 3])->id,
+            'term_id' => $this->term->id,
+            'instructor_id' => $this->instructor->id,
+        ]);
+
         for ($i = 0; $i < 5; $i++) {
             $enrollment = Enrollment::factory()->create([
                 'student_id' => Student::factory()->create(['user_id' => User::factory()->create()->id]),
-                'course_section_id' => $this->courseSection->id,
+                'course_section_id' => $freshSection->id,
                 'status' => 'enrolled',
+                'grade' => null,
             ]);
             $this->gradeService->submitGrade($enrollment, 'A', $this->instructorUser->id);
         }
 
-        $progress = $this->gradeService->getGradingProgress($this->courseSection);
+        $progress = $this->gradeService->getGradingProgress($freshSection);
 
         $this->assertTrue($progress['is_complete']);
         $this->assertEquals(100, $progress['percentage']);
@@ -394,8 +422,7 @@ class GradeServiceTest extends TestCase
         );
 
         // Approve the change
-        $adminUser = User::factory()->create();
-        $adminUser->assignRole('admin');
+        $adminUser = $this->createAdminUser();
 
         $result = $this->gradeService->approveGradeChange($changeRequest, $adminUser->id);
 
@@ -419,8 +446,7 @@ class GradeServiceTest extends TestCase
         );
 
         // Deny the change
-        $adminUser = User::factory()->create();
-        $adminUser->assignRole('admin');
+        $adminUser = $this->createAdminUser();
 
         $result = $this->gradeService->denyGradeChange(
             $changeRequest,

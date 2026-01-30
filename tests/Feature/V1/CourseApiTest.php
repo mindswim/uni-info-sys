@@ -9,24 +9,19 @@ use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+use Tests\Traits\CreatesUsersWithRoles;
 
 class CourseApiTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use RefreshDatabase, WithFaker, CreatesUsersWithRoles;
 
     private $admin;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
-        // Create admin role
-        $adminRole = Role::firstOrCreate(['name' => 'admin'], ['description' => 'Administrator']);
-        
-        $this->admin = User::factory()->create();
-        
-        // Assign admin role
-        $this->admin->roles()->attach($adminRole);
+
+        $this->admin = $this->createAdminUser();
     }
 
     private function getCourseData(array $overrides = []): array
@@ -51,7 +46,7 @@ class CourseApiTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'title', 'course_code', 'credits', 'description', 'department', 'prerequisites']
+                    '*' => ['id', 'title', 'course_code', 'credits', 'description', 'department', 'prerequisite_courses']
                 ],
                 'links',
                 'meta',
@@ -88,7 +83,7 @@ class CourseApiTest extends TestCase
             ]);
         
         $this->assertDatabaseHas('courses', ['title' => $data['title']]);
-        $this->assertCount(0, $response->json('data.prerequisites'));
+        $this->assertCount(0, $response->json('data.prerequisite_courses'));
     }
 
     public function test_can_create_a_course_with_prerequisites()
@@ -105,7 +100,7 @@ class CourseApiTest extends TestCase
 
         $this->assertDatabaseHas('course_prerequisites', ['course_id' => $response->json('data.id'), 'prerequisite_id' => $prereq1->id]);
         $this->assertDatabaseHas('course_prerequisites', ['course_id' => $response->json('data.id'), 'prerequisite_id' => $prereq2->id]);
-        $this->assertCount(2, $response->json('data.prerequisites'));
+        $this->assertCount(2, $response->json('data.prerequisite_courses'));
     }
 
     public function test_create_course_validation_fails()
@@ -120,7 +115,7 @@ class CourseApiTest extends TestCase
     {
         $course = Course::factory()->create();
         $prereq = Course::factory()->create();
-        $course->prerequisites()->attach($prereq->id);
+        $course->prerequisiteCourses()->attach($prereq->id);
 
         $response = $this->actingAs($this->admin, 'sanctum')->getJson("/api/v1/courses/{$course->id}");
 
@@ -129,7 +124,7 @@ class CourseApiTest extends TestCase
                 'id' => $course->id,
                 'title' => $course->title,
             ])
-            ->assertJsonCount(1, 'data.prerequisites');
+            ->assertJsonCount(1, 'data.prerequisite_courses');
     }
 
     public function test_can_update_a_course()
@@ -152,13 +147,13 @@ class CourseApiTest extends TestCase
 
         $this->assertDatabaseHas('courses', ['id' => $course->id, 'title' => 'Updated Title']);
         $this->assertDatabaseHas('course_prerequisites', ['course_id' => $course->id, 'prerequisite_id' => $prereq->id]);
-        $this->assertCount(1, $response->json('data.prerequisites'));
+        $this->assertCount(1, $response->json('data.prerequisite_courses'));
     }
 
     public function test_update_can_remove_prerequisites()
     {
         $prereq = Course::factory()->create();
-        $course = Course::factory()->hasAttached($prereq, [], 'prerequisites')->create();
+        $course = Course::factory()->hasAttached($prereq, [], 'prerequisiteCourses')->create();
         
         $this->assertDatabaseHas('course_prerequisites', ['course_id' => $course->id, 'prerequisite_id' => $prereq->id]);
 
@@ -168,7 +163,7 @@ class CourseApiTest extends TestCase
 
         $response->assertStatus(200);
         $this->assertDatabaseMissing('course_prerequisites', ['course_id' => $course->id, 'prerequisite_id' => $prereq->id]);
-        $this->assertCount(0, $response->json('data.prerequisites'));
+        $this->assertCount(0, $response->json('data.prerequisite_courses'));
     }
 
     public function test_can_delete_a_course()

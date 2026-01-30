@@ -23,10 +23,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
+use Tests\Traits\CreatesUsersWithRoles;
 
 class StudentEnrollmentFlowTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesUsersWithRoles;
 
     private Role $studentRole;
     private Role $adminRole;
@@ -53,25 +54,10 @@ class StudentEnrollmentFlowTest extends TestCase
 
     private function setupRolesAndPermissions(): void
     {
-        // Create permissions
-        $permissions = [
-            Permission::factory()->create(['name' => 'manage-applications']),
-            Permission::factory()->create(['name' => 'approve-applications']),
-            Permission::factory()->create(['name' => 'view-own-data']),
-            Permission::factory()->create(['name' => 'submit-documents']),
-        ];
+        $this->seedPermissions();
 
-        // Create roles
-        $this->studentRole = Role::factory()->create(['name' => 'student']);
-        $this->adminRole = Role::factory()->create(['name' => 'admin']);
-
-        // Assign permissions
-        $this->studentRole->permissions()->attach([
-            $permissions[2]->id, // view-own-data
-            $permissions[3]->id, // submit-documents
-        ]);
-
-        $this->adminRole->permissions()->attach(array_map(fn($p) => $p->id, $permissions));
+        $this->studentRole = Role::where('name', 'student')->first();
+        $this->adminRole = Role::where('name', 'admin')->first();
     }
 
     private function setupAcademicStructure(): void

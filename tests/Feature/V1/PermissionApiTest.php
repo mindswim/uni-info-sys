@@ -80,24 +80,13 @@ class PermissionApiTest extends TestCase
                 ->assertJsonCount(3, 'data'); // view, create, edit permissions
     }
 
-    public function test_staff_can_view_permissions_index()
+    public function test_staff_cannot_view_permissions_index()
     {
         Sanctum::actingAs($this->staffUser);
-        
+
         $response = $this->getJson('/api/v1/permissions');
-        
-        $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        '*' => [
-                            'id',
-                            'name',
-                            'description',
-                            'created_at',
-                            'updated_at'
-                        ]
-                    ]
-                ]);
+
+        $response->assertStatus(403);
     }
 
     public function test_student_cannot_view_permissions_index()
@@ -134,19 +123,13 @@ class PermissionApiTest extends TestCase
                 ]);
     }
 
-    public function test_staff_can_view_specific_permission()
+    public function test_staff_cannot_view_specific_permission()
     {
         Sanctum::actingAs($this->staffUser);
-        
+
         $response = $this->getJson("/api/v1/permissions/{$this->viewPermission->id}");
-        
-        $response->assertStatus(200)
-                ->assertJson([
-                    'data' => [
-                        'id' => $this->viewPermission->id,
-                        'name' => 'permissions.view'
-                    ]
-                ]);
+
+        $response->assertStatus(403);
     }
 
     public function test_student_cannot_view_specific_permission()

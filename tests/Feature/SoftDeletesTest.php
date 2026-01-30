@@ -15,10 +15,11 @@ use App\Models\AdmissionApplication;
 use App\Models\Term;
 use Laravel\Sanctum\Sanctum;
 use App\Models\Role;
+use Tests\Traits\CreatesUsersWithRoles;
 
 class SoftDeletesTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use RefreshDatabase, WithFaker, CreatesUsersWithRoles;
 
     protected $adminUser;
     protected $studentUser;
@@ -29,20 +30,10 @@ class SoftDeletesTest extends TestCase
     {
         parent::setUp();
 
-        // Create roles
-        $adminRole = Role::create(['name' => 'admin']);
-        $studentRole = Role::create(['name' => 'student']);
+        $this->adminUser = $this->createAdminUser();
+        $this->studentUser = $this->createStudentUser();
+        $this->student = $this->studentUser->student;
 
-        // Create admin user
-        $this->adminUser = User::factory()->create();
-        $this->adminUser->roles()->attach($adminRole->id);
-
-        // Create student user and student record
-        $this->studentUser = User::factory()->create();
-        $this->studentUser->roles()->attach($studentRole->id);
-        $this->student = Student::factory()->create(['user_id' => $this->studentUser->id]);
-
-        // Create a term for admission applications
         $this->term = Term::factory()->create();
     }
 

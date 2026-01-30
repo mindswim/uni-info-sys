@@ -32,8 +32,6 @@ class ProcessCourseImportTest extends TestCase
     public function test_processes_valid_csv_data_successfully()
     {
         Storage::fake('local');
-        Log::shouldReceive('info')->zeroOrMoreTimes();
-        Log::shouldReceive('error')->zeroOrMoreTimes();
         
         // Create a user
         $user = User::factory()->create();
@@ -48,10 +46,10 @@ class ProcessCourseImportTest extends TestCase
         Storage::disk('local')->put($filePath, $csvContent);
         
         $job = new ProcessCourseImport($filePath, $user->id, 'test_import_123', 'test_courses.csv');
-        
+
         // Execute the job
         $job->handle();
-        
+
         // Assert courses were created
         $this->assertDatabaseHas('courses', ['course_code' => 'CS201', 'title' => 'Data Structures']);
         $this->assertDatabaseHas('courses', ['course_code' => 'CS301', 'title' => 'Algorithms']);
@@ -62,10 +60,10 @@ class ProcessCourseImportTest extends TestCase
         $cs301 = Course::where('course_code', 'CS301')->first();
         $math201 = Course::where('course_code', 'MATH201')->first();
         
-        $this->assertTrue($cs201->prerequisites->contains('course_code', 'CS101'));
-        $this->assertTrue($cs301->prerequisites->contains('course_code', 'CS101'));
-        $this->assertTrue($cs301->prerequisites->contains('course_code', 'CS201'));
-        $this->assertTrue($math201->prerequisites->contains('course_code', 'MATH101'));
+        $this->assertTrue($cs201->prerequisiteCourses->contains('course_code', 'CS101'));
+        $this->assertTrue($cs301->prerequisiteCourses->contains('course_code', 'CS101'));
+        $this->assertTrue($cs301->prerequisiteCourses->contains('course_code', 'CS201'));
+        $this->assertTrue($math201->prerequisiteCourses->contains('course_code', 'MATH101'));
     }
 
     public function test_handles_invalid_data_gracefully()
@@ -160,8 +158,8 @@ class ProcessCourseImportTest extends TestCase
         
         // Assert only existing prerequisites were added
         $course = Course::where('course_code', 'CS401')->first();
-        $this->assertFalse($course->prerequisites->contains('course_code', 'CS301')); // CS301 doesn't exist in our test data
-        $this->assertFalse($course->prerequisites->contains('course_code', 'CS999')); // CS999 doesn't exist
+        $this->assertFalse($course->prerequisiteCourses->contains('course_code', 'CS301')); // CS301 doesn't exist in our test data
+        $this->assertFalse($course->prerequisiteCourses->contains('course_code', 'CS999')); // CS999 doesn't exist
     }
 
     public function test_handles_empty_csv_file()

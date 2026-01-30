@@ -9,12 +9,13 @@ class Term extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'academic_year', 'semester', 'start_date', 'end_date', 'add_drop_deadline', 'is_current'];
+    protected $fillable = ['name', 'academic_year', 'semester', 'start_date', 'end_date', 'add_drop_deadline', 'grade_deadline', 'is_current'];
     
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
         'add_drop_deadline' => 'datetime',
+        'grade_deadline' => 'datetime',
     ];
 
     public function admissionApplications()

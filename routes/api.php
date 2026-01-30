@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\ActionItemController;
+use App\Http\Controllers\Api\V1\AuditController;
 use App\Http\Controllers\Api\V1\AnnouncementController;
 use App\Http\Controllers\Api\V1\AppointmentController;
 use App\Http\Controllers\Api\V1\AssignmentController;
@@ -263,6 +264,14 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
 
         // Admin dashboard endpoints
         Route::get('admin/dashboard/holds-summary', [HoldController::class, 'adminSummary']);
+
+        // Audit log
+        Route::get('audits', [AuditController::class, 'index']);
+
+        // Graduation applications (admin review)
+        Route::get('graduation-applications', [\App\Http\Controllers\Api\V1\GraduationApplicationController::class, 'index']);
+        Route::post('graduation-applications/{graduationApplication}/approve', [\App\Http\Controllers\Api\V1\GraduationApplicationController::class, 'approve']);
+        Route::post('graduation-applications/{graduationApplication}/deny', [\App\Http\Controllers\Api\V1\GraduationApplicationController::class, 'deny']);
     });
 
     // User management (for admin to list users without student records)
@@ -284,6 +293,11 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::middleware('role.student')->group(function () {
         Route::get('students/me', [\App\Http\Controllers\Api\V1\StudentController::class, 'me']);
         Route::get('students/me/academic-records', [\App\Http\Controllers\Api\V1\AcademicRecordController::class, 'myRecords']);
+
+        // Graduation applications (student)
+        Route::get('graduation-applications/me', [\App\Http\Controllers\Api\V1\GraduationApplicationController::class, 'myApplications']);
+        Route::post('graduation-applications', [\App\Http\Controllers\Api\V1\GraduationApplicationController::class, 'store']);
+        Route::get('graduation-applications/{graduationApplication}', [\App\Http\Controllers\Api\V1\GraduationApplicationController::class, 'show']);
     });
 
     // Student management with permission-based authorization

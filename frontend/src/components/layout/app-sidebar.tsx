@@ -48,7 +48,11 @@ import {
   Building2,
   Megaphone,
   FolderOpen,
-  PenTool
+  PenTool,
+  FileCheck,
+  CalendarDays,
+  History,
+  ScrollText
 } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/components/auth/auth-provider"
@@ -79,7 +83,8 @@ const navigationItems = {
       items: [
         { title: "Grades", url: "/student/grades", icon: Award },
         { title: "Degree Audit", url: "/student/degree-audit", icon: Target },
-        { title: "Transcripts", url: "/student/transcripts", icon: FileText }
+        { title: "Transcripts", url: "/student/transcripts", icon: FileText },
+        { title: "Graduation", url: "/student/graduation", icon: GraduationCap }
       ]
     },
     {
@@ -177,14 +182,16 @@ const navigationItems = {
         { title: "Registration", url: "/admin/enrollments", icon: ClipboardCheck },
         { title: "Holds Management", url: "/admin/holds", icon: AlertCircle },
         { title: "Waitlists", url: "/admin/waitlists", icon: Users },
-        { title: "Grades", url: "/admin/grades", icon: Award }
+        { title: "Grades", url: "/admin/grades", icon: Award },
+        { title: "Graduation", url: "/admin/graduation", icon: GraduationCap }
       ]
     },
     {
       title: "Admissions",
       items: [
         { title: "Applications", url: "/admin/admissions", icon: FileText },
-        { title: "Review Queue", url: "/admin/admissions/review", icon: ClipboardCheck }
+        { title: "Review Queue", url: "/admin/admissions/review", icon: ClipboardCheck },
+        { title: "Documents", url: "/admin/documents", icon: FileCheck }
       ]
     },
     {
@@ -207,13 +214,15 @@ const navigationItems = {
       title: "Communications",
       items: [
         { title: "Announcements", url: "/admin/announcements", icon: Megaphone },
-        { title: "Messages", url: "/messages", icon: MessageSquare }
+        { title: "Messages", url: "/messages", icon: MessageSquare },
+        { title: "Events", url: "/admin/events", icon: CalendarDays }
       ]
     },
     {
       title: "System",
       items: [
         { title: "Roles & Permissions", url: "/admin/roles", icon: Key },
+        { title: "Audit Log", url: "/admin/audits", icon: History },
         { title: "Settings", url: "/admin/settings", icon: Settings },
         { title: "Profile", url: "/profile", icon: User }
       ]

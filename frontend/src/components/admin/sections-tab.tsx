@@ -26,7 +26,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { StatCard } from "@/components/layouts"
-import { Calendar, Plus, Search, Loader2, Edit, Trash2, Users, BookOpen, Clock } from "lucide-react"
+import { Calendar, Plus, Search, Loader2, Edit, Trash2, Users, BookOpen, Clock, Play } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
@@ -132,6 +132,41 @@ export function CourseSectionsTab() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deletingSection, setDeletingSection] = useState<CourseSection | null>(null)
   const [deleting, setDeleting] = useState(false)
+
+  // Generate sessions state
+  const [generatingSessionsFor, setGeneratingSessionsFor] = useState<number | null>(null)
+
+  const handleGenerateSectionSessions = async (sectionId: number) => {
+    setGeneratingSessionsFor(sectionId)
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/course-sections/${sectionId}/sessions/generate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      })
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        throw new Error(error.message || 'Failed to generate sessions')
+      }
+      const result = await response.json()
+      toast({
+        title: "Sessions Generated",
+        description: result.message || "Class sessions generated for this section",
+      })
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : 'Failed to generate sessions',
+        variant: "destructive",
+      })
+    } finally {
+      setGeneratingSessionsFor(null)
+    }
+  }
 
   const fetchData = async () => {
     try {
@@ -552,6 +587,19 @@ export function CourseSectionsTab() {
                     </div>
                   </div>
                   <div className="flex gap-2 ml-4">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      title="Generate Sessions"
+                      disabled={generatingSessionsFor === section.id}
+                      onClick={() => handleGenerateSectionSessions(section.id)}
+                    >
+                      {generatingSessionsFor === section.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Play className="h-4 w-4" />
+                      )}
+                    </Button>
                     <Button
                       variant="outline"
                       size="icon"

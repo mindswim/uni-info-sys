@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Exceptions\CourseSectionUnavailableException;
+use App\Exceptions\CreditLimitExceededException;
 use App\Exceptions\DuplicateEnrollmentException;
 use App\Exceptions\EnrollmentCapacityExceededException;
 use App\Exceptions\RegistrationHoldException;
+use App\Exceptions\RepeatCourseException;
 use App\Exceptions\StudentNotActiveException;
 use App\Jobs\SendEnrollmentConfirmation;
 use App\Jobs\ProcessWaitlistPromotion;
@@ -46,11 +48,17 @@ class EnrollmentService
             // Check for duplicate enrollment
             $this->validateNoDuplicateEnrollment($studentId, $courseSectionId);
 
+            // Check repeat course policy
+            $this->checkRepeatCoursePolicy($studentId, $courseSectionId);
+
             // Check prerequisites
             $this->checkPrerequisites($studentId, $courseSectionId);
 
             // Check schedule conflicts
             $this->checkScheduleConflicts($studentId, $courseSectionId);
+
+            // Check credit hour limit
+            $this->checkCreditHourLimit($studentId, $courseSectionId);
 
             // Determine enrollment status based on capacity
             $status = $this->determineEnrollmentStatus($courseSectionId, $requestedStatus);
@@ -412,4 +420,82 @@ class EnrollmentService
              }
          }
      }
+
+    /**
+     * Check credit hour limit for the term
+     *
+     * @param int $studentId
+     * @param int $courseSectionId
+     * @throws CreditLimitExceededException
+     */
+    private function checkCreditHourLimit(int $studentId, int $courseSectionId): void
+    {
+        $courseSection = CourseSection::with('course')->find($courseSectionId);
+
+        if (!$courseSection || !$courseSection->course) {
+            return;
+        }
+
+        $attemptedCredits = $courseSection->course->credits ?? 0;
+        if ($attemptedCredits <= 0) {
+            return;
+        }
+
+        // Sum credits for enrolled + waitlisted enrollments in the same term
+        $currentCredits = Enrollment::where('student_id', $studentId)
+            ->whereIn('status', ['enrolled', 'waitlisted'])
+            ->whereHas('courseSection', function ($query) use ($courseSection) {
+                $query->where('term_id', $courseSection->term_id);
+            })
+            ->join('course_sections', 'enrollments.course_section_id', '=', 'course_sections.id')
+            ->join('courses', 'course_sections.course_id', '=', 'courses.id')
+            ->sum('courses.credits');
+
+        // Default max 18 credits per term; could be made configurable via system settings
+        $maxCredits = 18;
+
+        if (($currentCredits + $attemptedCredits) > $maxCredits) {
+            throw new CreditLimitExceededException(
+                (int) $currentCredits,
+                $attemptedCredits,
+                $maxCredits
+            );
+        }
+    }
+
+    /**
+     * Check repeat course policy - prevent re-enrollment if student already passed
+     *
+     * @param int $studentId
+     * @param int $courseSectionId
+     * @throws RepeatCourseException
+     */
+    private function checkRepeatCoursePolicy(int $studentId, int $courseSectionId): void
+    {
+        $courseSection = CourseSection::with('course')->find($courseSectionId);
+
+        if (!$courseSection || !$courseSection->course) {
+            return;
+        }
+
+        $courseId = $courseSection->course->id;
+        $failingGrades = ['F', 'W', 'D', 'D-'];
+
+        // Find completed enrollments for the same course
+        $completedEnrollment = Enrollment::where('student_id', $studentId)
+            ->where('status', 'completed')
+            ->whereNotNull('grade')
+            ->whereNotIn('grade', $failingGrades)
+            ->whereHas('courseSection', function ($query) use ($courseId) {
+                $query->where('course_id', $courseId);
+            })
+            ->first();
+
+        if ($completedEnrollment) {
+            throw new RepeatCourseException(
+                $courseSection->course->course_code,
+                $completedEnrollment->grade
+            );
+        }
+    }
 }  

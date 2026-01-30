@@ -11,7 +11,8 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
-import { Plus, Search, GraduationCap, BookOpen, Calendar, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Search, GraduationCap, BookOpen, Calendar, Pencil, Trash2, ClipboardList } from 'lucide-react'
+import Link from 'next/link'
 import { CsvImportExport } from '@/components/admin/csv-import-export'
 import { getAuthToken } from '@/lib/api-client'
 
@@ -481,6 +482,12 @@ export function ProgramsTab() {
                       )}
                     </div>
                     <div className="flex items-center gap-2 ml-4">
+                      <Link href={`/admin/degree-requirements?program=${program.id}`}>
+                        <Button variant="outline" size="sm">
+                          <ClipboardList className="h-4 w-4 mr-1" />
+                          Requirements
+                        </Button>
+                      </Link>
                       <Button
                         variant="outline"
                         size="sm"

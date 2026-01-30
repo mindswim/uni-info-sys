@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { StatCard } from "@/components/layouts"
-import { Calendar, Plus, Search, CalendarCheck, CalendarClock, Loader2, Edit, Trash2 } from "lucide-react"
+import { Calendar, Plus, Search, CalendarCheck, CalendarClock, Loader2, Edit, Trash2, Play } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
@@ -70,6 +70,12 @@ export function TermsTab() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deletingTerm, setDeletingTerm] = useState<Term | null>(null)
   const [deleting, setDeleting] = useState(false)
+
+  // Generate sessions dialog state
+  const [generateDialogOpen, setGenerateDialogOpen] = useState(false)
+  const [generatingTerm, setGeneratingTerm] = useState<Term | null>(null)
+  const [generating, setGenerating] = useState(false)
+  const [excludeDates, setExcludeDates] = useState('')
 
   const fetchTerms = async () => {
     try {
@@ -302,6 +308,59 @@ export function TermsTab() {
     }
   }
 
+  const handleGenerateSessions = async () => {
+    if (!generatingTerm) return
+
+    setGenerating(true)
+
+    try {
+      const token = sessionStorage.getItem('auth_token')
+
+      const body: Record<string, unknown> = {}
+      if (excludeDates.trim()) {
+        body.exclude_dates = excludeDates.split(',').map(d => d.trim())
+      }
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/terms/${generatingTerm.id}/sessions/generate`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify(body),
+        }
+      )
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to generate sessions')
+      }
+
+      const result = await response.json()
+
+      toast({
+        title: "Sessions Generated",
+        description: result.message || `Class sessions have been generated for ${generatingTerm.name}`,
+      })
+
+      setGenerateDialogOpen(false)
+      setGeneratingTerm(null)
+      setExcludeDates('')
+    } catch (error: any) {
+      console.error('Generate sessions error:', error)
+      toast({
+        title: "Generation Failed",
+        description: error.message || "Failed to generate sessions. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setGenerating(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -464,6 +523,17 @@ export function TermsTab() {
                       </div>
                     </div>
                     <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setGeneratingTerm(term)
+                          setGenerateDialogOpen(true)
+                        }}
+                      >
+                        <Play className="h-4 w-4 mr-2" />
+                        Generate Sessions
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
@@ -746,6 +816,51 @@ export function TermsTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Generate Sessions Dialog */}
+      <AlertDialog open={generateDialogOpen} onOpenChange={setGenerateDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Generate Class Sessions</AlertDialogTitle>
+            <AlertDialogDescription>
+              {generatingTerm && (
+                <>
+                  Generate class sessions for all sections in <strong>{generatingTerm.name}</strong>?
+                  This will create individual session records based on each section's schedule.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="exclude_dates">Exclude Dates (optional, comma-separated YYYY-MM-DD)</Label>
+            <Input
+              id="exclude_dates"
+              placeholder="e.g., 2024-11-28, 2024-11-29"
+              value={excludeDates}
+              onChange={(e) => setExcludeDates(e.target.value)}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={generating}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleGenerateSessions}
+              disabled={generating}
+            >
+              {generating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4 mr-2" />
+                  Generate
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

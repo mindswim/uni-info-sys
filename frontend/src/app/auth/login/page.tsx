@@ -305,6 +305,11 @@ export default function LoginPage() {
 
                 <div className="mt-6 pt-4 border-t text-center space-y-2">
                   <p className="text-sm text-muted-foreground">
+                    <a href="/auth/forgot-password" className="text-primary hover:underline font-medium">
+                      Forgot password?
+                    </a>
+                  </p>
+                  <p className="text-sm text-muted-foreground">
                     Demo credentials available in the Demo Login tab
                   </p>
                   <p className="text-sm text-muted-foreground">

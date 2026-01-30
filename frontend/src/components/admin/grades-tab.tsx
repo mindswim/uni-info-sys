@@ -9,7 +9,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
-import { Plus, Search, Award, TrendingUp, Users, BookOpen, Pencil, Download } from 'lucide-react'
+import { Plus, Search, Award, TrendingUp, Users, BookOpen, Pencil, Download, FileEdit } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { GradeChangeRequestsTab } from '@/components/admin/grade-change-requests-tab'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { getAuthToken } from '@/lib/api-client'
 
@@ -299,6 +301,24 @@ export function GradesTab() {
         <p className="text-muted-foreground">Manage student grades and academic records</p>
       </div>
 
+      <Tabs defaultValue="grades">
+        <TabsList>
+          <TabsTrigger value="grades">
+            <Award className="h-4 w-4 mr-2" />
+            All Grades
+          </TabsTrigger>
+          <TabsTrigger value="change-requests">
+            <FileEdit className="h-4 w-4 mr-2" />
+            Grade Changes
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="change-requests" className="mt-4">
+          <GradeChangeRequestsTab />
+        </TabsContent>
+
+        <TabsContent value="grades" className="mt-4 space-y-6">
+
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -532,6 +552,8 @@ export function GradesTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

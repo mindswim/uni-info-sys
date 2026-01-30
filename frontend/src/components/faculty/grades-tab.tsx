@@ -11,8 +11,13 @@ import { Progress } from "@/components/ui/progress"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useToast } from "@/hooks/use-toast"
 import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import {
   Download, Save, CheckCircle2, Clock, Search, ArrowUpDown, ArrowUp, ArrowDown,
-  RotateCcw, ChevronDown, AlertCircle
+  RotateCcw, ChevronDown, AlertCircle, FileEdit
 } from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
@@ -86,6 +91,12 @@ export function GradesTab() {
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
   const [showQuickGrades, setShowQuickGrades] = useState<number | null>(null)
   const { toast } = useToast()
+
+  // Grade change request state
+  const [gradeChangeDialogOpen, setGradeChangeDialogOpen] = useState(false)
+  const [gradeChangeEnrollment, setGradeChangeEnrollment] = useState<Enrollment | null>(null)
+  const [gradeChangeData, setGradeChangeData] = useState({ requested_grade: '', reason: '' })
+  const [submittingGradeChange, setSubmittingGradeChange] = useState(false)
   const inputRefs = useRef<Record<number, HTMLInputElement | null>>({})
 
   // Track if there are unsaved changes
@@ -413,6 +424,38 @@ export function GradesTab() {
     setGrades(originalGrades)
   }
 
+  const handleRequestGradeChange = async () => {
+    if (!gradeChangeEnrollment || !gradeChangeData.requested_grade || !gradeChangeData.reason) {
+      toast({ title: "Validation Error", description: "Please fill in all fields", variant: "destructive" })
+      return
+    }
+    setSubmittingGradeChange(true)
+    try {
+      const token = sessionStorage.getItem('auth_token')
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/grade-change-requests`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          enrollment_id: gradeChangeEnrollment.id,
+          requested_grade: gradeChangeData.requested_grade,
+          reason: gradeChangeData.reason,
+        }),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.message || 'Failed to submit grade change request')
+      }
+      toast({ title: "Request Submitted", description: "Grade change request sent for admin review" })
+      setGradeChangeDialogOpen(false)
+      setGradeChangeEnrollment(null)
+      setGradeChangeData({ requested_grade: '', reason: '' })
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" })
+    } finally {
+      setSubmittingGradeChange(false)
+    }
+  }
+
   // Get sort icon
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) return <ArrowUpDown className="h-3 w-3 ml-1 text-muted-foreground" />
@@ -624,6 +667,7 @@ export function GradesTab() {
                           </span>
                         </TableHead>
                         <TableHead className="w-24 text-center">Status</TableHead>
+                        <TableHead className="w-16"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -709,6 +753,22 @@ export function GradesTab() {
                                 {enrollment.status}
                               </Badge>
                             </TableCell>
+                            <TableCell>
+                              {enrollment.grade && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  title="Request Grade Change"
+                                  onClick={() => {
+                                    setGradeChangeEnrollment(enrollment)
+                                    setGradeChangeData({ requested_grade: '', reason: '' })
+                                    setGradeChangeDialogOpen(true)
+                                  }}
+                                >
+                                  <FileEdit className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </TableCell>
                           </TableRow>
                         )
                       })}
@@ -739,6 +799,50 @@ export function GradesTab() {
           </CardContent>
         </Card>
       )}
+
+      {/* Grade Change Request Dialog */}
+      <Dialog open={gradeChangeDialogOpen} onOpenChange={setGradeChangeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request Grade Change</DialogTitle>
+            <DialogDescription>
+              {gradeChangeEnrollment && (
+                <>Request a grade change for {gradeChangeEnrollment.student.user.name} (current grade: {gradeChangeEnrollment.grade})</>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>New Grade *</Label>
+              <Select value={gradeChangeData.requested_grade} onValueChange={(v) => setGradeChangeData({...gradeChangeData, requested_grade: v})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select new grade" />
+                </SelectTrigger>
+                <SelectContent>
+                  {VALID_GRADES.map(g => (
+                    <SelectItem key={g} value={g}>{g}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Reason *</Label>
+              <Textarea
+                placeholder="Explain the reason for this grade change..."
+                value={gradeChangeData.reason}
+                onChange={(e) => setGradeChangeData({...gradeChangeData, reason: e.target.value})}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setGradeChangeDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleRequestGradeChange} disabled={submittingGradeChange}>
+              {submittingGradeChange && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Submit Request
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

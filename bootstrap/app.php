@@ -40,6 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role.student' => \App\Http\Middleware\EnsureIsStudent::class,
             'role.staff' => \App\Http\Middleware\EnsureIsStaff::class,
             'role.admin' => \App\Http\Middleware\EnsureIsAdmin::class,
+            'role.chair' => \App\Http\Middleware\EnsureIsDepartmentChair::class,
             'permission' => \App\Http\Middleware\HasPermission::class,
         ]);
     })

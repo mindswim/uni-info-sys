@@ -58,6 +58,11 @@ class Conversation extends Model
         return $this->belongsTo(CourseSection::class);
     }
 
+    public function discussionTopic()
+    {
+        return $this->hasOne(DiscussionTopic::class);
+    }
+
     // Scopes
 
     public function scopeForUser(Builder $query, User $user): Builder

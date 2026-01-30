@@ -13,6 +13,7 @@ class Department extends Model
         'faculty_id',
         'name',
         'code',
+        'chair_id',
     ];
 
     public function faculty()
@@ -23,5 +24,20 @@ class Department extends Model
     public function programs()
     {
         return $this->hasMany(Program::class);
+    }
+
+    public function chair()
+    {
+        return $this->belongsTo(Staff::class, 'chair_id');
+    }
+
+    public function staff()
+    {
+        return $this->hasMany(Staff::class);
+    }
+
+    public function courses()
+    {
+        return $this->hasManyThrough(Course::class, Program::class);
     }
 }

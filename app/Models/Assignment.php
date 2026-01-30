@@ -27,6 +27,7 @@ class Assignment extends Model
         'instructions_file',
         'is_published',
         'sort_order',
+        'rubric_id',
     ];
 
     protected $casts = [
@@ -72,6 +73,11 @@ class Assignment extends Model
     public function submissions(): HasMany
     {
         return $this->hasMany(\App\Models\AssignmentSubmission::class);
+    }
+
+    public function rubric(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Rubric::class);
     }
 
     /**

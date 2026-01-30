@@ -46,6 +46,19 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'documents.manage', 'description' => 'Admin-level access to all user documents'],
             ['name' => 'documents.manage.own', 'description' => 'Student-level access to their own documents'],
 
+            // Department Chair permissions
+            ['name' => 'department.view-stats', 'description' => 'View department statistics and dashboard'],
+            ['name' => 'department.manage-sections', 'description' => 'Manage department course sections'],
+            ['name' => 'grades.view-department', 'description' => 'View grade distribution for department'],
+            ['name' => 'faculty.view-department', 'description' => 'View faculty within department'],
+
+            // Early Alert permissions
+            ['name' => 'early-alerts.create', 'description' => 'Create early alerts for students'],
+            ['name' => 'early-alerts.manage', 'description' => 'Manage and resolve early alerts'],
+
+            // Transfer Credit permissions
+            ['name' => 'transfer-credits.evaluate', 'description' => 'Evaluate transfer credit requests'],
+
             // Legacy permissions (for backward compatibility)
             ['name' => 'manage-applications', 'description' => 'Can manage student applications'],
             ['name' => 'submit-documents', 'description' => 'Can submit documents'],
@@ -94,6 +107,11 @@ class RolePermissionSeeder extends Seeder
         $moderatorRole = Role::firstOrCreate(
             ['name' => 'moderator'],
             ['description' => 'Moderator with application review access']
+        );
+
+        $departmentChairRole = Role::firstOrCreate(
+            ['name' => 'department-chair'],
+            ['description' => 'Department chair with scoped access to department faculty, sections, and grade data']
         );
 
         // Assign permissions to roles
@@ -170,5 +188,19 @@ class RolePermissionSeeder extends Seeder
             'applications.manage',
         ])->get();
         $moderatorRole->permissions()->sync($moderatorPermissions);
+
+        // Department Chair permissions
+        $departmentChairPermissions = Permission::whereIn('name', [
+            'department.view-stats',
+            'department.manage-sections',
+            'grades.view-department',
+            'faculty.view-department',
+            'grades.upload',
+            'enrollments.manage',
+            'course-sections.manage',
+            'early-alerts.create',
+            'early-alerts.manage',
+        ])->get();
+        $departmentChairRole->permissions()->sync($departmentChairPermissions);
     }
 }

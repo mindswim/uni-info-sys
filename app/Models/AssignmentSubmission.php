@@ -72,6 +72,11 @@ class AssignmentSubmission extends Model
         return $this->belongsTo(Staff::class, 'graded_by');
     }
 
+    public function rubricScores()
+    {
+        return $this->hasMany(SubmissionRubricScore::class);
+    }
+
     /**
      * Get the student through enrollment
      */

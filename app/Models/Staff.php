@@ -50,4 +50,14 @@ class Staff extends Model
     {
         return $this->hasMany(Appointment::class, 'advisor_id')->upcoming();
     }
+
+    public function officeHourSlots()
+    {
+        return $this->hasMany(OfficeHourSlot::class);
+    }
+
+    public function chairedDepartment()
+    {
+        return $this->hasOne(Department::class, 'chair_id');
+    }
 }

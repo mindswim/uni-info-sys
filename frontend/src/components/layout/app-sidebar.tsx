@@ -53,7 +53,13 @@ import {
   CalendarDays,
   Clock,
   History,
-  ScrollText
+  ScrollText,
+  ArrowRightLeft,
+  MessageCircle,
+  Ruler,
+  Flag,
+  FileBadge,
+  Landmark
 } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/components/auth/auth-provider"
@@ -86,6 +92,7 @@ const navigationItems = {
         { title: "Degree Audit", url: "/student/degree-audit", icon: Target },
         { title: "Academic Planner", url: "/student/academic-planner", icon: CalendarDays },
         { title: "Transcripts", url: "/student/transcripts", icon: FileText },
+        { title: "Transfer Credits", url: "/student/transfer-credits", icon: ArrowRightLeft },
         { title: "Evaluations", url: "/student/evaluations", icon: ScrollText },
         { title: "Graduation", url: "/student/graduation", icon: GraduationCap }
       ]
@@ -95,7 +102,8 @@ const navigationItems = {
       items: [
         { title: "Account Summary", url: "/student/billing", icon: DollarSign },
         { title: "Make Payment", url: "/student/payment", icon: CreditCard },
-        { title: "Financial Aid", url: "/student/financial-aid", icon: Award }
+        { title: "Financial Aid", url: "/student/financial-aid", icon: Award },
+        { title: "Tax Forms (1098-T)", url: "/student/tax-forms", icon: Landmark }
       ]
     },
     {
@@ -110,6 +118,7 @@ const navigationItems = {
       title: "Resources",
       items: [
         { title: "Messages", url: "/messages", icon: MessageSquare },
+        { title: "Discussions", url: "/student/discussions", icon: MessageCircle },
         { title: "Announcements", url: "/student/announcements", icon: Megaphone },
         { title: "Academic Calendar", url: "/student/calendar", icon: Calendar }
       ]
@@ -136,7 +145,9 @@ const navigationItems = {
       items: [
         { title: "Assignments", url: "/faculty/assignments", icon: PenTool },
         { title: "Materials", url: "/faculty/materials", icon: FolderOpen },
-        { title: "Announcements", url: "/faculty/announcements", icon: Megaphone }
+        { title: "Announcements", url: "/faculty/announcements", icon: Megaphone },
+        { title: "Rubrics", url: "/faculty/rubrics", icon: Ruler },
+        { title: "Discussions", url: "/faculty/discussions", icon: MessageCircle }
       ]
     },
     {
@@ -144,13 +155,33 @@ const navigationItems = {
       items: [
         { title: "My Advisees", url: "/faculty/advisees", icon: Users },
         { title: "Approval Requests", url: "/faculty/approvals", icon: ClipboardCheck },
-        { title: "Appointments", url: "/faculty/appointments", icon: Calendar }
+        { title: "Appointments", url: "/faculty/appointments", icon: Calendar },
+        { title: "Office Hours", url: "/faculty/office-hours", icon: Clock },
+        { title: "Early Alerts", url: "/faculty/early-alerts", icon: Flag }
       ]
     },
     {
       title: "Feedback",
       items: [
         { title: "Evaluations", url: "/faculty/evaluations", icon: ScrollText }
+      ]
+    },
+    {
+      title: "Resources",
+      items: [
+        { title: "Messages", url: "/messages", icon: MessageSquare },
+        { title: "Profile", url: "/profile", icon: User }
+      ]
+    }
+  ],
+  "department-chair": [
+    {
+      title: "Chair Dashboard",
+      items: [
+        { title: "Dashboard", url: "/chair", icon: Home },
+        { title: "Sections", url: "/chair/sections", icon: BookOpen },
+        { title: "Faculty", url: "/chair/faculty", icon: Users },
+        { title: "Grade Reports", url: "/chair/grades", icon: BarChart3 }
       ]
     },
     {
@@ -196,7 +227,8 @@ const navigationItems = {
         { title: "Waitlists", url: "/admin/waitlists", icon: Users },
         { title: "Evaluations", url: "/admin/evaluations", icon: ScrollText },
         { title: "Grades", url: "/admin/grades", icon: Award },
-        { title: "Graduation", url: "/admin/graduation", icon: GraduationCap }
+        { title: "Graduation", url: "/admin/graduation", icon: GraduationCap },
+        { title: "Early Alerts", url: "/admin/early-alerts", icon: Flag }
       ]
     },
     {
@@ -204,7 +236,8 @@ const navigationItems = {
       items: [
         { title: "Applications", url: "/admin/admissions", icon: FileText },
         { title: "Review Queue", url: "/admin/admissions/review", icon: ClipboardCheck },
-        { title: "Documents", url: "/admin/documents", icon: FileCheck }
+        { title: "Documents", url: "/admin/documents", icon: FileCheck },
+        { title: "Transfer Credits", url: "/admin/transfer-credits", icon: ArrowRightLeft }
       ]
     },
     {

@@ -1,5 +1,13 @@
 <?php
 
+use App\Http\Controllers\Api\V1\DepartmentChairController;
+use App\Http\Controllers\Api\V1\DiscussionForumController;
+use App\Http\Controllers\Api\V1\EarlyAlertController;
+use App\Http\Controllers\Api\V1\EnrollmentVerificationController;
+use App\Http\Controllers\Api\V1\OfficeHourController;
+use App\Http\Controllers\Api\V1\RubricController;
+use App\Http\Controllers\Api\V1\TaxFormController;
+use App\Http\Controllers\Api\V1\TransferCreditController;
 use App\Http\Controllers\Api\V1\AcademicStandingController;
 use App\Http\Controllers\Api\V1\ActionItemController;
 use App\Http\Controllers\Api\V1\AuditController;
@@ -682,6 +690,71 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
         Route::post('academic-standings/recalculate', [AcademicStandingController::class, 'recalculate']);
         Route::get('academic-standings/summary', [AcademicStandingController::class, 'summary']);
     });
+
+    // Department Chair routes (E23)
+    Route::middleware('role.chair')->group(function () {
+        Route::get('department-chair/dashboard', [DepartmentChairController::class, 'dashboard']);
+        Route::get('department-chair/faculty', [DepartmentChairController::class, 'facultyList']);
+        Route::get('department-chair/sections', [DepartmentChairController::class, 'sectionOverview']);
+        Route::get('department-chair/grade-distribution', [DepartmentChairController::class, 'gradeDistribution']);
+    });
+
+    // Office Hours routes (E28)
+    Route::get('staff/{staff}/office-hours', [OfficeHourController::class, 'index']);
+    Route::get('staff/{staff}/office-hours/available', [OfficeHourController::class, 'available']);
+    Route::middleware('role.staff')->group(function () {
+        Route::post('office-hours', [OfficeHourController::class, 'store']);
+        Route::put('office-hours/{officeHourSlot}', [OfficeHourController::class, 'update']);
+        Route::delete('office-hours/{officeHourSlot}', [OfficeHourController::class, 'destroy']);
+    });
+
+    // Enrollment Verification Letters (E29)
+    Route::get('students/{student}/enrollment-verification', [EnrollmentVerificationController::class, 'generate']);
+
+    // 1098-T Tax Forms (E30)
+    Route::get('students/{student}/tax-forms', [TaxFormController::class, 'index']);
+    Route::post('students/{student}/tax-forms/generate', [TaxFormController::class, 'generate']);
+    Route::get('tax-forms/{taxForm}/download', [TaxFormController::class, 'download']);
+
+    // Early Alert System (E25)
+    Route::get('early-alerts', [EarlyAlertController::class, 'index']);
+    Route::get('early-alerts/{earlyAlert}', [EarlyAlertController::class, 'show']);
+    Route::put('early-alerts/{earlyAlert}', [EarlyAlertController::class, 'update']);
+    Route::post('early-alerts/{earlyAlert}/comments', [EarlyAlertController::class, 'addComment']);
+    Route::middleware('role.staff')->group(function () {
+        Route::post('early-alerts', [EarlyAlertController::class, 'store']);
+        Route::get('early-alerts-mine', [EarlyAlertController::class, 'myAlerts']);
+    });
+
+    // Transfer Credit Evaluation (E24)
+    Route::get('students/{student}/transfer-credits', [TransferCreditController::class, 'index']);
+    Route::post('transfer-credits', [TransferCreditController::class, 'store']);
+    Route::middleware('role.admin')->group(function () {
+        Route::post('transfer-credits/{transferCredit}/evaluate', [TransferCreditController::class, 'evaluate']);
+        Route::get('transfer-equivalencies', [TransferCreditController::class, 'equivalencies']);
+        Route::post('transfer-equivalencies', [TransferCreditController::class, 'storeEquivalency']);
+    });
+
+    // Rubric-Based Grading (E27)
+    Route::get('rubrics', [RubricController::class, 'index']);
+    Route::get('rubrics/templates', [RubricController::class, 'templates']);
+    Route::get('rubrics/{rubric}', [RubricController::class, 'show']);
+    Route::middleware('role.staff')->group(function () {
+        Route::post('rubrics', [RubricController::class, 'store']);
+        Route::put('rubrics/{rubric}', [RubricController::class, 'update']);
+        Route::delete('rubrics/{rubric}', [RubricController::class, 'destroy']);
+        Route::post('rubrics/{rubric}/duplicate', [RubricController::class, 'duplicate']);
+        Route::post('submissions/{assignmentSubmission}/rubric-score', [RubricController::class, 'scoreSubmission']);
+    });
+    Route::get('submissions/{assignmentSubmission}/rubric-results', [RubricController::class, 'rubricResults']);
+
+    // Discussion Forums (E26)
+    Route::get('course-sections/{courseSection}/discussions', [DiscussionForumController::class, 'topics']);
+    Route::post('course-sections/{courseSection}/discussions', [DiscussionForumController::class, 'createTopic']);
+    Route::get('discussions/{discussionTopic}/replies', [DiscussionForumController::class, 'replies']);
+    Route::post('discussions/{discussionTopic}/replies', [DiscussionForumController::class, 'postReply']);
+    Route::patch('discussions/{discussionTopic}/pin', [DiscussionForumController::class, 'togglePin']);
+    Route::patch('discussions/{discussionTopic}/lock', [DiscussionForumController::class, 'toggleLock']);
 
     // User Settings routes
     Route::get('settings/me', [SettingController::class, 'mySettings']);

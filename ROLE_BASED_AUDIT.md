@@ -487,16 +487,16 @@ These are features found in production SIS platforms (Banner, PeopleSoft, Workda
 
 ### Tier 3: Advanced / Enterprise (Future)
 
-| # | Feature | Domain | Notes |
-|---|---------|--------|-------|
-| E23 | Department Chair role | Governance | New role with scoped views |
-| E24 | Transfer credit evaluation | Admissions | Complex mapping logic |
-| E25 | Student early alert system | Retention | Faculty flags at-risk students |
-| E26 | Discussion forums | LMS | Threaded course discussions |
-| E27 | Rubric-based grading | LMS | Structured grading criteria |
-| E28 | Office hours management | Faculty | Recurring availability slots |
-| E29 | Enrollment verification letters | Registrar | PDF generation |
-| E30 | 1098-T tax form | Financial | Regulatory compliance |
+| # | Feature | Domain | Backend | Frontend | Notes |
+|---|---------|--------|---------|----------|-------|
+| E23 | Department Chair role | Governance | Done | Done | New role with scoped views |
+| E24 | Transfer credit evaluation | Admissions | Done | Done | Complex mapping logic |
+| E25 | Student early alert system | Retention | Done | Done | Faculty flags at-risk students |
+| E26 | Discussion forums | LMS | Done | Done | Threaded course discussions |
+| E27 | Rubric-based grading | LMS | Done | Done | Structured grading criteria |
+| E28 | Office hours management | Faculty | Done | Done | Recurring availability slots |
+| E29 | Enrollment verification letters | Registrar | Done | N/A | PDF generation |
+| E30 | 1098-T tax form | Financial | Done | Done | Regulatory compliance |
 | E31 | FERPA compliance tools | Compliance | Access logging, disclosure tracking |
 | E32 | Graduation clearance workflow | Registrar | Multi-step approval |
 | E33 | Course section request workflow | Scheduling | Faculty preference submission |

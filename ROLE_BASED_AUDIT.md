@@ -229,7 +229,8 @@
 | 4.4 | I manage faculty/staff | [x] | `/admin/faculty` |
 | 4.5 | I manage user accounts | [x] | `/admin/system` |
 | 4.6 | I assign roles to users | [x] | Roles API + roles-tab.tsx |
-| 4.7 | I import/export people via CSV | [x] | CSV endpoints + csv-import-export.tsx |
+| 4.7 | I import/export people via CSV | [x] | CSV endpoints (students, staff) + csv-import-export.tsx |
+| 4.7b | I restore soft-deleted student records | [x] | `POST /students/{id}/restore`, `DELETE .../force` |
 
 ### 4c. Academic Structure
 
@@ -294,6 +295,15 @@
 | 4.39 | I view system info | [x] | System info endpoint in settings |
 | 4.40 | I clear cache / toggle maintenance | [x] | Cache/maintenance endpoints |
 | 4.41 | I import/export data via CSV | [x] | CSV on all major resources |
+
+### 4i. Data Recovery & Administration
+
+| # | User Story | Status | Notes |
+|---|-----------|--------|-------|
+| 4.42 | I restore soft-deleted records (students, courses, enrollments, applications, documents) | [x] | Restore + force-delete endpoints on all soft-deletable models |
+| 4.43 | I view a specific student's sessions/assignments/submissions (cross-user lookup) | [x] | `/class-sessions/student`, `/assignments/student`, admin-scoped queries |
+| 4.44 | I bulk import courses via dedicated importer | [x] | `POST /imports/courses` (CourseImportController) |
+| 4.45 | I import grades from file for a section | [x] | `POST /course-sections/{id}/import-grades` (GradeImportController) |
 
 **Gaps:**
 - [ ] Degree requirements admin UI
@@ -388,6 +398,57 @@
 
 ---
 
+## Backend API Completeness Verification
+
+> Every backend endpoint is accounted for in the user stories above or in this reference table.
+> This section exists to confirm no API capability is missing from the audit.
+
+### Endpoints mapped to user stories above (confirmed complete)
+
+| API Domain | Endpoints | Covered In |
+|-----------|-----------|------------|
+| Auth (register, login, logout, user, forgot/reset password) | 6 | Section 1 |
+| Students (CRUD, /me, restore, force-delete, CSV) | 10 | Sections 2, 4b |
+| Staff (CRUD, /me, sections, students, CSV) | 9 | Sections 3, 4b |
+| Academic Hierarchy (faculties, departments, programs + CSV) | 18 | Section 4c |
+| Courses (CRUD, catalog, restore, force-delete, CSV, import) | 11 | Sections 2a, 4c, 4i |
+| Course Sections (CRUD, CSV) | 7 | Sections 2a, 4c |
+| Terms (CRUD, CSV, session generation) | 8 | Section 4c, 4d |
+| Degree Requirements (CRUD) | 5 | Section 4c |
+| Buildings & Rooms (CRUD, CSV) | 12 | Section 4g |
+| Admission Applications (CRUD, accept/reject/waitlist/enroll/confirm, bulk, stats, restore) | 14 | Sections 1, 4e |
+| Program Choices (CRUD) | 5 | Section 1 |
+| Enrollments (CRUD, withdraw/complete/swap, /me, by-student, by-section, restore, CSV) | 14 | Sections 2a, 4d |
+| Grades (submit, bulk, distribution, progress, valid-grades, import) | 7 | Sections 3b, 4d, 4i |
+| Grade Change Requests (list, create, approve, deny) | 4 | Sections 3b, 4d |
+| Gradebook (me, student, class, export, stats, finalize, categories, needed) | 9 | Sections 2b, 3b |
+| Assignments (CRUD, /me, upcoming, by-section, for-student, publish, duplicate, types, progress) | 14 | Sections 2b, 3b, 4i |
+| Submissions (submit, draft, grade, batch, return, resubmit, /me, by-assignment, stats, pending) | 14 | Sections 2b, 3b |
+| Attendance (CRUD, bulk, stats, student-report, CSV) | 8 | Sections 2b, 3a |
+| Class Sessions (CRUD, /me, instructor, for-date, by-section, generate, stats, complete/cancel/reschedule/substitute, student/instructor queries) | 18 | Sections 2b, 3a, 4d, 4i |
+| Course Materials (CRUD, /me, by-section, syllabus, by-session, publish, reorder, types) | 12 | Sections 2b, 3c |
+| Announcements (CRUD, /me, created, university-wide, by-section, by-department, publish, pin, priorities) | 13 | Sections 2d, 3c, 4g |
+| Documents (CRUD, upload, versions, verify, reject, restore, force-delete) | 9 | Sections 1, 4e, 4i |
+| Academic Records (CRUD, /me) | 6 | Section 2b |
+| Invoices (CRUD, student-summary, discount, adjustment) | 7 | Sections 2c, 4f |
+| Payments (CRUD, refund) | 6 | Sections 2c, 4f |
+| Holds (CRUD, summary, admin-summary, resolve) | 7 | Sections 2d, 4d |
+| Action Items (CRUD, dashboard, complete, dismiss) | 7 | Section 2d |
+| Financial Aid (CRUD, /me, scholarships, stats, student-packages) | 8 | Sections 2c, 4f |
+| Events (CRUD, /me, upcoming, types, rsvp, cancel) | 8 | Sections 2d, 4g |
+| Appointments (CRUD, /me, advisor, advisees, advisor-appointments, cancel/confirm/complete/no-show) | 10 | Sections 2d, 3d |
+| Messages (conversations, send, read, archive, unread, search-users) | 7 | Sections 2d, 3e, 4g |
+| Tuition Rates (CRUD) | 5 | Section 4f |
+| Settings (user: me, notifications, appearance; system: all, info, group, setting, cache, maintenance) | 11 | Sections 2d, 4h |
+| Roles (CRUD, sync-permissions) | 6 | Section 4h |
+| Permissions (list, show) | 2 | Section 4h |
+| Users (list, show, roles) | 3 | Section 4b |
+| Notifications (list, mark-read) | 2 | Section 2d |
+| Health + Metrics | 2 | Section 7a |
+| **Total** | **~290** | **All mapped** |
+
+---
+
 ## Enterprise Feature Gap Analysis
 
 These are features found in production SIS platforms (Banner, PeopleSoft, Workday Student) that are not yet in this system. Organized by domain and priority.
@@ -460,10 +521,10 @@ These are features found in production SIS platforms (Banner, PeopleSoft, Workda
 | Faculty: Content | 4 | 4 | 0 | 0 | 100% |
 | Faculty: Advising | 3 | 3 | 0 | 0 | 100% |
 | Faculty: Communication | 2 | 2 | 0 | 0 | 100% |
-| Admin: All | 41 | 35 | 5 | 1 | 85% |
+| Admin: All | 46 | 40 | 5 | 1 | 87% |
 | Staff / Registrar | 7 | 4 | 1 | 2 | 57% |
 | Department Chair | 7 | 0 | 0 | 7 | 0% |
-| **Totals** | **135** | **116** | **8** | **11** | **86%** |
+| **Totals** | **140** | **121** | **8** | **11** | **86%** |
 
 ### Key Takeaway
 

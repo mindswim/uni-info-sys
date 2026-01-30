@@ -1,282 +1,403 @@
-# Testing Guide - API Integration
+# 🧪 UniSys User Testing Guide
 
-## Current Status
+This guide will help you test the University Admissions System like a real user. Follow these scenarios to ensure everything works smoothly and feels professional.
 
-### ✅ Services Running
-- **Backend**: http://localhost (Laravel + Docker)
-- **Frontend**: http://localhost:3000 (Next.js)
-- **Health Check**: http://localhost/api/health - PASSING
+## 🚀 Getting Started
 
-### ✅ Integration Complete
-We've integrated **14 pages** with real APIs:
+### Prerequisites
+1. **Backend Running**: Ensure Laravel backend is running on `http://localhost`
+2. **Frontend Running**: Ensure Next.js frontend is running on `http://localhost:3002`
+3. **Fresh Data**: Run `./vendor/bin/sail artisan migrate:fresh --seed` to reset with demo data
 
-**Student Pages (5):**
-1. Academic Records - `/academic-records`
-2. Schedule - `/schedule`
-3. Course Catalog - `/course-catalog`
-4. Profile - `/profile`
-5. Registration - `/registration`
-
-**Admin Pages (3):**
-6. Students Management - `/students`
-7. Enrollments Management - `/enrollments`
-8. Course Sections - `/course-sections`
-
-**Faculty Pages (3):**
-9. Gradebook - `/gradebook`
-10. Course Management - `/course-management`
-11. Attendance - `/attendance`
-
----
-
-## Authentication Issue
-
-### Problem
-The login endpoint (`/api/v1/tokens/create`) exists and works, but:
-- Database has users with Argon2id password hashes
-- Factory-generated passwords don't match
-- Test credentials need to be reset
-
-### Solution - Create Test User
-
-Run this command to create a working test user:
-
-```bash
-cd /Users/juan/dev/student-admissions-system/university-admissions
-
-./vendor/bin/sail artisan tinker --execute="
-\$student = App\Models\Student::with('user')->first();
-if (\$student && \$student->user) {
-    \$user = \$student->user;
-    \$user->password = \Illuminate\Support\Facades\Hash::make('test123');
-    \$user->save();
-    echo 'Test credentials created:\n';
-    echo 'Email: ' . \$user->email . '\n';
-    echo 'Password: test123\n';
-    echo 'Role: Student\n';
-}
-"
+### Demo Accounts
 ```
-
-Or manually create one:
-
-```bash
-./vendor/bin/sail artisan tinker --execute="
-App\Models\User::create([
-    'name' => 'Test Student',
-    'email' => 'student@test.com',
-    'password' => bcrypt('password123')
-]);
-echo 'Created: student@test.com / password123';
-"
+Admin:     admin@demo.com / password
+Student 1: maria@demo.com / password (Just applied from Mexico)
+Student 2: david@demo.com / password (Enrolled from Korea)
+Student 3: sophie@demo.com / password (Waitlisted American student)
 ```
 
 ---
 
-## Manual Testing Checklist
+## 📝 Testing Scenarios
 
-### 1. Test Login Flow
-- [ ] Go to http://localhost:3000
-- [ ] Click login or go to `/auth/login`
-- [ ] Enter test credentials
-- [ ] Verify token is stored in localStorage
-- [ ] Verify redirect to dashboard
+### Scenario 1: First-Time Admin Experience
+**Goal**: Experience onboarding and navigation
 
-### 2. Test Student Pages
+**Steps**:
+1. Visit `http://localhost:3002`
+2. Login with `admin@demo.com / password`
+3. **Check**: Welcome card appears with quick actions
+4. Click each quick action link to verify navigation works
+5. Dismiss the welcome card (X button)
+6. **Check**: Card doesn't reappear on refresh
+7. Explore sidebar navigation - all links should work
 
-**Academic Records** (`/academic-records`)
-- [ ] Page loads without errors
-- [ ] Shows real course history from API
-- [ ] Displays GPA and credit information
-- [ ] Loading spinner appears initially
-- [ ] Error handling works (try logging out)
-
-**Schedule** (`/schedule`)
-- [ ] Shows current class schedule
-- [ ] Displays meeting times and locations
-- [ ] Shows instructor names
-- [ ] Calendar view renders correctly
-
-**Course Catalog** (`/course-catalog`)
-- [ ] Lists available courses
-- [ ] Search/filter works
-- [ ] Enroll button triggers API call
-- [ ] Enrollment count updates
-- [ ] Drop course works
-
-**Profile** (`/profile`)
-- [ ] Shows student information
-- [ ] Edit mode allows changes
-- [ ] Save triggers API update
-- [ ] Emergency contact info displays
-
-**Registration** (`/registration`)
-- [ ] Shows current term info
-- [ ] Displays enrolled credits
-- [ ] Credit limits shown correctly
-- [ ] Registration wizard opens
-
-### 3. Test Admin Pages
-
-**Students Management** (`/students`)
-- [ ] Lists all students with pagination
-- [ ] Search works
-- [ ] Status filter works
-- [ ] Create student form opens
-- [ ] Edit student works
-- [ ] Delete confirmation appears
-
-**Enrollments Management** (`/enrollments`)
-- [ ] Shows all enrollments
-- [ ] Filter by status works
-- [ ] Withdraw action works
-- [ ] Pagination works
-
-**Course Sections** (`/course-sections`)
-- [ ] Lists all sections
-- [ ] Shows enrollment counts
-- [ ] Filter works
-- [ ] Delete action works
-
-### 4. Test Faculty Pages
-
-**Gradebook** (`/gradebook`)
-- [ ] Shows instructor's courses
-- [ ] Student count displays
-- [ ] Course list populates
-- [ ] Stats cards show data
-
-**Course Management** (`/course-management`)
-- [ ] Lists sections taught
-- [ ] Search works
-- [ ] Course details display
-
-**Attendance** (`/attendance`)
-- [ ] Shows courses for attendance
-- [ ] Loads without errors
-- [ ] UI renders properly
+**What to Look For**:
+- ✅ Clear welcome message
+- ✅ Intuitive quick action buttons
+- ✅ Welcome card can be dismissed permanently
+- ✅ Sidebar navigation is organized and labeled clearly
+- ✅ No broken links or 404 errors
 
 ---
 
-## Known Issues
+### Scenario 2: Processing Student Applications
+**Goal**: Approve/reject applications like a real admissions officer
 
-### 1. Auth Context Import
-Some pages may reference old auth provider:
-```typescript
-// OLD (may cause errors)
-import { useAuth } from '@/components/auth/auth-provider'
+**Steps**:
+1. Click **Applications** in sidebar
+2. **Check**: See Maria Rodriguez's application
+3. **Review**: Click on her application to see details
+4. **Approve**: Click "Approve" button
+   - **Check**: Green success toast appears
+   - **Check**: Status updates to "accepted"
+   - **Check**: Stats card updates counts
+5. **Edit**: Try the Edit button
+   - Change status to "pending"
+   - Add admin comments
+   - Save and verify changes
+6. **Search**: Use search bar to find applications
+7. **Filter**: Try filtering by status
 
-// NEW (correct)
-import { useAuth } from '@/contexts/auth-context'
-```
-
-### 2. Dev Bypass Mode
-Frontend supports bypassing auth for development:
-
-In `frontend/.env.local`:
-```bash
-NEXT_PUBLIC_DEV_BYPASS_AUTH=true
-NEXT_PUBLIC_API_LOGGING=true
-```
-
-### 3. Type Mismatches
-Some API responses may have different property names than TypeScript types expect:
-- Backend uses snake_case: `first_name`, `course_code`
-- Frontend expects camelCase or needs transformation
-
-### 4. Missing Endpoints
-Some service methods may call endpoints that don't exist yet in the backend:
-- Attendance records endpoint
-- Gradebook details endpoint
-- Some analytics endpoints
+**What to Look For**:
+- ✅ Application data displays clearly
+- ✅ Approve/Reject buttons work instantly
+- ✅ Toast notifications provide feedback
+- ✅ Stats update in real-time
+- ✅ Edit dialog shows current values
+- ✅ Search and filters work correctly
 
 ---
 
-## API Testing with cURL
+### Scenario 3: Managing Course Enrollments
+**Goal**: Handle student course registrations
 
-### Get Token
-```bash
-curl -X POST 'http://localhost/api/v1/tokens/create' \
-  -H 'Content-Type: application/json' \
-  -d '{"email":"student@test.com","password":"password123","device_name":"Test"}'
-```
+**Steps**:
+1. Navigate to **Enrollments**
+2. **Check**: See David Park's enrollments
+3. **Check**: Notice "AI Course" shows 2/2 capacity
+4. **Check**: Sophie Turner is waitlisted for AI Course
+5. **Create**: Click "Create Enrollment"
+   - Select a student
+   - Select a course section with capacity
+   - Set enrollment date
+   - **Check**: Success toast on creation
+6. **Edit Grade**: Click Edit on an enrollment
+   - Enter a grade (A, B+, C, etc.)
+   - **Check**: Grade validation works
+   - **Check**: Invalid grades are rejected
+7. **Delete**: Try deleting an enrollment
+   - **Check**: Confirmation dialog appears
+   - **Check**: Can cancel or proceed
 
-### Test Student Endpoint
-```bash
-TOKEN="your_token_here"
-
-curl -H "Authorization: Bearer $TOKEN" \
-     -H "Accept: application/json" \
-     http://localhost/api/v1/students/me
-```
-
-### Test Course Catalog
-```bash
-curl -H "Authorization: Bearer $TOKEN" \
-     -H "Accept: application/json" \
-     http://localhost/api/v1/courses
-```
-
----
-
-## Debugging Tips
-
-### Check Browser Console
-- Open DevTools (F12)
-- Look for API errors
-- Check Network tab for failed requests
-- Verify token in localStorage
-
-### Check Backend Logs
-```bash
-./vendor/bin/sail logs -f
-```
-
-### Verify API Response
-```bash
-# Test any endpoint
-curl -H "Authorization: Bearer $TOKEN" \
-     -H "Accept: application/json" \
-     http://localhost/api/v1/students/me | python3 -m json.tool
-```
-
-### Check Service Worker
-If pages aren't updating, clear service worker:
-- DevTools > Application > Service Workers
-- Click "Unregister"
-- Hard refresh (Cmd+Shift+R)
+**What to Look For**:
+- ✅ Capacity indicators are clear (2/2, 15/20)
+- ✅ Waitlist status is obvious
+- ✅ Create form has all necessary fields
+- ✅ Dropdowns are populated with real data
+- ✅ Grade validation prevents invalid entries
+- ✅ Delete requires confirmation
 
 ---
 
-## Next Steps
+### Scenario 4: Student Shopping Cart Experience
+**Goal**: Register for courses like a real student
 
-1. **Fix Auth**: Create working test credentials (see above)
-2. **Test All 14 Pages**: Go through checklist
-3. **Fix Bugs**: Document any errors found
-4. **Add Missing Endpoints**: Implement any 404 endpoints
-5. **Type Safety**: Fix type mismatches between API and frontend
-6. **Error Handling**: Improve error messages
-7. **Loading States**: Verify all loading spinners work
+**Steps**:
+1. **Logout**: Click user menu → Log out
+2. **Login as Student**: Use `david@demo.com / password`
+3. Navigate to **Registration**
+4. **Browse**: Scroll through available courses
+5. **Add to Cart**:
+   - Click "Add to Cart" on 2-3 courses
+   - **Check**: Cart button shows count (e.g., "Cart (3)")
+   - **Check**: Success toast appears
+6. **View Cart**: Click cart button in header
+   - **Check**: Cart panel slides out
+   - **Check**: Shows all added courses
+   - **Check**: Shows total credits
+7. **Remove from Cart**: Click remove on one course
+   - **Check**: Updates immediately
+8. **Schedule Conflict**:
+   - Try adding courses with same time slots
+   - **Check**: Warning message appears
+9. **Bulk Enroll**: Click "Enroll in All Courses"
+   - **Check**: Progress indication
+   - **Check**: Success/failure summary
+   - **Check**: Individual course feedback
+
+**What to Look For**:
+- ✅ "Add to Cart" is clearly visible
+- ✅ Cart badge shows accurate count
+- ✅ Cart panel is easy to open/close
+- ✅ Course details visible in cart
+- ✅ Conflict detection prevents errors
+- ✅ Bulk enrollment provides clear feedback
+- ✅ Feels like online shopping experience
 
 ---
 
-## Success Criteria
+### Scenario 5: Analytics Dashboard
+**Goal**: Get insights into university operations
 
-✅ Login works with test credentials
-✅ All 14 pages load without console errors
-✅ API calls return data (not 404)
-✅ Loading states appear correctly
-✅ Error states display helpful messages
-✅ User can navigate between pages
-✅ Data persists after refresh (token valid)
+**Steps**:
+1. **Login as Admin** if not already
+2. Navigate to **Analytics**
+3. **Review Summary Cards**:
+   - **Check**: Shows total students, enrollments, applications
+   - **Check**: Shows average GPA
+4. **Enrollment Trends Tab**:
+   - **Check**: Line chart displays correctly
+   - **Check**: Shows total, active, completed enrollments
+   - **Check**: Hover shows exact values
+   - Click "Export" → **Check**: CSV downloads
+5. **Applications Tab**:
+   - **Check**: Bar chart shows status breakdown
+   - **Check**: Export works
+6. **Programs Tab**:
+   - **Check**: Pie chart displays distribution
+   - **Check**: Labels are readable
+   - **Check**: Export works
+7. **Grades Tab**:
+   - **Check**: Grade distribution makes sense
+   - **Check**: Export works
+8. **Term Filter**:
+   - Change term dropdown
+   - **Check**: Data updates accordingly
+
+**What to Look For**:
+- ✅ Charts load without errors
+- ✅ Data is accurate and makes sense
+- ✅ Export functionality works
+- ✅ Responsive design (resize browser)
+- ✅ Professional appearance
+- ✅ Clear legends and labels
 
 ---
 
-## Contact
+### Scenario 6: User & Role Management
+**Goal**: Manage users and permissions
 
-If you encounter issues:
-1. Check browser console for errors
-2. Check backend logs
-3. Verify API endpoints exist
-4. Check TypeScript types match API response
-5. Test with cURL to isolate frontend vs backend issues
+**Steps**:
+1. Navigate to **User Management**
+2. **Users Tab**:
+   - **Check**: See list of all users
+   - Click "Assign Roles" on a user
+   - **Check**: Checkboxes for available roles
+   - Assign a role → **Check**: Success toast
+3. **Roles Tab**:
+   - Click "Create Role"
+   - Enter name and assign permissions
+   - **Check**: Save works
+   - Try editing a role
+   - **Check**: Shows current permissions
+4. **Permissions Tab**:
+   - **Check**: Lists all system permissions
+   - Try creating a new permission
+
+**What to Look For**:
+- ✅ User list displays clearly
+- ✅ Role assignment is intuitive
+- ✅ Permissions are grouped logically
+- ✅ Changes save successfully
+- ✅ Validation prevents errors
+
+---
+
+### Scenario 7: Buildings & Rooms Management
+**Goal**: Manage campus facilities
+
+**Steps**:
+1. Navigate to **Buildings**
+2. **Buildings Tab**:
+   - **Check**: See stats (total buildings, rooms, capacity)
+   - Click "Create Building"
+   - Fill in name, code, address
+   - **Check**: Creates successfully
+   - Try editing → **Check**: Shows current values
+3. **Rooms Tab**:
+   - Click "Create Room"
+   - Select building from dropdown
+   - Enter room number, type, capacity
+   - Add features (comma-separated)
+   - **Check**: Creates successfully
+   - **Check**: Features display as badges
+
+**What to Look For**:
+- ✅ Dual-tab interface is clear
+- ✅ Stats cards provide overview
+- ✅ Building selector in rooms works
+- ✅ Features are easy to add
+- ✅ Everything saves correctly
+
+---
+
+## 🎯 What Makes This Feel Like a Real App?
+
+As you test, evaluate these professional qualities:
+
+### Navigation & Layout
+- [ ] Sidebar is always visible and organized
+- [ ] Breadcrumbs show current location
+- [ ] Active page is highlighted in sidebar
+- [ ] Mobile responsive (test by resizing browser)
+
+### Feedback & Communication
+- [ ] Every action shows toast notification
+- [ ] Success = green, error = red
+- [ ] Loading states appear during operations
+- [ ] Error messages are helpful, not cryptic
+
+### Data Entry
+- [ ] Forms have clear labels
+- [ ] Required fields are marked
+- [ ] Dropdowns are populated
+- [ ] Validation happens before submission
+- [ ] Error messages appear on fields
+
+### Data Display
+- [ ] Tables are sortable/searchable
+- [ ] Pagination works when needed
+- [ ] Empty states have helpful messages
+- [ ] Stats update in real-time
+- [ ] Data is formatted (dates, numbers)
+
+### Professional Polish
+- [ ] Consistent design throughout
+- [ ] Icons match actions
+- [ ] Colors have meaning (red=delete, blue=info)
+- [ ] Spacing is uniform
+- [ ] No broken images or missing icons
+
+---
+
+## 🐛 Bug Checklist
+
+Test these common issues:
+
+### Data Integrity
+- [ ] Can't delete items that are in use (e.g., enrolled courses)
+- [ ] Can't create duplicates (same student in same course)
+- [ ] Required fields can't be skipped
+- [ ] Dates must be in correct format
+
+### Edge Cases
+- [ ] What happens with empty search results?
+- [ ] What if no data exists yet?
+- [ ] Can you exceed course capacity?
+- [ ] What if you logout mid-action?
+
+### Performance
+- [ ] Pages load within 2 seconds
+- [ ] No console errors (open browser DevTools)
+- [ ] Charts render smoothly
+- [ ] Bulk operations handle 10+ items
+
+---
+
+## 📊 Professional Standards Checklist
+
+Rate the app on these criteria (1-5):
+
+**Usability**
+- [ ] Can a new user navigate without help? ___/5
+- [ ] Are actions clearly labeled? ___/5
+- [ ] Is feedback immediate and clear? ___/5
+
+**Design**
+- [ ] Looks professional and modern? ___/5
+- [ ] Consistent design language? ___/5
+- [ ] Good use of color and spacing? ___/5
+
+**Functionality**
+- [ ] All features work as expected? ___/5
+- [ ] No broken links or errors? ___/5
+- [ ] Data is accurate and makes sense? ___/5
+
+**Overall Feel**
+- [ ] Feels like a real production app? ___/5
+- [ ] Would you be proud to demo this? ___/5
+
+---
+
+## 💡 Tips for Testing
+
+1. **Think Like a User**: Don't just click buttons - ask "Would I understand this?"
+2. **Try to Break It**: Enter weird data, click rapidly, use browser back button
+3. **Check Mobile**: Resize browser to phone size
+4. **Test Edge Cases**: Empty lists, full capacity, missing data
+5. **Note Your Feelings**: If something feels confusing, it probably is
+
+---
+
+## 🎓 What Professionals Do
+
+Real companies test like this:
+
+1. **Manual Testing** (what you're doing now)
+   - User flows and scenarios
+   - Exploratory testing
+   - Visual regression
+
+2. **Automated Testing** (future step)
+   - Unit tests for components
+   - Integration tests for API calls
+   - End-to-end tests with Playwright
+
+3. **User Acceptance Testing** (UAT)
+   - Real users try the app
+   - Collect feedback
+   - Iterate and improve
+
+You're doing **UAT** right now - this is exactly what professionals do before launch!
+
+---
+
+## 📝 Feedback Template
+
+After testing, note down:
+
+**What worked well:**
+-
+-
+-
+
+**What felt confusing:**
+-
+-
+-
+
+**Bugs found:**
+-
+-
+-
+
+**Suggestions for improvement:**
+-
+-
+-
+
+---
+
+## ✅ Final Checklist
+
+Before considering the app "done":
+
+- [ ] All demo accounts work
+- [ ] All sidebar links navigate correctly
+- [ ] All CRUD operations work (Create, Read, Update, Delete)
+- [ ] Search and filters function properly
+- [ ] Charts display accurately
+- [ ] Exports download correctly
+- [ ] Mobile view is usable
+- [ ] No console errors in browser DevTools
+- [ ] Toast notifications appear for all actions
+- [ ] Welcome card appears for new users
+- [ ] App feels professional and polished
+
+---
+
+**Happy Testing!** 🚀
+
+Remember: If you can navigate the app easily and accomplish tasks without frustration, you've built something real and professional!

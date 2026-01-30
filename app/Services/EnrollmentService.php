@@ -442,14 +442,17 @@ class EnrollmentService
         }
 
         // Sum credits for enrolled + waitlisted enrollments in the same term
-        $currentCredits = Enrollment::where('student_id', $studentId)
+        $enrollments = Enrollment::where('student_id', $studentId)
             ->whereIn('status', ['enrolled', 'waitlisted'])
             ->whereHas('courseSection', function ($query) use ($courseSection) {
                 $query->where('term_id', $courseSection->term_id);
             })
-            ->join('course_sections', 'enrollments.course_section_id', '=', 'course_sections.id')
-            ->join('courses', 'course_sections.course_id', '=', 'courses.id')
-            ->sum('courses.credits');
+            ->with('courseSection.course')
+            ->get();
+
+        $currentCredits = $enrollments->sum(function ($enrollment) {
+            return $enrollment->courseSection?->course?->credits ?? 0;
+        });
 
         // Default max 18 credits per term; could be made configurable via system settings
         $maxCredits = 18;

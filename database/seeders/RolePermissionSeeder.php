@@ -51,6 +51,8 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'department.manage-sections', 'description' => 'Manage department course sections'],
             ['name' => 'grades.view-department', 'description' => 'View grade distribution for department'],
             ['name' => 'faculty.view-department', 'description' => 'View faculty within department'],
+            ['name' => 'approvals.manage', 'description' => 'Manage approval requests for section offerings and enrollment overrides'],
+            ['name' => 'faculty.view-performance', 'description' => 'View faculty performance analytics'],
 
             // Early Alert permissions
             ['name' => 'early-alerts.create', 'description' => 'Create early alerts for students'],
@@ -200,6 +202,8 @@ class RolePermissionSeeder extends Seeder
             'course-sections.manage',
             'early-alerts.create',
             'early-alerts.manage',
+            'approvals.manage',
+            'faculty.view-performance',
         ])->get();
         $departmentChairRole->permissions()->sync($departmentChairPermissions);
     }

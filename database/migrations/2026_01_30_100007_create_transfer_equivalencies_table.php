@@ -17,7 +17,7 @@ return new class extends Migration
             $table->datetime('approved_at');
             $table->timestamps();
 
-            $table->unique(['external_institution', 'external_course_code']);
+            $table->unique(['external_institution', 'external_course_code'], 'transfer_equiv_institution_course_unique');
         });
     }
 

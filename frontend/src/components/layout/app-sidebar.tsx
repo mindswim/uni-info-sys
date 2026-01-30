@@ -181,7 +181,8 @@ const navigationItems = {
         { title: "Dashboard", url: "/chair", icon: Home },
         { title: "Sections", url: "/chair/sections", icon: BookOpen },
         { title: "Faculty", url: "/chair/faculty", icon: Users },
-        { title: "Grade Reports", url: "/chair/grades", icon: BarChart3 }
+        { title: "Grade Reports", url: "/chair/grades", icon: BarChart3 },
+        { title: "Approvals", url: "/chair/approvals", icon: ClipboardCheck }
       ]
     },
     {

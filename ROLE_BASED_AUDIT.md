@@ -351,12 +351,12 @@
 | # | User Story | Status | Notes |
 |---|-----------|--------|-------|
 | 6.1 | I view my department's courses and sections | [x] | `/chair/sections` + DepartmentChairController (E23) |
-| 6.2 | I approve course section offerings for next term | [ ] | No approval workflow |
-| 6.3 | I assign instructors to sections | [ ] | Sections have instructor_id but no assignment workflow |
+| 6.2 | I approve course section offerings for next term | [x] | ApprovalRequest(type=section_offering) + `/chair/approvals` page |
+| 6.3 | I assign instructors to sections | [x] | PUT sections/{id}/assign-instructor + dropdown in sections page |
 | 6.4 | I review grade distributions for my department | [x] | `/chair/grades` + gradeDistribution() (E23) |
-| 6.5 | I approve enrollment overrides / capacity increases | [ ] | No approval workflow |
-| 6.6 | I approve grade change requests for my department | [ ] | No department-scoped review |
-| 6.7 | I review faculty performance data | [ ] | No analytics scoped to department |
+| 6.5 | I approve enrollment overrides / capacity increases | [x] | ApprovalRequest(type=enrollment_override) + `/chair/approvals` page |
+| 6.6 | I approve grade change requests for my department | [x] | Scoped grade-change-requests endpoints + grades page tab |
+| 6.7 | I review faculty performance data | [x] | facultyPerformance() endpoint + faculty page performance tab |
 
 ---
 
@@ -547,13 +547,12 @@ These are features found in production SIS platforms (Banner, PeopleSoft, Workda
 | Faculty: Communication | 2 | 2 | 0 | 0 | 100% |
 | Admin: All | 46 | 46 | 0 | 0 | 100% |
 | Staff / Registrar | 7 | 6 | 1 | 0 | 86% |
-| Department Chair | 7 | 2 | 0 | 5 | 29% |
-| **Totals** | **140** | **134** | **1** | **5** | **96%** |
+| Department Chair | 7 | 7 | 0 | 0 | 100% |
+| **Totals** | **140** | **139** | **1** | **0** | **99%** |
 
 ### Key Takeaway
 
-The system has **96% coverage** across 140 user stories spanning 6 active roles (prospective student, enrolled student, faculty, admin, staff/registrar, department chair). All core student, faculty, and admin journeys are complete. All 30 enterprise gap features (E1-E30) across Tiers 1-3 have been implemented. The remaining gaps are:
+The system has **99% coverage** across 140 user stories spanning 6 active roles (prospective student, enrolled student, faculty, admin, staff/registrar, department chair). All core student, faculty, admin, and department chair journeys are complete. All 30 enterprise gap features (E1-E30) across Tiers 1-3 have been implemented. The remaining gaps are:
 
 1. **1 backend-only feature** -- graduation clearance workflow (partial)
-2. **5 department chair stories** -- approval workflows for sections, instructors, overrides, grade changes, and faculty analytics
-3. **7 Tier 4 enterprise features** (E31-E37) -- FERPA compliance, graduation clearance, section requests, notification templates, WebSockets, peer review, multi-tenancy
+2. **7 Tier 4 enterprise features** (E31-E37) -- FERPA compliance, graduation clearance, section requests, notification templates, WebSockets, peer review, multi-tenancy

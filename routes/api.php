@@ -691,12 +691,29 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
         Route::get('academic-standings/summary', [AcademicStandingController::class, 'summary']);
     });
 
-    // Department Chair routes (E23)
+    // Department Chair routes (E23 + Stories 6.2-6.7)
     Route::middleware('role.chair')->group(function () {
         Route::get('department-chair/dashboard', [DepartmentChairController::class, 'dashboard']);
         Route::get('department-chair/faculty', [DepartmentChairController::class, 'facultyList']);
         Route::get('department-chair/sections', [DepartmentChairController::class, 'sectionOverview']);
         Route::get('department-chair/grade-distribution', [DepartmentChairController::class, 'gradeDistribution']);
+
+        // Approval requests (6.2 section offerings, 6.5 enrollment overrides)
+        Route::get('department-chair/approval-requests', [DepartmentChairController::class, 'approvalRequests']);
+        Route::post('department-chair/approval-requests', [DepartmentChairController::class, 'createApprovalRequest']);
+        Route::post('department-chair/approval-requests/{id}/approve', [DepartmentChairController::class, 'approveRequest']);
+        Route::post('department-chair/approval-requests/{id}/deny', [DepartmentChairController::class, 'denyRequest']);
+
+        // Assign instructor (6.3)
+        Route::put('department-chair/sections/{id}/assign-instructor', [DepartmentChairController::class, 'assignInstructor']);
+
+        // Grade change requests (6.6)
+        Route::get('department-chair/grade-change-requests', [DepartmentChairController::class, 'departmentGradeChangeRequests']);
+        Route::post('department-chair/grade-change-requests/{id}/approve', [DepartmentChairController::class, 'approveGradeChange']);
+        Route::post('department-chair/grade-change-requests/{id}/deny', [DepartmentChairController::class, 'denyGradeChange']);
+
+        // Faculty performance (6.7)
+        Route::get('department-chair/faculty-performance', [DepartmentChairController::class, 'facultyPerformance']);
     });
 
     // Office Hours routes (E28)

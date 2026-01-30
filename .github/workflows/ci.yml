@@ -153,7 +153,8 @@ jobs:
           DB_DATABASE: testing
           DB_USERNAME: root
           DB_PASSWORD: password
-        run: php artisan serve --port=80 &
+          APP_URL: http://localhost:8000
+        run: php artisan serve --port=8000 &
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -166,19 +167,27 @@ jobs:
         run: cd frontend && npm ci
 
       - name: Build and start frontend
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:8000/api/v1
         run: |
           cd frontend
           npm run build
-          npm start -- -p 5174 &
+
+      - name: Start frontend server
+        run: cd frontend && npm start -- -p 5174 &
 
       - name: Install Playwright browsers
         run: cd frontend && npx playwright install --with-deps chromium
 
       - name: Wait for servers
         run: |
-          npx wait-on http://localhost:80/api/health http://localhost:5174 --timeout 30000
+          npx wait-on http://localhost:8000/api/health http://localhost:5174 --timeout 60000
 
       - name: Run Playwright tests
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:8000/api/v1
         run: cd frontend && npx playwright test
 
       - name: Upload test results

@@ -36,7 +36,7 @@ class DepartmentChairController extends Controller
         if (!$term) {
             return collect();
         }
-        return CourseSection::whereHas('course.program', function ($q) use ($department) {
+        return CourseSection::whereHas('course', function ($q) use ($department) {
             $q->where('department_id', $department->id);
         })->where('term_id', $term->id)->pluck('id');
     }
@@ -110,7 +110,7 @@ class DepartmentChairController extends Controller
             return response()->json(['data' => []]);
         }
 
-        $sections = CourseSection::whereHas('course.program', function ($q) use ($department) {
+        $sections = CourseSection::whereHas('course', function ($q) use ($department) {
             $q->where('department_id', $department->id);
         })
             ->where('term_id', $currentTerm->id)
@@ -249,7 +249,7 @@ class DepartmentChairController extends Controller
     {
         [$staff, $department] = $this->getChairContext($request);
 
-        $section = CourseSection::whereHas('course.program', function ($q) use ($department) {
+        $section = CourseSection::whereHas('course', function ($q) use ($department) {
             $q->where('department_id', $department->id);
         })->findOrFail($sectionId);
 

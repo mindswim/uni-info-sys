@@ -9,7 +9,7 @@ class Term extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'academic_year', 'semester', 'start_date', 'end_date', 'add_drop_deadline'];
+    protected $fillable = ['name', 'academic_year', 'semester', 'start_date', 'end_date', 'add_drop_deadline', 'is_current'];
     
     protected $casts = [
         'start_date' => 'date',

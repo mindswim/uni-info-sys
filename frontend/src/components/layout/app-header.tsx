@@ -8,12 +8,6 @@ import { GlobalSearch } from "@/components/global-search"
 import { NotificationsPanel } from "@/components/notifications-panel"
 
 interface AppHeaderProps {
-  user?: {
-    name: string
-    email: string
-    role: string
-    avatar?: string
-  }
   breadcrumbs?: Array<{
     label: string
     href?: string
@@ -22,7 +16,7 @@ interface AppHeaderProps {
   onSidebarToggle?: () => void
 }
 
-export function AppHeader({ user, breadcrumbs = [], sidebarCollapsed, onSidebarToggle }: AppHeaderProps) {
+export function AppHeader({ breadcrumbs = [], sidebarCollapsed, onSidebarToggle }: AppHeaderProps) {
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 px-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

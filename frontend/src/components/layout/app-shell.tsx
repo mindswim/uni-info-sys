@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { AppHeader } from "./app-header"
 import { AppSidebar } from "./app-sidebar"
-// import { useAuth } from "@/components/auth/auth-provider"
 
 interface AppShellProps {
   children: React.ReactNode
@@ -14,15 +13,8 @@ interface AppShellProps {
 }
 
 export function AppShell({ children, breadcrumbs }: AppShellProps) {
-  // const { user } = useAuth()
-  // Mock user for now
-  const user = {
-    name: "Demo User",
-    email: "demo@university.edu",
-    roles: ["Admin"]
-  }
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  
+
   return (
     <div className={`h-screen transition-all duration-300 ${
       sidebarCollapsed
@@ -40,7 +32,6 @@ export function AppShell({ children, breadcrumbs }: AppShellProps) {
       {/* Main Content */}
       <div className="flex flex-col h-screen overflow-hidden">
         <AppHeader
-          user={user}
           breadcrumbs={breadcrumbs}
           sidebarCollapsed={sidebarCollapsed}
           onSidebarToggle={() => setSidebarCollapsed(!sidebarCollapsed)}

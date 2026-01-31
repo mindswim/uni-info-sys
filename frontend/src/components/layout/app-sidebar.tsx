@@ -277,11 +277,18 @@ const navigationItems = {
   ]
 }
 
+function getRoleKey(user: ReturnType<typeof useAuth>['user']): keyof typeof navigationItems {
+  const name = user?.roles?.[0]?.name?.toLowerCase()
+  if (name === 'admin') return 'admin'
+  if (name === 'staff' || name === 'instructor') return 'staff'
+  if (name === 'department-chair') return 'department-chair'
+  return 'student'
+}
+
 export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
-  const { user, logout } = useAuth()
-  // Roles are now always objects with {id, name, permissions}
-  const userRole = user?.roles?.[0]?.name?.toLowerCase() || 'student'
-  const roleNavigation = navigationItems[userRole as keyof typeof navigationItems] || navigationItems.student
+  const { user, isLoading, logout } = useAuth()
+  const userRole = getRoleKey(user)
+  const roleNavigation = navigationItems[userRole]
 
   return (
     <div className="h-screen flex flex-col">
@@ -317,7 +324,17 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
       
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {roleNavigation.map((group) => (
+        {isLoading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="space-y-2">
+                {!collapsed && <div className="h-3 w-16 bg-muted rounded animate-pulse" />}
+                <div className="h-8 bg-muted rounded animate-pulse" />
+                <div className="h-8 bg-muted rounded animate-pulse" />
+              </div>
+            ))}
+          </div>
+        ) : roleNavigation.map((group) => (
           <div key={group.title}>
             {!collapsed && (
               <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">

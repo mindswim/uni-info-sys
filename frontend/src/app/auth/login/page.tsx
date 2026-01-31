@@ -76,14 +76,21 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
 
-  const { login, isAuthenticated, isLoading: authLoading } = useAuth()
+  const { user, login, isAuthenticated, isLoading: authLoading } = useAuth()
+
+  const getDashboardPath = (u: typeof user) => {
+    const role = u?.roles?.[0]?.name?.toLowerCase()
+    if (role === 'admin') return '/admin'
+    if (role === 'staff' || role === 'instructor') return '/faculty'
+    return '/student'
+  }
 
   useEffect(() => {
     // Check if already authenticated, but only after initial load
-    if (!authLoading && isAuthenticated) {
-      router.push('/')
+    if (!authLoading && isAuthenticated && user) {
+      router.push(getDashboardPath(user))
     }
-  }, [isAuthenticated, authLoading, router])
+  }, [isAuthenticated, authLoading, user, router])
 
   useEffect(() => {
     // Clear any existing errors when component mounts or fields change
@@ -99,8 +106,7 @@ export default function LoginPage() {
 
     try {
       await login(email, password)
-      // Don't push immediately, let the useEffect handle redirect
-      router.push('/')
+      // useEffect watches user state and redirects to the correct dashboard
     } catch (err) {
       console.error('Login failed:', err)
       setError(err instanceof Error ? err.message : 'Login failed. Please check your credentials.')
@@ -115,8 +121,7 @@ export default function LoginPage() {
 
     try {
       await login(persona.email, persona.password)
-      // Don't push immediately, let the useEffect handle redirect
-      router.push('/')
+      // useEffect watches user state and redirects to the correct dashboard
     } catch (err) {
       console.error('Demo login failed:', err)
       setError(err instanceof Error ? err.message : 'Demo login failed')

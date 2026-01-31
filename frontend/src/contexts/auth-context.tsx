@@ -150,9 +150,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Cookie is already set by the API route for middleware
       storage.setToken(data.token)
 
-      // Extract all permissions from roles (backend now returns roles with permissions)
+      // Normalize roles: backend may return strings ["Admin"] or objects [{id,name,permissions}]
+      const normalizedRoles: Role[] = (data.user.roles || []).map((role: string | Role) => {
+        if (typeof role === 'string') {
+          return { id: 0, name: role, permissions: [] }
+        }
+        return role
+      })
+
+      // Extract all permissions from roles
       const permissions = new Set<string>()
-      data.user.roles?.forEach((role: Role) => {
+      normalizedRoles.forEach((role: Role) => {
         role.permissions?.forEach((permission: string) => {
           permissions.add(permission)
         })
@@ -160,6 +168,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const enrichedUser: User = {
         ...data.user,
+        roles: normalizedRoles,
         permissions: Array.from(permissions),
       }
 
@@ -208,9 +217,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         const userData = await response.json()
 
+        // Normalize roles: backend may return strings or objects
+        const normalizedRoles: Role[] = (userData.roles || []).map((role: string | Role) => {
+          if (typeof role === 'string') {
+            return { id: 0, name: role, permissions: [] }
+          }
+          return role
+        })
+
         // Extract all permissions from roles
         const permissions = new Set<string>()
-        userData.roles?.forEach((role: Role) => {
+        normalizedRoles.forEach((role: Role) => {
           role.permissions?.forEach((permission: string) => {
             permissions.add(permission)
           })
@@ -218,6 +235,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const enrichedUser: User = {
           ...userData,
+          roles: normalizedRoles,
           permissions: Array.from(permissions),
         }
 

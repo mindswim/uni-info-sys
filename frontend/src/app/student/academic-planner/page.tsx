@@ -16,9 +16,9 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost/a
 
 interface Course {
   id: number;
-  code: string;
-  name: string;
-  credit_hours: number;
+  course_code: string;
+  title: string;
+  credits: number;
   description?: string;
 }
 
@@ -69,12 +69,12 @@ export default function AcademicPlannerPage() {
 
       const [termsRes, plannedRes, coursesRes] = await Promise.all([
         fetch(`${API_BASE_URL}/terms`, { headers }),
-        fetch(`${API_BASE_URL}/academic-plans/me`, { headers }),
+        fetch(`${API_BASE_URL}/academic-plans/me`, { headers }).catch(() => null),
         fetch(`${API_BASE_URL}/courses`, { headers }),
       ]);
 
       const termsData = await termsRes.json();
-      const plannedData = await plannedRes.json();
+      const plannedData = plannedRes?.ok ? await plannedRes.json() : { data: [] };
       const coursesData = await coursesRes.json();
 
       setTerms(termsData.data || []);
@@ -92,7 +92,7 @@ export default function AcademicPlannerPage() {
 
     terms.forEach(term => {
       const termCourses = plannedCourses.filter(pc => pc.term_id === term.id);
-      const totalCredits = termCourses.reduce((sum, pc) => sum + pc.course.credit_hours, 0);
+      const totalCredits = termCourses.reduce((sum, pc) => sum + pc.course.credits, 0);
 
       if (totalCredits > 18) {
         issues.push({
@@ -173,8 +173,8 @@ export default function AcademicPlannerPage() {
   };
 
   const filteredCourses = availableCourses.filter(course =>
-    course.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    course.name.toLowerCase().includes(searchQuery.toLowerCase())
+    (course.course_code ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (course.title ?? '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (loading) {
@@ -215,7 +215,7 @@ export default function AcademicPlannerPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {terms.map(term => {
             const termCourses = plannedCourses.filter(pc => pc.term_id === term.id);
-            const totalCredits = termCourses.reduce((sum, pc) => sum + pc.course.credit_hours, 0);
+            const totalCredits = termCourses.reduce((sum, pc) => sum + pc.course.credits, 0);
 
             return (
               <Card key={term.id} className={term.is_current ? 'ring-2 ring-primary' : ''}>
@@ -247,9 +247,9 @@ export default function AcademicPlannerPage() {
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm truncate">{pc.course.code}</p>
+                            <p className="font-medium text-sm truncate">{pc.course.course_code}</p>
                             <p className="text-xs text-muted-foreground line-clamp-2">
-                              {pc.course.name}
+                              {pc.course.title}
                             </p>
                           </div>
                           <Button
@@ -266,7 +266,7 @@ export default function AcademicPlannerPage() {
                             {pc.status}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
-                            {pc.course.credit_hours} credits
+                            {pc.course.credits} credits
                           </span>
                         </div>
                       </div>
@@ -334,13 +334,13 @@ export default function AcademicPlannerPage() {
                                     <div className="flex items-start justify-between gap-4">
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                          <p className="font-medium">{course.code}</p>
+                                          <p className="font-medium">{course.course_code}</p>
                                           <Badge variant="secondary">
-                                            {course.credit_hours} credits
+                                            {course.credits} credits
                                           </Badge>
                                         </div>
                                         <p className="text-sm text-muted-foreground mt-1">
-                                          {course.name}
+                                          {course.title}
                                         </p>
                                         {course.description && (
                                           <p className="text-xs text-muted-foreground mt-2 line-clamp-2">

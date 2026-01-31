@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AppShell } from "@/components/layout/app-shell";
+import { PageShell } from "@/components/layout/page-shell";
 import {
   Card,
   CardContent,
@@ -89,15 +90,7 @@ export default function ChairFacultyPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Department Faculty
-          </h1>
-          <p className="text-muted-foreground">
-            Faculty members, teaching loads, and performance metrics
-          </p>
-        </div>
+      <PageShell title="Department Faculty" description="Faculty members, teaching loads, and performance metrics">
 
         <Tabs defaultValue="roster">
           <TabsList>
@@ -267,7 +260,7 @@ export default function ChairFacultyPage() {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
+      </PageShell>
     </AppShell>
   );
 }

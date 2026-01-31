@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AppShell } from "@/components/layout/app-shell";
+import { PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -185,12 +186,7 @@ export default function FacultyApprovalsPage() {
 
   return (
     <AppShell>
-      <div className="container mx-auto py-8 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Approval Requests</h1>
-          <p className="text-muted-foreground">Review and process student enrollment approval requests</p>
-        </div>
-
+      <PageShell title="Approval Requests" description="Review and process student enrollment approval requests">
         <Card>
           <CardHeader>
             <CardTitle>Pending Requests</CardTitle>
@@ -272,7 +268,6 @@ export default function FacultyApprovalsPage() {
             )}
           </CardContent>
         </Card>
-      </div>
 
       <Dialog open={denyDialogOpen} onOpenChange={setDenyDialogOpen}>
         <DialogContent>
@@ -324,6 +319,7 @@ export default function FacultyApprovalsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </PageShell>
     </AppShell>
   );
 }

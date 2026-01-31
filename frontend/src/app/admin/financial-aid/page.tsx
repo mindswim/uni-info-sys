@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -187,16 +188,11 @@ export default function FinancialAidAdminPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-4 p-6">
-        {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold">Financial Aid Administration</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage student financial aid packages and disbursements
-            </p>
-          </div>
-          <div className="flex gap-2">
+      <PageShell
+        title="Financial Aid Administration"
+        description="Manage student financial aid packages and disbursements"
+        actions={
+          <>
             <Button variant="outline" size="sm" onClick={fetchPackages}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
@@ -209,9 +205,9 @@ export default function FinancialAidAdminPage() {
               <Award className="h-4 w-4 mr-2" />
               New Package
             </Button>
-          </div>
-        </div>
-
+          </>
+        }
+      >
         {/* Stats */}
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           <Card>
@@ -349,7 +345,7 @@ export default function FinancialAidAdminPage() {
             </TableBody>
           </Table>
         </Card>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

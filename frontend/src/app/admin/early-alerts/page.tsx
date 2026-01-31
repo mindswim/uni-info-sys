@@ -1,6 +1,7 @@
 'use client'
 
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -8,14 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 export default function AdminEarlyAlertsPage() {
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Early Alerts Dashboard</h1>
-          <p className="text-muted-foreground">
-            Monitor and manage early alerts across all departments
-          </p>
-        </div>
-
+      <PageShell title="Early Alerts Dashboard" description="Monitor and manage early alerts across all departments">
         <div className="grid gap-4 md:grid-cols-4">
           {['Open', 'Acknowledged', 'In Progress', 'Resolved'].map((status) => (
             <Card key={status}>
@@ -57,7 +51,7 @@ export default function AdminEarlyAlertsPage() {
             </Table>
           </CardContent>
         </Card>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

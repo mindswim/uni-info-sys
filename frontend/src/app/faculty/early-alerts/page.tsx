@@ -1,6 +1,7 @@
 'use client'
 
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -10,20 +11,16 @@ import { Plus } from 'lucide-react'
 export default function FacultyEarlyAlertsPage() {
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Early Alerts</h1>
-            <p className="text-muted-foreground">
-              Flag at-risk students for advisor intervention
-            </p>
-          </div>
+      <PageShell
+        title="Early Alerts"
+        description="Flag at-risk students for advisor intervention"
+        actions={
           <Button>
             <Plus className="mr-2 h-4 w-4" />
             Raise Alert
           </Button>
-        </div>
-
+        }
+      >
         <Card>
           <CardHeader>
             <CardTitle>My Alerts</CardTitle>
@@ -51,7 +48,7 @@ export default function FacultyEarlyAlertsPage() {
             </Table>
           </CardContent>
         </Card>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

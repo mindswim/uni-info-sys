@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AppShell } from "@/components/layout/app-shell";
+import { PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -155,12 +156,7 @@ export default function RegistrationTimeTicketsPage() {
 
   return (
     <AppShell>
-      <div className="container mx-auto py-8 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Registration Time Tickets</h1>
-          <p className="text-muted-foreground">Manage student registration time windows</p>
-        </div>
-
+      <PageShell title="Registration Time Tickets" description="Manage student registration time windows">
         <Card>
           <CardHeader>
             <CardTitle>Bulk Assign Tickets</CardTitle>
@@ -276,7 +272,7 @@ export default function RegistrationTimeTicketsPage() {
             )}
           </CardContent>
         </Card>
-      </div>
+      </PageShell>
     </AppShell>
   );
 }

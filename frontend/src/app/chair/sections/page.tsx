@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AppShell } from "@/components/layout/app-shell";
+import { PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -183,16 +184,7 @@ export default function ChairSectionsPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Department Sections
-          </h1>
-          <p className="text-muted-foreground">
-            Manage course sections, assign instructors, and propose new
-            offerings
-          </p>
-        </div>
+      <PageShell title="Department Sections" description="Manage course sections, assign instructors, and propose new offerings">
 
         <Card>
           <CardHeader>
@@ -296,7 +288,7 @@ export default function ChairSectionsPage() {
             </Table>
           </CardContent>
         </Card>
-      </div>
+      </PageShell>
 
       <Dialog open={proposalOpen} onOpenChange={setProposalOpen}>
         <DialogContent>

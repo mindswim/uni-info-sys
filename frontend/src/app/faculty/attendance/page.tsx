@@ -1,17 +1,15 @@
 'use client'
 
+import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { AttendanceTab } from '@/components/faculty/attendance-tab'
 
 export default function FacultyAttendancePage() {
   return (
-    <div className="container mx-auto py-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">Attendance Tracking</h1>
-        <p className="text-muted-foreground">
-          Record and manage student attendance for your courses
-        </p>
-      </div>
-      <AttendanceTab />
-    </div>
+    <AppShell>
+      <PageShell title="Attendance Tracking" description="Record and manage student attendance for your courses">
+        <AttendanceTab />
+      </PageShell>
+    </AppShell>
   )
 }

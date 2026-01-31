@@ -1,6 +1,7 @@
 'use client'
 
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -10,20 +11,16 @@ import { Plus } from 'lucide-react'
 export default function AdminTransferCreditsPage() {
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Transfer Credit Evaluation</h1>
-            <p className="text-muted-foreground">
-              Evaluate transfer credits and manage course equivalency mappings
-            </p>
-          </div>
+      <PageShell
+        title="Transfer Credit Evaluation"
+        description="Evaluate transfer credits and manage course equivalency mappings"
+        actions={
           <Button>
             <Plus className="mr-2 h-4 w-4" />
             Add Equivalency
           </Button>
-        </div>
-
+        }
+      >
         <Tabs defaultValue="pending">
           <TabsList>
             <TabsTrigger value="pending">Pending Evaluation</TabsTrigger>
@@ -83,7 +80,7 @@ export default function AdminTransferCreditsPage() {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -265,16 +266,11 @@ export default function AdminHoldsPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-4 p-6">
-        {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold">Holds Management</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage student registration and transcript holds
-            </p>
-          </div>
-          <div className="flex gap-2">
+      <PageShell
+        title="Holds Management"
+        description="Manage student registration and transcript holds"
+        actions={
+          <>
             <Button variant="outline" size="sm" onClick={fetchHolds}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
@@ -390,9 +386,9 @@ export default function AdminHoldsPage() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-          </div>
-        </div>
-
+          </>
+        }
+      >
         {/* Summary Cards */}
         {summary && (
           <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
@@ -674,7 +670,7 @@ export default function AdminHoldsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

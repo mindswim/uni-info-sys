@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -208,7 +209,7 @@ export default function AdminOverviewPage() {
   if (loading) {
     return (
       <AppShell>
-        <div className="flex flex-col gap-4 p-6">
+        <PageShell>
           <WelcomeCard />
 
           {/* Header skeleton */}
@@ -275,7 +276,7 @@ export default function AdminOverviewPage() {
               </CardContent>
             </Card>
           </div>
-        </div>
+        </PageShell>
       </AppShell>
     )
   }
@@ -283,7 +284,7 @@ export default function AdminOverviewPage() {
   if (error) {
     return (
       <AppShell>
-        <div className="flex flex-col gap-6 p-6">
+        <PageShell>
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-2 text-destructive">
@@ -292,7 +293,7 @@ export default function AdminOverviewPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </PageShell>
       </AppShell>
     )
   }
@@ -311,7 +312,7 @@ export default function AdminOverviewPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-4 p-6">
+      <PageShell>
         {/* Welcome Card */}
         <WelcomeCard />
 
@@ -638,7 +639,7 @@ export default function AdminOverviewPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

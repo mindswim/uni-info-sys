@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -160,23 +161,18 @@ export default function AppointmentsPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-4 p-6">
-        {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold">Appointments</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage advising appointments with students
-            </p>
-          </div>
+      <PageShell
+        title="Appointments"
+        description="Manage advising appointments with students"
+        actions={
           <Button asChild>
             <Link href="/faculty/advisees">
               <Users className="h-4 w-4 mr-2" />
               View Advisees
             </Link>
           </Button>
-        </div>
-
+        }
+      >
         {/* Stats */}
         <div className="grid gap-4 grid-cols-3">
           <Card>
@@ -518,7 +514,7 @@ export default function AppointmentsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

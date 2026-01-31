@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AppShell } from "@/components/layout/app-shell";
+import { PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -199,18 +200,16 @@ export default function AdminEvaluationsPage() {
 
   return (
     <AppShell>
-      <div className="container mx-auto py-8 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Evaluation Forms</h1>
-            <p className="text-muted-foreground">Manage course evaluation forms and questions</p>
-          </div>
+      <PageShell
+        title="Evaluation Forms"
+        description="Manage course evaluation forms and questions"
+        actions={
           <Button onClick={openCreateDialog}>
             <Plus className="mr-2 h-4 w-4" />
             Create Form
           </Button>
-        </div>
-
+        }
+      >
         <Card>
           <CardHeader>
             <CardTitle>All Evaluation Forms</CardTitle>
@@ -253,7 +252,7 @@ export default function AdminEvaluationsPage() {
             )}
           </CardContent>
         </Card>
-      </div>
+      </PageShell>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">

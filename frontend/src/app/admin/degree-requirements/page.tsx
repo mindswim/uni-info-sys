@@ -3,6 +3,7 @@
 import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { DegreeRequirementsTab } from '@/components/admin/degree-requirements-tab'
 
 export default function DegreeRequirementsPage() {
@@ -19,15 +20,9 @@ function DegreeRequirementsContent() {
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
-        <div>
-          <h1 className="text-3xl font-bold">Degree Requirements</h1>
-          <p className="text-muted-foreground">
-            Manage degree requirements by program
-          </p>
-        </div>
+      <PageShell title="Degree Requirements" description="Manage degree requirements by program">
         <DegreeRequirementsTab programId={programId ? parseInt(programId) : undefined} />
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

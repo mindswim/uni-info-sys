@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -174,21 +175,16 @@ export default function WaitlistsPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-4 p-6">
-        {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold">Waitlist Management</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage course waitlists and promote students
-            </p>
-          </div>
+      <PageShell
+        title="Waitlist Management"
+        description="Manage course waitlists and promote students"
+        actions={
           <Button variant="outline" onClick={fetchWaitlist}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-        </div>
-
+        }
+      >
         {/* Stats */}
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           <Card>
@@ -353,7 +349,7 @@ export default function WaitlistsPage() {
             </Table>
           </Card>
         )}
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

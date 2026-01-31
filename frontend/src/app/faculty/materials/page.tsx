@@ -1,20 +1,15 @@
 "use client"
 
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { MaterialsTab } from '@/components/faculty/materials-tab'
 
 export default function MaterialsPage() {
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
-        <div>
-          <h1 className="text-3xl font-bold">Course Materials</h1>
-          <p className="text-muted-foreground">
-            Manage and share course materials with students
-          </p>
-        </div>
+      <PageShell title="Course Materials" description="Manage and share course materials with students">
         <MaterialsTab />
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

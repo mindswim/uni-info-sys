@@ -1,20 +1,14 @@
 'use client'
 
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, BookOpen, BarChart3, GraduationCap } from 'lucide-react'
 
 export default function ChairDashboardPage() {
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Department Chair Dashboard</h1>
-          <p className="text-muted-foreground">
-            Overview of your department's faculty, sections, and enrollment data
-          </p>
-        </div>
-
+      <PageShell title="Department Chair Dashboard" description="Overview of your department's faculty, sections, and enrollment data">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -57,7 +51,7 @@ export default function ChairDashboardPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -163,21 +164,16 @@ export default function SettingsPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-4 p-6 max-w-4xl">
-        {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold">System Settings</h1>
-            <p className="text-sm text-muted-foreground">
-              Configure system-wide settings and preferences
-            </p>
-          </div>
+      <PageShell
+        title="System Settings"
+        description="Configure system-wide settings and preferences"
+        actions={
           <Button onClick={handleSave} disabled={saving}>
             <Save className="h-4 w-4 mr-2" />
             {saving ? 'Saving...' : 'Save Changes'}
           </Button>
-        </div>
-
+        }
+      >
         <Tabs defaultValue="registration">
           <TabsList>
             <TabsTrigger value="registration">Registration</TabsTrigger>
@@ -483,7 +479,7 @@ export default function SettingsPage() {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

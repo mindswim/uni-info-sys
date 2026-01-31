@@ -1,20 +1,15 @@
 "use client"
 
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { StaffTab } from '@/components/admin/staff-tab'
 
 export default function StaffManagementPage() {
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
-        <div>
-          <h1 className="text-3xl font-bold">Staff Management</h1>
-          <p className="text-muted-foreground">
-            Manage staff members and their roles
-          </p>
-        </div>
+      <PageShell title="Staff Management" description="Manage staff members and their roles">
         <StaffTab />
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

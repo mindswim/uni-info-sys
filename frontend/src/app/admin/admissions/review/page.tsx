@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -214,7 +215,7 @@ export default function ReviewQueuePage() {
   if (applications.length === 0) {
     return (
       <AppShell>
-        <div className="p-6">
+        <PageShell>
           <EmptyState
             icon={CheckCircle}
             title="Review queue empty"
@@ -222,22 +223,17 @@ export default function ReviewQueuePage() {
             action={{ label: 'View All Applications', href: '/admin/admissions' }}
             variant="card"
           />
-        </div>
+        </PageShell>
       </AppShell>
     )
   }
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-4 p-6">
-        {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold">Application Review</h1>
-            <p className="text-sm text-muted-foreground">
-              Review and make decisions on applications
-            </p>
-          </div>
+      <PageShell
+        title="Application Review"
+        description="Review and make decisions on applications"
+        actions={
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
               {currentIndex + 1} of {applications.length} remaining
@@ -247,7 +243,8 @@ export default function ReviewQueuePage() {
               className="w-24 h-2"
             />
           </div>
-        </div>
+        }
+      >
 
         {/* Navigation */}
         <div className="flex justify-between items-center">
@@ -500,7 +497,7 @@ export default function ReviewQueuePage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

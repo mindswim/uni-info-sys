@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
+import { PageShell } from '@/components/layout/page-shell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -132,21 +133,13 @@ export default function AcademicStandingsPage() {
 
   return (
     <AppShell>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Academic Standings</h1>
-            <p className="text-gray-600 mt-1">Monitor and manage student academic performance</p>
-            {lastUpdated && (
-              <p className="text-sm text-gray-500 mt-1">
-                Last updated: {lastUpdated.toLocaleString()}
-              </p>
-            )}
-          </div>
+      <PageShell
+        title="Academic Standings"
+        description="Monitor and manage student academic performance"
+        actions={
           <Button
             onClick={handleRecalculateAll}
             disabled={recalculating || loading}
-            className="bg-blue-600 hover:bg-blue-700"
           >
             {recalculating ? (
               <span className="flex items-center gap-2">
@@ -160,7 +153,13 @@ export default function AcademicStandingsPage() {
               </span>
             )}
           </Button>
-        </div>
+        }
+      >
+        {lastUpdated && (
+          <p className="text-sm text-muted-foreground -mt-4">
+            Last updated: {lastUpdated.toLocaleString()}
+          </p>
+        )}
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
@@ -248,7 +247,7 @@ export default function AcademicStandingsPage() {
             </Card>
           </>
         ) : null}
-      </div>
+      </PageShell>
     </AppShell>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AppShell } from "@/components/layout/app-shell";
+import { PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -192,13 +193,7 @@ export default function ChairGradeReportsPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Grade Reports</h1>
-          <p className="text-muted-foreground">
-            Grade distribution and grade change request management
-          </p>
-        </div>
+      <PageShell title="Grade Reports" description="Grade distribution and grade change request management">
 
         <Tabs defaultValue="distribution">
           <TabsList>
@@ -393,7 +388,7 @@ export default function ChairGradeReportsPage() {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
+      </PageShell>
 
       <Dialog open={denyDialogOpen} onOpenChange={setDenyDialogOpen}>
         <DialogContent>

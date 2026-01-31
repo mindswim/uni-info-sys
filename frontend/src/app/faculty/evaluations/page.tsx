@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AppShell } from "@/components/layout/app-shell";
+import { PageShell } from "@/components/layout/page-shell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -132,12 +133,7 @@ export default function FacultyEvaluationsPage() {
 
   return (
     <AppShell>
-      <div className="container mx-auto py-8 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Course Evaluation Results</h1>
-          <p className="text-muted-foreground">View aggregated student feedback for your courses</p>
-        </div>
-
+      <PageShell title="Course Evaluation Results" description="View aggregated student feedback for your courses">
         <Card>
           <CardHeader>
             <CardTitle>Select Course Section</CardTitle>
@@ -280,7 +276,7 @@ export default function FacultyEvaluationsPage() {
             </Card>
           </>
         )}
-      </div>
+      </PageShell>
     </AppShell>
   );
 }

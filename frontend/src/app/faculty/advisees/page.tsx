@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { AppointmentAPI } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -179,30 +180,27 @@ export default function AdviseesPage() {
   if (loading) {
     return (
       <AppShell>
-        <PageSkeleton type="list" />
+        <PageShell>
+          <PageSkeleton type="list" />
+        </PageShell>
       </AppShell>
     )
   }
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-4 p-6">
-        {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold">My Advisees</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage and support your assigned students
-            </p>
-          </div>
+      <PageShell
+        title="My Advisees"
+        description="Manage and support your assigned students"
+        actions={
           <Button asChild>
             <Link href="/faculty/appointments">
               <Calendar className="h-4 w-4 mr-2" />
               View Appointments
             </Link>
           </Button>
-        </div>
-
+        }
+      >
         {/* Stats */}
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           <Card>
@@ -548,7 +546,7 @@ export default function AdviseesPage() {
             )}
           </DialogContent>
         </Dialog>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

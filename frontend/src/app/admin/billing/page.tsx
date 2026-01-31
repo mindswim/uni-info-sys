@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -159,16 +160,11 @@ export default function BillingPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-4 p-6">
-        {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold">Billing & Invoices</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage student billing and payment processing
-            </p>
-          </div>
-          <div className="flex gap-2">
+      <PageShell
+        title="Billing & Invoices"
+        description="Manage student billing and payment processing"
+        actions={
+          <>
             <Button variant="outline" size="sm" onClick={fetchInvoices}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
@@ -181,9 +177,9 @@ export default function BillingPage() {
               <Receipt className="h-4 w-4 mr-2" />
               Create Invoice
             </Button>
-          </div>
-        </div>
-
+          </>
+        }
+      >
         {/* Stats */}
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           <Card>
@@ -305,7 +301,7 @@ export default function BillingPage() {
             </TableBody>
           </Table>
         </Card>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

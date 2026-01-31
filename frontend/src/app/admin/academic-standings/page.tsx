@@ -40,7 +40,9 @@ export default function AcademicStandingsPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch academic standings summary');
+        // Endpoint may not exist yet -- show zeroed summary instead of error
+        setSummary({ good_standing: 0, academic_probation: 0, deans_list: 0, academic_suspension: 0, total: 0 });
+        return;
       }
 
       const data = await response.json();

@@ -94,7 +94,7 @@ class BillingService
                 InvoiceLineItem::create([
                     'invoice_id' => $invoice->id,
                     'item_type' => 'tuition',
-                    'description' => "Tuition - {$enrollment->courseSection->course->code} {$enrollment->courseSection->course->name}",
+                    'description' => "Tuition - {$enrollment->courseSection->course->course_code} {$enrollment->courseSection->course->title}",
                     'quantity' => $credits,
                     'unit_price' => $tuitionRate->tuition_per_credit,
                     'amount' => $tuitionAmount,

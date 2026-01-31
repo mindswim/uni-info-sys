@@ -96,13 +96,13 @@ export function BillingTab() {
       if (!user.student_id) {
         setInvoices([])
         setSummary({
-          total_charges: 0,
-          total_payments: 0,
-          total_adjustments: 0,
-          balance_due: 0,
-          overdue_amount: 0,
-          next_due_date: null,
-          invoice_count: 0,
+          total_invoiced: 0,
+          total_paid: 0,
+          total_balance: 0,
+          count_pending: 0,
+          count_partially_paid: 0,
+          count_paid: 0,
+          count_overdue: 0,
         })
         return
       }
@@ -142,13 +142,13 @@ export function BillingTab() {
       } else {
         // No billing data yet - set empty summary
         setSummary({
-          total_charges: 0,
-          total_payments: 0,
-          total_adjustments: 0,
-          balance_due: 0,
-          overdue_amount: 0,
-          next_due_date: null,
-          invoice_count: 0,
+          total_invoiced: 0,
+          total_paid: 0,
+          total_balance: 0,
+          count_pending: 0,
+          count_partially_paid: 0,
+          count_paid: 0,
+          count_overdue: 0,
         })
       }
     } catch (error) {

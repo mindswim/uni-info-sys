@@ -41,6 +41,17 @@ class DemoSeeder extends Seeder
         ]);
         $adminUser->roles()->attach($adminRole);
 
+        // Create a completed past term for academic history
+        $pastTerm = Term::firstOrCreate(
+            ['academic_year' => 2025, 'semester' => 'Spring'],
+            [
+                'name' => 'Spring 2025',
+                'start_date' => '2025-01-15',
+                'end_date' => '2025-05-15',
+                'add_drop_deadline' => '2025-01-30',
+            ]
+        );
+
         // Get current term (Fall 2025) - or create if doesn't exist
         $currentTerm = Term::firstOrCreate(
             ['academic_year' => 2025, 'semester' => 'Fall'],
@@ -352,6 +363,95 @@ class DemoSeeder extends Seeder
             'status' => 'enrolled',
             'enrollment_date' => now()->subDays(8),
         ]);
+
+        // ── Past-term academic history ──
+        // Create past-term course sections for transcript data
+        $pastCourses = [
+            Course::firstOrCreate(['course_code' => 'CS101'], [
+                'title' => 'Introduction to Programming',
+                'credits' => 3,
+                'department_id' => $csDepartment->id,
+                'description' => 'Programming fundamentals using Python.',
+            ]),
+            Course::firstOrCreate(['course_code' => 'MATH101'], [
+                'title' => 'Calculus I',
+                'credits' => 4,
+                'department_id' => Department::where('code', 'MATH')->first()?->id ?? $csDepartment->id,
+                'description' => 'Limits, derivatives, and integrals.',
+            ]),
+            Course::firstOrCreate(['course_code' => 'ENG101'], [
+                'title' => 'English Composition',
+                'credits' => 3,
+                'department_id' => Department::where('code', 'ENG')->first()?->id ?? $csDepartment->id,
+                'description' => 'Academic writing and rhetorical analysis.',
+            ]),
+            Course::firstOrCreate(['course_code' => 'CS220'], [
+                'title' => 'Full Stack Web Development',
+                'credits' => 3,
+                'department_id' => $csDepartment->id,
+                'description' => 'Modern web development with React, Node.js, and cloud deployment.',
+            ]),
+        ];
+
+        $pastSections = [];
+        foreach ($pastCourses as $course) {
+            $pastSections[] = CourseSection::firstOrCreate(
+                [
+                    'course_id' => $course->id,
+                    'term_id' => $pastTerm->id,
+                    'section_number' => '001',
+                ],
+                [
+                    'instructor_id' => $instructor->id,
+                    'room_id' => $room1->id,
+                    'capacity' => 30,
+                    'status' => 'closed',
+                    'schedule_days' => ['Tuesday', 'Thursday'],
+                    'start_time' => '10:00:00',
+                    'end_time' => '11:15:00',
+                ]
+            );
+        }
+
+        // David's past-term completed enrollments (4 courses, strong student)
+        $davidPastGrades = ['A-', 'B+', 'A', 'A-'];
+        foreach ($pastSections as $idx => $section) {
+            Enrollment::create([
+                'student_id' => $davidStudent->id,
+                'course_section_id' => $section->id,
+                'status' => 'completed',
+                'enrollment_date' => '2025-01-15',
+                'completion_date' => '2025-05-15',
+                'grade' => $davidPastGrades[$idx],
+            ]);
+        }
+
+        // Sophie's past-term completed enrollments (3 courses)
+        $sophiePastGrades = ['B+', 'A-', 'B'];
+        foreach (array_slice($pastSections, 0, 3) as $idx => $section) {
+            Enrollment::create([
+                'student_id' => $sophieStudent->id,
+                'course_section_id' => $section->id,
+                'status' => 'completed',
+                'enrollment_date' => '2025-01-15',
+                'completion_date' => '2025-05-15',
+                'grade' => $sophiePastGrades[$idx],
+            ]);
+        }
+
+        // Give David grades on current-term enrollments (mid-semester grades)
+        Enrollment::where('student_id', $davidStudent->id)
+            ->where('course_section_id', $aiSection->id)
+            ->update(['grade' => 'A-']);
+
+        Enrollment::where('student_id', $davidStudent->id)
+            ->where('course_section_id', $dsSection->id)
+            ->update(['grade' => 'B+']);
+
+        // Give Sophie a grade on her current enrollment
+        Enrollment::where('student_id', $sophieStudent->id)
+            ->where('course_section_id', $webSection->id)
+            ->update(['grade' => 'A']);
 
         $this->command->info('Demo data seeded successfully!');
         $this->command->info('');

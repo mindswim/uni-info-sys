@@ -49,6 +49,12 @@ class DatabaseSeeder extends Seeder
         // Step 5: Create course sections
         $this->seedCourseSections();
 
+        // Step 5b: Add realistic course catalog and faculty
+        $this->call([
+            RealisticCourseCatalogSeeder::class,
+            RealisticFacultySeeder::class,
+        ]);
+
         // Step 6: Create students and users
         $this->seedStudents();
 
@@ -168,9 +174,22 @@ class DatabaseSeeder extends Seeder
             ['department_id' => $departments[4]->id, 'course_code' => 'BUS201', 'title' => 'Marketing Principles', 'credits' => 3],
         ];
 
+        $descriptions = [
+            'CS101' => 'An introductory course teaching programming fundamentals using Python, covering variables, control flow, functions, and basic data structures.',
+            'CS201' => 'Explores linked lists, trees, hash tables, graphs, and sorting algorithms with emphasis on time/space complexity analysis.',
+            'CS301' => 'Advanced study of algorithm design paradigms including divide-and-conquer, dynamic programming, greedy methods, and NP-completeness.',
+            'EE101' => 'Covers Kirchhoff\'s laws, Thevenin/Norton equivalents, RC/RL circuits, and AC steady-state analysis using phasors.',
+            'EE201' => 'Study of semiconductor devices, diode circuits, BJT and MOSFET amplifiers, and operational amplifier applications.',
+            'MATH101' => 'Limits, derivatives, integrals, and the Fundamental Theorem of Calculus with applications to physics and engineering.',
+            'MATH201' => 'Techniques of integration, infinite series, parametric equations, and polar coordinates.',
+            'ENG101' => 'Develops academic writing skills through essay composition, rhetorical analysis, research methods, and revision strategies.',
+            'BUS101' => 'Overview of management, marketing, finance, and operations within modern business organizations.',
+            'BUS201' => 'Consumer behavior, market segmentation, product positioning, pricing strategies, and digital marketing channels.',
+        ];
+
         foreach ($courses as $courseData) {
             Course::create(array_merge($courseData, [
-                'description' => 'A comprehensive course covering fundamental concepts and practical applications.',
+                'description' => $descriptions[$courseData['course_code']] ?? 'Fundamental concepts and practical applications in the discipline.',
             ]));
         }
 
@@ -229,11 +248,25 @@ class DatabaseSeeder extends Seeder
         $staff = Staff::all();
         $rooms = Room::all();
 
+        $scheduleOptions = [
+            ['days' => ['Monday', 'Wednesday', 'Friday'], 'start' => '09:00:00', 'end' => '09:50:00'],
+            ['days' => ['Monday', 'Wednesday', 'Friday'], 'start' => '10:00:00', 'end' => '10:50:00'],
+            ['days' => ['Monday', 'Wednesday', 'Friday'], 'start' => '11:00:00', 'end' => '11:50:00'],
+            ['days' => ['Monday', 'Wednesday', 'Friday'], 'start' => '13:00:00', 'end' => '13:50:00'],
+            ['days' => ['Tuesday', 'Thursday'], 'start' => '09:30:00', 'end' => '10:45:00'],
+            ['days' => ['Tuesday', 'Thursday'], 'start' => '11:00:00', 'end' => '12:15:00'],
+            ['days' => ['Tuesday', 'Thursday'], 'start' => '14:00:00', 'end' => '15:15:00'],
+            ['days' => ['Tuesday', 'Thursday'], 'start' => '15:30:00', 'end' => '16:45:00'],
+            ['days' => ['Monday', 'Wednesday'], 'start' => '14:00:00', 'end' => '15:15:00'],
+            ['days' => ['Monday', 'Wednesday'], 'start' => '16:00:00', 'end' => '17:15:00'],
+        ];
+
         foreach ($terms as $term) {
             foreach ($courses as $course) {
                 // Create 1-2 sections per course per term
                 $sectionCount = rand(1, 2);
                 for ($i = 0; $i < $sectionCount; $i++) {
+                    $schedule = $scheduleOptions[array_rand($scheduleOptions)];
                     CourseSection::create([
                         'course_id' => $course->id,
                         'term_id' => $term->id,
@@ -242,9 +275,9 @@ class DatabaseSeeder extends Seeder
                         'section_number' => str_pad($i + 1, 3, '0', STR_PAD_LEFT),
                         'capacity' => rand(20, 40),
                         'status' => 'open',
-                        'schedule_days' => ['Monday', 'Wednesday', 'Friday'],
-                        'start_time' => '10:00:00',
-                        'end_time' => '11:00:00',
+                        'schedule_days' => $schedule['days'],
+                        'start_time' => $schedule['start'],
+                        'end_time' => $schedule['end'],
                     ]);
                 }
             }

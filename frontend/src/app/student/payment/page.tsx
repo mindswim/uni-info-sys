@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -171,14 +172,7 @@ export default function PaymentPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-4 p-6 max-w-4xl mx-auto">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold">Make a Payment</h1>
-          <p className="text-sm text-muted-foreground">
-            Pay your tuition and fees securely online
-          </p>
-        </div>
+      <PageShell title="Make a Payment" description="Pay your tuition and fees securely online">
 
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Left Column - Payment Form */}
@@ -426,7 +420,7 @@ export default function PaymentPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

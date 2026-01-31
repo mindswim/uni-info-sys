@@ -1,6 +1,7 @@
 "use client"
 
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -242,15 +243,10 @@ export default function DegreeAuditPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Degree Audit</h1>
-            <p className="text-muted-foreground mt-1">
-              Track your progress toward graduation
-            </p>
-          </div>
+      <PageShell
+        title="Degree Audit"
+        description="Track your progress toward graduation"
+        actions={
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm">
               <Printer className="h-4 w-4 mr-2" />
@@ -263,7 +259,8 @@ export default function DegreeAuditPage() {
               </Link>
             </Button>
           </div>
-        </div>
+        }
+      >
 
         {/* Student Info & Overall Progress */}
         <div className="grid gap-6 lg:grid-cols-3">
@@ -558,7 +555,7 @@ export default function DegreeAuditPage() {
             </p>
           </CardContent>
         </Card>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

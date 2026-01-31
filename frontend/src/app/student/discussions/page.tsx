@@ -1,19 +1,13 @@
 'use client'
 
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function StudentDiscussionsPage() {
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Discussions</h1>
-          <p className="text-muted-foreground">
-            Course discussion forums for your enrolled classes
-          </p>
-        </div>
-
+      <PageShell title="Discussions" description="Course discussion forums for your enrolled classes">
         <Card>
           <CardHeader>
             <CardTitle>My Course Discussions</CardTitle>
@@ -23,7 +17,7 @@ export default function StudentDiscussionsPage() {
             <p className="text-muted-foreground">Connect to API to load your enrolled courses and discussions</p>
           </CardContent>
         </Card>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

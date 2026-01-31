@@ -1,20 +1,15 @@
 'use client'
 
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { BillingTab } from '@/components/student/billing-tab'
 
 export default function StudentBillingPage() {
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">My Billing</h1>
-          <p className="text-muted-foreground">
-            View your invoices and make payments
-          </p>
-        </div>
+      <PageShell title="My Billing" description="View your invoices and make payments">
         <BillingTab />
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

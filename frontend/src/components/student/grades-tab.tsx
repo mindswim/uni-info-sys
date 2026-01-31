@@ -151,7 +151,7 @@ export function GradesTab() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Academic Progress</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Academic Record</h2>
         <p className="text-muted-foreground">Track your grades and GPA across all terms</p>
       </div>
 

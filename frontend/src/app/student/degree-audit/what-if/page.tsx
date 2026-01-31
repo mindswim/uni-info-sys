@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
+import { PageShell } from '@/components/layout/page-shell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -259,13 +260,7 @@ export default function WhatIfAnalysisPage() {
 
   return (
     <AppShell>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">What-If Analysis</h1>
-          <p className="text-gray-600 mt-1">
-            Simulate how your academic progress would look in a different program
-          </p>
-        </div>
+      <PageShell title="What-If Analysis" description="Simulate how your academic progress would look in a different program">
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
@@ -355,7 +350,7 @@ export default function WhatIfAnalysisPage() {
             )}
           </div>
         )}
-      </div>
+      </PageShell>
     </AppShell>
   );
 }

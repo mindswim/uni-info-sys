@@ -1,20 +1,15 @@
 'use client'
 
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { AdmissionsStatusTab } from '@/components/student/admissions-status-tab'
 
 export default function StudentAdmissionsPage() {
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Application Status</h1>
-          <p className="text-muted-foreground">
-            Track your admission application progress and view decisions
-          </p>
-        </div>
+      <PageShell title="Application Status" description="Track your admission application progress and view decisions">
         <AdmissionsStatusTab />
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

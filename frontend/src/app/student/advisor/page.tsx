@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { AppointmentAPI } from '@/lib/api-client'
 import { PageSkeleton } from '@/components/ui/page-skeleton'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -236,13 +237,7 @@ export default function AdvisorPage() {
   if (!advisor) {
     return (
       <AppShell>
-        <div className="flex flex-col gap-4 p-6">
-          <div>
-            <h1 className="text-2xl font-bold">My Advisor</h1>
-            <p className="text-sm text-muted-foreground">
-              Connect with your academic advisor for guidance and support
-            </p>
-          </div>
+        <PageShell title="My Advisor" description="Connect with your academic advisor for guidance and support">
           <Card>
             <CardContent className="py-12 text-center">
               <User className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
@@ -252,22 +247,17 @@ export default function AdvisorPage() {
               </p>
             </CardContent>
           </Card>
-        </div>
+        </PageShell>
       </AppShell>
     )
   }
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-4 p-6">
-        {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold">My Advisor</h1>
-            <p className="text-sm text-muted-foreground">
-              Connect with your academic advisor for guidance and support
-            </p>
-          </div>
+      <PageShell
+        title="My Advisor"
+        description="Connect with your academic advisor for guidance and support"
+        actions={
           <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
             <DialogTrigger asChild>
               <Button>
@@ -363,8 +353,8 @@ export default function AdvisorPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-        </div>
-
+        }
+      >
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Left Column - Advisor Info */}
           <div className="space-y-4">
@@ -574,7 +564,7 @@ export default function AdvisorPage() {
             </Card>
           </div>
         </div>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

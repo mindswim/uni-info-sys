@@ -1,22 +1,14 @@
 'use client'
 
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Download } from 'lucide-react'
 
 export default function StudentTaxFormsPage() {
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Tax Forms (1098-T)</h1>
-          <p className="text-muted-foreground">
-            View and download your 1098-T tuition statements for tax filing
-          </p>
-        </div>
-
+      <PageShell title="Tax Forms (1098-T)" description="View and download your 1098-T tuition statements for tax filing">
         <Card>
           <CardHeader>
             <CardTitle>Available Tax Forms</CardTitle>
@@ -43,7 +35,7 @@ export default function StudentTaxFormsPage() {
             </Table>
           </CardContent>
         </Card>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

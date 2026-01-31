@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
+import { PageShell } from '@/components/layout/page-shell';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -188,13 +189,7 @@ export default function AcademicPlannerPage() {
 
   return (
     <AppShell>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Academic Planner</h1>
-          <p className="text-muted-foreground mt-2">
-            Plan your course schedule across multiple terms
-          </p>
-        </div>
+      <PageShell title="Academic Planner" description="Plan your course schedule across multiple terms">
 
         {validationIssues.length > 0 && (
           <div className="space-y-2">
@@ -397,7 +392,7 @@ export default function AcademicPlannerPage() {
             );
           })}
         </div>
-      </div>
+      </PageShell>
     </AppShell>
   );
 }

@@ -1,20 +1,15 @@
 "use client"
 
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { EnrollmentsTab } from '@/components/student/enrollments-tab'
 
 export default function EnrollmentsPage() {
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
-        <div>
-          <h1 className="text-3xl font-bold">Enrollments</h1>
-          <p className="text-muted-foreground">
-            View and manage your course enrollments
-          </p>
-        </div>
+      <PageShell title="Enrollments" description="View and manage your course enrollments">
         <EnrollmentsTab />
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

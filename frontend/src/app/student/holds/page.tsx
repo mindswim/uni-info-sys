@@ -1,6 +1,7 @@
 "use client"
 
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -131,14 +132,7 @@ export default function HoldsAndToDoPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold">Holds & To-Do</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your account holds and complete required tasks
-          </p>
-        </div>
+      <PageShell title="Holds & To-Do" description="Manage your account holds and complete required tasks">
 
         {/* Summary Stats */}
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
@@ -494,7 +488,7 @@ export default function HoldsAndToDoPage() {
             )}
           </TabsContent>
         </Tabs>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

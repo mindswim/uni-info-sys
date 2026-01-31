@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import type { Student, Enrollment, Assignment, Announcement, Hold, ActionItem, ActionItemDashboard, HoldSummary } from '@/types/api-types'
+import { PageShell } from '@/components/layout/page-shell'
 import Link from 'next/link'
 import { format, formatDistanceToNow, isPast, isToday, isTomorrow } from 'date-fns'
 
@@ -170,7 +171,7 @@ export default function StudentDashboardPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 p-6">
+      <PageShell>
         {/* Holds Alert Banner */}
         {hasActiveHolds && (
           <div className={`rounded-lg border p-4 ${
@@ -602,7 +603,7 @@ export default function StudentDashboardPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

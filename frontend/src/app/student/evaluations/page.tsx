@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AppShell } from "@/components/layout/app-shell";
+import { PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -233,11 +234,7 @@ export default function StudentEvaluationsPage() {
 
   return (
     <AppShell>
-      <div className="container mx-auto py-8 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Course Evaluations</h1>
-          <p className="text-muted-foreground">Complete evaluations for your courses</p>
-        </div>
+      <PageShell title="Course Evaluations" description="Complete evaluations for your courses">
 
         {loading ? (
           <Card>
@@ -304,7 +301,6 @@ export default function StudentEvaluationsPage() {
             ))}
           </div>
         )}
-      </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -366,6 +362,7 @@ export default function StudentEvaluationsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </PageShell>
     </AppShell>
   );
 }

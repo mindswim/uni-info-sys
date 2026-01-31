@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -168,24 +169,20 @@ export default function DropAddPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-4 p-6">
-        {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold">Drop/Add Classes</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage your course enrollment for the current term
-            </p>
-          </div>
-          {canAdd && (
+      <PageShell
+        title="Drop/Add Classes"
+        description="Manage your course enrollment for the current term"
+        actions={
+          canAdd ? (
             <Button asChild>
               <Link href="/student/registration">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Classes
               </Link>
             </Button>
-          )}
-        </div>
+          ) : undefined
+        }
+      >
 
         {/* Important Dates */}
         <Card>
@@ -421,7 +418,7 @@ export default function DropAddPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+      </PageShell>
     </AppShell>
   )
 }

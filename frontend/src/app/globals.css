@@ -6,6 +6,7 @@
 @import '../styles/themes.css';
 @import '../styles/modern-tech.css';
 @import '../styles/classic-university.css';
+@import '../styles/linear-minimal.css';
 
 @custom-variant dark (&:is(.dark *));
 

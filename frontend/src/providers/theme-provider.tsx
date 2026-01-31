@@ -7,6 +7,7 @@ export type ThemeVariant =
   | "default"
   | "classic-university"
   | "modern-tech"
+  | "linear-minimal"
   | "warm-professional"
   | "forest-green"
   | "high-contrast"

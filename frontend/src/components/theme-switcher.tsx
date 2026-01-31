@@ -20,6 +20,7 @@ import {
 
 const themes = [
   { value: "default", label: "Default (shadcn)" },
+  { value: "linear-minimal", label: "Linear Minimal" },
   { value: "classic-university", label: "Classic University" },
   { value: "modern-tech", label: "Modern Tech" },
 ] as const

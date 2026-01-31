@@ -74,7 +74,10 @@ export function GradesTab() {
         }
       )
 
-      if (!enrollmentsResponse.ok) throw new Error('Failed to fetch enrollments')
+      if (!enrollmentsResponse.ok) {
+        setEnrollments([])
+        return
+      }
 
       const enrollmentsData = await enrollmentsResponse.json()
       setEnrollments(enrollmentsData.data || [])

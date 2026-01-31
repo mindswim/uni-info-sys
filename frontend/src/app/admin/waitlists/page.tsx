@@ -314,7 +314,7 @@ export default function WaitlistsPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {format(new Date(entry.created_at), 'MMM d, h:mm a')}
+                      {entry.created_at ? format(new Date(entry.created_at), 'MMM d, h:mm a') : '-'}
                     </TableCell>
                     <TableCell>
                       {getStatusBadge(entry.status)}

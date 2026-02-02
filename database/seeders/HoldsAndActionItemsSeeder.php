@@ -80,34 +80,7 @@ class HoldsAndActionItemsSeeder extends Seeder
         }
 
         if ($david) {
-            // David has an immunization hold
-            Hold::create([
-                'student_id' => $david->id,
-                'type' => Hold::TYPE_IMMUNIZATION,
-                'reason' => 'Missing immunization records',
-                'description' => 'Please submit proof of MMR vaccination or a waiver form to Student Health Services.',
-                'severity' => Hold::SEVERITY_WARNING,
-                'prevents_registration' => true,
-                'prevents_transcript' => false,
-                'prevents_graduation' => false,
-                'placed_by' => $admin?->id,
-                'department' => 'Student Health Services',
-                'placed_at' => now()->subDays(10),
-            ]);
-
             // Action items for David
-            ActionItem::create([
-                'student_id' => $david->id,
-                'type' => ActionItem::TYPE_IMMUNIZATION,
-                'title' => 'Submit immunization records',
-                'description' => 'Upload your MMR vaccination records or complete a waiver form.',
-                'priority' => ActionItem::PRIORITY_HIGH,
-                'action_url' => '/student/holds',
-                'action_label' => 'Upload Records',
-                'due_date' => now()->addDays(5),
-                'source' => 'health_services',
-            ]);
-
             ActionItem::create([
                 'student_id' => $david->id,
                 'type' => ActionItem::TYPE_COURSE_EVAL,

@@ -319,6 +319,11 @@ export class AdmissionAPI {
     return await ApiClient.post(`/admission-applications/${applicationId}/reject`, data)
   }
 
+  // Enroll (matriculate) an accepted application
+  static async enroll(applicationId: number): Promise<any> {
+    return await ApiClient.post(`/admission-applications/${applicationId}/enroll`)
+  }
+
   // Waitlist application
   static async waitlist(applicationId: number, data?: { notes?: string }): Promise<any> {
     return await ApiClient.post(`/admission-applications/${applicationId}/waitlist`, data)

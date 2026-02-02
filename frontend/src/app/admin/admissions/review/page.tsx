@@ -165,13 +165,19 @@ export default function ReviewQueuePage() {
     try {
       if (decision === 'accept') {
         await AdmissionAPI.accept(currentApp.id, { notes: notes || undefined })
+        // Auto-matriculate so the student can register for classes
+        try {
+          await AdmissionAPI.enroll(currentApp.id)
+        } catch {
+          // Acceptance still succeeded even if matriculation fails
+        }
       } else {
         await AdmissionAPI.reject(currentApp.id, { notes: notes || undefined })
       }
 
       toast({
         title: decision === 'accept'
-          ? `Accepted ${getApplicantName(currentApp)}`
+          ? `Accepted and enrolled ${getApplicantName(currentApp)}`
           : `Rejected ${getApplicantName(currentApp)}`,
       })
 

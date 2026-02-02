@@ -25,8 +25,9 @@ import {
   AlertTriangle,
   Check
 } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
+import Link from "next/link"
 
 interface CourseSection {
   id: number
@@ -78,6 +79,9 @@ export function RegistrationTab() {
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all")
   const [availableTerms, setAvailableTerms] = useState<any[]>([])
 
+  // Holds state
+  const [holdsSummary, setHoldsSummary] = useState<{ has_registration_hold: boolean; active: number } | null>(null)
+
   // Shopping cart state
   const [cart, setCart] = useState<CourseSection[]>([])
   const [showCart, setShowCart] = useState(false)
@@ -90,6 +94,20 @@ export function RegistrationTab() {
     try {
       setLoading(true)
       const token = sessionStorage.getItem('auth_token')
+
+      // Fetch holds summary
+      fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/holds/summary`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+          },
+        }
+      )
+        .then(res => res.ok ? res.json() : null)
+        .then(data => { if (data?.data) setHoldsSummary(data.data) })
+        .catch(() => {})
 
       // Fetch available course sections
       const sectionsResponse = await fetch(
@@ -324,6 +342,22 @@ export function RegistrationTab() {
           )}
         </Button>
       </div>
+
+      {/* Holds Banner */}
+      {holdsSummary?.has_registration_hold && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Registration Blocked</AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
+            <span>
+              You have {holdsSummary.active} active hold{holdsSummary.active !== 1 ? 's' : ''} preventing registration. Resolve {holdsSummary.active === 1 ? 'it' : 'them'} before enrolling in courses.
+            </span>
+            <Button variant="destructive" size="sm" asChild className="ml-4 shrink-0">
+              <Link href="/student/holds">View Holds</Link>
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Shopping Cart Panel */}
       {showCart && (

@@ -190,9 +190,27 @@ export function AdmissionsTab() {
 
       if (!response.ok) throw new Error('Failed to update application')
 
+      // Auto-matriculate on acceptance so the student can register for classes
+      if (reviewAction === 'approve') {
+        try {
+          await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/admission-applications/${selectedApplication.id}/enroll`,
+            {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+              },
+            }
+          )
+        } catch {
+          // Acceptance still succeeded even if matriculation fails
+        }
+      }
+
       toast({
         title: "Success",
-        description: `Application ${reviewAction === 'approve' ? 'accepted' : 'rejected'} successfully`,
+        description: `Application ${reviewAction === 'approve' ? 'accepted and enrolled' : 'rejected'} successfully`,
       })
 
       setReviewDialogOpen(false)

@@ -125,6 +125,19 @@ class AdmissionService
             // Transition application to enrolled
             $application->update(['status' => 'enrolled']);
 
+            // Create action item prompting the student to register for classes
+            \App\Models\ActionItem::create([
+                'student_id' => $student->id,
+                'type' => \App\Models\ActionItem::TYPE_REGISTRATION,
+                'title' => 'Register for classes',
+                'description' => 'You have been admitted! Browse available courses and register for your first semester.',
+                'priority' => \App\Models\ActionItem::PRIORITY_HIGH,
+                'action_url' => '/student/registration',
+                'action_label' => 'Register Now',
+                'due_date' => now()->addDays(14),
+                'source' => 'admission_system',
+            ]);
+
             // Notify the student
             SendApplicationStatusNotification::dispatch($application);
 

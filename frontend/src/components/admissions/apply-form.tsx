@@ -2,15 +2,15 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
-import { Loader2, GraduationCap, Send, ArrowLeft } from "lucide-react"
+import { Loader2, Send, ArrowLeft, LogIn } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
@@ -33,11 +33,6 @@ interface Program {
   }
 }
 
-interface ProgramChoice {
-  program_id: number
-  preference_order: number
-}
-
 export function ApplyForm() {
   const router = useRouter()
   const { user, isAuthenticated } = useAuth()
@@ -53,12 +48,6 @@ export function ApplyForm() {
   const [selectedPrograms, setSelectedPrograms] = useState<number[]>([])
   const [personalStatement, setPersonalStatement] = useState("")
 
-  // Personal info (for non-authenticated users)
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
-  const [email, setEmail] = useState("")
-  const [phone, setPhone] = useState("")
-
   useEffect(() => {
     fetchData()
   }, [])
@@ -67,38 +56,20 @@ export function ApplyForm() {
     try {
       setLoading(true)
       const token = sessionStorage.getItem('auth_token')
+      const headers: Record<string, string> = { 'Accept': 'application/json' }
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
 
-      // Fetch available terms
-      const termsResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/terms`,
-        {
-          headers: token ? {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-          } : {
-            'Accept': 'application/json',
-          },
-        }
-      )
+      const [termsResponse, programsResponse] = await Promise.all([
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/terms`, { headers }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/programs`, { headers }),
+      ])
 
       if (termsResponse.ok) {
         const termsData = await termsResponse.json()
         setTerms(termsData.data || [])
       }
-
-      // Fetch available programs
-      const programsResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/programs`,
-        {
-          headers: token ? {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-          } : {
-            'Accept': 'application/json',
-          },
-        }
-      )
-
       if (programsResponse.ok) {
         const programsData = await programsResponse.json()
         setPrograms(programsData.data || [])
@@ -129,6 +100,11 @@ export function ApplyForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (!isAuthenticated) {
+      router.push('/auth/login?redirect=/apply')
+      return
+    }
+
     if (!selectedTerm) {
       toast({
         title: "Validation Error",
@@ -147,71 +123,41 @@ export function ApplyForm() {
       return
     }
 
-    // For non-authenticated users, validate personal info
-    if (!isAuthenticated) {
-      if (!firstName || !lastName || !email) {
-        toast({
-          title: "Validation Error",
-          description: "Please fill in all required personal information",
-          variant: "destructive",
-        })
-        return
-      }
-    }
-
     setSubmitting(true)
 
     try {
       const token = sessionStorage.getItem('auth_token')
-
-      // If user is authenticated, get their student ID
-      let studentId: number | null = null
-
-      if (isAuthenticated && user) {
-        // Get student profile to get student ID
-        const studentResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/students/me`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Accept': 'application/json',
-            },
-          }
-        )
-
-        if (studentResponse.ok) {
-          const studentData = await studentResponse.json()
-          studentId = studentData.data.id
-        } else {
-          throw new Error('Could not retrieve student profile')
-        }
+      const authHeaders = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       }
+
+      // Get student ID from profile
+      const studentResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/students/me`,
+        { headers: authHeaders }
+      )
+
+      if (!studentResponse.ok) {
+        throw new Error('Could not retrieve student profile. Make sure your account has a student record.')
+      }
+
+      const studentData = await studentResponse.json()
+      const studentId = studentData.data.id
 
       // Create the application
-      const applicationData: any = {
-        term_id: parseInt(selectedTerm),
-        comments: personalStatement || undefined,
-        status: 'submitted'
-      }
-
-      // If authenticated, include student_id
-      if (studentId) {
-        applicationData.student_id = studentId
-      }
-
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/admission-applications`,
         {
           method: 'POST',
-          headers: token ? {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          } : {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify(applicationData),
+          headers: authHeaders,
+          body: JSON.stringify({
+            student_id: studentId,
+            term_id: parseInt(selectedTerm),
+            comments: personalStatement || undefined,
+            status: 'submitted',
+          }),
         }
       )
 
@@ -223,42 +169,40 @@ export function ApplyForm() {
 
       const applicationId = result.data.id
 
-      // Add program choices
-      const programChoices: ProgramChoice[] = selectedPrograms.map((programId, index) => ({
-        program_id: programId,
-        preference_order: index + 1
-      }))
-
-      for (const choice of programChoices) {
-        await fetch(
+      // Add program choices, tracking failures
+      const choiceErrors: string[] = []
+      for (let i = 0; i < selectedPrograms.length; i++) {
+        const choiceResponse = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/admission-applications/${applicationId}/program-choices`,
           {
             method: 'POST',
-            headers: token ? {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            } : {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: JSON.stringify(choice),
+            headers: authHeaders,
+            body: JSON.stringify({
+              program_id: selectedPrograms[i],
+              preference_order: i + 1,
+            }),
           }
         )
+
+        if (!choiceResponse.ok) {
+          const programName = programs.find(p => p.id === selectedPrograms[i])?.name || `Program #${i + 1}`
+          choiceErrors.push(programName)
+        }
+      }
+
+      if (choiceErrors.length > 0 && choiceErrors.length === selectedPrograms.length) {
+        throw new Error('Failed to save any program choices. Please try editing your application later.')
       }
 
       toast({
         title: "Application Submitted!",
-        description: "Your application has been successfully submitted. You will be notified of the decision.",
+        description: choiceErrors.length > 0
+          ? `Application submitted, but some program choices failed to save: ${choiceErrors.join(', ')}. You can edit these later.`
+          : "Your application has been successfully submitted. You will be notified of the decision.",
       })
 
-      // Redirect after success
       setTimeout(() => {
-        if (isAuthenticated) {
-          router.push('/student')
-        } else {
-          router.push('/')
-        }
+        router.push('/student/admissions')
       }, 2000)
 
     } catch (error: any) {
@@ -293,63 +237,22 @@ export function ApplyForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Personal Information (for non-authenticated users) */}
+      {/* Login prompt for unauthenticated users */}
       {!isAuthenticated && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Personal Information</CardTitle>
-            <CardDescription>Please provide your contact information</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Alert>
-              <AlertDescription>
-                Note: You can create an account to track your application status after submission.
-              </AlertDescription>
-            </Alert>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name *</Label>
-                <Input
-                  id="firstName"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name *</Label>
-                <Input
-                  id="lastName"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  required
-                />
-              </div>
+        <Alert>
+          <LogIn className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>You need to be signed in to submit an application. You can browse programs below.</span>
+            <div className="flex gap-2 ml-4">
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/auth/login?redirect=/apply">Sign In</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link href="/auth/register?redirect=/apply">Create Account</Link>
+              </Button>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-            </div>
-          </CardContent>
-        </Card>
+          </AlertDescription>
+        </Alert>
       )}
 
       {/* Application Term */}
@@ -401,11 +304,13 @@ export function ApplyForm() {
                         className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-accent transition-colors cursor-pointer"
                         onClick={() => toggleProgramSelection(program.id)}
                       >
-                        <Checkbox
-                          checked={isSelected}
-                          onCheckedChange={() => toggleProgramSelection(program.id)}
-                          disabled={!isSelected && selectedPrograms.length >= 3}
-                        />
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={() => toggleProgramSelection(program.id)}
+                            disabled={!isSelected && selectedPrograms.length >= 3}
+                          />
+                        </div>
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center gap-2">
                             <p className="font-medium">{program.name}</p>
@@ -466,23 +371,32 @@ export function ApplyForm() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Cancel
         </Button>
-        <Button
-          type="submit"
-          disabled={submitting || selectedPrograms.length === 0 || !selectedTerm}
-          className="flex-1"
-        >
-          {submitting ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Submitting Application...
-            </>
-          ) : (
-            <>
-              <Send className="h-4 w-4 mr-2" />
-              Submit Application
-            </>
-          )}
-        </Button>
+        {isAuthenticated ? (
+          <Button
+            type="submit"
+            disabled={submitting || selectedPrograms.length === 0 || !selectedTerm}
+            className="flex-1"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Submitting Application...
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4 mr-2" />
+                Submit Application
+              </>
+            )}
+          </Button>
+        ) : (
+          <Button type="button" className="flex-1" asChild>
+            <Link href="/auth/login?redirect=/apply">
+              <LogIn className="h-4 w-4 mr-2" />
+              Sign In to Submit
+            </Link>
+          </Button>
+        )}
       </div>
     </form>
   )

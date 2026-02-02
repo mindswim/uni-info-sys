@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { Suspense, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,10 +15,19 @@ import {
   Lock,
   Eye,
   EyeOff,
+  Loader2,
 } from "lucide-react"
 import Link from "next/link"
 
 export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+      <RegisterForm />
+    </Suspense>
+  )
+}
+
+function RegisterForm() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -28,6 +37,8 @@ export default function RegisterPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect')
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,7 +47,7 @@ export default function RegisterPage() {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -63,7 +74,7 @@ export default function RegisterPage() {
         sessionStorage.setItem('auth_token_expiry', expiry.toString())
       }
 
-      router.push('/student/apply')
+      router.push(redirectTo || '/student/apply')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed')
     } finally {
@@ -202,7 +213,7 @@ export default function RegisterPage() {
             <div className="mt-6 pt-4 border-t text-center">
               <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
-                <Link href="/auth/login" className="text-primary hover:underline font-medium">
+                <Link href={redirectTo ? `/auth/login?redirect=${encodeURIComponent(redirectTo)}` : "/auth/login"} className="text-primary hover:underline font-medium">
                   Sign in
                 </Link>
               </p>

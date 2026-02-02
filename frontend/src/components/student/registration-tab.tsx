@@ -239,7 +239,7 @@ export function RegistrationTab() {
           }).then(async res => {
             if (!res.ok) {
               const error = await res.json()
-              throw new Error(error.message || 'Failed to enroll')
+              throw new Error(error.detail || error.message || 'Failed to enroll')
             }
             return res.json()
           })
@@ -247,17 +247,19 @@ export function RegistrationTab() {
       )
 
       const successful = results.filter(r => r.status === 'fulfilled').length
-      const failed = results.filter(r => r.status === 'rejected').length
+      const rejected = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected')
 
       if (successful > 0) {
         toast({
           title: "Enrollment Complete!",
-          description: `Successfully enrolled in ${successful} course${successful !== 1 ? 's' : ''}${failed > 0 ? `. ${failed} failed.` : ''}`,
+          description: `Successfully enrolled in ${successful} course${successful !== 1 ? 's' : ''}${rejected.length > 0 ? `. ${rejected.length} failed.` : ''}`,
         })
         clearCart()
         fetchData()
       } else {
-        throw new Error('All enrollments failed')
+        // Show the first distinct error reason from the backend
+        const reasons = [...new Set(rejected.map(r => r.reason?.message))]
+        throw new Error(reasons[0] || 'All enrollments failed')
       }
     } catch (error: any) {
       console.error('Enrollment error:', error)

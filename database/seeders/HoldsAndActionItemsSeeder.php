@@ -80,29 +80,41 @@ class HoldsAndActionItemsSeeder extends Seeder
         }
 
         if ($david) {
-            // Action items for David
+            // Graduation-related action items for senior David
+            ActionItem::create([
+                'student_id' => $david->id,
+                'type' => ActionItem::TYPE_GRADUATION,
+                'title' => 'Apply for Spring 2026 graduation',
+                'description' => 'Submit your graduation application to the Registrar. You are on track to complete all degree requirements this semester.',
+                'priority' => ActionItem::PRIORITY_HIGH,
+                'action_url' => '/student/graduation',
+                'action_label' => 'Apply Now',
+                'due_date' => now()->addDays(21),
+                'source' => 'registrar_system',
+            ]);
+
             ActionItem::create([
                 'student_id' => $david->id,
                 'type' => ActionItem::TYPE_COURSE_EVAL,
-                'title' => 'Complete course evaluations',
-                'description' => 'Please complete evaluations for your Fall 2024 courses. Your feedback helps improve teaching.',
+                'title' => 'Complete senior exit survey',
+                'description' => 'As a graduating senior, please complete the exit survey to help us improve the program for future students.',
                 'priority' => ActionItem::PRIORITY_NORMAL,
                 'action_url' => '/student/course-evaluations',
-                'action_label' => 'Start Evaluations',
-                'due_date' => now()->addDays(3),
+                'action_label' => 'Start Survey',
+                'due_date' => now()->addDays(30),
                 'source' => 'academic_system',
             ]);
 
             ActionItem::create([
                 'student_id' => $david->id,
-                'type' => ActionItem::TYPE_ADVISING,
-                'title' => 'Schedule advising appointment',
-                'description' => 'Meet with your academic advisor before registering for next semester.',
+                'type' => ActionItem::TYPE_GRADUATION,
+                'title' => 'Order cap and gown',
+                'description' => 'Order your commencement regalia from the campus bookstore before the deadline.',
                 'priority' => ActionItem::PRIORITY_NORMAL,
-                'action_url' => '/student/advisor',
-                'action_label' => 'Schedule Meeting',
-                'due_date' => now()->addDays(10),
-                'source' => 'advising_system',
+                'action_url' => '/student/graduation',
+                'action_label' => 'Order Regalia',
+                'due_date' => now()->addDays(45),
+                'source' => 'registrar_system',
             ]);
 
             // Completed item
@@ -110,7 +122,7 @@ class HoldsAndActionItemsSeeder extends Seeder
                 'student_id' => $david->id,
                 'type' => ActionItem::TYPE_PAYMENT,
                 'title' => 'Pay tuition balance',
-                'description' => 'Fall 2024 tuition payment was received.',
+                'description' => 'Fall 2025 tuition payment was received.',
                 'priority' => ActionItem::PRIORITY_NORMAL,
                 'status' => ActionItem::STATUS_COMPLETED,
                 'completed_at' => now()->subDays(15),

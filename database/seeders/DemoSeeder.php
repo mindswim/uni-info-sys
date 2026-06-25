@@ -217,7 +217,7 @@ class DemoSeeder extends Seeder
             'status' => 'pending',
         ]);
 
-        // STUDENT 2: David Park - Accepted and Enrolled
+        // STUDENT 2: David Park - Senior nearing graduation
         $david = User::create([
             'name' => 'David Park',
             'email' => 'david@demo.com',
@@ -228,7 +228,7 @@ class DemoSeeder extends Seeder
 
         $davidStudent = Student::create([
             'user_id' => $david->id,
-            'student_number' => 'STU2025002',
+            'student_number' => 'STU2022015',
             'first_name' => 'David',
             'last_name' => 'Park',
             'date_of_birth' => '2004-11-22',
@@ -243,15 +243,23 @@ class DemoSeeder extends Seeder
             'emergency_contact_name' => 'Min-Jung Park',
             'emergency_contact_phone' => '+82-2-555-4321',
             'major_program_id' => $csProgram->id,
+            'enrollment_status' => 'full_time',
+            'class_standing' => 'senior',
+            'academic_status' => 'good_standing',
+            'admission_date' => '2022-08-15',
+            'expected_graduation_date' => '2026-05-15',
+            'total_credits_earned' => 92,
+            'credits_in_progress' => 14,
+            'gpa' => 3.62,
         ]);
 
-        // David's application - accepted
+        // David's application - enrolled
         $davidApp = AdmissionApplication::create([
             'student_id' => $davidStudent->id,
             'term_id' => $currentTerm->id,
-            'status' => 'accepted',
-            'application_date' => now()->subDays(30),
-            'decision_date' => now()->subDays(20),
+            'status' => 'enrolled',
+            'application_date' => '2022-04-15',
+            'decision_date' => '2022-05-10',
             'decision_status' => 'accepted',
             'comments' => 'Strong background in mathematics and programming competitions',
         ]);
@@ -263,21 +271,162 @@ class DemoSeeder extends Seeder
             'status' => 'accepted',
         ]);
 
-        // David is enrolled in AI course (taking 1 of 2 spots)
-        Enrollment::create([
-            'student_id' => $davidStudent->id,
-            'course_section_id' => $aiSection->id,
-            'status' => 'enrolled',
-            'enrollment_date' => now()->subDays(10),
+        // ── David's 6 semesters of completed coursework ──
+
+        // Create past terms
+        $davidTerms = [
+            'fall2022' => Term::firstOrCreate(
+                ['academic_year' => 2022, 'semester' => 'Fall'],
+                ['name' => 'Fall 2022', 'start_date' => '2022-08-22', 'end_date' => '2022-12-16', 'add_drop_deadline' => '2022-09-05']
+            ),
+            'spring2023' => Term::firstOrCreate(
+                ['academic_year' => 2023, 'semester' => 'Spring'],
+                ['name' => 'Spring 2023', 'start_date' => '2023-01-17', 'end_date' => '2023-05-12', 'add_drop_deadline' => '2023-01-31']
+            ),
+            'fall2023' => Term::firstOrCreate(
+                ['academic_year' => 2023, 'semester' => 'Fall'],
+                ['name' => 'Fall 2023', 'start_date' => '2023-08-21', 'end_date' => '2023-12-15', 'add_drop_deadline' => '2023-09-04']
+            ),
+            'spring2024' => Term::firstOrCreate(
+                ['academic_year' => 2024, 'semester' => 'Spring'],
+                ['name' => 'Spring 2024', 'start_date' => '2024-01-16', 'end_date' => '2024-05-10', 'add_drop_deadline' => '2024-01-30']
+            ),
+            'fall2024' => Term::firstOrCreate(
+                ['academic_year' => 2024, 'semester' => 'Fall'],
+                ['name' => 'Fall 2024', 'start_date' => '2024-08-19', 'end_date' => '2024-12-13', 'add_drop_deadline' => '2024-09-02']
+            ),
+        ];
+
+        // Humanities/social science electives not in catalog
+        $mathDept = Department::where('code', 'MATH')->first();
+        $engDept = Department::where('code', 'ENG')->first();
+        $histElective = Course::firstOrCreate(['course_code' => 'HIST 10'], [
+            'title' => 'World History',
+            'credits' => 3,
+            'department_id' => $engDept?->id ?? $csDepartment->id,
+            'description' => 'Survey of world civilizations from antiquity to the present.',
+        ]);
+        $socElective = Course::firstOrCreate(['course_code' => 'SOC 1'], [
+            'title' => 'Introduction to Sociology',
+            'credits' => 3,
+            'department_id' => $engDept?->id ?? $csDepartment->id,
+            'description' => 'Fundamentals of sociological theory and method.',
+        ]);
+        $philElective = Course::firstOrCreate(['course_code' => 'PHIL 25'], [
+            'title' => 'Ethics',
+            'credits' => 3,
+            'department_id' => $engDept?->id ?? $csDepartment->id,
+            'description' => 'Introduction to moral philosophy and applied ethics.',
+        ]);
+        $psychElective = Course::firstOrCreate(['course_code' => 'PSYCH 1'], [
+            'title' => 'General Psychology',
+            'credits' => 3,
+            'department_id' => $engDept?->id ?? $csDepartment->id,
+            'description' => 'Introduction to psychological science.',
+        ]);
+        $capstoneCourse = Course::firstOrCreate(['course_code' => 'CS 195'], [
+            'title' => 'Senior Capstone Project',
+            'credits' => 6,
+            'department_id' => $csDepartment->id,
+            'description' => 'Capstone project integrating knowledge from the CS curriculum.',
         ]);
 
-        // Also enrolled in Data Structures
-        Enrollment::create([
-            'student_id' => $davidStudent->id,
-            'course_section_id' => $dsSection->id,
-            'status' => 'enrolled',
-            'enrollment_date' => now()->subDays(10),
-        ]);
+        // Helper to look up catalog courses
+        $catalogCourse = fn (string $code) => Course::where('course_code', $code)->first();
+
+        // David's semester-by-semester history
+        $davidSemesters = [
+            ['term' => $davidTerms['fall2022'], 'courses' => [
+                [$catalogCourse('CS 61A'), 'B+'],
+                [$catalogCourse('MATH 16A'), 'B'],
+                [$catalogCourse('ENG 1A'), 'A-'],
+                [$histElective, 'B+'],
+            ]],
+            ['term' => $davidTerms['spring2023'], 'courses' => [
+                [$catalogCourse('CS 61B'), 'A-'],
+                [$catalogCourse('MATH 16B'), 'B+'],
+                [$catalogCourse('ENG 1B'), 'A'],
+                [$catalogCourse('STAT 135'), 'B'],
+            ]],
+            ['term' => $davidTerms['fall2023'], 'courses' => [
+                [$catalogCourse('CS 61C'), 'A'],
+                [$catalogCourse('CS 70'), 'A-'],
+                [$catalogCourse('MATH 53'), 'B+'],
+                [$socElective, 'A'],
+            ]],
+            ['term' => $davidTerms['spring2024'], 'courses' => [
+                [$catalogCourse('CS 162'), 'A-'],
+                [$catalogCourse('CS 170'), 'A'],
+                [$catalogCourse('MATH 54'), 'B+'],
+                [$philElective, 'A-'],
+            ]],
+            ['term' => $davidTerms['fall2024'], 'courses' => [
+                [$catalogCourse('CS 186'), 'A'],
+                [$catalogCourse('CS 188'), 'A-'],
+                [$catalogCourse('STAT 134'), 'A-'],
+                [$psychElective, 'B+'],
+            ]],
+            ['term' => $pastTerm, 'courses' => [ // Spring 2025
+                [$catalogCourse('CS 169'), 'A-'],
+                [$catalogCourse('CS 161'), 'B+'],
+                [$catalogCourse('ENG 45A'), 'A'],
+                [$catalogCourse('ECON 1'), 'A-'],
+            ]],
+        ];
+
+        foreach ($davidSemesters as $sem) {
+            $term = $sem['term'];
+            foreach ($sem['courses'] as [$course, $grade]) {
+                $section = CourseSection::firstOrCreate(
+                    ['course_id' => $course->id, 'term_id' => $term->id, 'section_number' => '001'],
+                    [
+                        'instructor_id' => $instructor->id,
+                        'room_id' => $room1->id,
+                        'capacity' => 30,
+                        'status' => 'closed',
+                        'schedule_days' => ['Tuesday', 'Thursday'],
+                        'start_time' => '10:00:00',
+                        'end_time' => '11:15:00',
+                    ]
+                );
+                Enrollment::create([
+                    'student_id' => $davidStudent->id,
+                    'course_section_id' => $section->id,
+                    'status' => 'completed',
+                    'enrollment_date' => $term->start_date,
+                    'completion_date' => $term->end_date,
+                    'grade' => $grade,
+                ]);
+            }
+        }
+
+        // David's current term (Fall 2025): senior capstone + upper-division CS
+        $davidCurrentCourses = [
+            [$catalogCourse('CS 184'), 'A-'],
+            [$catalogCourse('CS 189'), null],
+            [$capstoneCourse, null],
+        ];
+        foreach ($davidCurrentCourses as [$course, $midtermGrade]) {
+            $section = CourseSection::firstOrCreate(
+                ['course_id' => $course->id, 'term_id' => $currentTerm->id, 'section_number' => '001'],
+                [
+                    'instructor_id' => $instructor->id,
+                    'room_id' => $room1->id,
+                    'capacity' => 30,
+                    'status' => 'open',
+                    'schedule_days' => ['Monday', 'Wednesday'],
+                    'start_time' => '10:00:00',
+                    'end_time' => '11:30:00',
+                ]
+            );
+            Enrollment::create([
+                'student_id' => $davidStudent->id,
+                'course_section_id' => $section->id,
+                'status' => 'enrolled',
+                'enrollment_date' => $currentTerm->start_date,
+                'grade' => $midtermGrade,
+            ]);
+        }
 
         // STUDENT 3: Sophie Turner - Waitlisted for popular course
         $sophie = User::create([
@@ -325,24 +474,40 @@ class DemoSeeder extends Seeder
             'status' => 'accepted',
         ]);
 
-        // Create another student to fill the second AI spot
-        $fillerUser = User::create([
+        // Create filler students to fill AI spots (David no longer takes AI)
+        $fillerUser1 = User::create([
             'name' => 'Alex Chen',
             'email' => 'alex@demo.com',
-            'password' => 'password', // Don't bcrypt - User model handles hashing
+            'password' => 'password',
             'email_verified_at' => now(),
         ]);
-        $fillerUser->roles()->attach($studentRole);
-
-        $fillerStudent = Student::factory()->create([
-            'user_id' => $fillerUser->id,
+        $fillerUser1->roles()->attach($studentRole);
+        $fillerStudent1 = Student::factory()->create([
+            'user_id' => $fillerUser1->id,
             'student_number' => 'STU2025004',
             'major_program_id' => $csProgram->id,
         ]);
-
-        // Fill the second AI spot
         Enrollment::create([
-            'student_id' => $fillerStudent->id,
+            'student_id' => $fillerStudent1->id,
+            'course_section_id' => $aiSection->id,
+            'status' => 'enrolled',
+            'enrollment_date' => now()->subDays(12),
+        ]);
+
+        $fillerUser2 = User::create([
+            'name' => 'Jordan Lee',
+            'email' => 'jordan@demo.com',
+            'password' => 'password',
+            'email_verified_at' => now(),
+        ]);
+        $fillerUser2->roles()->attach($studentRole);
+        $fillerStudent2 = Student::factory()->create([
+            'user_id' => $fillerUser2->id,
+            'student_number' => 'STU2025005',
+            'major_program_id' => $csProgram->id,
+        ]);
+        Enrollment::create([
+            'student_id' => $fillerStudent2->id,
             'course_section_id' => $aiSection->id,
             'status' => 'enrolled',
             'enrollment_date' => now()->subDays(9),
@@ -364,9 +529,8 @@ class DemoSeeder extends Seeder
             'enrollment_date' => now()->subDays(8),
         ]);
 
-        // ── Past-term academic history ──
-        // Create past-term course sections for transcript data
-        $pastCourses = [
+        // ── Sophie's past-term academic history ──
+        $sophiePastCourses = [
             Course::firstOrCreate(['course_code' => 'CS101'], [
                 'title' => 'Introduction to Programming',
                 'credits' => 3,
@@ -385,22 +549,12 @@ class DemoSeeder extends Seeder
                 'department_id' => Department::where('code', 'ENG')->first()?->id ?? $csDepartment->id,
                 'description' => 'Academic writing and rhetorical analysis.',
             ]),
-            Course::firstOrCreate(['course_code' => 'CS220'], [
-                'title' => 'Full Stack Web Development',
-                'credits' => 3,
-                'department_id' => $csDepartment->id,
-                'description' => 'Modern web development with React, Node.js, and cloud deployment.',
-            ]),
         ];
 
-        $pastSections = [];
-        foreach ($pastCourses as $course) {
-            $pastSections[] = CourseSection::firstOrCreate(
-                [
-                    'course_id' => $course->id,
-                    'term_id' => $pastTerm->id,
-                    'section_number' => '001',
-                ],
+        $sophiePastGrades = ['B+', 'A-', 'B'];
+        foreach ($sophiePastCourses as $idx => $course) {
+            $section = CourseSection::firstOrCreate(
+                ['course_id' => $course->id, 'term_id' => $pastTerm->id, 'section_number' => '001'],
                 [
                     'instructor_id' => $instructor->id,
                     'room_id' => $room1->id,
@@ -411,24 +565,6 @@ class DemoSeeder extends Seeder
                     'end_time' => '11:15:00',
                 ]
             );
-        }
-
-        // David's past-term completed enrollments (4 courses, strong student)
-        $davidPastGrades = ['A-', 'B+', 'A', 'A-'];
-        foreach ($pastSections as $idx => $section) {
-            Enrollment::create([
-                'student_id' => $davidStudent->id,
-                'course_section_id' => $section->id,
-                'status' => 'completed',
-                'enrollment_date' => '2025-01-15',
-                'completion_date' => '2025-05-15',
-                'grade' => $davidPastGrades[$idx],
-            ]);
-        }
-
-        // Sophie's past-term completed enrollments (3 courses)
-        $sophiePastGrades = ['B+', 'A-', 'B'];
-        foreach (array_slice($pastSections, 0, 3) as $idx => $section) {
             Enrollment::create([
                 'student_id' => $sophieStudent->id,
                 'course_section_id' => $section->id,
@@ -438,15 +574,6 @@ class DemoSeeder extends Seeder
                 'grade' => $sophiePastGrades[$idx],
             ]);
         }
-
-        // Give David grades on current-term enrollments (mid-semester grades)
-        Enrollment::where('student_id', $davidStudent->id)
-            ->where('course_section_id', $aiSection->id)
-            ->update(['grade' => 'A-']);
-
-        Enrollment::where('student_id', $davidStudent->id)
-            ->where('course_section_id', $dsSection->id)
-            ->update(['grade' => 'B+']);
 
         // Give Sophie a grade on her current enrollment
         Enrollment::where('student_id', $sophieStudent->id)
@@ -458,12 +585,12 @@ class DemoSeeder extends Seeder
         $this->command->info('Demo Accounts:');
         $this->command->info('Admin: admin@demo.com / password');
         $this->command->info('Student 1 (Just Applied): maria@demo.com / password');
-        $this->command->info('Student 2 (Enrolled): david@demo.com / password');
+        $this->command->info('Student 2 (Senior): david@demo.com / password');
         $this->command->info('Student 3 (Waitlisted): sophie@demo.com / password');
         $this->command->info('');
         $this->command->info('Demo Scenario:');
         $this->command->info('- Maria: Just submitted application from Mexico');
-        $this->command->info('- David: Accepted student from Korea, enrolled in 2 courses');
+        $this->command->info('- David: Senior from Korea, 92 credits, 3.62 GPA, graduating Spring 2026');
         $this->command->info('- Sophie: Local student, waitlisted for popular AI course');
         $this->command->info('- AI Course: Full (2/2 capacity) with Sophie on waitlist');
     }

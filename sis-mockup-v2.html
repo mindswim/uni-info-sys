@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniSys - Student Portal</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        slate: { 925:'#0c1222' },
+      },
+      fontFamily: {
+        sans: ['DM Sans', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      }
+    }
+  }
+}
+</script>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'DM Sans', system-ui, sans-serif; background: #f1f4f9; margin: 0; }
+
+  /* ── Top nav dropdowns ── */
+  .nav-dropdown { position:relative; }
+  .nav-dropdown-trigger { display:flex; align-items:center; gap:4px; padding:6px 12px; border-radius:6px; font-size:13px; font-weight:500; color:#64748b; cursor:pointer; transition:all 0.12s; white-space:nowrap; }
+  .nav-dropdown-trigger:hover { background:#f1f5f9; color:#1e293b; }
+  .nav-dropdown-trigger.active { background:#e2e8f0; color:#0f172a; }
+  .nav-dropdown-menu { display:none; position:absolute; top:calc(100% + 6px); left:0; min-width:220px; background:#fff; border:1px solid #e2e8f0; border-radius:10px; box-shadow:0 12px 40px rgba(0,0,0,0.1),0 2px 8px rgba(0,0,0,0.04); z-index:100; padding:6px; }
+  .nav-dropdown.open .nav-dropdown-menu { display:block; animation:dropIn 0.15s ease; }
+  .nav-dropdown-item { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:6px; font-size:13px; color:#475569; cursor:pointer; transition:all 0.1s; }
+  .nav-dropdown-item:hover { background:#f8fafc; color:#0f172a; }
+  .nav-dropdown-item svg { width:16px; height:16px; opacity:0.5; }
+  .nav-dropdown-sep { height:1px; background:#f1f5f9; margin:4px 8px; }
+
+  @keyframes dropIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ── Widget grid ── */
+  .widget { background:#fff; border:1px solid #e5e9f0; border-radius:14px; overflow:hidden; transition: box-shadow 0.2s, border-color 0.2s; position:relative; }
+  .widget:hover { box-shadow:0 4px 20px rgba(0,0,0,0.04); border-color:#d0d7e2; }
+  .widget-header { display:flex; align-items:center; justify-content:between; padding:16px 20px 0; }
+  .widget-title { font-size:13px; font-weight:600; color:#0f172a; display:flex; align-items:center; gap:8px; }
+  .widget-body { padding:16px 20px 20px; }
+  .widget-link { font-size:11px; font-weight:600; color:#6366f1; cursor:pointer; transition: color 0.1s; }
+  .widget-link:hover { color:#4338ca; }
+
+  /* Drag handle */
+  .drag-handle { position:absolute; top:8px; right:8px; width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.15s; cursor:grab; color:#94a3b8; }
+  .widget:hover .drag-handle { opacity:1; }
+  .drag-handle:hover { background:#f1f5f9; color:#64748b; }
+  .editing .drag-handle { opacity:1 !important; }
+  .editing .widget { border-style:dashed; }
+
+  /* ── Data table ── */
+  .dt { width:100%; border-collapse:collapse; font-size:13px; }
+  .dt th { text-align:left; padding:8px 12px; color:#94a3b8; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.8px; border-bottom:1px solid #f1f5f9; }
+  .dt td { padding:8px 12px; color:#334155; border-bottom:1px solid #f8fafc; }
+  .dt tbody tr:hover td { background:#fafbfd; }
+  .dt tbody tr:last-child td { border-bottom:none; }
+
+  /* ── Pills ── */
+  .pill { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600; letter-spacing:0.3px; }
+  .pill-green { background:#dcfce7; color:#166534; }
+  .pill-amber { background:#fef9c3; color:#854d0e; }
+  .pill-red { background:#ffe4e6; color:#9f1239; }
+  .pill-blue { background:#dbeafe; color:#1e40af; }
+  .pill-gray { background:#f1f5f9; color:#64748b; }
+  .pill-indigo { background:#e0e7ff; color:#3730a3; }
+
+  /* ── Grade chip ── */
+  .grade { display:inline-flex; align-items:center; justify-content:center; min-width:32px; height:22px; border-radius:6px; font-size:11px; font-weight:700; font-family:'JetBrains Mono',monospace; }
+  .grade-a { background:#dcfce7; color:#166534; }
+  .grade-b { background:#dbeafe; color:#1e40af; }
+  .grade-c { background:#fef9c3; color:#854d0e; }
+
+  /* ── Schedule blocks ── */
+  .sched-block { border-radius:8px; padding:5px 7px; font-size:10px; line-height:1.35; font-weight:500; }
+
+  /* ── Progress ring ── */
+  .ring { transform: rotate(-90deg); }
+  .ring-bg { fill:none; stroke:#e5e9f0; stroke-width:6; }
+  .ring-fill { fill:none; stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset 0.8s ease; }
+
+  /* ── Customize overlay ── */
+  .customize-bar { position:fixed; bottom:0; left:0; right:0; background:#0f172a; color:#fff; padding:12px 24px; display:none; align-items:center; justify-content:space-between; z-index:200; }
+  .customize-bar.visible { display:flex; animation:slideUp 0.2s ease; }
+  @keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+
+  /* ── Entrance ── */
+  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  .widget { animation: fadeUp 0.35s ease both; }
+
+  /* ── Page transitions ── */
+  .page { display:none; }
+  .page.active { display:block; }
+
+  /* ── Full-page view header ── */
+  .page-head { margin-bottom:24px; }
+  .page-head h1 { font-size:22px; font-weight:700; color:#0f172a; }
+  .page-head p { font-size:13px; color:#64748b; margin-top:4px; }
+
+  /* ── Command palette ── */
+  .cmd-overlay { position:fixed; inset:0; background:rgba(15,23,42,0.4); backdrop-filter:blur(4px); z-index:300; display:none; align-items:flex-start; justify-content:center; padding-top:20vh; }
+  .cmd-overlay.open { display:flex; }
+  .cmd-box { width:560px; background:#fff; border-radius:14px; box-shadow:0 24px 80px rgba(0,0,0,0.2); overflow:hidden; animation:dropIn 0.15s ease; }
+  .cmd-input { width:100%; padding:16px 20px; border:none; outline:none; font-size:15px; font-family:'DM Sans',sans-serif; background:transparent; }
+  .cmd-results { border-top:1px solid #f1f5f9; max-height:320px; overflow-y:auto; }
+  .cmd-item { display:flex; align-items:center; gap:12px; padding:10px 20px; cursor:pointer; font-size:13px; color:#475569; }
+  .cmd-item:hover, .cmd-item.selected { background:#f8fafc; color:#0f172a; }
+  .cmd-item svg { width:16px; height:16px; color:#94a3b8; }
+  .cmd-item kbd { margin-left:auto; font-size:10px; background:#f1f5f9; padding:2px 6px; border-radius:4px; color:#94a3b8; font-family:'JetBrains Mono',monospace; }
+
+  ::-webkit-scrollbar { width:5px; }
+  ::-webkit-scrollbar-thumb { background:#d0d7e2; border-radius:3px; }
+</style>
+</head>
+<body>
+
+<!-- ===================== TOP NAV ===================== -->
+<header class="sticky top-0 z-50 bg-white border-b border-gray-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+  <div class="max-w-[1400px] mx-auto px-6 h-[56px] flex items-center justify-between">
+
+    <!-- Left: Logo + Nav -->
+    <div class="flex items-center gap-1">
+      <!-- Logo -->
+      <a href="#" onclick="showPage('home')" class="flex items-center gap-2.5 mr-6 group">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-sm shadow-indigo-200 group-hover:shadow-md group-hover:shadow-indigo-200 transition-shadow">
+          <svg class="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+        </div>
+        <span class="font-bold text-[15px] text-slate-800 tracking-tight">UniSys</span>
+      </a>
+
+      <!-- Navigation dropdowns -->
+      <div class="nav-dropdown" data-nav="reg">
+        <div class="nav-dropdown-trigger" onclick="toggleNav('reg')">
+          Registration
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="nav-dropdown-menu">
+          <div class="nav-dropdown-item" onclick="showPage('registration')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+            Register for Classes
+          </div>
+          <div class="nav-dropdown-item" onclick="showPage('schedule')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            My Schedule
+          </div>
+          <div class="nav-dropdown-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+            Drop / Add
+          </div>
+          <div class="nav-dropdown-sep"></div>
+          <div class="nav-dropdown-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            Course Catalog
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-dropdown" data-nav="acad">
+        <div class="nav-dropdown-trigger" onclick="toggleNav('acad')">
+          Academics
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="nav-dropdown-menu">
+          <div class="nav-dropdown-item" onclick="showPage('grades')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+            Grades
+          </div>
+          <div class="nav-dropdown-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            Degree Audit
+          </div>
+          <div class="nav-dropdown-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Transcripts
+          </div>
+          <div class="nav-dropdown-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2"/></svg>
+            Academic Planner
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-dropdown" data-nav="fin">
+        <div class="nav-dropdown-trigger" onclick="toggleNav('fin')">
+          Financial
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="nav-dropdown-menu">
+          <div class="nav-dropdown-item" onclick="showPage('billing')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1"/></svg>
+            Account Summary
+          </div>
+          <div class="nav-dropdown-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+            Make Payment
+          </div>
+          <div class="nav-dropdown-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4"/></svg>
+            Financial Aid
+          </div>
+          <div class="nav-dropdown-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            Tax Forms (1098-T)
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-dropdown-trigger" onclick="showPage('home')" style="color:#6366f1; font-weight:600;">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Home
+      </div>
+    </div>
+
+    <!-- Right: Search, notif, user -->
+    <div class="flex items-center gap-2">
+      <!-- Search trigger -->
+      <button onclick="openCmd()" class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition text-sm text-gray-400 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <span>Search...</span>
+        <kbd class="text-[10px] font-mono bg-white border border-gray-200 px-1.5 py-0.5 rounded text-gray-400 ml-4">/</kbd>
+      </button>
+
+      <!-- Term badge -->
+      <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-semibold cursor-pointer hover:bg-indigo-100 transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        Fall 2025
+      </div>
+
+      <!-- Notifications -->
+      <button class="relative p-2 rounded-lg hover:bg-gray-100 text-gray-400 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
+      </button>
+
+      <!-- User -->
+      <button class="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-lg hover:bg-gray-50 transition">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center text-white text-[11px] font-bold">DP</div>
+        <div class="text-left hidden sm:block">
+          <div class="text-[13px] font-medium text-slate-800 leading-tight">David Park</div>
+          <div class="text-[10px] text-gray-400 leading-tight">STU2025002</div>
+        </div>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== COMMAND PALETTE ===================== -->
+<div class="cmd-overlay" id="cmdOverlay" onclick="if(event.target===this)closeCmd()">
+  <div class="cmd-box">
+    <input class="cmd-input" placeholder="Search courses, pages, people..." id="cmdInput" oninput="filterCmd(this.value)">
+    <div class="cmd-results" id="cmdResults">
+      <div class="cmd-item selected"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg> Dashboard <kbd>Home</kbd></div>
+      <div class="cmd-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg> Register for Classes <kbd>Reg</kbd></div>
+      <div class="cmd-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4"/></svg> View Grades <kbd>Acad</kbd></div>
+      <div class="cmd-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> My Schedule <kbd>Reg</kbd></div>
+      <div class="cmd-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V7m0 9v1"/></svg> Account Summary <kbd>Fin</kbd></div>
+      <div class="cmd-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/></svg> Degree Audit <kbd>Acad</kbd></div>
+      <div class="cmd-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg> Holds & To-Do <kbd>Info</kbd></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MAIN CONTENT ===================== -->
+<main class="max-w-[1400px] mx-auto px-6 py-6">
+
+  <!-- ==================== HOME / WIDGET DASHBOARD ==================== -->
+  <div class="page active" id="page-home">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h1 class="text-xl font-bold text-slate-900">Welcome back, David</h1>
+        <p class="text-[13px] text-gray-400 mt-0.5">Fall 2025 &middot; Week 12 of 16</p>
+      </div>
+      <button onclick="toggleEdit()" id="customizeBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        Customize Dashboard
+      </button>
+    </div>
+
+    <!-- Alert -->
+    <div class="mb-5 flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60">
+      <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+        <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01"/></svg>
+      </div>
+      <div class="flex-1">
+        <span class="text-[13px] font-semibold text-amber-900">2 holds on your account</span>
+        <span class="text-[12px] text-amber-700 ml-2">Immunization compliance and advising hold must be cleared before Spring 2026 registration.</span>
+      </div>
+      <button class="text-[11px] font-semibold text-amber-700 hover:text-amber-900 px-3 py-1 rounded-md hover:bg-amber-100 transition whitespace-nowrap">Resolve &rarr;</button>
+    </div>
+
+    <!-- Widget Grid -->
+    <div class="grid grid-cols-12 gap-4" id="widgetGrid">
+
+      <!-- W1: GPA Ring -->
+      <div class="widget col-span-3" style="animation-delay:0s" data-widget="gpa">
+        <div class="drag-handle"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg></div>
+        <div class="widget-body flex items-center gap-5">
+          <div class="relative flex-shrink-0">
+            <svg width="80" height="80" class="ring">
+              <circle cx="40" cy="40" r="34" class="ring-bg"/>
+              <circle cx="40" cy="40" r="34" class="ring-fill" stroke="#6366f1" stroke-dasharray="213.6" stroke-dashoffset="42.7"/>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span class="text-xl font-bold text-slate-900 leading-none">3.65</span>
+              <span class="text-[9px] text-gray-400 mt-0.5">/ 4.00</span>
+            </div>
+          </div>
+          <div>
+            <div class="widget-title">Cumulative GPA</div>
+            <div class="flex items-center gap-1.5 mt-2">
+              <span class="pill pill-green">Dean's List</span>
+            </div>
+            <div class="text-[11px] text-gray-400 mt-2">13 credits graded</div>
+            <div class="text-[11px] text-gray-400">Term GPA: 3.50</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- W2: Degree Progress -->
+      <div class="widget col-span-3" style="animation-delay:0.04s" data-widget="degree">
+        <div class="drag-handle"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg></div>
+        <div class="widget-body">
+          <div class="flex items-center justify-between mb-3">
+            <div class="widget-title">Degree Progress</div>
+            <span class="widget-link" onclick="showPage('grades')">Details</span>
+          </div>
+          <div class="text-3xl font-bold text-slate-900 mb-1">27<span class="text-base font-normal text-gray-400">%</span></div>
+          <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
+            <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500" style="width:27%"></div>
+          </div>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px]">
+            <div class="flex justify-between"><span class="text-gray-400">Earned</span><span class="font-semibold text-slate-700">32 cr.</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Required</span><span class="font-semibold text-slate-700">120 cr.</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">In Progress</span><span class="font-semibold text-slate-700">18 cr.</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Remaining</span><span class="font-semibold text-slate-700">70 cr.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- W3: Account Balance -->
+      <div class="widget col-span-3" style="animation-delay:0.08s" data-widget="balance">
+        <div class="drag-handle"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg></div>
+        <div class="widget-body">
+          <div class="flex items-center justify-between mb-3">
+            <div class="widget-title">Account Balance</div>
+            <span class="widget-link" onclick="showPage('billing')">Pay Now</span>
+          </div>
+          <div class="text-3xl font-bold text-rose-600 mb-1">$4,250<span class="text-base">.00</span></div>
+          <div class="text-[11px] text-gray-400 mb-3">Next payment due Feb 15, 2026</div>
+          <div class="space-y-1.5 text-[11px]">
+            <div class="flex justify-between"><span class="text-gray-400">Total Charges</span><span class="font-mono font-medium text-slate-700">$14,550.00</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Financial Aid</span><span class="font-mono font-medium text-emerald-600">-$6,500.00</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Payments</span><span class="font-mono font-medium text-blue-600">-$3,800.00</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- W4: Holds & To-Do -->
+      <div class="widget col-span-3" style="animation-delay:0.12s" data-widget="holds">
+        <div class="drag-handle"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg></div>
+        <div class="widget-body">
+          <div class="widget-title mb-3">
+            Holds & To-Do
+            <span class="w-5 h-5 rounded-full bg-rose-100 text-rose-600 text-[10px] font-bold flex items-center justify-center">2</span>
+          </div>
+          <div class="space-y-2.5">
+            <div class="flex items-start gap-2.5 p-2.5 rounded-lg bg-rose-50/80 border border-rose-100">
+              <div class="w-1.5 h-1.5 rounded-full bg-rose-500 mt-1.5 flex-shrink-0"></div>
+              <div>
+                <div class="text-[11px] font-semibold text-rose-800">Immunization Hold</div>
+                <div class="text-[10px] text-rose-600">Submit MMR records</div>
+              </div>
+            </div>
+            <div class="flex items-start gap-2.5 p-2.5 rounded-lg bg-amber-50/80 border border-amber-100">
+              <div class="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 flex-shrink-0"></div>
+              <div>
+                <div class="text-[11px] font-semibold text-amber-800">Advising Hold</div>
+                <div class="text-[10px] text-amber-600">Meet with Dr. Kim by Dec 1</div>
+              </div>
+            </div>
+            <div class="flex items-start gap-2.5 p-2.5 rounded-lg bg-blue-50/80 border border-blue-100">
+              <div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></div>
+              <div>
+                <div class="text-[11px] font-semibold text-blue-800">Course Evaluations</div>
+                <div class="text-[10px] text-blue-600">6 evals due by Dec 15</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- W5: Current Schedule (wide) -->
+      <div class="widget col-span-8" style="animation-delay:0.16s" data-widget="schedule">
+        <div class="drag-handle"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg></div>
+        <div class="widget-header">
+          <div class="widget-title flex-1">
+            Current Courses
+            <span class="text-[11px] font-normal text-gray-400 ml-1">6 enrolled &middot; 18 cr.</span>
+          </div>
+          <span class="widget-link" onclick="showPage('schedule')">Full Schedule &rarr;</span>
+        </div>
+        <div class="widget-body pt-2 pb-1 px-0">
+          <table class="dt">
+            <thead>
+              <tr><th class="pl-5">Course</th><th>Title</th><th>Instructor</th><th>Schedule</th><th>Room</th><th>Grade</th><th class="pr-5">Status</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="pl-5"><span class="font-mono text-xs font-semibold text-indigo-700">CS 350</span></td>
+                <td class="font-medium text-slate-800">Intro to Artificial Intelligence</td>
+                <td class="text-gray-500 text-xs">Prof. A. Turing</td>
+                <td class="text-xs text-gray-500">MWF 10:00-11:30a</td>
+                <td class="text-xs text-gray-400">SCI 301</td>
+                <td><span class="grade grade-a">A-</span></td>
+                <td class="pr-5"><span class="pill pill-green">Enrolled</span></td>
+              </tr>
+              <tr>
+                <td class="pl-5"><span class="font-mono text-xs font-semibold text-indigo-700">CS 201</span></td>
+                <td class="font-medium text-slate-800">Data Structures & Algorithms</td>
+                <td class="text-gray-500 text-xs">Prof. A. Turing</td>
+                <td class="text-xs text-gray-500">TTh 2:00-3:30p</td>
+                <td class="text-xs text-gray-400">SCI 105</td>
+                <td><span class="grade grade-b">B+</span></td>
+                <td class="pr-5"><span class="pill pill-green">Enrolled</span></td>
+              </tr>
+              <tr>
+                <td class="pl-5"><span class="font-mono text-xs font-semibold text-indigo-700">MATH 301</span></td>
+                <td class="font-medium text-slate-800">Linear Algebra</td>
+                <td class="text-gray-500 text-xs">Dr. E. Noether</td>
+                <td class="text-xs text-gray-500">MWF 1:00-1:50p</td>
+                <td class="text-xs text-gray-400">ENG 204</td>
+                <td><span class="text-xs text-gray-300">&mdash;</span></td>
+                <td class="pr-5"><span class="pill pill-green">Enrolled</span></td>
+              </tr>
+              <tr>
+                <td class="pl-5"><span class="font-mono text-xs font-semibold text-indigo-700">PHYS 201</span></td>
+                <td class="font-medium text-slate-800">Classical Mechanics</td>
+                <td class="text-gray-500 text-xs">Dr. R. Feynman</td>
+                <td class="text-xs text-gray-500">TTh 11:00a-12:15p</td>
+                <td class="text-xs text-gray-400">SCI 102</td>
+                <td><span class="text-xs text-gray-300">&mdash;</span></td>
+                <td class="pr-5"><span class="pill pill-green">Enrolled</span></td>
+              </tr>
+              <tr>
+                <td class="pl-5"><span class="font-mono text-xs font-semibold text-indigo-700">CS 370</span></td>
+                <td class="font-medium text-slate-800">Computer Networks</td>
+                <td class="text-gray-500 text-xs">Prof. V. Cerf</td>
+                <td class="text-xs text-gray-500">MW 4:00-5:15p</td>
+                <td class="text-xs text-gray-400">ENG 110</td>
+                <td><span class="text-xs text-gray-300">&mdash;</span></td>
+                <td class="pr-5"><span class="pill pill-green">Enrolled</span></td>
+              </tr>
+              <tr>
+                <td class="pl-5"><span class="font-mono text-xs font-semibold text-indigo-700">ENG 205</span></td>
+                <td class="font-medium text-slate-800">Technical Writing</td>
+                <td class="text-gray-500 text-xs">Prof. S. Sontag</td>
+                <td class="text-xs text-gray-500">TTh 3:30-4:45p</td>
+                <td class="text-xs text-gray-400">LIB 308</td>
+                <td><span class="text-xs text-gray-300">&mdash;</span></td>
+                <td class="pr-5"><span class="pill pill-green">Enrolled</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- W6: Upcoming + Quick Actions -->
+      <div class="widget col-span-4" style="animation-delay:0.2s" data-widget="upcoming">
+        <div class="drag-handle"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg></div>
+        <div class="widget-body">
+          <div class="widget-title mb-4">Upcoming</div>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-rose-50 flex flex-col items-center justify-center flex-shrink-0">
+                <span class="text-[9px] font-bold text-rose-400 uppercase leading-none">Feb</span>
+                <span class="text-sm font-bold text-rose-600 leading-tight">15</span>
+              </div>
+              <div>
+                <div class="text-[12px] font-medium text-slate-800">Tuition Payment Due</div>
+                <div class="text-[10px] text-gray-400">Balance: $4,250.00</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-indigo-50 flex flex-col items-center justify-center flex-shrink-0">
+                <span class="text-[9px] font-bold text-indigo-400 uppercase leading-none">Mar</span>
+                <span class="text-sm font-bold text-indigo-600 leading-tight">24</span>
+              </div>
+              <div>
+                <div class="text-[12px] font-medium text-slate-800">Spring 2026 Registration</div>
+                <div class="text-[10px] text-gray-400">Time ticket: 9:00 AM</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-gray-50 flex flex-col items-center justify-center flex-shrink-0">
+                <span class="text-[9px] font-bold text-gray-400 uppercase leading-none">Dec</span>
+                <span class="text-sm font-bold text-gray-600 leading-tight">15</span>
+              </div>
+              <div>
+                <div class="text-[12px] font-medium text-slate-800">Course Evaluations Close</div>
+                <div class="text-[10px] text-gray-400">6 evaluations pending</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-gray-50 flex flex-col items-center justify-center flex-shrink-0">
+                <span class="text-[9px] font-bold text-gray-400 uppercase leading-none">Dec</span>
+                <span class="text-sm font-bold text-gray-600 leading-tight">20</span>
+              </div>
+              <div>
+                <div class="text-[12px] font-medium text-slate-800">Last Day of Classes</div>
+                <div class="text-[10px] text-gray-400">Final exams begin Dec 21</div>
+              </div>
+            </div>
+          </div>
+          <!-- Quick actions row -->
+          <div class="mt-5 pt-4 border-t border-gray-100">
+            <div class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">Quick Actions</div>
+            <div class="grid grid-cols-4 gap-2">
+              <button class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-50 transition">
+                <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center"><svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+                <span class="text-[10px] text-gray-500">Transcript</span>
+              </button>
+              <button class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-50 transition">
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center"><svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg></div>
+                <span class="text-[10px] text-gray-500">Pay</span>
+              </button>
+              <button class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-50 transition">
+                <div class="w-8 h-8 rounded-lg bg-sky-50 flex items-center justify-center"><svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z"/></svg></div>
+                <span class="text-[10px] text-gray-500">Print</span>
+              </button>
+              <button class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-50 transition">
+                <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center"><svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536"/></svg></div>
+                <span class="text-[10px] text-gray-500">Help</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- W7: Today's Schedule Mini -->
+      <div class="widget col-span-4" style="animation-delay:0.24s" data-widget="today">
+        <div class="drag-handle"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg></div>
+        <div class="widget-body">
+          <div class="flex items-center justify-between mb-3">
+            <div class="widget-title">Today &middot; Wednesday</div>
+            <span class="text-[10px] text-gray-400">Jan 29</span>
+          </div>
+          <div class="space-y-2">
+            <div class="flex gap-3 items-stretch">
+              <div class="w-1 rounded-full bg-indigo-400 flex-shrink-0"></div>
+              <div class="py-1">
+                <div class="text-[11px] font-semibold text-slate-800">CS 350 &middot; Intro to AI</div>
+                <div class="text-[10px] text-gray-400">10:00 - 11:30 AM &middot; SCI 301 &middot; Turing</div>
+              </div>
+            </div>
+            <div class="flex gap-3 items-stretch">
+              <div class="w-1 rounded-full bg-emerald-400 flex-shrink-0"></div>
+              <div class="py-1">
+                <div class="text-[11px] font-semibold text-slate-800">MATH 301 &middot; Linear Algebra</div>
+                <div class="text-[10px] text-gray-400">1:00 - 1:50 PM &middot; ENG 204 &middot; Noether</div>
+              </div>
+            </div>
+            <div class="flex gap-3 items-stretch">
+              <div class="w-1 rounded-full bg-amber-400 flex-shrink-0"></div>
+              <div class="py-1">
+                <div class="text-[11px] font-semibold text-slate-800">CS 370 &middot; Computer Networks</div>
+                <div class="text-[10px] text-gray-400">4:00 - 5:15 PM &middot; ENG 110 &middot; Cerf</div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 pt-3 border-t border-gray-100 text-center">
+            <span class="widget-link" onclick="showPage('schedule')">View Full Week &rarr;</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- W8: Messages -->
+      <div class="widget col-span-4" style="animation-delay:0.28s" data-widget="messages">
+        <div class="drag-handle"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg></div>
+        <div class="widget-body">
+          <div class="flex items-center justify-between mb-3">
+            <div class="widget-title">Messages <span class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-600 text-[10px] font-bold flex items-center justify-center">3</span></div>
+            <span class="widget-link">View All</span>
+          </div>
+          <div class="space-y-2.5">
+            <div class="flex items-start gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer transition">
+              <div class="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-[10px] font-bold text-violet-700 flex-shrink-0">AT</div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] font-semibold text-slate-800 truncate">Prof. Alan Turing</span>
+                  <span class="text-[10px] text-gray-400 flex-shrink-0">2h ago</span>
+                </div>
+                <div class="text-[11px] text-gray-500 truncate">RE: CS 350 Final project guidelines and team...</div>
+              </div>
+            </div>
+            <div class="flex items-start gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer transition">
+              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-bold text-blue-700 flex-shrink-0">FA</div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] font-semibold text-slate-800 truncate">Financial Aid Office</span>
+                  <span class="text-[10px] text-gray-400 flex-shrink-0">1d ago</span>
+                </div>
+                <div class="text-[11px] text-gray-500 truncate">Spring 2026 FAFSA reminder: deadline March 1</div>
+              </div>
+            </div>
+            <div class="flex items-start gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer transition">
+              <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-[10px] font-bold text-emerald-700 flex-shrink-0">RG</div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] font-semibold text-slate-800 truncate">Registrar's Office</span>
+                  <span class="text-[10px] text-gray-400 flex-shrink-0">3d ago</span>
+                </div>
+                <div class="text-[11px] text-gray-500 truncate">Spring 2026 registration time ticket assigned</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- W9: Recent Grades -->
+      <div class="widget col-span-4" style="animation-delay:0.32s" data-widget="recent-grades">
+        <div class="drag-handle"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg></div>
+        <div class="widget-body">
+          <div class="flex items-center justify-between mb-3">
+            <div class="widget-title">Recent Grades</div>
+            <span class="widget-link" onclick="showPage('grades')">All Grades &rarr;</span>
+          </div>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between py-2 border-b border-gray-50">
+              <div>
+                <div class="text-[11px] font-semibold text-slate-800">CS 101 &middot; Intro to Programming</div>
+                <div class="text-[10px] text-gray-400">Spring 2025 &middot; 3 cr.</div>
+              </div>
+              <span class="grade grade-a">A-</span>
+            </div>
+            <div class="flex items-center justify-between py-2 border-b border-gray-50">
+              <div>
+                <div class="text-[11px] font-semibold text-slate-800">MATH 101 &middot; Calculus I</div>
+                <div class="text-[10px] text-gray-400">Spring 2025 &middot; 4 cr.</div>
+              </div>
+              <span class="grade grade-b">B+</span>
+            </div>
+            <div class="flex items-center justify-between py-2 border-b border-gray-50">
+              <div>
+                <div class="text-[11px] font-semibold text-slate-800">ENG 101 &middot; English Composition</div>
+                <div class="text-[10px] text-gray-400">Spring 2025 &middot; 3 cr.</div>
+              </div>
+              <span class="grade grade-a">A</span>
+            </div>
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <div class="text-[11px] font-semibold text-slate-800">CS 220 &middot; Full Stack Web Dev</div>
+                <div class="text-[10px] text-gray-400">Spring 2025 &middot; 3 cr.</div>
+              </div>
+              <span class="grade grade-a">A-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end widget grid -->
+  </div><!-- end page-home -->
+
+  <!-- ==================== GRADES PAGE ==================== -->
+  <div class="page" id="page-grades">
+    <div class="page-head flex items-center justify-between">
+      <div>
+        <h1>Academic Record</h1>
+        <p>B.S. Computer Science &middot; Expected May 2027</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="px-4 py-2 text-xs font-medium border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition">Request Transcript</button>
+      </div>
+    </div>
+    <!-- Summary row -->
+    <div class="grid grid-cols-5 gap-3 mb-6">
+      <div class="widget"><div class="widget-body py-4 text-center"><div class="text-2xl font-bold text-slate-900">3.65</div><div class="text-[10px] text-gray-400 mt-1">Cumulative GPA</div><span class="pill pill-green mt-2">Dean's List</span></div></div>
+      <div class="widget"><div class="widget-body py-4 text-center"><div class="text-2xl font-bold text-slate-900">3.50</div><div class="text-[10px] text-gray-400 mt-1">Term GPA (F25)</div></div></div>
+      <div class="widget"><div class="widget-body py-4 text-center"><div class="text-2xl font-bold text-slate-900">32</div><div class="text-[10px] text-gray-400 mt-1">Credits Earned</div><div class="w-full h-1.5 bg-gray-100 rounded-full mt-2"><div class="h-full bg-indigo-500 rounded-full" style="width:27%"></div></div></div></div>
+      <div class="widget"><div class="widget-body py-4 text-center"><div class="text-2xl font-bold text-slate-900">88</div><div class="text-[10px] text-gray-400 mt-1">Remaining</div></div></div>
+      <div class="widget"><div class="widget-body py-4 text-center"><div class="text-2xl font-bold text-slate-900">2nd</div><div class="text-[10px] text-gray-400 mt-1">Year Standing</div><span class="pill pill-indigo mt-2">Sophomore</span></div></div>
+    </div>
+    <!-- Term tables -->
+    <div class="space-y-4">
+      <div class="widget">
+        <div class="widget-header pb-3"><div class="flex items-center gap-2"><span class="widget-title">Fall 2025</span><span class="pill pill-blue">In Progress</span></div><span class="text-xs text-gray-400 ml-auto">6 courses &middot; 18 cr. &middot; GPA: 3.50</span></div>
+        <div class="px-0 pb-0">
+          <table class="dt"><thead><tr><th class="pl-5">Course</th><th>Title</th><th>Credits</th><th>Grade</th><th>Points</th><th class="pr-5">Status</th></tr></thead>
+          <tbody>
+            <tr><td class="pl-5 font-mono text-xs font-semibold text-indigo-700">CS 350</td><td class="text-slate-800 font-medium">Intro to Artificial Intelligence</td><td>3</td><td><span class="grade grade-a">A-</span></td><td class="font-mono text-xs text-gray-500">3.70</td><td class="pr-5"><span class="pill pill-green">Enrolled</span></td></tr>
+            <tr><td class="pl-5 font-mono text-xs font-semibold text-indigo-700">CS 201</td><td class="text-slate-800 font-medium">Data Structures & Algorithms</td><td>3</td><td><span class="grade grade-b">B+</span></td><td class="font-mono text-xs text-gray-500">3.30</td><td class="pr-5"><span class="pill pill-green">Enrolled</span></td></tr>
+            <tr><td class="pl-5 font-mono text-xs font-semibold text-indigo-700">MATH 301</td><td class="text-slate-800 font-medium">Linear Algebra</td><td>3</td><td class="text-gray-300">&mdash;</td><td class="text-gray-300">&mdash;</td><td class="pr-5"><span class="pill pill-green">Enrolled</span></td></tr>
+            <tr><td class="pl-5 font-mono text-xs font-semibold text-indigo-700">PHYS 201</td><td class="text-slate-800 font-medium">Classical Mechanics</td><td>4</td><td class="text-gray-300">&mdash;</td><td class="text-gray-300">&mdash;</td><td class="pr-5"><span class="pill pill-green">Enrolled</span></td></tr>
+            <tr><td class="pl-5 font-mono text-xs font-semibold text-indigo-700">CS 370</td><td class="text-slate-800 font-medium">Computer Networks</td><td>3</td><td class="text-gray-300">&mdash;</td><td class="text-gray-300">&mdash;</td><td class="pr-5"><span class="pill pill-green">Enrolled</span></td></tr>
+            <tr><td class="pl-5 font-mono text-xs font-semibold text-indigo-700">ENG 205</td><td class="text-slate-800 font-medium">Technical Writing</td><td>2</td><td class="text-gray-300">&mdash;</td><td class="text-gray-300">&mdash;</td><td class="pr-5"><span class="pill pill-green">Enrolled</span></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+      <div class="widget">
+        <div class="widget-header pb-3"><div class="flex items-center gap-2"><span class="widget-title">Spring 2025</span><span class="pill pill-gray">Completed</span><span class="pill pill-green">Dean's List</span></div><span class="text-xs text-gray-400 ml-auto">4 courses &middot; 13 cr. &middot; GPA: 3.65</span></div>
+        <div class="px-0 pb-0">
+          <table class="dt"><thead><tr><th class="pl-5">Course</th><th>Title</th><th>Credits</th><th>Grade</th><th>Points</th><th class="pr-5">Status</th></tr></thead>
+          <tbody>
+            <tr><td class="pl-5 font-mono text-xs font-semibold text-indigo-700">CS 101</td><td class="text-slate-800 font-medium">Introduction to Programming</td><td>3</td><td><span class="grade grade-a">A-</span></td><td class="font-mono text-xs text-gray-500">3.70</td><td class="pr-5"><span class="pill pill-gray">Completed</span></td></tr>
+            <tr><td class="pl-5 font-mono text-xs font-semibold text-indigo-700">MATH 101</td><td class="text-slate-800 font-medium">Calculus I</td><td>4</td><td><span class="grade grade-b">B+</span></td><td class="font-mono text-xs text-gray-500">3.30</td><td class="pr-5"><span class="pill pill-gray">Completed</span></td></tr>
+            <tr><td class="pl-5 font-mono text-xs font-semibold text-indigo-700">ENG 101</td><td class="text-slate-800 font-medium">English Composition</td><td>3</td><td><span class="grade grade-a">A</span></td><td class="font-mono text-xs text-gray-500">4.00</td><td class="pr-5"><span class="pill pill-gray">Completed</span></td></tr>
+            <tr><td class="pl-5 font-mono text-xs font-semibold text-indigo-700">CS 220</td><td class="text-slate-800 font-medium">Full Stack Web Development</td><td>3</td><td><span class="grade grade-a">A-</span></td><td class="font-mono text-xs text-gray-500">3.70</td><td class="pr-5"><span class="pill pill-gray">Completed</span></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Placeholder pages for billing, registration, schedule -->
+  <div class="page" id="page-billing">
+    <div class="page-head"><h1>Account Summary</h1><p>Student Account &middot; STU2025002</p></div>
+    <div class="grid grid-cols-4 gap-3 mb-6">
+      <div class="widget"><div class="widget-body"><div class="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Total Charges</div><div class="text-2xl font-bold text-slate-900">$14,550.00</div><div class="text-[10px] text-gray-400 mt-1">Fall 2025</div></div></div>
+      <div class="widget"><div class="widget-body"><div class="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Financial Aid</div><div class="text-2xl font-bold text-emerald-600">-$6,500.00</div><div class="text-[10px] text-gray-400 mt-1">Scholarship + Grant</div></div></div>
+      <div class="widget"><div class="widget-body"><div class="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Payments</div><div class="text-2xl font-bold text-blue-600">-$3,800.00</div><div class="text-[10px] text-gray-400 mt-1">2 payments received</div></div></div>
+      <div class="widget" style="border-color:#fecdd3;background:#fff5f5"><div class="widget-body"><div class="text-[10px] font-semibold text-rose-500 uppercase tracking-wide mb-1">Balance Due</div><div class="text-2xl font-bold text-rose-600">$4,250.00</div><div class="text-[10px] text-rose-500 mt-1">Due Feb 15, 2026</div></div></div>
+    </div>
+    <div class="widget">
+      <div class="widget-header pb-3"><span class="widget-title">Charges & Payments</span></div>
+      <div class="px-0 pb-0">
+        <table class="dt">
+          <thead><tr><th class="pl-5">Date</th><th>Description</th><th>Type</th><th>Reference</th><th class="text-right pr-5">Amount</th></tr></thead>
+          <tbody>
+            <tr><td class="pl-5 text-xs text-gray-400">Sep 1</td><td class="font-medium text-slate-800">Tuition - 18 credit hours</td><td><span class="pill pill-gray">Tuition</span></td><td class="font-mono text-[10px] text-gray-400">INV-20250901-7A3F</td><td class="text-right pr-5 font-mono text-sm">$12,450.00</td></tr>
+            <tr><td class="pl-5 text-xs text-gray-400">Sep 1</td><td class="font-medium text-slate-800">Technology + Activity + Health Fees</td><td><span class="pill pill-blue">Fees</span></td><td class="font-mono text-[10px] text-gray-400">INV-20250901-7A3F</td><td class="text-right pr-5 font-mono text-sm">$1,100.00</td></tr>
+            <tr><td class="pl-5 text-xs text-gray-400">Sep 1</td><td class="font-medium text-slate-800">International Student Fee</td><td><span class="pill pill-blue">Fees</span></td><td class="font-mono text-[10px] text-gray-400">INV-20250901-7A3F</td><td class="text-right pr-5 font-mono text-sm">$1,000.00</td></tr>
+            <tr class="bg-emerald-50/30"><td class="pl-5 text-xs text-gray-400">Sep 1</td><td class="font-medium text-emerald-700">Merit Scholarship - Computer Science</td><td><span class="pill pill-green">Aid</span></td><td class="font-mono text-[10px] text-gray-400">FA-2025-0847</td><td class="text-right pr-5 font-mono text-sm text-emerald-600">-$4,500.00</td></tr>
+            <tr class="bg-emerald-50/30"><td class="pl-5 text-xs text-gray-400">Sep 1</td><td class="font-medium text-emerald-700">Federal Pell Grant</td><td><span class="pill pill-green">Aid</span></td><td class="font-mono text-[10px] text-gray-400">FA-2025-0848</td><td class="text-right pr-5 font-mono text-sm text-emerald-600">-$2,000.00</td></tr>
+            <tr class="bg-blue-50/30"><td class="pl-5 text-xs text-gray-400">Sep 15</td><td class="font-medium text-blue-700">Online Payment &middot; Visa ****4829</td><td><span class="pill pill-blue">Payment</span></td><td class="font-mono text-[10px] text-gray-400">PAY-20250915-B2C1</td><td class="text-right pr-5 font-mono text-sm text-blue-600">-$2,000.00</td></tr>
+            <tr class="bg-blue-50/30"><td class="pl-5 text-xs text-gray-400">Oct 15</td><td class="font-medium text-blue-700">Bank Transfer</td><td><span class="pill pill-blue">Payment</span></td><td class="font-mono text-[10px] text-gray-400">PAY-20251015-D4E5</td><td class="text-right pr-5 font-mono text-sm text-blue-600">-$1,800.00</td></tr>
+          </tbody>
+        </table>
+        <div class="flex items-center justify-end px-5 py-3 border-t border-gray-100 bg-gray-50/50">
+          <span class="text-sm font-bold text-slate-700 mr-2">Balance:</span>
+          <span class="font-mono text-lg font-bold text-rose-600">$4,250.00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-registration">
+    <div class="page-head"><h1>Register for Classes</h1><p>Fall 2025 &middot; Registration open until Sep 15</p></div>
+    <div class="widget"><div class="widget-body text-center py-16 text-gray-400"><p class="text-lg">Registration view from v1 mockup applies here</p><p class="text-sm mt-1">Course search + shopping cart pattern</p></div></div>
+  </div>
+
+  <div class="page" id="page-schedule">
+    <div class="page-head"><h1>My Schedule</h1><p>Fall 2025 &middot; 6 courses &middot; 18 credit hours</p></div>
+    <div class="widget"><div class="widget-body text-center py-16 text-gray-400"><p class="text-lg">Weekly calendar grid from v1 mockup applies here</p><p class="text-sm mt-1">Color-coded time blocks with room/instructor info</p></div></div>
+  </div>
+
+</main>
+
+<!-- ===================== CUSTOMIZE BAR ===================== -->
+<div class="customize-bar" id="customizeBar">
+  <div class="flex items-center gap-3">
+    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+    <span class="text-sm font-medium">Customizing Dashboard</span>
+    <span class="text-xs text-gray-400 ml-2">Drag widgets to rearrange &middot; Click X to hide</span>
+  </div>
+  <div class="flex items-center gap-3">
+    <button class="px-4 py-1.5 text-xs font-medium rounded-md bg-white/10 hover:bg-white/20 transition">Add Widget</button>
+    <button class="px-4 py-1.5 text-xs font-medium rounded-md bg-white/10 hover:bg-white/20 transition">Reset Layout</button>
+    <button onclick="toggleEdit()" class="px-4 py-1.5 text-xs font-semibold rounded-md bg-indigo-500 hover:bg-indigo-600 transition">Done</button>
+  </div>
+</div>
+
+<script>
+// Nav dropdowns
+function toggleNav(id) {
+  const el = document.querySelector(`[data-nav="${id}"]`);
+  const wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('open'));
+  if (!wasOpen) el.classList.add('open');
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.nav-dropdown')) {
+    document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('open'));
+  }
+});
+
+// Page switching
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('open'));
+  // Re-trigger widget animations on home
+  if (id === 'home') {
+    document.querySelectorAll('#page-home .widget').forEach((w, i) => {
+      w.style.animation = 'none';
+      w.offsetHeight;
+      w.style.animation = '';
+      w.style.animationDelay = (i * 0.04) + 's';
+    });
+  }
+  window.scrollTo(0, 0);
+}
+
+// Command palette
+function openCmd() {
+  document.getElementById('cmdOverlay').classList.add('open');
+  document.getElementById('cmdInput').focus();
+}
+function closeCmd() {
+  document.getElementById('cmdOverlay').classList.remove('open');
+  document.getElementById('cmdInput').value = '';
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === '/' && !e.target.closest('input')) { e.preventDefault(); openCmd(); }
+  if (e.key === 'Escape') closeCmd();
+});
+function filterCmd(q) {
+  const items = document.querySelectorAll('.cmd-item');
+  items.forEach(item => {
+    item.style.display = item.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+
+// Customize mode
+let editing = false;
+function toggleEdit() {
+  editing = !editing;
+  document.getElementById('widgetGrid').classList.toggle('editing', editing);
+  document.getElementById('customizeBar').classList.toggle('visible', editing);
+}
+</script>
+</body>
+</html>

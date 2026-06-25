@@ -30,3 +30,15 @@ storage/framework/testing/
 test-results/
 frontend/test-results/
 frontend/playwright-report/
+node_modules
+.next
+dist
+build
+.venv
+venv
+__pycache__
+*.log
+.turbo
+out
+.cache
+coverage
